@@ -1,4 +1,6 @@
 import SwiftUI
+import SwiftData
+import PhotosUI
 
 // MARK: - Cooking Log Entry View
 
@@ -6,6 +8,7 @@ struct CookingLogEntryView: View {
     let recipe: Recipe
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
 
     @State private var rating = 3
     @State private var prepMinutes = ""
@@ -13,6 +16,17 @@ struct CookingLogEntryView: View {
     @State private var notes = ""
     @State private var substitutions: [String] = []
     @State private var newSubstitution = ""
+    @State private var deductFromPantry = true
+    @State private var servingsCooked: Int
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var photoData: Data?
+    @State private var deductedItems: [PantryItem] = []
+    @State private var showingDeductionResult = false
+
+    init(recipe: Recipe) {
+        self.recipe = recipe
+        _servingsCooked = State(initialValue: recipe.servings)
+    }
 
     var body: some View {
         NavigationStack {
@@ -33,11 +47,31 @@ struct CookingLogEntryView: View {
                     .sensoryFeedback(.selection, trigger: rating)
                 }
 
-                Section("Time") {
+                Section("Servings & Time") {
+                    Stepper("Servings cooked: \(servingsCooked)", value: $servingsCooked, in: 1...50)
                     TextField("Prep time (minutes)", text: $prepMinutes)
                         .keyboardType(.numberPad)
                     TextField("Cook time (minutes)", text: $cookMinutes)
                         .keyboardType(.numberPad)
+                }
+
+                Section {
+                    Toggle("Deduct ingredients from pantry", isOn: $deductFromPantry)
+                } header: {
+                    Text("Pantry")
+                } footer: {
+                    Text("Automatically reduces pantry quantities for ingredients used in this recipe.")
+                }
+
+                Section("Photo") {
+                    PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                        if photoData != nil {
+                            Label("Photo attached", systemImage: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                        } else {
+                            Label("Add a photo", systemImage: "camera")
+                        }
+                    }
                 }
 
                 Section("Substitutions Made") {
@@ -69,10 +103,32 @@ struct CookingLogEntryView: View {
                     Button("Save") { saveEntry() }
                 }
             }
+            .onChange(of: selectedPhoto) { _, newItem in
+                Task {
+                    if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                        photoData = data
+                    }
+                }
+            }
+            .alert("Pantry Updated", isPresented: $showingDeductionResult) {
+                Button("OK") { dismiss() }
+            } message: {
+                if deductedItems.isEmpty {
+                    Text("Ingredients deducted from your pantry.")
+                } else {
+                    Text("\(deductedItems.count) item\(deductedItems.count == 1 ? "" : "s") fully used up and can be restocked.")
+                }
+            }
         }
     }
 
     private func saveEntry() {
+        // Create photo if attached
+        var photo: RecipePhoto?
+        if let data = photoData {
+            photo = RecipePhoto(imageData: data)
+        }
+
         let entry = CookingLogEntry(
             prepTimeMinutes: Int(prepMinutes),
             cookTimeMinutes: Int(cookMinutes),
@@ -80,7 +136,19 @@ struct CookingLogEntryView: View {
             notes: notes.isEmpty ? nil : notes,
             substitutionsMade: substitutions
         )
+        entry.photo = photo
         recipe.cookingLog.append(entry)
-        dismiss()
+
+        // Deduct from pantry
+        if deductFromPantry {
+            deductedItems = PantryDeductionService.deductAfterCooking(
+                recipe: recipe,
+                servingsCooked: servingsCooked,
+                pantryItems: pantryItems
+            )
+            showingDeductionResult = true
+        } else {
+            dismiss()
+        }
     }
 }

@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import PhotosUI
 
 // MARK: - Recipe Detail View
 
@@ -11,6 +12,7 @@ struct RecipeDetailView: View {
     @State private var showingLogEntry = false
     @State private var selectedServings: Int
     @State private var showNutrition = false
+    @State private var selectedPhoto: PhotosPickerItem?
 
     init(recipe: Recipe) {
         self.recipe = recipe
@@ -25,6 +27,7 @@ struct RecipeDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 headerSection
+                photoGallerySection
                 quickInfoBar
                 ingredientsSection
                 directionsSection
@@ -51,6 +54,9 @@ struct RecipeDetailView: View {
                     Button("Log Cooking Session", systemImage: "flame") {
                         showingLogEntry = true
                     }
+                    PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                        Label("Add Photo", systemImage: "camera")
+                    }
                     ShareLink(item: recipeShareText)
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -60,9 +66,63 @@ struct RecipeDetailView: View {
         .sheet(isPresented: $showingLogEntry) {
             CookingLogEntryView(recipe: recipe)
         }
+        .onChange(of: selectedPhoto) { _, newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                    let photo = RecipePhoto(imageData: data)
+                    recipe.photos.append(photo)
+                }
+            }
+        }
     }
 
     // MARK: - Sections
+
+    @ViewBuilder
+    private var photoGallerySection: some View {
+        if !recipe.photos.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Photos")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    Spacer()
+                    Text("\(recipe.photos.count)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 12) {
+                        ForEach(recipe.photos) { photo in
+                            if let uiImage = UIImage(data: photo.imageData) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 200, height: 150)
+                                    .clipShape(.rect(cornerRadius: 12))
+                                    .overlay(alignment: .bottomTrailing) {
+                                        if let caption = photo.caption {
+                                            Text(caption)
+                                                .font(.caption2)
+                                                .padding(4)
+                                                .background(in: .capsule)
+                                                .glassEffect(.regular, in: .capsule)
+                                                .padding(8)
+                                        }
+                                    }
+                                    .contextMenu {
+                                        Button("Delete", systemImage: "trash", role: .destructive) {
+                                            recipe.photos.removeAll { $0.id == photo.id }
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -137,7 +197,11 @@ struct RecipeDetailView: View {
                 .fontWeight(.bold)
 
             ForEach(recipe.directions) { direction in
-                DirectionStepView(direction: direction)
+                DirectionStepView(
+                    direction: direction,
+                    recipeTitle: recipe.title,
+                    totalSteps: recipe.directions.count
+                )
             }
         }
     }

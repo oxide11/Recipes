@@ -97,24 +97,48 @@ struct DirectionStepView: View {
     }
 
     @State private var timerStartTrigger = false
+    var recipeTitle: String = ""
+    var totalSteps: Int = 1
 
     private func startTimer(seconds: Int) {
         remainingSeconds = seconds
         timerActive = true
         timerStartTrigger.toggle()
 
+        // Start Live Activity on lock screen
+        CookingTimerLiveActivityManager.shared.startTimer(
+            recipeTitle: recipeTitle,
+            totalCookTimeMinutes: seconds / 60,
+            stepNumber: direction.stepNumber,
+            stepInstruction: direction.instruction,
+            durationSeconds: seconds,
+            totalSteps: totalSteps
+        )
+
         timerTask = Task {
             while remainingSeconds > 0, !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(1))
                 remainingSeconds -= 1
+
+                // Update Live Activity every 5 seconds
+                if remainingSeconds % 5 == 0 {
+                    await CookingTimerLiveActivityManager.shared.updateTimer(
+                        stepNumber: direction.stepNumber,
+                        stepInstruction: direction.instruction,
+                        remainingSeconds: remainingSeconds,
+                        totalSteps: totalSteps
+                    )
+                }
             }
             timerActive = false
+            await CookingTimerLiveActivityManager.shared.endTimer()
         }
     }
 
     private func stopTimer() {
         timerTask?.cancel()
         timerActive = false
+        Task { await CookingTimerLiveActivityManager.shared.endTimer() }
     }
 
     private func formatTime(_ totalSeconds: Int) -> String {

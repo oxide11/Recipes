@@ -6,9 +6,15 @@ import SwiftData
 struct MealPlanView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \MealPlan.startDate, order: .reverse) private var mealPlans: [MealPlan]
+    @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
+    @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
+    @Query private var profiles: [UserProfile]
 
     @State private var showingCreatePlan = false
+    @State private var showingAIGenerator = false
     @State private var selectedDate = Date()
+
+    private var profile: UserProfile? { profiles.first }
 
     var body: some View {
         NavigationStack {
@@ -32,24 +38,51 @@ struct MealPlanView: View {
                     )
                     .frame(maxHeight: .infinity)
 
-                    Button("Create Meal Plan") {
-                        showingCreatePlan = true
+                    HStack(spacing: 12) {
+                        Button("Create Meal Plan") {
+                            showingCreatePlan = true
+                        }
+                        .buttonStyle(.glass)
+
+                        if !recipes.isEmpty {
+                            Button {
+                                showingAIGenerator = true
+                            } label: {
+                                Label("AI Generate", systemImage: "sparkles")
+                            }
+                            .buttonStyle(.glass)
+                        }
                     }
-                    .buttonStyle(.glass)
                     .padding()
                 }
             }
             .navigationTitle("Meal Plan")
             .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button("New Plan", systemImage: "plus") {
-                        showingCreatePlan = true
+                ToolbarItemGroup(placement: .primaryAction) {
+                    Menu {
+                        Button("Create Manually", systemImage: "plus") {
+                            showingCreatePlan = true
+                        }
+                        if !recipes.isEmpty {
+                            Button("Generate with AI", systemImage: "sparkles") {
+                                showingAIGenerator = true
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "plus")
                     }
                 }
             }
             .sheet(isPresented: $showingCreatePlan) {
                 CreateMealPlanView()
+            }
+            .sheet(isPresented: $showingAIGenerator) {
+                AIMealPlanGeneratorView(
+                    recipes: recipes,
+                    pantryItems: pantryItems,
+                    profile: profile
+                )
             }
         }
     }
@@ -70,6 +103,25 @@ struct MealPlanView: View {
                 if let cal = plan.calorieTarget {
                     LabeledContent("Daily Calories", value: "\(cal)")
                 }
+
+                // Generate shopping list button
+                Button {
+                    generateShoppingList(from: plan)
+                } label: {
+                    Label {
+                        VStack(alignment: .leading) {
+                            Text("Generate Shopping List")
+                                .fontWeight(.medium)
+                            Text("Creates a list from all planned meals, minus pantry stock")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "cart.badge.plus")
+                            .foregroundStyle(.green)
+                    }
+                }
+                .sensoryFeedback(.success, trigger: plan.meals.count)
             }
 
             ForEach(MealType.allCases, id: \.self) { mealType in
@@ -81,9 +133,16 @@ struct MealPlanView: View {
                                 VStack(alignment: .leading) {
                                     Text(meal.recipe?.title ?? "Unassigned")
                                         .fontWeight(.medium)
-                                    Text(meal.date, style: .date)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
+                                    HStack(spacing: 8) {
+                                        Text(meal.date, style: .date)
+                                        if let notes = meal.notes {
+                                            Text(notes)
+                                                .foregroundStyle(.tertiary)
+                                                .lineLimit(1)
+                                        }
+                                    }
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                                 }
                                 Spacer()
                                 if meal.isCompleted {
@@ -96,6 +155,190 @@ struct MealPlanView: View {
                 }
             }
         }
+    }
+
+    private func generateShoppingList(from plan: MealPlan) {
+        let list = ShoppingListGenerator.generateList(
+            from: plan,
+            pantryItems: pantryItems
+        )
+        modelContext.insert(list)
+    }
+}
+
+// MARK: - AI Meal Plan Generator View
+
+struct AIMealPlanGeneratorView: View {
+    let recipes: [Recipe]
+    let pantryItems: [PantryItem]
+    let profile: UserProfile?
+
+    @Environment(\.modelContext) private var modelContext
+    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var days = 7
+    @State private var includedMeals: Set<MealType> = [.breakfast, .lunch, .dinner]
+    @State private var isGenerating = false
+    @State private var generatedPlan: GeneratedMealPlan?
+    @State private var errorMessage: String?
+
+    private let generator = MealPlanGenerator()
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Plan Duration") {
+                    Stepper("Days: \(days)", value: $days, in: 1...14)
+                }
+
+                Section("Meals to Include") {
+                    ForEach(MealType.allCases, id: \.self) { mealType in
+                        Toggle(mealType.rawValue.capitalized, isOn: Binding(
+                            get: { includedMeals.contains(mealType) },
+                            set: { isOn in
+                                if isOn { includedMeals.insert(mealType) }
+                                else { includedMeals.remove(mealType) }
+                            }
+                        ))
+                    }
+                }
+
+                Section {
+                    Button {
+                        Task { await generatePlan() }
+                    } label: {
+                        HStack {
+                            Spacer()
+                            if isGenerating {
+                                ProgressView()
+                                    .padding(.trailing, 8)
+                                Text("Generating plan...")
+                            } else {
+                                Image(systemName: "sparkles")
+                                Text("Generate Meal Plan")
+                            }
+                            Spacer()
+                        }
+                    }
+                    .disabled(isGenerating || recipes.isEmpty || includedMeals.isEmpty)
+                }
+
+                if let error = errorMessage {
+                    Section {
+                        Label(error, systemImage: "exclamationmark.triangle")
+                            .foregroundStyle(.red)
+                    }
+                }
+
+                if let plan = generatedPlan {
+                    generatedPlanPreview(plan)
+                }
+            }
+            .navigationTitle("AI Meal Plan")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.glass, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func generatedPlanPreview(_ plan: GeneratedMealPlan) -> some View {
+        Group {
+            Section("Generated Plan") {
+                Text(plan.summary)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            ForEach(plan.days, id: \.dayNumber) { day in
+                Section("Day \(day.dayNumber)") {
+                    ForEach(day.meals, id: \.recipeTitle) { meal in
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(meal.mealType.capitalized)
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.tint)
+                                Spacer()
+                                Text("\(meal.servings) servings")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Text(meal.recipeTitle)
+                                .fontWeight(.medium)
+                            if !meal.reasoning.isEmpty {
+                                Text(meal.reasoning)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+            }
+
+            Section {
+                Button {
+                    savePlan(plan)
+                } label: {
+                    HStack {
+                        Spacer()
+                        Image(systemName: "square.and.arrow.down")
+                        Text("Save Meal Plan")
+                        Spacer()
+                    }
+                }
+                .buttonStyle(.glass)
+                .tint(.green)
+            }
+        }
+    }
+
+    private func generatePlan() async {
+        isGenerating = true
+        errorMessage = nil
+        generatedPlan = nil
+
+        let mealsArray = Array(includedMeals).sorted { $0.rawValue < $1.rawValue }
+
+        do {
+            generatedPlan = try await generator.generatePlan(
+                recipes: recipes,
+                pantryItems: pantryItems,
+                profile: profile,
+                startDate: .now,
+                days: days,
+                mealsPerDay: mealsArray
+            )
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isGenerating = false
+    }
+
+    private func savePlan(_ plan: GeneratedMealPlan) {
+        let endDate = Calendar.current.date(byAdding: .day, value: days, to: .now) ?? .now
+
+        let mealPlan = MealPlan(
+            name: "AI Plan — \(days) days",
+            startDate: .now,
+            endDate: endDate,
+            calorieTarget: profile?.dailyCalorieTarget
+        )
+
+        let meals = generator.convertToPlannedMeals(
+            plan: plan,
+            recipes: recipes,
+            startDate: .now
+        )
+        mealPlan.meals = meals
+
+        modelContext.insert(mealPlan)
+        dismiss()
     }
 }
 
