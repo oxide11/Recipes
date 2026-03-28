@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Recipes needs camera access to scan barcodes for pantry management and to take photos of your dishes.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Recipes uses speech recognition for the guided shopping experience, allowing you to confirm items hands-free.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Recipes needs microphone access for voice-guided shopping so you can confirm items while your hands are full.</string>
+</dict>
+</plist>
