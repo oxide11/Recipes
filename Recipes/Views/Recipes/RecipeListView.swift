@@ -58,6 +58,26 @@ struct RecipeListView: View {
         NavigationStack {
             List {
                 if !recipes.isEmpty {
+                    // Tags quick access
+                    Section {
+                        NavigationLink {
+                            TagManagementView()
+                        } label: {
+                            Label {
+                                VStack(alignment: .leading) {
+                                    Text("Tags & Collections")
+                                        .fontWeight(.medium)
+                                    Text("Organize recipes with custom tags")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            } icon: {
+                                Image(systemName: "tag")
+                                    .foregroundStyle(.teal)
+                            }
+                        }
+                    }
+
                     // Recommendations teaser
                     Section {
                         NavigationLink {

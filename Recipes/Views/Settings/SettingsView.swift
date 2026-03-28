@@ -24,6 +24,7 @@ struct SettingsView: View {
             Form {
                 aiSection
                 measurementSection
+                notificationsSection
                 profileSection
                 aboutSection
             }
@@ -118,6 +119,29 @@ struct SettingsView: View {
             Label("AI Configuration", systemImage: "sparkles")
         } footer: {
             Text("API keys are stored securely in your device's Keychain. On-device AI processes data locally — no data leaves your device.")
+        }
+    }
+
+    // MARK: - Notifications
+
+    private var notificationsSection: some View {
+        Section("Notifications") {
+            NavigationLink {
+                NotificationSettingsView()
+            } label: {
+                Label {
+                    VStack(alignment: .leading) {
+                        Text("Smart Notifications")
+                            .fontWeight(.medium)
+                        Text("Pantry expiry alerts, meal reminders & streaks")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } icon: {
+                    Image(systemName: "bell.badge")
+                        .foregroundStyle(.orange)
+                }
+            }
         }
     }
 

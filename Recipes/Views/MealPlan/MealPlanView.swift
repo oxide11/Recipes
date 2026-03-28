@@ -12,6 +12,8 @@ struct MealPlanView: View {
 
     @State private var showingCreatePlan = false
     @State private var showingAIGenerator = false
+    @State private var showingRecipePicker = false
+    @State private var addingMealType: MealType = .dinner
     @State private var selectedDate = Date()
 
     private var profile: UserProfile? { profiles.first }
@@ -84,6 +86,23 @@ struct MealPlanView: View {
                     profile: profile
                 )
             }
+            .sheet(isPresented: $showingRecipePicker) {
+                MealRecipePickerView(
+                    recipes: recipes,
+                    mealType: addingMealType,
+                    date: selectedDate
+                ) { recipe, servings in
+                    if let plan = activeMealPlan {
+                        let meal = PlannedMeal(
+                            mealType: addingMealType,
+                            date: selectedDate,
+                            recipe: recipe,
+                            servings: servings
+                        )
+                        plan.meals.append(meal)
+                    }
+                }
+            }
         }
     }
 
@@ -126,8 +145,8 @@ struct MealPlanView: View {
 
             ForEach(MealType.allCases, id: \.self) { mealType in
                 let meals = plan.meals.filter { $0.mealType == mealType }
-                if !meals.isEmpty {
-                    Section(mealType.rawValue.capitalized) {
+                Section(mealType.rawValue.capitalized) {
+                    if !meals.isEmpty {
                         ForEach(meals) { meal in
                             HStack {
                                 VStack(alignment: .leading) {
@@ -150,7 +169,24 @@ struct MealPlanView: View {
                                         .foregroundStyle(.green)
                                 }
                             }
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    plan.meals.removeAll { $0.id == meal.id }
+                                } label: {
+                                    Label("Remove", systemImage: "trash")
+                                }
+                            }
                         }
+                    }
+
+                    // Add meal button
+                    Button {
+                        addingMealType = mealType
+                        showingRecipePicker = true
+                    } label: {
+                        Label("Add \(mealType.rawValue.capitalized)", systemImage: "plus.circle")
+                            .font(.subheadline)
+                            .foregroundStyle(.tint)
                     }
                 }
             }
@@ -339,6 +375,67 @@ struct AIMealPlanGeneratorView: View {
 
         modelContext.insert(mealPlan)
         dismiss()
+    }
+}
+
+// MARK: - Meal Recipe Picker
+
+struct MealRecipePickerView: View {
+    let recipes: [Recipe]
+    let mealType: MealType
+    let date: Date
+    let onSelect: (Recipe, Int) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var searchText = ""
+    @State private var servings = 2
+
+    private var filteredRecipes: [Recipe] {
+        if searchText.isEmpty { return recipes }
+        return recipes.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Stepper("Servings: \(servings)", value: $servings, in: 1...20)
+                }
+
+                ForEach(filteredRecipes) { recipe in
+                    Button {
+                        onSelect(recipe, servings)
+                        dismiss()
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(recipe.title)
+                                    .font(.headline)
+                                    .foregroundStyle(.primary)
+                                HStack(spacing: 8) {
+                                    Label("\(recipe.estimatedTotalMinutes) min", systemImage: "clock")
+                                    Label(recipe.cuisine.rawValue.capitalized, systemImage: "fork.knife")
+                                    Label(recipe.difficulty.rawValue.capitalized, systemImage: "chart.bar")
+                                }
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "plus.circle")
+                                .foregroundStyle(.tint)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Pick \(mealType.rawValue.capitalized)")
+            .navigationBarTitleDisplayMode(.inline)
+            .searchable(text: $searchText, prompt: "Search recipes...")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
     }
 }
 

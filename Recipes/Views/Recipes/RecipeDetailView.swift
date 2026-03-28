@@ -10,6 +10,9 @@ struct RecipeDetailView: View {
 
     @State private var showingVariations = false
     @State private var showingLogEntry = false
+    @State private var showingCookingMode = false
+    @State private var showingBlinkHelp = false
+    @State private var showingExport = false
     @State private var selectedServings: Int
     @State private var showNutrition = false
     @State private var selectedPhoto: PhotosPickerItem?
@@ -32,6 +35,7 @@ struct RecipeDetailView: View {
                 ingredientsSection
                 directionsSection
                 safeTemperaturesSection
+                tagsSection
                 nutritionSection
                 variationsSection
                 cookingLogSection
@@ -50,9 +54,25 @@ struct RecipeDetailView: View {
                 }
                 .sensoryFeedback(.impact(flexibility: .soft), trigger: recipe.isFavorite)
 
+                Button {
+                    showingCookingMode = true
+                } label: {
+                    Image(systemName: "play.circle")
+                }
+                .accessibilityLabel("Start Cooking Mode")
+
                 Menu {
                     Button("Log Cooking Session", systemImage: "flame") {
                         showingLogEntry = true
+                    }
+                    Button("Start Cooking Mode", systemImage: "play.fill") {
+                        showingCookingMode = true
+                    }
+                    Button("Hands-Free Setup", systemImage: "accessibility") {
+                        showingBlinkHelp = true
+                    }
+                    Button("Export Recipe", systemImage: "square.and.arrow.up") {
+                        showingExport = true
                     }
                     PhotosPicker(selection: $selectedPhoto, matching: .images) {
                         Label("Add Photo", systemImage: "camera")
@@ -65,6 +85,15 @@ struct RecipeDetailView: View {
         }
         .sheet(isPresented: $showingLogEntry) {
             CookingLogEntryView(recipe: recipe)
+        }
+        .fullScreenCover(isPresented: $showingCookingMode) {
+            CookingModeView(recipe: recipe)
+        }
+        .sheet(isPresented: $showingBlinkHelp) {
+            BlinkNavigationHelpView()
+        }
+        .sheet(isPresented: $showingExport) {
+            RecipeExportView(recipe: recipe)
         }
         .onChange(of: selectedPhoto) { _, newItem in
             Task {
@@ -305,6 +334,12 @@ struct RecipeDetailView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Tags
+
+    private var tagsSection: some View {
+        RecipeTagEditorView(recipe: recipe)
     }
 
     // MARK: - Helpers

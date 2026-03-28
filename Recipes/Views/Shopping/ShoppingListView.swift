@@ -10,6 +10,7 @@ struct ShoppingListView: View {
 
     @State private var showingCreateList = false
     @State private var showingGuidedShopping = false
+    @State private var showingReceiptScanner = false
     @State private var selectedList: GroceryList?
 
     var body: some View {
@@ -129,7 +130,14 @@ struct ShoppingListView: View {
             .navigationTitle("Shopping")
             .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    Button {
+                        showingReceiptScanner = true
+                    } label: {
+                        Image(systemName: "doc.text.viewfinder")
+                    }
+                    .accessibilityLabel("Scan Receipt")
+
                     Button("New List", systemImage: "plus") {
                         showingCreateList = true
                     }
@@ -142,6 +150,9 @@ struct ShoppingListView: View {
                 if let list = selectedList {
                     GuidedShoppingView(list: list)
                 }
+            }
+            .sheet(isPresented: $showingReceiptScanner) {
+                ReceiptScannerView()
             }
         }
     }
