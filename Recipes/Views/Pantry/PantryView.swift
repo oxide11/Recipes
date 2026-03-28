@@ -6,9 +6,11 @@ import SwiftData
 struct PantryView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var items: [PantryItem]
+    @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
 
     @State private var showingScanner = false
     @State private var showingAddItem = false
+    @State private var showingNoWasteResults = false
     @State private var searchText = ""
 
     private var filteredItems: [PantryItem] {
@@ -20,14 +22,17 @@ struct PantryView: View {
         Dictionary(grouping: filteredItems, by: \.category)
     }
 
+    private var expiringItems: [PantryItem] {
+        items.filter(\.isExpiringSoon)
+    }
+
     var body: some View {
         NavigationStack {
             List {
-                // Expiring soon alert
-                let expiring = items.filter(\.isExpiringSoon)
-                if !expiring.isEmpty {
+                // "Use It Up" section for expiring items
+                if !expiringItems.isEmpty {
                     Section {
-                        ForEach(expiring) { item in
+                        ForEach(expiringItems) { item in
                             HStack {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundStyle(.orange)
@@ -40,8 +45,55 @@ struct PantryView: View {
                                 }
                             }
                         }
+
+                        Button {
+                            showingNoWasteResults = true
+                        } label: {
+                            Label("Find Recipes to Use These Up", systemImage: "sparkles")
+                        }
+                        .tint(.orange)
                     } header: {
                         Label("Expiring Soon", systemImage: "clock.badge.exclamationmark")
+                    }
+                }
+
+                // Quick actions
+                if !items.isEmpty {
+                    Section {
+                        NavigationLink {
+                            NoWasteResultsView(recipes: recipes, pantryItems: items)
+                        } label: {
+                            Label {
+                                VStack(alignment: .leading) {
+                                    Text("What Can I Make?")
+                                        .fontWeight(.medium)
+                                    Text("\(items.count) items in pantry")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            } icon: {
+                                Image(systemName: "frying.pan")
+                                    .foregroundStyle(.tint)
+                            }
+                        }
+
+                        NavigationLink {
+                            RecommendedStaplesView()
+                        } label: {
+                            Label {
+                                VStack(alignment: .leading) {
+                                    Text("Recommended Staples")
+                                        .fontWeight(.medium)
+                                    let missing = RecommendedStaplesService.missingStaples(pantryItems: items)
+                                    Text("\(missing.count) suggested items to stock")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            } icon: {
+                                Image(systemName: "checklist")
+                                    .foregroundStyle(.green)
+                            }
+                        }
                     }
                 }
 
@@ -65,7 +117,7 @@ struct PantryView: View {
                     ContentUnavailableView(
                         "Pantry is Empty",
                         systemImage: "refrigerator",
-                        description: Text("Scan barcodes or add items manually.")
+                        description: Text("Scan barcodes or add items manually to start tracking ingredients.")
                     )
                 }
             }
@@ -82,10 +134,24 @@ struct PantryView: View {
                 }
             }
             .sheet(isPresented: $showingScanner) {
-                BarcodeScannerView()
+                BarcodeScannerFullView()
             }
             .sheet(isPresented: $showingAddItem) {
                 AddPantryItemView()
+            }
+            .sheet(isPresented: $showingNoWasteResults) {
+                NavigationStack {
+                    NoWasteResultsView(
+                        recipes: recipes,
+                        pantryItems: items,
+                        expiringOnly: true
+                    )
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Close") { showingNoWasteResults = false }
+                        }
+                    }
+                }
             }
         }
     }
@@ -98,14 +164,33 @@ struct PantryItemRow: View {
 
     var body: some View {
         HStack {
+            // Color-coded category dot
+            Circle()
+                .fill(categoryColor(item.category))
+                .frame(width: 8, height: 8)
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.name)
                     .fontWeight(.medium)
                     .foregroundStyle(item.isExpired ? .red : .primary)
 
-                Text("\(item.quantity, specifier: "%.1f") \(item.unit.rawValue)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 4) {
+                    Text("\(item.quantity, specifier: "%.1f") \(item.unit.rawValue)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    if item.barcode != nil {
+                        Image(systemName: "barcode")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+
+                    if !SeasonalAwarenessService.isInSeason(item.name) {
+                        Label("Off season", systemImage: "leaf.arrow.triangle.circlepath")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                    }
+                }
             }
 
             Spacer()
@@ -122,29 +207,99 @@ struct PantryItemRow: View {
             }
         }
     }
+
+    private func categoryColor(_ category: IngredientCategory) -> Color {
+        switch category.displayColor {
+        case .red: return .red
+        case .green: return .green
+        case .orange: return .orange
+        case .amber: return .yellow
+        case .blue: return .blue
+        case .purple: return .purple
+        case .yellow: return .yellow
+        case .teal: return .teal
+        case .cyan: return .cyan
+        case .pink: return .pink
+        case .brown: return .brown
+        case .mint: return .mint
+        case .lime: return .green.opacity(0.7)
+        case .gray: return .gray
+        }
+    }
 }
 
-// MARK: - Barcode Scanner View (Placeholder)
+// MARK: - Barcode Scanner Full View (with live camera)
 
-struct BarcodeScannerView: View {
+struct BarcodeScannerFullView: View {
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+
+    @State private var scanner = BarcodeScannerService()
+    @State private var quantity: Double = 1
+    @State private var unit: MeasurementUnit = .piece
+    @State private var hasExpiration = false
+    @State private var expirationDate = Date().addingTimeInterval(7 * 86400)
+    @State private var manualName = ""
+    @State private var manualCategory: IngredientCategory = .other
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                Image(systemName: "barcode.viewfinder")
-                    .font(.system(size: 80))
-                    .foregroundStyle(.secondary)
+            VStack(spacing: 0) {
+                // Camera preview or result
+                if scanner.isScanning, let session = scanner.captureSession {
+                    ZStack {
+                        CameraPreviewView(session: session)
 
-                Text("Point camera at a barcode")
-                    .font(.headline)
+                        // Scan overlay
+                        VStack {
+                            Spacer()
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(.white, lineWidth: 2)
+                                .frame(width: 280, height: 140)
+                            Spacer()
+                            Text("Position barcode within the frame")
+                                .font(.subheadline)
+                                .foregroundStyle(.white)
+                                .padding(.bottom, 20)
+                        }
+                    }
+                    .frame(height: 300)
+                    .clipShape(.rect(cornerRadius: 16))
+                    .padding()
+                } else if scanner.scannedCode != nil {
+                    // Show result
+                    scannedResultView
+                } else {
+                    // Camera not started yet
+                    VStack(spacing: 16) {
+                        Image(systemName: "barcode.viewfinder")
+                            .font(.system(size: 60))
+                            .foregroundStyle(.secondary)
 
-                Text("Scanned items will be added to your pantry automatically.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
+                        Button("Start Scanning") {
+                            Task {
+                                let granted = await scanner.requestCameraAccess()
+                                if granted {
+                                    scanner.startScanning()
+                                } else {
+                                    scanner.errorMessage = "Camera access is required for barcode scanning. Enable it in Settings."
+                                }
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    .frame(height: 300)
+                }
+
+                if let error = scanner.errorMessage {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .padding()
+                }
+
+                Spacer()
             }
-            .padding()
             .navigationTitle("Scan Barcode")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -152,11 +307,141 @@ struct BarcodeScannerView: View {
                     Button("Close") { dismiss() }
                 }
             }
+            .task {
+                let granted = await scanner.requestCameraAccess()
+                if granted {
+                    scanner.startScanning()
+                }
+            }
         }
+    }
+
+    @ViewBuilder
+    private var scannedResultView: some View {
+        Form {
+            if scanner.isLookingUp {
+                Section {
+                    HStack {
+                        ProgressView()
+                        Text("Looking up product...")
+                            .padding(.leading, 8)
+                    }
+                }
+            } else if let product = scanner.lookupResult {
+                Section("Product Found") {
+                    LabeledContent("Name", value: product.name)
+                    if let brand = product.brand {
+                        LabeledContent("Brand", value: brand)
+                    }
+                    LabeledContent("Category", value: product.category.rawValue.capitalized)
+                    LabeledContent("Barcode", value: product.barcode)
+                }
+
+                Section("Quantity") {
+                    HStack {
+                        TextField("Qty", value: $quantity, format: .number)
+                            .keyboardType(.decimalPad)
+                            .frame(width: 80)
+                        Picker("Unit", selection: $unit) {
+                            ForEach(MeasurementUnit.allCases, id: \.self) { u in
+                                Text(u.rawValue).tag(u)
+                            }
+                        }
+                    }
+
+                    Toggle("Has Expiration Date", isOn: $hasExpiration)
+                    if hasExpiration {
+                        DatePicker("Expires", selection: $expirationDate, displayedComponents: .date)
+                    }
+                }
+
+                Section {
+                    Button("Add to Pantry") {
+                        addProductToPantry()
+                    }
+                    .frame(maxWidth: .infinity)
+
+                    Button("Scan Another") {
+                        scanner.resetForNextScan()
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            } else {
+                // Product not found — manual entry
+                Section("Product Not Found") {
+                    Text("Barcode: \(scanner.scannedCode ?? "")")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    TextField("Item Name", text: $manualName)
+                    Picker("Category", selection: $manualCategory) {
+                        ForEach(IngredientCategory.allCases, id: \.self) { c in
+                            Text(c.rawValue.capitalized).tag(c)
+                        }
+                    }
+                }
+
+                Section("Quantity") {
+                    HStack {
+                        TextField("Qty", value: $quantity, format: .number)
+                            .keyboardType(.decimalPad)
+                            .frame(width: 80)
+                        Picker("Unit", selection: $unit) {
+                            ForEach(MeasurementUnit.allCases, id: \.self) { u in
+                                Text(u.rawValue).tag(u)
+                            }
+                        }
+                    }
+
+                    Toggle("Has Expiration Date", isOn: $hasExpiration)
+                    if hasExpiration {
+                        DatePicker("Expires", selection: $expirationDate, displayedComponents: .date)
+                    }
+                }
+
+                Section {
+                    Button("Add to Pantry") {
+                        addManualItem()
+                    }
+                    .disabled(manualName.isEmpty)
+                    .frame(maxWidth: .infinity)
+
+                    Button("Scan Another") {
+                        scanner.resetForNextScan()
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+        }
+    }
+
+    private func addProductToPantry() {
+        if let item = scanner.createPantryItem(
+            quantity: quantity,
+            unit: unit,
+            expirationDate: hasExpiration ? expirationDate : nil
+        ) {
+            modelContext.insert(item)
+            scanner.resetForNextScan()
+        }
+    }
+
+    private func addManualItem() {
+        let item = PantryItem(
+            name: manualName,
+            category: manualCategory,
+            barcode: scanner.scannedCode,
+            quantity: quantity,
+            unit: unit,
+            expirationDate: hasExpiration ? expirationDate : nil
+        )
+        modelContext.insert(item)
+        scanner.resetForNextScan()
+        manualName = ""
     }
 }
 
-// MARK: - Add Pantry Item View
+// MARK: - Add Pantry Item View (Manual)
 
 struct AddPantryItemView: View {
     @Environment(\.modelContext) private var modelContext

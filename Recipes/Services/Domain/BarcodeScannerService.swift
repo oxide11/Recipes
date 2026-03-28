@@ -4,14 +4,17 @@ import SwiftUI
 // MARK: - Barcode Scanner Service
 
 /// Manages camera-based barcode scanning for pantry management.
-/// Uses AVFoundation for real-time barcode detection.
+/// Uses AVFoundation for real-time barcode detection, with Open Food Facts
+/// integration for automatic product identification.
 @Observable
 final class BarcodeScannerService: NSObject {
     var scannedCode: String?
     var isScanning = false
     var errorMessage: String?
+    var lookupResult: OpenFoodFactsService.Product?
+    var isLookingUp = false
 
-    private var captureSession: AVCaptureSession?
+    private(set) var captureSession: AVCaptureSession?
 
     /// Supported barcode types for grocery items.
     static let supportedBarcodeTypes: [AVMetadataObject.ObjectType] = [
@@ -34,8 +37,9 @@ final class BarcodeScannerService: NSObject {
         guard captureSession == nil else { return }
 
         let session = AVCaptureSession()
+        session.sessionPreset = .high
 
-        guard let device = AVCaptureDevice.default(for: .video),
+        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
               let input = try? AVCaptureDeviceInput(device: device),
               session.canAddInput(input) else {
             errorMessage = "Unable to access camera."
@@ -56,6 +60,9 @@ final class BarcodeScannerService: NSObject {
 
         captureSession = session
         isScanning = true
+        scannedCode = nil
+        lookupResult = nil
+        errorMessage = nil
 
         Task.detached { [session] in
             session.startRunning()
@@ -66,6 +73,44 @@ final class BarcodeScannerService: NSObject {
         captureSession?.stopRunning()
         captureSession = nil
         isScanning = false
+    }
+
+    func resetForNextScan() {
+        scannedCode = nil
+        lookupResult = nil
+        errorMessage = nil
+        startScanning()
+    }
+
+    /// Look up the scanned barcode against Open Food Facts.
+    func lookupScannedProduct() async {
+        guard let code = scannedCode else { return }
+
+        isLookingUp = true
+        defer { isLookingUp = false }
+
+        do {
+            lookupResult = try await OpenFoodFactsService.lookup(barcode: code)
+            if lookupResult == nil {
+                errorMessage = "Product not found in database. You can add it manually."
+            }
+        } catch {
+            errorMessage = "Lookup failed: \(error.localizedDescription)"
+        }
+    }
+
+    /// Convert the lookup result to a PantryItem.
+    func createPantryItem(quantity: Double = 1, unit: MeasurementUnit = .piece, expirationDate: Date? = nil) -> PantryItem? {
+        guard let product = lookupResult else { return nil }
+
+        return PantryItem(
+            name: product.name,
+            category: product.category,
+            barcode: product.barcode,
+            quantity: quantity,
+            unit: unit,
+            expirationDate: expirationDate
+        )
     }
 }
 
@@ -84,24 +129,38 @@ extension BarcodeScannerService: AVCaptureMetadataOutputObjectsDelegate {
 
         scannedCode = code
         stopScanning()
+
+        // Automatically look up the product
+        Task {
+            await lookupScannedProduct()
+        }
     }
 }
 
-// MARK: - Barcode Lookup (Stub)
+// MARK: - Camera Preview (UIViewRepresentable)
 
-/// Placeholder for barcode-to-product lookup.
-/// In production, this would integrate with a product database API.
-enum BarcodeLookupService {
+/// SwiftUI wrapper around AVCaptureVideoPreviewLayer for live camera preview.
+struct CameraPreviewView: UIViewRepresentable {
+    let session: AVCaptureSession
 
-    struct ProductInfo {
-        var name: String
-        var brand: String?
-        var category: IngredientCategory
-        var barcode: String
+    func makeUIView(context: Context) -> CameraPreviewUIView {
+        let view = CameraPreviewUIView()
+        view.previewLayer.session = session
+        view.previewLayer.videoGravity = .resizeAspectFill
+        return view
     }
 
-    static func lookup(barcode: String) async throws -> ProductInfo? {
-        // TODO: Integrate with Open Food Facts or similar product database API
-        return nil
+    func updateUIView(_ uiView: CameraPreviewUIView, context: Context) {
+        uiView.previewLayer.session = session
+    }
+}
+
+final class CameraPreviewUIView: UIView {
+    override class var layerClass: AnyClass {
+        AVCaptureVideoPreviewLayer.self
+    }
+
+    var previewLayer: AVCaptureVideoPreviewLayer {
+        layer as! AVCaptureVideoPreviewLayer
     }
 }

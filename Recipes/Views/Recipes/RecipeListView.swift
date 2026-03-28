@@ -8,10 +8,14 @@ struct RecipeListView: View {
     @Environment(AIServiceRouter.self) private var aiRouter
     @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
 
+    @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
+
     @State private var searchText = ""
     @State private var selectedCuisine: Cuisine?
     @State private var showingAddRecipe = false
     @State private var showingRecipeGenerator = false
+    @State private var showingImport = false
+    @State private var showingRecipeAsCode = false
 
     private var filteredRecipes: [Recipe] {
         var result = recipes
@@ -31,6 +35,31 @@ struct RecipeListView: View {
         NavigationStack {
             List {
                 if !recipes.isEmpty {
+                    // Recommendations teaser
+                    Section {
+                        NavigationLink {
+                            RecommendationsView()
+                        } label: {
+                            Label {
+                                VStack(alignment: .leading) {
+                                    Text("Recommended For You")
+                                        .fontWeight(.medium)
+                                    Text("Personalized suggestions based on your cooking history")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            } icon: {
+                                Image(systemName: "sparkles")
+                                    .foregroundStyle(.purple)
+                            }
+                        }
+                    }
+
+                    // No Waste quick access
+                    if !pantryItems.isEmpty {
+                        noWasteTeaser
+                    }
+
                     seasonalSection
                     favoritesSection
                 }
@@ -48,6 +77,12 @@ struct RecipeListView: View {
                         Button("Generate with AI", systemImage: "sparkles") {
                             showingRecipeGenerator = true
                         }
+                        Button("Import Recipe", systemImage: "arrow.down.doc") {
+                            showingImport = true
+                        }
+                        Button("Recipe as Code", systemImage: "chevron.left.forwardslash.chevron.right") {
+                            showingRecipeAsCode = true
+                        }
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -63,10 +98,64 @@ struct RecipeListView: View {
             .sheet(isPresented: $showingRecipeGenerator) {
                 RecipeGeneratorView()
             }
+            .sheet(isPresented: $showingImport) {
+                RecipeImportView()
+            }
+            .sheet(isPresented: $showingRecipeAsCode) {
+                RecipeAsCodePreviewView()
+            }
         }
     }
 
     // MARK: - Sections
+
+    @ViewBuilder
+    private var noWasteTeaser: some View {
+        let matches = NoWasteMatchingEngine.matchRecipes(
+            recipes: recipes,
+            pantryItems: pantryItems,
+            maxMissing: 2
+        )
+        let topMatches = Array(matches.prefix(3))
+
+        if !topMatches.isEmpty {
+            Section("Ready to Cook") {
+                ForEach(topMatches) { match in
+                    NavigationLink {
+                        RecipeDetailView(recipe: match.recipe)
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(match.recipe.title)
+                                    .fontWeight(.medium)
+                                HStack(spacing: 6) {
+                                    Text("\(Int(match.coveragePercent))% covered")
+                                        .foregroundStyle(match.missingIngredients.isEmpty ? .green : .orange)
+                                    if !match.missingIngredients.isEmpty {
+                                        Text("Need \(match.missingIngredients.count) more")
+                                    }
+                                }
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Text("\(match.recipe.estimatedTotalMinutes) min")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                NavigationLink {
+                    NoWasteResultsView(recipes: recipes, pantryItems: pantryItems)
+                } label: {
+                    Text("See All Matches")
+                        .font(.caption)
+                        .foregroundStyle(.tint)
+                }
+            }
+        }
+    }
 
     @ViewBuilder
     private var seasonalSection: some View {
