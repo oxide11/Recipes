@@ -135,9 +135,10 @@ struct RecipeImportView: View {
     }
 
     private var photoInputSection: some View {
-        Section("Recipe Photo") {
+        let hasPhoto = photoData != nil
+        return Section("Recipe Photo") {
             PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                if photoData != nil {
+                if hasPhoto {
                     Label("Photo Selected", systemImage: "checkmark.circle.fill")
                         .foregroundStyle(.green)
                 } else {

@@ -64,8 +64,9 @@ struct CookingLogEntryView: View {
                 }
 
                 Section("Photo") {
+                    let hasPhoto = photoData != nil
                     PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                        if photoData != nil {
+                        if hasPhoto {
                             Label("Photo attached", systemImage: "checkmark.circle.fill")
                                 .foregroundStyle(.green)
                         } else {
@@ -103,11 +104,9 @@ struct CookingLogEntryView: View {
                     Button("Save") { saveEntry() }
                 }
             }
-            .onChange(of: selectedPhoto) { _, newItem in
-                Task {
-                    if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                        photoData = data
-                    }
+            .task(id: selectedPhoto) {
+                if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) {
+                    photoData = data
                 }
             }
             .alert("Pantry Updated", isPresented: $showingDeductionResult) {

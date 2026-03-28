@@ -509,7 +509,7 @@ final class RecipeIngestionService {
             var ingredientsUsed: [String]
         }
 
-        guard let cloudSteps = try? JSONDecoder().decode(CloudSteps.self, from: data) else {
+        guard let _ = try? JSONDecoder().decode(CloudSteps.self, from: data) else {
             return nil
         }
 

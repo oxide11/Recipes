@@ -18,7 +18,6 @@ struct CookingModeView: View {
     @State private var timerTask: Task<Void, Never>?
     @State private var isVoiceEnabled = true
     @State private var synthesizer = AVSpeechSynthesizer()
-    @State private var screenBrightness: CGFloat = UIScreen.main.brightness
 
     private var currentStep: RecipeDirection? {
         guard currentStepIndex < recipe.directions.count else { return nil }

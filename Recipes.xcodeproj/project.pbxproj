@@ -117,6 +117,7 @@
 		2D7A8EC0E71D481E9B60647A /* ReceiptScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptScannerView.swift; sourceTree = "<group>"; };
 		303ED6C8336C499EA53B3F85 /* NutritionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionCardView.swift; sourceTree = "<group>"; };
 		336DDE732F789011008C60D3 /* Recipes.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = file; path = Recipes.xctestplan; sourceTree = "<group>"; };
+		336DDE742F789281008C60D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		35871CC1E193462DB7CDE628 /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
 		3A30F9E1863F4EA88497ADDE /* ShoppingVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingVoiceService.swift; sourceTree = "<group>"; };
 		3C77BA0F32DA4834ABEDEAB9 /* NoWasteResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoWasteResultsView.swift; sourceTree = "<group>"; };
@@ -278,6 +279,7 @@
 		75EF7A75947649A0A1B32937 /* RecipesWidgets */ = {
 			isa = PBXGroup;
 			children = (
+				336DDE742F789281008C60D3 /* Info.plist */,
 				768C3CB3B6B9486B964DB3F0 /* RecipesWidgets.swift */,
 			);
 			path = RecipesWidgets;
@@ -760,7 +762,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RecipesWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = RecipesWidgets;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -782,7 +786,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RecipesWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = RecipesWidgets;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
