@@ -12,22 +12,44 @@ struct RecipeListView: View {
 
     @State private var searchText = ""
     @State private var selectedCuisine: Cuisine?
+    @State private var selectedDifficulty: RecipeDifficulty?
+    @State private var maxTimeFilter: Int?
+    @State private var showFavoritesOnly = false
     @State private var showingAddRecipe = false
     @State private var showingRecipeGenerator = false
     @State private var showingImport = false
     @State private var showingRecipeAsCode = false
-    @State private var showingCuisineFilter = false
+    @State private var showingFilters = false
+
+    private var activeFilterCount: Int {
+        var count = 0
+        if selectedCuisine != nil { count += 1 }
+        if selectedDifficulty != nil { count += 1 }
+        if maxTimeFilter != nil { count += 1 }
+        if showFavoritesOnly { count += 1 }
+        return count
+    }
 
     private var filteredRecipes: [Recipe] {
         var result = recipes
         if !searchText.isEmpty {
             result = result.filter {
                 $0.title.localizedCaseInsensitiveContains(searchText) ||
-                $0.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) })
+                $0.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) }) ||
+                $0.ingredients.contains(where: { $0.name.localizedCaseInsensitiveContains(searchText) })
             }
         }
         if let cuisine = selectedCuisine {
             result = result.filter { $0.cuisine == cuisine }
+        }
+        if let difficulty = selectedDifficulty {
+            result = result.filter { $0.difficulty == difficulty }
+        }
+        if let maxTime = maxTimeFilter {
+            result = result.filter { $0.estimatedTotalMinutes <= maxTime }
+        }
+        if showFavoritesOnly {
+            result = result.filter { $0.isFavorite || $0.isAutoFavorite }
         }
         return result
     }
@@ -36,6 +58,26 @@ struct RecipeListView: View {
         NavigationStack {
             List {
                 if !recipes.isEmpty {
+                    // Tags quick access
+                    Section {
+                        NavigationLink {
+                            TagManagementView()
+                        } label: {
+                            Label {
+                                VStack(alignment: .leading) {
+                                    Text("Tags & Collections")
+                                        .fontWeight(.medium)
+                                    Text("Organize recipes with custom tags")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            } icon: {
+                                Image(systemName: "tag")
+                                    .foregroundStyle(.teal)
+                            }
+                        }
+                    }
+
                     // Recommendations teaser
                     Section {
                         NavigationLink {
@@ -93,7 +135,14 @@ struct RecipeListView: View {
                 }
 
                 ToolbarItem(placement: .topBarLeading) {
-                    cuisineFilterMenu
+                    Button {
+                        showingFilters = true
+                    } label: {
+                        Label("Filters", systemImage: activeFilterCount > 0
+                              ? "line.3.horizontal.decrease.circle.fill"
+                              : "line.3.horizontal.decrease.circle")
+                    }
+                    .badge(activeFilterCount)
                 }
             }
             .sheet(isPresented: $showingAddRecipe) {
@@ -108,8 +157,14 @@ struct RecipeListView: View {
             .sheet(isPresented: $showingRecipeAsCode) {
                 RecipeAsCodePreviewView()
             }
-            .sheet(isPresented: $showingCuisineFilter) {
-                CuisineFilterSheet(selectedCuisine: $selectedCuisine)
+            .sheet(isPresented: $showingFilters) {
+                RecipeFilterSheet(
+                    selectedCuisine: $selectedCuisine,
+                    selectedDifficulty: $selectedDifficulty,
+                    maxTimeFilter: $maxTimeFilter,
+                    showFavoritesOnly: $showFavoritesOnly
+                )
+                .presentationDetents([.medium])
             }
         }
     }
@@ -242,19 +297,6 @@ struct RecipeListView: View {
         } header: {
             Text("All recipes")
                 .miseSectionHeader()
-        }
-    }
-
-    private var cuisineFilterMenu: some View {
-        Button {
-            showingCuisineFilter = true
-        } label: {
-            Label(
-                selectedCuisine?.rawValue.capitalized ?? "Filter",
-                systemImage: selectedCuisine != nil
-                    ? "line.3.horizontal.decrease.circle.fill"
-                    : "line.3.horizontal.decrease.circle"
-            )
         }
     }
 
@@ -416,5 +458,75 @@ struct RecipeCardCompact: View {
         }
         .frame(width: 130)
         .padding(.bottom, 4)
+    }
+}
+
+// MARK: - Recipe Filter Sheet
+
+struct RecipeFilterSheet: View {
+    @Binding var selectedCuisine: Cuisine?
+    @Binding var selectedDifficulty: RecipeDifficulty?
+    @Binding var maxTimeFilter: Int?
+    @Binding var showFavoritesOnly: Bool
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Cuisine") {
+                    Picker("Cuisine", selection: $selectedCuisine) {
+                        Text("All Cuisines").tag(Cuisine?.none)
+                        ForEach(Cuisine.allCases, id: \.self) { cuisine in
+                            Text(cuisine.rawValue.capitalized).tag(Cuisine?.some(cuisine))
+                        }
+                    }
+                    .pickerStyle(.menu)
+                }
+
+                Section("Difficulty") {
+                    Picker("Difficulty", selection: $selectedDifficulty) {
+                        Text("Any Difficulty").tag(RecipeDifficulty?.none)
+                        ForEach(RecipeDifficulty.allCases, id: \.self) { level in
+                            Text(level.rawValue.capitalized).tag(RecipeDifficulty?.some(level))
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+
+                Section("Max Total Time") {
+                    Picker("Time", selection: $maxTimeFilter) {
+                        Text("No Limit").tag(Int?.none)
+                        Text("15 min").tag(Int?.some(15))
+                        Text("30 min").tag(Int?.some(30))
+                        Text("45 min").tag(Int?.some(45))
+                        Text("60 min").tag(Int?.some(60))
+                        Text("90 min").tag(Int?.some(90))
+                    }
+                    .pickerStyle(.segmented)
+                }
+
+                Section {
+                    Toggle("Favorites Only", isOn: $showFavoritesOnly)
+                }
+
+                Section {
+                    Button("Clear All Filters") {
+                        selectedCuisine = nil
+                        selectedDifficulty = nil
+                        maxTimeFilter = nil
+                        showFavoritesOnly = false
+                    }
+                    .foregroundStyle(.red)
+                }
+            }
+            .navigationTitle("Filters")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
     }
 }

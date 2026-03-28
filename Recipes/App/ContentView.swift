@@ -1,9 +1,12 @@
 import SwiftUI
+import SwiftData
 
 // MARK: - Content View (Root Navigation)
 
 struct ContentView: View {
     @State private var selectedTab: AppTab = .recipes
+    @State private var showingOnboarding = false
+    @Query private var profiles: [UserProfile]
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -36,6 +39,14 @@ struct ContentView: View {
             }
         }
         .tabViewStyle(.sidebarAdaptable)
+        .onAppear {
+            if profiles.isEmpty {
+                showingOnboarding = true
+            }
+        }
+        .fullScreenCover(isPresented: $showingOnboarding) {
+            OnboardingView()
+        }
     }
 }
 

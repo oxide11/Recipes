@@ -24,6 +24,7 @@ struct SettingsView: View {
             Form {
                 aiSection
                 measurementSection
+                notificationsSection
                 profileSection
                 aboutSection
             }
@@ -121,6 +122,29 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Notifications
+
+    private var notificationsSection: some View {
+        Section("Notifications") {
+            NavigationLink {
+                NotificationSettingsView()
+            } label: {
+                Label {
+                    VStack(alignment: .leading) {
+                        Text("Smart Notifications")
+                            .fontWeight(.medium)
+                        Text("Pantry expiry alerts, meal reminders & streaks")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } icon: {
+                    Image(systemName: "bell.badge")
+                        .foregroundStyle(.orange)
+                }
+            }
+        }
+    }
+
     // MARK: - Measurements
 
     private var measurementSection: some View {
@@ -134,16 +158,47 @@ struct SettingsView: View {
 
     // MARK: - Profile
 
+    @State private var showingProfileEditor = false
+
     private var profileSection: some View {
         Section("Profile") {
             if let profile {
                 LabeledContent("Name", value: profile.displayName)
                 LabeledContent("Skill Level", value: profile.skillLevel.rawValue.capitalized)
                 LabeledContent("Member Since", value: profile.dateJoined, format: .dateTime.month().year())
+
+                if !profile.dietaryRestrictions.isEmpty {
+                    LabeledContent("Dietary") {
+                        Text(profile.dietaryRestrictions.map { $0.rawValue.capitalized }.joined(separator: ", "))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Button("Edit Profile") {
+                    showingProfileEditor = true
+                }
             } else {
-                Text("No profile created yet.")
-                    .foregroundStyle(.secondary)
+                Button {
+                    showingProfileEditor = true
+                } label: {
+                    Label {
+                        VStack(alignment: .leading) {
+                            Text("Create Profile")
+                                .fontWeight(.medium)
+                            Text("Set up your dietary preferences and cooking goals")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "person.crop.circle.badge.plus")
+                            .foregroundStyle(.tint)
+                    }
+                }
             }
+        }
+        .sheet(isPresented: $showingProfileEditor) {
+            ProfileEditorView(profile: profile)
         }
     }
 

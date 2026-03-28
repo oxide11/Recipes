@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import PhotosUI
 
 // MARK: - Recipe Detail View
 
@@ -10,10 +11,14 @@ struct RecipeDetailView: View {
     @Environment(AIServiceRouter.self) private var aiRouter
     @State private var showingVariations = false
     @State private var showingLogEntry = false
+    @State private var showingCookingMode = false
+    @State private var showingBlinkHelp = false
+    @State private var showingExport = false
     @State private var selectedServings: Int
     @State private var showNutrition = false
     @State private var checkedIngredients: Set<UUID> = []
     @State private var isEstimatingNutrition = false
+    @State private var selectedPhoto: PhotosPickerItem?
 
     init(recipe: Recipe) {
         self.recipe = recipe
@@ -29,10 +34,12 @@ struct RecipeDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 headerSection
+                photoGallerySection
                 quickInfoBar
                 ingredientsSection
                 directionsSection
                 safeTemperaturesSection
+                tagsSection
                 nutritionSection
                 variationsSection
                 cookingLogSection
@@ -52,9 +59,28 @@ struct RecipeDetailView: View {
                 .sensoryFeedback(.impact(flexibility: .soft), trigger: recipe.isFavorite)
                 .accessibilityLabel(recipe.isFavorite ? "Remove from favourites" : "Add to favourites")
 
+                Button {
+                    showingCookingMode = true
+                } label: {
+                    Image(systemName: "play.circle")
+                }
+                .accessibilityLabel("Start Cooking Mode")
+
                 Menu {
                     Button("Log Cooking Session", systemImage: "flame") {
                         showingLogEntry = true
+                    }
+                    Button("Start Cooking Mode", systemImage: "play.fill") {
+                        showingCookingMode = true
+                    }
+                    Button("Hands-Free Setup", systemImage: "accessibility") {
+                        showingBlinkHelp = true
+                    }
+                    Button("Export Recipe", systemImage: "square.and.arrow.up") {
+                        showingExport = true
+                    }
+                    PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                        Label("Add Photo", systemImage: "camera")
                     }
                     ShareLink(item: recipeShareText)
                 } label: {
@@ -66,9 +92,72 @@ struct RecipeDetailView: View {
         .sheet(isPresented: $showingLogEntry) {
             CookingLogEntryView(recipe: recipe)
         }
+        .fullScreenCover(isPresented: $showingCookingMode) {
+            CookingModeView(recipe: recipe)
+        }
+        .sheet(isPresented: $showingBlinkHelp) {
+            BlinkNavigationHelpView()
+        }
+        .sheet(isPresented: $showingExport) {
+            RecipeExportView(recipe: recipe)
+        }
+        .onChange(of: selectedPhoto) { _, newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                    let photo = RecipePhoto(imageData: data)
+                    recipe.photos.append(photo)
+                }
+            }
+        }
     }
 
     // MARK: - Sections
+
+    @ViewBuilder
+    private var photoGallerySection: some View {
+        if !recipe.photos.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Photos")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    Spacer()
+                    Text("\(recipe.photos.count)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 12) {
+                        ForEach(recipe.photos) { photo in
+                            if let uiImage = UIImage(data: photo.imageData) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 200, height: 150)
+                                    .clipShape(.rect(cornerRadius: 12))
+                                    .overlay(alignment: .bottomTrailing) {
+                                        if let caption = photo.caption {
+                                            Text(caption)
+                                                .font(.caption2)
+                                                .padding(4)
+                                                .background(in: .capsule)
+                                                .glassEffect(.regular, in: .capsule)
+                                                .padding(8)
+                                        }
+                                    }
+                                    .contextMenu {
+                                        Button("Delete", systemImage: "trash", role: .destructive) {
+                                            recipe.photos.removeAll { $0.id == photo.id }
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -169,8 +258,8 @@ struct RecipeDetailView: View {
             ForEach(recipe.directions) { direction in
                 DirectionStepView(
                     direction: direction,
-                    allIngredients: recipe.ingredients,
-                    servingMultiplier: servingMultiplier
+                    recipeTitle: recipe.title,
+                    totalSteps: recipe.directions.count
                 )
             }
         }
@@ -430,6 +519,12 @@ struct RecipeDetailView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Tags
+
+    private var tagsSection: some View {
+        RecipeTagEditorView(recipe: recipe)
     }
 
     // MARK: - Helpers
