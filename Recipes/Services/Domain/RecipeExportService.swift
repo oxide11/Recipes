@@ -697,14 +697,10 @@ struct RecipeExportView: View {
 
     private func performExport() {
         isGenerating = true
-        DispatchQueue.global(qos: .userInitiated).async {
-            let items = generateExportItems()
-            DispatchQueue.main.async {
-                isGenerating = false
-                exportData = items.data
-                showShareSheet = true
-            }
-        }
+        let items = generateExportItems()
+        isGenerating = false
+        exportData = items.data
+        showShareSheet = true
     }
 
     private func generateExportItems() -> (data: Data?, items: [Any]) {

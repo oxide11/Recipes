@@ -1,0 +1,30 @@
+{
+  "configurations" : [
+    {
+      "id" : "78EA08B2-7D05-4D97-81D7-E203C925EAF0",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Recipes.xcodeproj",
+      "identifier" : "3AA5CF421D0540E9BA172A89",
+      "name" : "Recipes"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Recipes.xcodeproj",
+        "identifier" : "4CE2DECBA7E1473BB268583E",
+        "name" : "RecipesTests"
+      }
+    }
+  ],
+  "version" : 1
+}

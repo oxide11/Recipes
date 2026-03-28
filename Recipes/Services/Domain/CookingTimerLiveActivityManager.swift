@@ -2,10 +2,27 @@ import Foundation
 import ActivityKit
 import Observation
 
+// MARK: - Cooking Timer Attributes
+
+/// Attributes for the cooking timer Live Activity.
+/// Shared definition used by both the app and the widget extension.
+struct CookingTimerAttributes: ActivityAttributes {
+    public struct ContentState: Codable, Hashable {
+        var stepNumber: Int
+        var stepInstruction: String
+        var remainingSeconds: Int
+        var totalSteps: Int
+    }
+
+    var recipeTitle: String
+    var totalCookTimeMinutes: Int
+}
+
 // MARK: - Cooking Timer Live Activity Manager
 
 /// Manages the cooking timer Live Activity lifecycle.
 /// Starts, updates, and ends the Dynamic Island / lock screen timer.
+@MainActor
 @Observable
 final class CookingTimerLiveActivityManager {
 
@@ -72,7 +89,8 @@ final class CookingTimerLiveActivityManager {
             totalSteps: totalSteps
         )
 
-        await activity.update(.init(state: state, staleDate: nil))
+        nonisolated(unsafe) let sendableActivity = activity
+        await sendableActivity.update(.init(state: state, staleDate: nil))
     }
 
     // MARK: - End
@@ -88,7 +106,8 @@ final class CookingTimerLiveActivityManager {
             totalSteps: 0
         )
 
-        await activity.end(
+        nonisolated(unsafe) let sendableActivity = activity
+        await sendableActivity.end(
             .init(state: finalState, staleDate: nil),
             dismissalPolicy: .after(.now.addingTimeInterval(30))
         )

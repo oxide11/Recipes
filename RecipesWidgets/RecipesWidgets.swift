@@ -247,6 +247,6 @@ struct CookingTimerLiveActivityView: View {
 @main
 struct RecipesWidgetBundle: WidgetBundle {
     var body: some Widget {
-        MealPlanWidget
+        MealPlanWidget()
     }
 }

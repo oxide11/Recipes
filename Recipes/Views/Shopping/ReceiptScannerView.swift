@@ -157,7 +157,7 @@ struct ReceiptScannerView: View {
                 }
             }
             .navigationTitle("Scan Receipt")
-            .toolbarBackground(.glass, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {

@@ -41,96 +41,12 @@ struct ProfileEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("About You") {
-                    TextField("Your Name", text: $displayName)
-                        .textContentType(.name)
-
-                    Picker("Cooking Skill Level", selection: $skillLevel) {
-                        ForEach(RecipeDifficulty.allCases, id: \.self) { level in
-                            Text(level.rawValue.capitalized).tag(level)
-                        }
-                    }
-
-                    Picker("Measurement System", selection: $measurementSystem) {
-                        Text("Imperial (cups, oz, °F)").tag(MeasurementSystem.imperial)
-                        Text("Metric (ml, g, °C)").tag(MeasurementSystem.metric)
-                    }
-                }
-
-                Section {
-                    ForEach(DietaryRestriction.allCases, id: \.self) { restriction in
-                        Toggle(restriction.rawValue.capitalized, isOn: Binding(
-                            get: { dietaryRestrictions.contains(restriction) },
-                            set: { isOn in
-                                if isOn { dietaryRestrictions.insert(restriction) }
-                                else { dietaryRestrictions.remove(restriction) }
-                            }
-                        ))
-                    }
-                } header: {
-                    Text("Dietary Restrictions")
-                } footer: {
-                    Text("Recipes will be filtered and AI suggestions will respect these preferences.")
-                }
-
-                Section("Favorite Cuisines") {
-                    LazyVGrid(columns: [.init(.adaptive(minimum: 100))], spacing: 8) {
-                        ForEach(Cuisine.allCases, id: \.self) { cuisine in
-                            Button {
-                                if preferredCuisines.contains(cuisine) {
-                                    preferredCuisines.remove(cuisine)
-                                } else {
-                                    preferredCuisines.insert(cuisine)
-                                }
-                            } label: {
-                                Text(cuisine.rawValue.capitalized)
-                                    .font(.caption)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 6)
-                                    .frame(maxWidth: .infinity)
-                                    .background(
-                                        preferredCuisines.contains(cuisine)
-                                            ? Color.accentColor.opacity(0.2)
-                                            : Color.clear,
-                                        in: .capsule
-                                    )
-                                    .overlay(
-                                        Capsule()
-                                            .strokeBorder(
-                                                preferredCuisines.contains(cuisine)
-                                                    ? .accentColor
-                                                    : .secondary.opacity(0.3),
-                                                lineWidth: 1
-                                            )
-                                    )
-                            }
-                            .buttonStyle(.plain)
-                            .sensoryFeedback(.selection, trigger: preferredCuisines.count)
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-
-                Section("Avoid & Allergens") {
-                    TextField("Disliked ingredients (comma separated)", text: $dislikedIngredients)
-                    TextField("Allergens (comma separated)", text: $allergens)
-                }
-
-                Section {
-                    TextField("Max cook time (minutes)", text: $maxCookTime)
-                        .keyboardType(.numberPad)
-                } header: {
-                    Text("Cooking Preferences")
-                }
-
-                Section("Nutritional Goals (Optional)") {
-                    TextField("Daily calories", text: $dailyCalories)
-                        .keyboardType(.numberPad)
-                    TextField("Daily protein (grams)", text: $dailyProtein)
-                        .keyboardType(.numberPad)
-                    TextField("Weekly grocery budget ($)", text: $weeklyBudget)
-                        .keyboardType(.decimalPad)
-                }
+                aboutYouSection
+                dietaryRestrictionsSection
+                favoriteCuisinesSection
+                avoidAndAllergensSection
+                cookingPreferencesSection
+                nutritionalGoalsSection
             }
             .navigationTitle(existingProfile == nil ? "Create Profile" : "Edit Profile")
             .navigationBarTitleDisplayMode(.inline)
@@ -143,6 +59,109 @@ struct ProfileEditorView: View {
                         .disabled(displayName.isEmpty)
                 }
             }
+        }
+    }
+
+    private var aboutYouSection: some View {
+        Section("About You") {
+            TextField("Your Name", text: $displayName)
+                .textContentType(.name)
+
+            Picker("Cooking Skill Level", selection: $skillLevel) {
+                ForEach(RecipeDifficulty.allCases, id: \.self) { level in
+                    Text(level.rawValue.capitalized).tag(level)
+                }
+            }
+
+            Picker("Measurement System", selection: $measurementSystem) {
+                Text("Imperial (cups, oz, °F)").tag(MeasurementSystem.imperial)
+                Text("Metric (ml, g, °C)").tag(MeasurementSystem.metric)
+            }
+        }
+    }
+
+    private var dietaryRestrictionsSection: some View {
+        Section {
+            ForEach(DietaryRestriction.allCases, id: \.self) { restriction in
+                Toggle(restriction.rawValue.capitalized, isOn: Binding(
+                    get: { dietaryRestrictions.contains(restriction) },
+                    set: { isOn in
+                        if isOn { dietaryRestrictions.insert(restriction) }
+                        else { dietaryRestrictions.remove(restriction) }
+                    }
+                ))
+            }
+        } header: {
+            Text("Dietary Restrictions")
+        } footer: {
+            Text("Recipes will be filtered and AI suggestions will respect these preferences.")
+        }
+    }
+
+    private var favoriteCuisinesSection: some View {
+        Section("Favorite Cuisines") {
+            LazyVGrid(columns: [.init(.adaptive(minimum: 100))], spacing: 8) {
+                ForEach(Cuisine.allCases, id: \.self) { cuisine in
+                    Button {
+                        if preferredCuisines.contains(cuisine) {
+                            preferredCuisines.remove(cuisine)
+                        } else {
+                            preferredCuisines.insert(cuisine)
+                        }
+                    } label: {
+                        Text(cuisine.rawValue.capitalized)
+                            .font(.caption)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .frame(maxWidth: .infinity)
+                            .background(
+                                preferredCuisines.contains(cuisine)
+                                    ? Color.accentColor.opacity(0.2)
+                                    : Color.clear,
+                                in: .capsule
+                            )
+                            .overlay(
+                                Capsule()
+                                    .strokeBorder(
+                                        preferredCuisines.contains(cuisine)
+                                            ? Color.accentColor
+                                            : Color.secondary.opacity(0.3),
+                                        lineWidth: 1
+                                    )
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .sensoryFeedback(.selection, trigger: preferredCuisines.count)
+                }
+            }
+            .padding(.vertical, 4)
+        }
+    }
+
+    private var avoidAndAllergensSection: some View {
+        Section("Avoid & Allergens") {
+            TextField("Disliked ingredients (comma separated)", text: $dislikedIngredients)
+            TextField("Allergens (comma separated)", text: $allergens)
+        }
+    }
+
+    private var cookingPreferencesSection: some View {
+        Section {
+            TextField("Max cook time (minutes)", text: $maxCookTime)
+                .keyboardType(.numberPad)
+        } header: {
+            Text("Cooking Preferences")
+        }
+    }
+
+    private var nutritionalGoalsSection: some View {
+        Section("Nutritional Goals (Optional)") {
+            TextField("Daily calories", text: $dailyCalories)
+                .keyboardType(.numberPad)
+            TextField("Daily protein (grams)", text: $dailyProtein)
+                .keyboardType(.numberPad)
+            TextField("Weekly grocery budget ($)", text: $weeklyBudget)
+                .keyboardType(.decimalPad)
         }
     }
 

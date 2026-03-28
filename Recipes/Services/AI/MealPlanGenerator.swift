@@ -9,34 +9,20 @@ import FoundationModels
 final class MealPlanGenerator: Sendable {
 
     /// Generate a meal plan using AI, selecting from the user's existing recipes.
+    /// Accepts pre-extracted string data to avoid sending non-Sendable SwiftData models across isolation boundaries.
     func generatePlan(
-        recipes: [Recipe],
-        pantryItems: [PantryItem],
-        profile: UserProfile?,
+        recipeDescriptions: [String],
+        pantryItemNames: [String],
+        constraintsText: String,
         startDate: Date,
         days: Int,
         mealsPerDay: [MealType] = [.breakfast, .lunch, .dinner]
     ) async throws -> GeneratedMealPlan {
         let session = LanguageModelSession()
 
-        let recipeList = recipes.prefix(50).map { recipe in
-            "- \(recipe.title) [\(recipe.cuisine.rawValue), \(recipe.estimatedTotalMinutes)min, \(recipe.difficulty.rawValue)] (\(recipe.ingredients.map(\.name).joined(separator: ", ")))"
-        }.joined(separator: "\n")
-
-        let pantryList = pantryItems.prefix(30).map(\.name).joined(separator: ", ")
-
-        var constraints = ""
-        if let profile {
-            if let cal = profile.dailyCalorieTarget {
-                constraints += "Daily calorie target: \(cal). "
-            }
-            if !profile.dietaryRestrictions.isEmpty {
-                constraints += "Dietary restrictions: \(profile.dietaryRestrictions.map(\.rawValue).joined(separator: ", ")). "
-            }
-            if !profile.dislikedIngredients.isEmpty {
-                constraints += "Avoid: \(profile.dislikedIngredients.joined(separator: ", ")). "
-            }
-        }
+        let recipeList = recipeDescriptions.joined(separator: "\n")
+        let pantryList = pantryItemNames.joined(separator: ", ")
+        let constraints = constraintsText
 
         let mealTypeNames = mealsPerDay.map(\.rawValue).joined(separator: ", ")
 
@@ -57,7 +43,8 @@ final class MealPlanGenerator: Sendable {
         - Each meal assignment must reference an exact recipe title from the list above
         """
 
-        return try await session.respond(to: prompt, generating: GeneratedMealPlan.self)
+        let response = try await session.respond(to: prompt, generating: GeneratedMealPlan.self)
+        return response.content
     }
 
     /// Convert an AI-generated plan into PlannedMeal objects.
