@@ -39,7 +39,7 @@ struct NutritionTrackingView: View {
             .padding()
         }
         .navigationTitle("Nutrition")
-        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarBackground(.automatic, for: .navigationBar)
     }
 
     // MARK: - Period Picker
@@ -104,7 +104,7 @@ struct NutritionTrackingView: View {
                     x: .value("Day", day.date, unit: .day),
                     y: .value("Calories", day.calories)
                 )
-                .foregroundStyle(.blue.gradient)
+                .foregroundStyle(.tint.gradient)
 
                 if let profile, let target = profile.dailyCalorieTarget {
                     RuleMark(y: .value("Target", target))
@@ -114,7 +114,7 @@ struct NutritionTrackingView: View {
             }
             .frame(height: 200)
             .chartXAxis {
-                AxisMarks(values: .stride(by: .day, count: 1)) { _ in
+                AxisMarks(values: .stride(by: .day)) { _ in
                     AxisValueLabel(format: .dateTime.weekday(.abbreviated))
                 }
             }

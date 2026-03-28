@@ -21,7 +21,7 @@ enum ShoppingListGenerator {
         var aggregated: [String: AggregatedIngredient] = [:]
 
         for meal in plan.meals {
-            guard let recipe = meal.recipe else { continue }
+            guard let recipe = meal.recipe, recipe.servings > 0 else { continue }
             let servingScale = Double(meal.servings) / Double(recipe.servings)
 
             for ingredient in recipe.ingredients where !ingredient.isOptional {

@@ -14,6 +14,7 @@ enum PantryDeductionService {
         servingsCooked: Int,
         pantryItems: [PantryItem]
     ) -> [PantryItem] {
+        guard recipe.servings > 0 else { return [] }
         let scale = Double(servingsCooked) / Double(recipe.servings)
         var fullyConsumed: [PantryItem] = []
 

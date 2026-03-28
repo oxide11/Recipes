@@ -255,7 +255,7 @@ struct NotificationSettingsView: View {
         .navigationTitle("Notifications")
         .scrollContentBackground(.hidden)
         .background(.ultraThinMaterial)
-        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.automatic, for: .navigationBar)
         .task {
             await checkPermission()
         }
