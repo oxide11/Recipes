@@ -7,6 +7,28 @@ enum MealType: String, Codable, CaseIterable, Sendable {
     case breakfast, lunch, dinner, snack, dessert
 }
 
+extension MealType {
+    var sortOrder: Int {
+        switch self {
+        case .breakfast: return 0
+        case .lunch:     return 1
+        case .dinner:    return 2
+        case .snack:     return 3
+        case .dessert:   return 4
+        }
+    }
+
+    var systemImageName: String {
+        switch self {
+        case .breakfast: return "sunrise.fill"
+        case .lunch:     return "sun.max.fill"
+        case .dinner:    return "moon.stars.fill"
+        case .snack:     return "carrot.fill"
+        case .dessert:   return "birthday.cake.fill"
+        }
+    }
+}
+
 // MARK: - Planned Meal
 
 @Model

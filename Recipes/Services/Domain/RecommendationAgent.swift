@@ -157,7 +157,7 @@ final class RecommendationAgent {
         return quick.prefix(2).map { match in
             Recommendation(
                 title: match.recipe.title,
-                reason: "Ready in \(match.recipe.estimatedTotalMinutes) min with ingredients you have",
+                reason: "Ready in \(match.recipe.formattedDuration) with ingredients you have",
                 category: .quickMeal,
                 score: match.score + 10,
                 recipeID: match.recipe.id

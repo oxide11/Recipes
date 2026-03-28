@@ -7,10 +7,13 @@ struct RecipeDetailView: View {
     @Bindable var recipe: Recipe
     @Environment(\.modelContext) private var modelContext
 
+    @Environment(AIServiceRouter.self) private var aiRouter
     @State private var showingVariations = false
     @State private var showingLogEntry = false
     @State private var selectedServings: Int
     @State private var showNutrition = false
+    @State private var checkedIngredients: Set<UUID> = []
+    @State private var isEstimatingNutrition = false
 
     init(recipe: Recipe) {
         self.recipe = recipe
@@ -18,7 +21,8 @@ struct RecipeDetailView: View {
     }
 
     private var servingMultiplier: Double {
-        Double(selectedServings) / Double(recipe.servings)
+        guard recipe.servings > 0 else { return 1.0 }
+        return Double(selectedServings) / Double(recipe.servings)
     }
 
     var body: some View {
@@ -46,6 +50,7 @@ struct RecipeDetailView: View {
                     Image(systemName: recipe.isFavorite ? "heart.fill" : "heart")
                 }
                 .sensoryFeedback(.impact(flexibility: .soft), trigger: recipe.isFavorite)
+                .accessibilityLabel(recipe.isFavorite ? "Remove from favourites" : "Add to favourites")
 
                 Menu {
                     Button("Log Cooking Session", systemImage: "flame") {
@@ -55,6 +60,7 @@ struct RecipeDetailView: View {
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }
+                .accessibilityLabel("More options")
             }
         }
         .sheet(isPresented: $showingLogEntry) {
@@ -115,16 +121,40 @@ struct RecipeDetailView: View {
         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
     }
 
+    private var sortedIngredients: [Ingredient] {
+        recipe.ingredients.sorted { $0.category.sortOrder < $1.category.sortOrder }
+    }
+
     private var ingredientsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Ingredients")
-                .font(.title2)
-                .fontWeight(.bold)
+            HStack {
+                Text("Ingredients")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                Spacer()
+                if !checkedIngredients.isEmpty {
+                    Button("Clear") {
+                        withAnimation { checkedIngredients.removeAll() }
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(Brand.warmTan)
+                }
+            }
 
-            ForEach(recipe.ingredients) { ingredient in
+            ForEach(sortedIngredients) { ingredient in
                 IngredientRow(
                     ingredient: ingredient,
-                    servingMultiplier: servingMultiplier
+                    servingMultiplier: servingMultiplier,
+                    isChecked: checkedIngredients.contains(ingredient.id),
+                    onToggle: {
+                        withAnimation(.snappy(duration: 0.2)) {
+                            if checkedIngredients.contains(ingredient.id) {
+                                checkedIngredients.remove(ingredient.id)
+                            } else {
+                                checkedIngredients.insert(ingredient.id)
+                            }
+                        }
+                    }
                 )
             }
         }
@@ -137,7 +167,11 @@ struct RecipeDetailView: View {
                 .fontWeight(.bold)
 
             ForEach(recipe.directions) { direction in
-                DirectionStepView(direction: direction)
+                DirectionStepView(
+                    direction: direction,
+                    allIngredients: recipe.ingredients,
+                    servingMultiplier: servingMultiplier
+                )
             }
         }
     }
@@ -182,11 +216,108 @@ struct RecipeDetailView: View {
     @ViewBuilder
     private var nutritionSection: some View {
         if let nutrition = recipe.nutritionalInfo {
-            DisclosureGroup("Nutrition Facts", isExpanded: $showNutrition) {
-                NutritionCardView(info: nutrition)
+            VStack(alignment: .leading, spacing: 12) {
+                Button {
+                    withAnimation(.snappy) { showNutrition.toggle() }
+                } label: {
+                    HStack {
+                        Text("Nutrition Facts")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.primary)
+                        Spacer()
+                        Image(systemName: showNutrition ? "chevron.down" : "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .buttonStyle(.plain)
+
+                if showNutrition {
+                    NutritionCardView(info: nutrition)
+                }
             }
-            .font(.title2)
-            .fontWeight(.bold)
+        } else {
+            Button {
+                Task { await estimateNutrition() }
+            } label: {
+                HStack(spacing: 8) {
+                    if isEstimatingNutrition {
+                        ProgressView().tint(Brand.warmTan)
+                        Text("Estimating…")
+                    } else {
+                        Image(systemName: "sparkles")
+                        Text("Estimate Nutrition")
+                    }
+                }
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(Brand.warmTan)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+            }
+            .buttonStyle(.plain)
+            .disabled(isEstimatingNutrition)
+        }
+    }
+
+    private func estimateNutrition() async {
+        isEstimatingNutrition = true
+        defer { isEstimatingNutrition = false }
+
+        let ingredientDescriptions = recipe.ingredients.map {
+            "\($0.amount.displayString) \($0.name)"
+        }
+
+        // Build a prompt for cloud fallback
+        let ingredientList = ingredientDescriptions.joined(separator: ", ")
+        let prompt = """
+        Estimate nutrition per serving for a recipe with \(recipe.servings) servings.
+        Ingredients: \(ingredientList)
+        Return ONLY a JSON object, no prose:
+        {"calories":0,"proteinGrams":0,"carbsGrams":0,"fatGrams":0,"fiberGrams":0,"sugarGrams":0,"sodiumMg":0}
+        """
+
+        do {
+            // Try on-device structured generation first
+            if await aiRouter.foundationModelService.isAvailable {
+                let estimate = try await aiRouter.foundationModelService.estimateNutrition(
+                    ingredients: ingredientDescriptions,
+                    servings: recipe.servings
+                )
+                recipe.nutritionalInfo = NutritionalInfo(
+                    calories: Double(estimate.caloriesPerServing),
+                    proteinGrams: Double(estimate.proteinGrams),
+                    carbsGrams: Double(estimate.carbsGrams),
+                    fatGrams: Double(estimate.fatGrams),
+                    fiberGrams: Double(estimate.fiberGrams),
+                    sugarGrams: Double(estimate.sugarGrams)
+                )
+                showNutrition = true
+                return
+            }
+
+            // Cloud fallback — parse JSON response
+            let response = try await aiRouter.generateText(prompt: prompt, taskType: .nutritionalEstimation)
+            var cleaned = response.trimmingCharacters(in: .whitespacesAndNewlines)
+            if cleaned.hasPrefix("```") {
+                cleaned = cleaned.components(separatedBy: "\n").dropFirst().dropLast().joined(separator: "\n")
+            }
+            if let data = cleaned.data(using: .utf8),
+               let json = try? JSONDecoder().decode(NutritionEstimateResponse.self, from: data) {
+                recipe.nutritionalInfo = NutritionalInfo(
+                    calories: json.calories,
+                    proteinGrams: json.proteinGrams,
+                    carbsGrams: json.carbsGrams,
+                    fatGrams: json.fatGrams,
+                    fiberGrams: json.fiberGrams,
+                    sugarGrams: json.sugarGrams,
+                    sodiumMg: json.sodiumMg
+                )
+                showNutrition = true
+            }
+        } catch {
+            // Silently fail — button will remain visible so user can retry
         }
     }
 
@@ -220,23 +351,81 @@ struct RecipeDetailView: View {
     @ViewBuilder
     private var cookingLogSection: some View {
         if !recipe.cookingLog.isEmpty {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Cooking Log")
-                    .font(.title2)
-                    .fontWeight(.bold)
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("Cooking Log")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    Spacer()
+                    Text("Cooked \(recipe.cookCount)×")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
 
-                Text("Cooked \(recipe.cookCount) time\(recipe.cookCount == 1 ? "" : "s")")
-                    .foregroundStyle(.secondary)
-
+                // Average rating
                 if let avg = recipe.averageRating {
-                    HStack(spacing: 2) {
+                    HStack(spacing: 4) {
                         ForEach(1...5, id: \.self) { star in
                             Image(systemName: star <= Int(avg.rounded()) ? "star.fill" : "star")
                                 .foregroundStyle(.yellow)
+                                .font(.subheadline)
                         }
-                        Text(String(format: "%.1f", avg))
+                        Text(String(format: "%.1f avg", avg))
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                    }
+                }
+
+                // Photo strip from log entries that have photos
+                let photos = recipe.cookingLog.compactMap(\.photo)
+                if !photos.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(photos) { photo in
+                                if let uiImage = UIImage(data: photo.imageData) {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 120, height: 120)
+                                        .clipShape(.rect(cornerRadius: 10))
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Individual log entries
+                ForEach(recipe.cookingLog.sorted { $0.date > $1.date }) { entry in
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text(entry.date, style: .date)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            if let rating = entry.rating {
+                                HStack(spacing: 2) {
+                                    ForEach(1...5, id: \.self) { star in
+                                        Image(systemName: star <= rating ? "star.fill" : "star")
+                                            .font(.caption2)
+                                            .foregroundStyle(.yellow)
+                                    }
+                                }
+                            }
+                        }
+                        if let notes = entry.notes {
+                            Text(notes)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        if !entry.substitutionsMade.isEmpty {
+                            Text("Subs: " + entry.substitutionsMade.joined(separator: ", "))
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                    if entry.id != recipe.cookingLog.sorted(by: { $0.date > $1.date }).last?.id {
+                        Divider()
                     }
                 }
             }
@@ -253,6 +442,8 @@ struct RecipeDetailView: View {
             Text(value)
                 .font(.subheadline)
                 .fontWeight(.semibold)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             Text(title)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
@@ -274,4 +465,16 @@ struct RecipeDetailView: View {
         }
         return text
     }
+}
+
+// MARK: - Nutrition Estimate Response (cloud fallback)
+
+private struct NutritionEstimateResponse: Decodable {
+    let calories: Double
+    let proteinGrams: Double
+    let carbsGrams: Double
+    let fatGrams: Double
+    let fiberGrams: Double
+    let sugarGrams: Double
+    let sodiumMg: Double?
 }

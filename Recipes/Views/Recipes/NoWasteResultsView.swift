@@ -126,7 +126,7 @@ struct NoWasteRecipeRow: View {
             }
 
             HStack(spacing: 12) {
-                Label("\(match.recipe.estimatedTotalMinutes) min", systemImage: "clock")
+                Label(match.recipe.formattedDuration, systemImage: "clock")
                 Label(match.recipe.cuisine.rawValue.capitalized, systemImage: "fork.knife")
 
                 if !match.expiringIngredientsUsed.isEmpty {

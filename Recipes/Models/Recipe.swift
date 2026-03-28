@@ -31,9 +31,16 @@ struct TimerStep: Codable, Hashable, Sendable {
     var label: String
 
     var displayDuration: String {
-        let minutes = durationSeconds / 60
+        let totalMinutes = durationSeconds / 60
         let seconds = durationSeconds % 60
-        if minutes > 0 && seconds > 0 {
+        let hours = totalMinutes / 60
+        let minutes = totalMinutes % 60
+
+        if hours > 0 && minutes > 0 {
+            return "\(hours)h \(minutes)m"
+        } else if hours > 0 {
+            return "\(hours) hr"
+        } else if minutes > 0 && seconds > 0 {
             return "\(minutes)m \(seconds)s"
         } else if minutes > 0 {
             return "\(minutes) min"
@@ -121,7 +128,8 @@ final class CookingLogEntry {
         cookTimeMinutes: Int? = nil,
         rating: Int? = nil,
         notes: String? = nil,
-        substitutionsMade: [String] = []
+        substitutionsMade: [String] = [],
+        photo: RecipePhoto? = nil
     ) {
         self.id = UUID()
         self.date = date
@@ -130,6 +138,7 @@ final class CookingLogEntry {
         self.rating = rating
         self.notes = notes
         self.substitutionsMade = substitutionsMade
+        self.photo = photo
     }
 }
 
@@ -225,6 +234,15 @@ final class Recipe {
     /// Estimated total meal prep time including prep and cook time.
     var estimatedTotalMinutes: Int {
         prepTimeMinutes + cookTimeMinutes
+    }
+
+    /// Human-readable duration, e.g. "30 min", "1h 30min", "2h".
+    var formattedDuration: String {
+        let total = estimatedTotalMinutes
+        guard total >= 60 else { return "\(total) min" }
+        let hours = total / 60
+        let minutes = total % 60
+        return minutes == 0 ? "\(hours)h" : "\(hours)h \(minutes)min"
     }
 
     init(

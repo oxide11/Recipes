@@ -16,6 +16,7 @@ struct RecipeListView: View {
     @State private var showingRecipeGenerator = false
     @State private var showingImport = false
     @State private var showingRecipeAsCode = false
+    @State private var showingCuisineFilter = false
 
     private var filteredRecipes: [Recipe] {
         var result = recipes
@@ -41,16 +42,17 @@ struct RecipeListView: View {
                             RecommendationsView()
                         } label: {
                             Label {
-                                VStack(alignment: .leading) {
-                                    Text("Recommended For You")
-                                        .fontWeight(.medium)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Recommended for you")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundStyle(Brand.cream)
                                     Text("Personalized suggestions based on your cooking history")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
+                                        .font(.miseMeta)
+                                        .foregroundStyle(Brand.muted)
                                 }
                             } icon: {
                                 Image(systemName: "sparkles")
-                                    .foregroundStyle(.purple)
+                                    .foregroundStyle(Brand.warmTan)
                             }
                         }
                     }
@@ -87,6 +89,7 @@ struct RecipeListView: View {
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .accessibilityLabel("Add recipe")
                 }
 
                 ToolbarItem(placement: .topBarLeading) {
@@ -105,6 +108,9 @@ struct RecipeListView: View {
             .sheet(isPresented: $showingRecipeAsCode) {
                 RecipeAsCodePreviewView()
             }
+            .sheet(isPresented: $showingCuisineFilter) {
+                CuisineFilterSheet(selectedCuisine: $selectedCuisine)
+            }
         }
     }
 
@@ -120,7 +126,7 @@ struct RecipeListView: View {
         let topMatches = Array(matches.prefix(3))
 
         if !topMatches.isEmpty {
-            Section("Ready to Cook") {
+            Section {
                 ForEach(topMatches) { match in
                     NavigationLink {
                         RecipeDetailView(recipe: match.recipe)
@@ -128,21 +134,22 @@ struct RecipeListView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(match.recipe.title)
-                                    .fontWeight(.medium)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundStyle(Brand.cream)
                                 HStack(spacing: 6) {
                                     Text("\(Int(match.coveragePercent))% covered")
-                                        .foregroundStyle(match.missingIngredients.isEmpty ? .green : .orange)
+                                        .foregroundStyle(match.missingIngredients.isEmpty ? Brand.herbGreen : Brand.warmTan)
                                     if !match.missingIngredients.isEmpty {
                                         Text("Need \(match.missingIngredients.count) more")
+                                            .foregroundStyle(Brand.muted)
                                     }
                                 }
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .font(.miseMeta)
                             }
                             Spacer()
-                            Text("\(match.recipe.estimatedTotalMinutes) min")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                            Text(match.recipe.formattedDuration)
+                                .font(.miseMeta)
+                                .foregroundStyle(Brand.muted)
                         }
                     }
                 }
@@ -150,10 +157,13 @@ struct RecipeListView: View {
                 NavigationLink {
                     NoWasteResultsView(recipes: recipes, pantryItems: pantryItems)
                 } label: {
-                    Text("See All Matches")
-                        .font(.caption)
-                        .foregroundStyle(.tint)
+                    Text("See all matches")
+                        .font(.miseMeta)
+                        .foregroundStyle(Brand.warmTan)
                 }
+            } header: {
+                Text("Ready to cook")
+                    .miseSectionHeader()
             }
         }
     }
@@ -166,7 +176,7 @@ struct RecipeListView: View {
         }
 
         if !seasonal.isEmpty {
-            Section("In Season") {
+            Section {
                 ScrollView(.horizontal) {
                     LazyHStack(spacing: 12) {
                         ForEach(seasonal.prefix(8)) { recipe in
@@ -176,6 +186,13 @@ struct RecipeListView: View {
                     .padding(.horizontal)
                 }
                 .listRowInsets(EdgeInsets())
+            } header: {
+                HStack(spacing: 4) {
+                    Image(systemName: "leaf")
+                        .foregroundStyle(Brand.herbGreen)
+                    Text("In season")
+                }
+                .miseSectionHeader()
             }
         }
     }
@@ -185,21 +202,30 @@ struct RecipeListView: View {
         let favorites = filteredRecipes.filter { $0.isFavorite || $0.isAutoFavorite }
 
         if !favorites.isEmpty {
-            Section("Favorites") {
+            Section {
                 ForEach(favorites.prefix(5)) { recipe in
-                    NavigationLink(value: recipe) {
+                    NavigationLink {
+                        RecipeDetailView(recipe: recipe)
+                    } label: {
                         RecipeRow(recipe: recipe)
                     }
                 }
+            } header: {
+                HStack(spacing: 4) {
+                    Image(systemName: "heart")
+                        .foregroundStyle(Brand.spiceRed)
+                    Text("Favorites")
+                }
+                .miseSectionHeader()
             }
         }
     }
 
     private var allRecipesSection: some View {
-        Section("All Recipes") {
+        Section {
             if filteredRecipes.isEmpty {
                 ContentUnavailableView(
-                    "No Recipes Yet",
+                    "No recipes yet",
                     systemImage: "book.pages",
                     description: Text("Add your first recipe to get started.")
                 )
@@ -213,24 +239,21 @@ struct RecipeListView: View {
                 }
                 .onDelete(perform: deleteRecipes)
             }
+        } header: {
+            Text("All recipes")
+                .miseSectionHeader()
         }
     }
 
     private var cuisineFilterMenu: some View {
-        Menu {
-            Button("All Cuisines") {
-                selectedCuisine = nil
-            }
-            Divider()
-            ForEach(Cuisine.allCases, id: \.self) { cuisine in
-                Button(cuisine.rawValue.capitalized) {
-                    selectedCuisine = cuisine
-                }
-            }
+        Button {
+            showingCuisineFilter = true
         } label: {
             Label(
                 selectedCuisine?.rawValue.capitalized ?? "Filter",
-                systemImage: "line.3.horizontal.decrease.circle"
+                systemImage: selectedCuisine != nil
+                    ? "line.3.horizontal.decrease.circle.fill"
+                    : "line.3.horizontal.decrease.circle"
             )
         }
     }
@@ -239,6 +262,72 @@ struct RecipeListView: View {
         for index in offsets {
             modelContext.delete(filteredRecipes[index])
         }
+    }
+}
+
+// MARK: - Cuisine Filter Sheet
+
+struct CuisineFilterSheet: View {
+    @Binding var selectedCuisine: Cuisine?
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                // "All Cuisines" row
+                Button {
+                    selectedCuisine = nil
+                    dismiss()
+                } label: {
+                    HStack {
+                        Text("All Cuisines")
+                            .foregroundStyle(.primary)
+                        Spacer()
+                        if selectedCuisine == nil {
+                            Image(systemName: "checkmark")
+                                .foregroundStyle(.tint)
+                                .fontWeight(.semibold)
+                        }
+                    }
+                }
+
+                // One row per cuisine
+                ForEach(Cuisine.allCases, id: \.self) { cuisine in
+                    Button {
+                        selectedCuisine = cuisine
+                        dismiss()
+                    } label: {
+                        HStack {
+                            Text(cuisine.rawValue.capitalized)
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            if selectedCuisine == cuisine {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.tint)
+                                    .fontWeight(.semibold)
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Filter by Cuisine")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                if selectedCuisine != nil {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Clear") {
+                            selectedCuisine = nil
+                            dismiss()
+                        }
+                    }
+                }
+            }
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 }
 
@@ -251,36 +340,43 @@ struct RecipeRow: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(recipe.title)
-                    .font(.headline)
+                    .font(.system(size: 14, weight: .medium))
+                    .tracking(-0.2)
+                    .foregroundStyle(Brand.cream)
 
                 Spacer()
 
                 if recipe.isFavorite || recipe.isAutoFavorite {
-                    Image(systemName: "heart.fill")
-                        .foregroundStyle(.red)
+                    Image(systemName: "heart")
+                        .foregroundStyle(Brand.spiceRed)
                         .font(.caption)
                 }
             }
 
-            HStack(spacing: 8) {
-                Label("\(recipe.estimatedTotalMinutes) min", systemImage: "clock")
-                Label(recipe.cuisine.rawValue.capitalized, systemImage: "fork.knife")
+            HStack(spacing: 4) {
+                Image(systemName: "clock")
+                Text(recipe.formattedDuration)
+                Text("·").opacity(0.5)
+                Image(systemName: "fork.knife")
+                Text(recipe.cuisine.rawValue.capitalized)
                 if recipe.cookCount > 0 {
-                    Label("Cooked \(recipe.cookCount)x", systemImage: "flame")
+                    Text("·").opacity(0.5)
+                    Image(systemName: "flame")
+                    Text("Cooked \(recipe.cookCount)×")
                 }
             }
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .font(.miseMeta)
+            .foregroundStyle(Brand.muted)
 
             if !recipe.variations.isEmpty {
                 Text("\(recipe.variations.count) variation\(recipe.variations.count == 1 ? "" : "s")")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    .font(.miseMeta)
+                    .foregroundStyle(Brand.muted.opacity(0.6))
             }
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(recipe.title), \(recipe.estimatedTotalMinutes) minutes, \(recipe.cuisine.rawValue)")
+        .accessibilityLabel("\(recipe.title), \(recipe.formattedDuration), \(recipe.cuisine.rawValue)")
     }
 }
 
@@ -290,26 +386,35 @@ struct RecipeCardCompact: View {
     let recipe: Recipe
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            RoundedRectangle(cornerRadius: 8)
+        VStack(alignment: .leading, spacing: 6) {
+            RoundedRectangle(cornerRadius: 10)
                 .fill(.clear)
-                .frame(width: 120, height: 80)
-                .glassEffect(.regular, in: .rect(cornerRadius: 8))
+                .frame(width: 130, height: 86)
+                .glassEffect(.regular, in: .rect(cornerRadius: 10))
                 .overlay {
-                    Image(systemName: "fork.knife")
-                        .font(.title2)
-                        .foregroundStyle(.secondary)
+                    VStack(spacing: 4) {
+                        Image(systemName: "fork.knife")
+                            .font(.title3)
+                            .foregroundStyle(Brand.warmTan.opacity(0.7))
+                        if recipe.cookCount > 0 {
+                            Text("\(recipe.cookCount)×")
+                                .font(.miseMeta)
+                                .foregroundStyle(Brand.muted)
+                        }
+                    }
                 }
 
             Text(recipe.title)
-                .font(.caption)
-                .fontWeight(.medium)
+                .font(.system(size: 12, weight: .medium))
+                .tracking(-0.2)
+                .foregroundStyle(Brand.cream)
                 .lineLimit(2)
 
-            Text("\(recipe.estimatedTotalMinutes) min")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            Text(recipe.formattedDuration)
+                .font(.miseMeta)
+                .foregroundStyle(Brand.muted)
         }
-        .frame(width: 120)
+        .frame(width: 130)
+        .padding(.bottom, 4)
     }
 }
