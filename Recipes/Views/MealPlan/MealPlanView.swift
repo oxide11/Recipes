@@ -273,7 +273,7 @@ struct AIMealPlanGeneratorView: View {
             }
             .navigationTitle("AI Meal Plan")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -339,34 +339,14 @@ struct AIMealPlanGeneratorView: View {
         generatedPlan = nil
 
         let mealsArray = Array(includedMeals).sorted { $0.rawValue < $1.rawValue }
-        let currentDays = days
-
-        // Extract plain Sendable data from SwiftData models on the main actor
-        let recipeDescriptions = recipes.prefix(50).map { recipe in
-            "- \(recipe.title) [\(recipe.cuisine.rawValue), \(recipe.estimatedTotalMinutes)min, \(recipe.difficulty.rawValue)] (\(recipe.ingredients.map(\.name).joined(separator: ", ")))"
-        }
-        let pantryItemNames = Array(pantryItems.prefix(30).map(\.name))
-
-        var constraints = ""
-        if let profile {
-            if let cal = profile.dailyCalorieTarget {
-                constraints += "Daily calorie target: \(cal). "
-            }
-            if !profile.dietaryRestrictions.isEmpty {
-                constraints += "Dietary restrictions: \(profile.dietaryRestrictions.map(\.rawValue).joined(separator: ", ")). "
-            }
-            if !profile.dislikedIngredients.isEmpty {
-                constraints += "Avoid: \(profile.dislikedIngredients.joined(separator: ", ")). "
-            }
-        }
 
         do {
             generatedPlan = try await generator.generatePlan(
-                recipeDescriptions: recipeDescriptions,
-                pantryItemNames: pantryItemNames,
-                constraintsText: constraints,
+                recipes: recipes,
+                pantryItems: pantryItems,
+                profile: profile,
                 startDate: .now,
-                days: currentDays,
+                days: days,
                 mealsPerDay: mealsArray
             )
         } catch {

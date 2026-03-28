@@ -414,7 +414,7 @@ struct RecipeFilterSheet: View {
             }
             .navigationTitle("Filters")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }

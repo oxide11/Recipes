@@ -113,7 +113,7 @@ struct TagManagementView: View {
             }
         }
         .navigationTitle("Tags")
-        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarBackground(.automatic, for: .navigationBar)
         .sheet(isPresented: $showingBatchTag) {
             if let tag = selectedTag {
                 BatchTagView(tagName: tag, recipes: recipes)

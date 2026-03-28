@@ -65,13 +65,13 @@ final class RecommendationAgent {
         recommendations.append(contentsOf: blindSpots)
 
         // Sort by score and deduplicate
-        let seen = NSMutableSet()
+        var seen = Set<String>()
         return recommendations
             .sorted { $0.score > $1.score }
             .filter { rec in
-                let key = (rec.recipeID?.uuidString ?? rec.title) as NSString
-                if seen.contains(key) { return false }
-                seen.add(key)
+                let key = rec.recipeID?.uuidString ?? rec.title
+                guard !seen.contains(key) else { return false }
+                seen.insert(key)
                 return true
             }
     }

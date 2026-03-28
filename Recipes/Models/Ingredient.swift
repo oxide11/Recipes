@@ -134,10 +134,10 @@ final class Ingredient {
         seasonalAvailability: [Season] = Season.allCases,
         barcode: String? = nil,
         notes: String? = nil,
-        isGlutenFree: Bool = true,
-        isDairyFree: Bool = true,
-        isVegan: Bool = true,
-        isNutFree: Bool = true
+        isGlutenFree: Bool = false,
+        isDairyFree: Bool = false,
+        isVegan: Bool = false,
+        isNutFree: Bool = false
     ) {
         self.id = UUID()
         self.name = name
