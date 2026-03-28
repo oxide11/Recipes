@@ -37,6 +37,7 @@ struct RecipeDetailView: View {
         }
         .navigationTitle(recipe.title)
         .navigationBarTitleDisplayMode(.large)
+        .toolbarBackground(.glass, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button {
@@ -44,6 +45,7 @@ struct RecipeDetailView: View {
                 } label: {
                     Image(systemName: recipe.isFavorite ? "heart.fill" : "heart")
                 }
+                .sensoryFeedback(.impact(flexibility: .soft), trigger: recipe.isFavorite)
 
                 Menu {
                     Button("Log Cooking Session", systemImage: "flame") {
@@ -96,17 +98,21 @@ struct RecipeDetailView: View {
                 Button { if selectedServings > 1 { selectedServings -= 1 } } label: {
                     Image(systemName: "minus.circle")
                 }
+                .accessibilityLabel("Decrease servings")
                 Text("\(selectedServings)")
                     .fontWeight(.semibold)
                 Button { selectedServings += 1 } label: {
                     Image(systemName: "plus.circle")
                 }
+                .accessibilityLabel("Increase servings")
+                .sensoryFeedback(.selection, trigger: selectedServings)
             }
             .font(.subheadline)
             .frame(maxWidth: .infinity)
         }
         .padding()
-        .background(.regularMaterial, in: .rect(cornerRadius: 12))
+        .background(in: .rect(cornerRadius: 12))
+        .glassEffect(.regular.interactive, in: .rect(cornerRadius: 12))
     }
 
     private var ingredientsSection: some View {
@@ -204,7 +210,8 @@ struct RecipeDetailView: View {
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(.quaternary, in: .rect(cornerRadius: 8))
+                    .background(in: .rect(cornerRadius: 8))
+                    .glassEffect(.regular, in: .rect(cornerRadius: 8))
                 }
             }
         }
@@ -251,6 +258,8 @@ struct RecipeDetailView: View {
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 
     private var recipeShareText: String {

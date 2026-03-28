@@ -52,7 +52,7 @@ struct RecipeAsCodePreviewView: View {
                 Button("Parse") {
                     parseDefinition()
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.glass)
                 .controlSize(.small)
             }
 
@@ -60,7 +60,8 @@ struct RecipeAsCodePreviewView: View {
                 .font(.system(.body, design: .monospaced))
                 .frame(minHeight: 250)
                 .padding(8)
-                .background(.quaternary, in: .rect(cornerRadius: 8))
+                .background(in: .rect(cornerRadius: 8))
+                .glassEffect(.regular, in: .rect(cornerRadius: 8))
 
             if let error = parseError {
                 Label(error, systemImage: "exclamationmark.triangle")
@@ -154,7 +155,7 @@ struct RecipeAsCodePreviewView: View {
                     }
                     .padding()
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glass)
                 .disabled(isInferring)
 
                 if let error = inferError {
@@ -230,7 +231,7 @@ struct RecipeAsCodePreviewView: View {
                 }
                 .padding()
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.glass)
             .tint(.green)
         }
     }

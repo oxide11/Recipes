@@ -27,8 +27,10 @@ struct CookingLogEntryView: View {
                                     .foregroundStyle(.yellow)
                                     .font(.title2)
                             }
+                            .accessibilityLabel("\(star) star\(star == 1 ? "" : "s")")
                         }
                     }
+                    .sensoryFeedback(.selection, trigger: rating)
                 }
 
                 Section("Time") {

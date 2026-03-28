@@ -61,6 +61,8 @@ struct DirectionStepView: View {
             }
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Step \(direction.stepNumber). \(direction.instruction)")
     }
 
     // MARK: - Timer View
@@ -77,7 +79,7 @@ struct DirectionStepView: View {
                 Button("Stop") {
                     stopTimer()
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.glass)
                 .controlSize(.small)
             } else {
                 Text(timer.displayDuration)
@@ -85,7 +87,7 @@ struct DirectionStepView: View {
                 Button("Start Timer") {
                     startTimer(seconds: timer.durationSeconds)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glass)
                 .controlSize(.small)
             }
         }
@@ -94,9 +96,12 @@ struct DirectionStepView: View {
         .background(.orange.opacity(0.1), in: .rect(cornerRadius: 8))
     }
 
+    @State private var timerStartTrigger = false
+
     private func startTimer(seconds: Int) {
         remainingSeconds = seconds
         timerActive = true
+        timerStartTrigger.toggle()
 
         timerTask = Task {
             while remainingSeconds > 0, !Task.isCancelled {

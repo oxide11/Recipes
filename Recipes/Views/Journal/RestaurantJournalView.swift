@@ -29,6 +29,7 @@ struct RestaurantJournalView: View {
                 }
             }
             .navigationTitle("Restaurant Journal")
+            .toolbarBackground(.glass, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Add", systemImage: "plus") {
@@ -194,8 +195,10 @@ struct AddRestaurantEntryView: View {
                                     .foregroundStyle(.yellow)
                                     .font(.title2)
                             }
+                            .accessibilityLabel("\(star) star\(star == 1 ? "" : "s")")
                         }
                     }
+                    .sensoryFeedback(.selection, trigger: rating)
                 }
 
                 Section("Review") {

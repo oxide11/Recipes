@@ -127,6 +127,7 @@ struct ShoppingListView: View {
                 }
             }
             .navigationTitle("Shopping")
+            .toolbarBackground(.glass, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("New List", systemImage: "plus") {
@@ -163,6 +164,8 @@ struct ShoppingItemRow: View {
                     .font(.title3)
             }
             .buttonStyle(.plain)
+            .sensoryFeedback(.success, trigger: item.isPurchased)
+            .accessibilityLabel(item.isPurchased ? "\(item.name), purchased" : "\(item.name), not purchased")
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.name)

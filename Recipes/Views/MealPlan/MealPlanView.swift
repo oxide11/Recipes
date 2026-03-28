@@ -35,11 +35,12 @@ struct MealPlanView: View {
                     Button("Create Meal Plan") {
                         showingCreatePlan = true
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glass)
                     .padding()
                 }
             }
             .navigationTitle("Meal Plan")
+            .toolbarBackground(.glass, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("New Plan", systemImage: "plus") {

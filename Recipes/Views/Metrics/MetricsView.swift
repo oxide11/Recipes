@@ -25,6 +25,7 @@ struct MetricsView: View {
                 .padding()
             }
             .navigationTitle("Cooking Metrics")
+            .toolbarBackground(.glass, for: .navigationBar)
         }
     }
 
@@ -78,7 +79,8 @@ struct MetricsView: View {
                 .frame(height: 200)
             }
             .padding()
-            .background(.regularMaterial, in: .rect(cornerRadius: 12))
+            .background(in: .rect(cornerRadius: 12))
+        .glassEffect(.regular, in: .rect(cornerRadius: 12))
         }
     }
 
@@ -102,7 +104,8 @@ struct MetricsView: View {
                 }
             }
             .padding()
-            .background(.regularMaterial, in: .rect(cornerRadius: 12))
+            .background(in: .rect(cornerRadius: 12))
+        .glassEffect(.regular, in: .rect(cornerRadius: 12))
         }
     }
 
@@ -140,7 +143,8 @@ struct MetricsView: View {
                 }
             }
             .padding()
-            .background(.regularMaterial, in: .rect(cornerRadius: 12))
+            .background(in: .rect(cornerRadius: 12))
+        .glassEffect(.regular, in: .rect(cornerRadius: 12))
         }
     }
 
@@ -168,7 +172,8 @@ struct MetricsView: View {
             }
         }
         .padding()
-        .background(.regularMaterial, in: .rect(cornerRadius: 12))
+        .background(in: .rect(cornerRadius: 12))
+        .glassEffect(.regular, in: .rect(cornerRadius: 12))
     }
 
     private func formatMinutes(_ minutes: Int) -> String {
@@ -205,6 +210,9 @@ struct MetricCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(.regularMaterial, in: .rect(cornerRadius: 12))
+        .background(in: .rect(cornerRadius: 12))
+        .glassEffect(.regular, in: .rect(cornerRadius: 12))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 }

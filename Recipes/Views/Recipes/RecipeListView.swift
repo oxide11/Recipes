@@ -68,6 +68,7 @@ struct RecipeListView: View {
             }
             .navigationTitle("Recipes")
             .searchable(text: $searchText, prompt: "Search recipes...")
+            .toolbarBackground(.glass, for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
                     Menu {
@@ -278,6 +279,8 @@ struct RecipeRow: View {
             }
         }
         .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(recipe.title), \(recipe.estimatedTotalMinutes) minutes, \(recipe.cuisine.rawValue)")
     }
 }
 
@@ -289,8 +292,9 @@ struct RecipeCardCompact: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             RoundedRectangle(cornerRadius: 8)
-                .fill(.quaternary)
+                .fill(.clear)
                 .frame(width: 120, height: 80)
+                .glassEffect(.regular, in: .rect(cornerRadius: 8))
                 .overlay {
                     Image(systemName: "fork.knife")
                         .font(.title2)

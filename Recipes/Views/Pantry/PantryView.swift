@@ -123,14 +123,17 @@ struct PantryView: View {
             }
             .navigationTitle("Pantry")
             .searchable(text: $searchText, prompt: "Search pantry...")
+            .toolbarBackground(.glass, for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
                     Button("Scan", systemImage: "barcode.viewfinder") {
                         showingScanner = true
                     }
+                    .accessibilityLabel("Scan barcode")
                     Button("Add", systemImage: "plus") {
                         showingAddItem = true
                     }
+                    .accessibilityLabel("Add pantry item")
                 }
             }
             .sheet(isPresented: $showingScanner) {
@@ -168,6 +171,7 @@ struct PantryItemRow: View {
             Circle()
                 .fill(categoryColor(item.category))
                 .frame(width: 8, height: 8)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.name)
@@ -286,7 +290,7 @@ struct BarcodeScannerFullView: View {
                                 }
                             }
                         }
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(.glass)
                     }
                     .frame(height: 300)
                 }

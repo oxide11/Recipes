@@ -47,6 +47,7 @@ struct RecommendationsView: View {
             .padding(.vertical)
         }
         .navigationTitle("For You")
+        .toolbarBackground(.glass, for: .navigationBar)
         .task {
             guard !hasLoaded else { return }
             await loadRecommendations()
@@ -130,7 +131,8 @@ struct RecommendationCard: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.regularMaterial, in: .rect(cornerRadius: 12))
+        .background(in: .rect(cornerRadius: 12))
+        .glassEffect(.regular, in: .rect(cornerRadius: 12))
         .padding(.horizontal)
     }
 }

@@ -103,7 +103,8 @@ struct GuidedShoppingView: View {
             }
         }
         .padding()
-        .background(.regularMaterial)
+        .background(in: .rect)
+        .glassEffect(.regular, in: .rect)
     }
 
     // MARK: - Start View
@@ -135,7 +136,7 @@ struct GuidedShoppingView: View {
                     .frame(maxWidth: .infinity)
                     .padding()
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.glass)
             .tint(.green)
             .padding(.horizontal, 32)
 
@@ -208,8 +209,9 @@ struct GuidedShoppingView: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glass)
                 .tint(.green)
+                .sensoryFeedback(.success, trigger: item.isPurchased)
 
                 Button {
                     substitutionItem = item
@@ -219,7 +221,7 @@ struct GuidedShoppingView: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.glass)
 
                 Button {
                     skipItem()
@@ -228,13 +230,14 @@ struct GuidedShoppingView: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.glass)
                 .tint(.secondary)
             }
             .padding(.horizontal)
         }
         .padding()
-        .background(.regularMaterial)
+        .background(in: .rect)
+        .glassEffect(.regular, in: .rect)
     }
 
     private var allDoneView: some View {
@@ -251,7 +254,7 @@ struct GuidedShoppingView: View {
                     currentSectionIndex += 1
                     currentItemIndex = 0
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glass)
             } else {
                 Text("All sections done!")
                     .foregroundStyle(.secondary)
@@ -285,7 +288,8 @@ struct GuidedShoppingView: View {
         }
         .font(.caption)
         .padding()
-        .background(.ultraThinMaterial)
+        .background(in: .rect)
+        .glassEffect(.regular, in: .rect)
     }
 
     // MARK: - Actions

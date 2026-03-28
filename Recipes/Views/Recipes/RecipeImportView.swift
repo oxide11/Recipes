@@ -209,7 +209,7 @@ struct RecipeImportView: View {
             Button("Save to Recipes") {
                 saveImportedRecipe(result)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.glass)
         }
     }
 

@@ -55,7 +55,8 @@ struct NutritionCardView: View {
             macroPieChart
         }
         .padding()
-        .background(.regularMaterial, in: .rect(cornerRadius: 12))
+        .background(in: .rect(cornerRadius: 12))
+        .glassEffect(.regular, in: .rect(cornerRadius: 12))
     }
 
     private func nutritionRow(label: String, value: String, bold: Bool = false, isSubItem: Bool = false) -> some View {

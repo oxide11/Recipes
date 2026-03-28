@@ -52,6 +52,8 @@ struct IngredientRow: View {
             }
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(ingredient.name), \(scaledAmount.displayString)\(ingredient.isOptional ? ", optional" : "")")
     }
 
     private func colorForCategory(_ category: IngredientCategory) -> Color {
