@@ -127,7 +127,7 @@ struct ShoppingListView: View {
                 }
             }
             .navigationTitle("Shopping")
-            .toolbarBackground(.glass, for: .navigationBar)
+            .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("New List", systemImage: "plus") {

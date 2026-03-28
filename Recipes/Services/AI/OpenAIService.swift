@@ -5,6 +5,7 @@ import Foundation
 /// Integrates with the OpenAI API for cloud-based AI capabilities.
 /// Requires user-provided API key stored securely in Keychain.
 @Observable
+@MainActor
 final class OpenAIService {
     private let baseURL = URL(string: "https://api.openai.com/v1")!
     private let session = URLSession.shared

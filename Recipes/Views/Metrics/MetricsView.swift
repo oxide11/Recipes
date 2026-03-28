@@ -25,7 +25,7 @@ struct MetricsView: View {
                 .padding()
             }
             .navigationTitle("Cooking Metrics")
-            .toolbarBackground(.glass, for: .navigationBar)
+            .toolbarBackground(.automatic, for: .navigationBar)
         }
     }
 

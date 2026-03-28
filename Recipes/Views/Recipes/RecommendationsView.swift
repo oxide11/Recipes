@@ -47,7 +47,7 @@ struct RecommendationsView: View {
             .padding(.vertical)
         }
         .navigationTitle("For You")
-        .toolbarBackground(.glass, for: .navigationBar)
+        .toolbarBackground(.automatic, for: .navigationBar)
         .task {
             guard !hasLoaded else { return }
             await loadRecommendations()

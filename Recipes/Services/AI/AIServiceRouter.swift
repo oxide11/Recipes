@@ -47,6 +47,7 @@ enum AITaskType {
 /// task type, and availability. Supports hybrid mode with on-device first,
 /// cloud fallback.
 @Observable
+@MainActor
 final class AIServiceRouter {
     let foundationModelService = FoundationModelService()
     let openAIService = OpenAIService()

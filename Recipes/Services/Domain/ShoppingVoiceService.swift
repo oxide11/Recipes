@@ -7,6 +7,7 @@ import Speech
 /// Reads the grocery list section by section, item by item,
 /// and waits for voice confirmation before proceeding.
 @Observable
+@MainActor
 final class ShoppingVoiceService: NSObject {
     private let synthesizer = AVSpeechSynthesizer()
     private var speechRecognizer: SFSpeechRecognizer?
@@ -169,8 +170,8 @@ final class ShoppingVoiceService: NSObject {
 // MARK: - AVSpeechSynthesizerDelegate
 
 extension ShoppingVoiceService: AVSpeechSynthesizerDelegate {
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        isSpeaking = false
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        MainActor.assumeIsolated { isSpeaking = false }
     }
 }
 

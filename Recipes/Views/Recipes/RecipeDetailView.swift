@@ -37,7 +37,7 @@ struct RecipeDetailView: View {
         }
         .navigationTitle(recipe.title)
         .navigationBarTitleDisplayMode(.large)
-        .toolbarBackground(.glass, for: .navigationBar)
+        .toolbarBackground(.automatic, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button {
@@ -112,7 +112,7 @@ struct RecipeDetailView: View {
         }
         .padding()
         .background(in: .rect(cornerRadius: 12))
-        .glassEffect(.regular.interactive, in: .rect(cornerRadius: 12))
+        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
     }
 
     private var ingredientsSection: some View {

@@ -7,12 +7,13 @@ import FoundationModels
 /// Handles recipe generation, nutritional estimation, ingredient substitution,
 /// and step inference — all processed locally on the device.
 @Observable
-final class FoundationModelService: Sendable {
+@MainActor
+final class FoundationModelService {
 
     /// Check device eligibility for on-device foundation models.
     var isAvailable: Bool {
         get async {
-            let availability = LanguageModelSession.Availability.current
+            let availability = SystemLanguageModel.default.availability
             return availability == .available
         }
     }
@@ -36,7 +37,7 @@ final class FoundationModelService: Sendable {
         }
 
         let response = try await session.respond(to: prompt, generating: GeneratedRecipe.self)
-        return response
+        return response.content
     }
 
     // MARK: - Nutritional Estimation
@@ -53,7 +54,7 @@ final class FoundationModelService: Sendable {
         using these ingredients: \(ingredients.joined(separator: ", ")).
         """
 
-        return try await session.respond(to: prompt, generating: NutritionalEstimate.self)
+        return try await session.respond(to: prompt, generating: NutritionalEstimate.self).content
     }
 
     // MARK: - Ingredient Substitution
@@ -71,7 +72,7 @@ final class FoundationModelService: Sendable {
         Reason for substitution: \(reason).
         """
 
-        return try await session.respond(to: prompt, generating: SubstitutionSuggestions.self)
+        return try await session.respond(to: prompt, generating: SubstitutionSuggestions.self).content
     }
 
     // MARK: - Recipe Step Inference (Recipe as Code)
@@ -100,7 +101,7 @@ final class FoundationModelService: Sendable {
         Provide step-by-step cooking instructions that achieve all the desired outcomes.
         """
 
-        return try await session.respond(to: prompt, generating: InferredRecipeSteps.self)
+        return try await session.respond(to: prompt, generating: InferredRecipeSteps.self).content
     }
 
     // MARK: - Recipe Classification & Recommendation
@@ -120,7 +121,7 @@ final class FoundationModelService: Sendable {
         User cooking history summary: \(userHistory)
         """
 
-        return try await session.respond(to: prompt, generating: RecipeClassification.self)
+        return try await session.respond(to: prompt, generating: RecipeClassification.self).content
     }
 
     // MARK: - Blind Spot Detection
@@ -141,7 +142,7 @@ final class FoundationModelService: Sendable {
         Suggest cuisines, techniques, and recipes they haven't explored yet.
         """
 
-        return try await session.respond(to: prompt, generating: BlindSpotSuggestions.self)
+        return try await session.respond(to: prompt, generating: BlindSpotSuggestions.self).content
     }
 }
 

@@ -8,6 +8,7 @@ import PhotosUI
 /// URLs, plain text, markdown, images, photos, and Recipe-as-Code definitions.
 /// Handles HTML stripping, JSON-LD recipe extraction, and AI-powered parsing.
 @Observable
+@MainActor
 final class RecipeIngestionService {
     private let aiRouter: AIServiceRouter
 

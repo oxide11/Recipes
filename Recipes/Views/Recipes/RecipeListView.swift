@@ -68,7 +68,7 @@ struct RecipeListView: View {
             }
             .navigationTitle("Recipes")
             .searchable(text: $searchText, prompt: "Search recipes...")
-            .toolbarBackground(.glass, for: .navigationBar)
+            .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
                     Menu {

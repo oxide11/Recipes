@@ -11,7 +11,7 @@ import SwiftData
 @Observable
 final class NoWasteMatchingEngine {
 
-    struct MatchResult: Identifiable, Sendable {
+    struct MatchResult: Identifiable {
         var id: UUID { recipe.id }
         var recipe: Recipe
         var score: Double

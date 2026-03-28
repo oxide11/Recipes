@@ -7,6 +7,7 @@ import SwiftUI
 /// Uses AVFoundation for real-time barcode detection, with Open Food Facts
 /// integration for automatic product identification.
 @Observable
+@MainActor
 final class BarcodeScannerService: NSObject {
     var scannedCode: String?
     var isScanning = false
@@ -64,9 +65,7 @@ final class BarcodeScannerService: NSObject {
         lookupResult = nil
         errorMessage = nil
 
-        Task.detached { [session] in
-            session.startRunning()
-        }
+        DispatchQueue.global(qos: .userInitiated).async { session.startRunning() }
     }
 
     func stopScanning() {
@@ -117,7 +116,7 @@ final class BarcodeScannerService: NSObject {
 // MARK: - AVCaptureMetadataOutputObjectsDelegate
 
 extension BarcodeScannerService: AVCaptureMetadataOutputObjectsDelegate {
-    func metadataOutput(
+    nonisolated func metadataOutput(
         _ output: AVCaptureMetadataOutput,
         didOutput metadataObjects: [AVMetadataObject],
         from connection: AVCaptureConnection
@@ -127,12 +126,11 @@ extension BarcodeScannerService: AVCaptureMetadataOutputObjectsDelegate {
             return
         }
 
-        scannedCode = code
-        stopScanning()
-
-        // Automatically look up the product
-        Task {
-            await lookupScannedProduct()
+        // Safe: delegate queue is explicitly set to .main (line 58)
+        MainActor.assumeIsolated {
+            scannedCode = code
+            stopScanning()
+            Task { await lookupScannedProduct() }
         }
     }
 }

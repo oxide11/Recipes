@@ -40,7 +40,7 @@ struct MealPlanView: View {
                 }
             }
             .navigationTitle("Meal Plan")
-            .toolbarBackground(.glass, for: .navigationBar)
+            .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("New Plan", systemImage: "plus") {

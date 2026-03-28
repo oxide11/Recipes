@@ -123,7 +123,7 @@ struct PantryView: View {
             }
             .navigationTitle("Pantry")
             .searchable(text: $searchText, prompt: "Search pantry...")
-            .toolbarBackground(.glass, for: .navigationBar)
+            .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
                     Button("Scan", systemImage: "barcode.viewfinder") {

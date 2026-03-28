@@ -29,7 +29,7 @@ struct RestaurantJournalView: View {
                 }
             }
             .navigationTitle("Restaurant Journal")
-            .toolbarBackground(.glass, for: .navigationBar)
+            .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Add", systemImage: "plus") {

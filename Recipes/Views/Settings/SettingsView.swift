@@ -28,7 +28,7 @@ struct SettingsView: View {
                 aboutSection
             }
             .navigationTitle("Settings")
-            .toolbarBackground(.glass, for: .navigationBar)
+            .toolbarBackground(.automatic, for: .navigationBar)
             .task {
                 loadSettings()
                 onDeviceAvailable = await aiRouter.foundationModelService.isAvailable

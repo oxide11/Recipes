@@ -5,6 +5,7 @@ import Foundation
 /// Integrates with the Anthropic Messages API for cloud-based AI capabilities.
 /// Requires user-provided API key stored securely in Keychain.
 @Observable
+@MainActor
 final class ClaudeService {
     private let baseURL = URL(string: "https://api.anthropic.com/v1")!
     private let apiVersion = "2023-06-01"

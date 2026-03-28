@@ -8,6 +8,7 @@ import FoundationModels
 /// user reviews, pantry state, and AI to suggest recipes.
 /// Includes blind-spot detection for unexplored cuisines and techniques.
 @Observable
+@MainActor
 final class RecommendationAgent {
     private let aiRouter: AIServiceRouter
 
