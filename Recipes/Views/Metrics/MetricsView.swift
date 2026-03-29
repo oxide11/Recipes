@@ -73,25 +73,51 @@ struct MetricsView: View {
 
     // MARK: - Cuisine Chart
 
+    private let cuisineBarColors: [Color] = [
+        Brand.spiceRed, Brand.warmTan, Brand.herbGreen,
+        Brand.ingredientDairy, Brand.ingredientSeasoning, Brand.ingredientLiquid,
+        Brand.muted, Brand.cream
+    ]
+
     @ViewBuilder
     private var cuisineChart: some View {
-        if !metrics.favoriteCuisines.isEmpty {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Favourite Cuisines")
-                    .font(.headline)
+        let cuisines = Array(metrics.favoriteCuisines.prefix(8))
+        if !cuisines.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Favourite Cuisines")
+                        .font(.headline)
+                    Text("Based on your saved recipes")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
 
-                Chart(metrics.favoriteCuisines.prefix(8)) { cuisine in
+                Chart(Array(cuisines.enumerated()), id: \.offset) { index, cuisine in
                     BarMark(
                         x: .value("Count", cuisine.count),
                         y: .value("Cuisine", cuisine.cuisine.rawValue.capitalized)
                     )
-                    .foregroundStyle(.tint)
+                    .foregroundStyle(cuisineBarColors[index % cuisineBarColors.count])
+                    .cornerRadius(6)
+                    .annotation(position: .trailing, alignment: .leading, spacing: 6) {
+                        Text("\(cuisine.count)")
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.secondary)
+                    }
                 }
-                .frame(height: 200)
+                .chartXAxis(.hidden)
+                .chartYAxis {
+                    AxisMarks { _ in
+                        AxisValueLabel()
+                            .font(.caption)
+                    }
+                }
+                .frame(height: CGFloat(cuisines.count) * 36 + 16)
             }
             .padding()
-            .background(in: .rect(cornerRadius: 12))
-        .glassEffect(.regular, in: .rect(cornerRadius: 12))
+            .background(in: .rect(cornerRadius: 16))
+            .glassEffect(.regular, in: .rect(cornerRadius: 16))
         }
     }
 

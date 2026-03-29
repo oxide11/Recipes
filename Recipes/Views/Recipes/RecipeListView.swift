@@ -244,8 +244,12 @@ struct RecipeListView: View {
                         .foregroundStyle(Brand.warmTan)
                 }
             } header: {
-                Text("Ready to cook")
-                    .miseSectionHeader()
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle")
+                        .foregroundStyle(Brand.herbGreen)
+                    Text("Ready to cook")
+                }
+                .miseSectionHeader()
             }
         }
     }
