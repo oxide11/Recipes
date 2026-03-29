@@ -30,6 +30,7 @@ struct RecipeGeneratorView: View {
 
     @State private var mode: GeneratorMode = .photo
     @State private var selectedCuisine: Cuisine?
+    @State private var selectedMealType: MealType?
     @State private var maxTime: Int?
     @State private var dietaryRestrictions: Set<DietaryRestriction> = []
     @State private var hasLoadedProfile = false
@@ -73,6 +74,15 @@ struct RecipeGeneratorView: View {
 
                 // Shared preferences
                 Section("Preferences") {
+                    if mode == .describe {
+                        Picker("Meal Type", selection: $selectedMealType) {
+                            Text("Any").tag(MealType?.none)
+                            ForEach(MealType.allCases, id: \.self) { type in
+                                Text(type.displayName).tag(MealType?.some(type))
+                            }
+                        }
+                    }
+
                     if mode != .photo {
                         Picker("Cuisine", selection: $selectedCuisine) {
                             Text("Any").tag(Cuisine?.none)
@@ -93,7 +103,7 @@ struct RecipeGeneratorView: View {
 
                 Section("Dietary Restrictions") {
                     ForEach(sortedDietaryRestrictions, id: \.self) { restriction in
-                        Toggle(restriction.rawValue.capitalized, isOn: Binding(
+                        Toggle(restriction.displayName, isOn: Binding(
                             get: { dietaryRestrictions.contains(restriction) },
                             set: { isOn in
                                 if isOn { dietaryRestrictions.insert(restriction) }
@@ -160,18 +170,18 @@ struct RecipeGeneratorView: View {
     @ViewBuilder
     private var photoSection: some View {
         Section {
+            if let image = selectedImage {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxHeight: 200)
+                    .clipShape(.rect(cornerRadius: 10))
+                    .frame(maxWidth: .infinity)
+            }
             PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                if let image = selectedImage {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxHeight: 200)
-                        .clipShape(.rect(cornerRadius: 10))
-                        .frame(maxWidth: .infinity)
-                } else {
-                    Label("Choose a Food Photo", systemImage: "photo.on.rectangle")
-                        .frame(maxWidth: .infinity)
-                }
+                Label(selectedImage != nil ? "Change Photo" : "Choose a Food Photo",
+                      systemImage: "photo.on.rectangle")
+                    .frame(maxWidth: .infinity)
             }
         } footer: {
             Text("Pick a photo of a dish and the AI will identify it and generate a recipe to recreate it at home.")
@@ -276,10 +286,11 @@ struct RecipeGeneratorView: View {
 
     private var preferencesSuffix: String {
         var suffix = ""
+        if let mealType = selectedMealType { suffix += " This is for \(mealType.displayName.lowercased())." }
         if let cuisine = selectedCuisine { suffix += " Make it \(cuisine.rawValue) style." }
         if let time = maxTime { suffix += " Ready in \(time) minutes or less." }
         if !dietaryRestrictions.isEmpty {
-            suffix += " Dietary needs: \(dietaryRestrictions.map(\.rawValue).joined(separator: ", "))."
+            suffix += " Dietary needs: \(dietaryRestrictions.map(\.displayName).joined(separator: ", "))."
         }
         return suffix
     }

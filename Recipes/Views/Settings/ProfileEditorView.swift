@@ -83,7 +83,7 @@ struct ProfileEditorView: View {
     private var dietaryRestrictionsSection: some View {
         Section {
             ForEach(DietaryRestriction.allCases, id: \.self) { restriction in
-                Toggle(restriction.rawValue.capitalized, isOn: Binding(
+                Toggle(restriction.displayName, isOn: Binding(
                     get: { dietaryRestrictions.contains(restriction) },
                     set: { isOn in
                         if isOn { dietaryRestrictions.insert(restriction) }
@@ -306,7 +306,7 @@ struct OnboardingView: View {
                                 selectedRestrictions.insert(restriction)
                             }
                         } label: {
-                            Text(restriction.rawValue.capitalized)
+                            Text(restriction.displayName)
                                 .font(.subheadline)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 10)

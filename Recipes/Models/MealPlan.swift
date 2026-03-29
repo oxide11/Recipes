@@ -4,7 +4,19 @@ import SwiftData
 // MARK: - Meal Type
 
 enum MealType: String, Codable, CaseIterable, Sendable {
-    case breakfast, lunch, dinner, snack, dessert
+    case breakfast, lunch, dinner, snack, dessert, appetizer, side
+
+    var displayName: String {
+        switch self {
+        case .breakfast: return "Breakfast"
+        case .lunch:     return "Lunch"
+        case .dinner:    return "Dinner"
+        case .snack:     return "Snack"
+        case .dessert:   return "Dessert"
+        case .appetizer: return "Appetizer"
+        case .side:      return "Side"
+        }
+    }
 }
 
 extension MealType {
@@ -15,6 +27,8 @@ extension MealType {
         case .dinner:    return 2
         case .snack:     return 3
         case .dessert:   return 4
+        case .appetizer: return 5
+        case .side:      return 6
         }
     }
 
@@ -25,6 +39,8 @@ extension MealType {
         case .dinner:    return "moon.stars.fill"
         case .snack:     return "carrot.fill"
         case .dessert:   return "birthday.cake.fill"
+        case .appetizer: return "fork.knife"
+        case .side:      return "leaf.fill"
         }
     }
 }

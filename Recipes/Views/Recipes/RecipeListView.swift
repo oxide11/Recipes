@@ -17,12 +17,15 @@ struct RecipeListView: View {
     @State private var maxTimeFilter: Int?
     @State private var showFavoritesOnly = false
     @State private var selectedDietaryRestrictions: Set<DietaryRestriction> = []
+    @State private var selectedTags: Set<String> = []
+    @State private var selectedMealType: MealType?
     @State private var hasLoadedProfile = false
     @State private var showingAddRecipe = false
     @State private var showingRecipeGenerator = false
     @State private var showingImport = false
     @State private var showingRecipeAsCode = false
     @State private var showingFilters = false
+    @State private var showingTagManagement = false
     @State private var cachedNoWasteMatches: [NoWasteMatchingEngine.MatchResult] = []
     @State private var recipeToDelete: Recipe?
 
@@ -33,6 +36,8 @@ struct RecipeListView: View {
         if maxTimeFilter != nil { count += 1 }
         if showFavoritesOnly { count += 1 }
         if !selectedDietaryRestrictions.isEmpty { count += 1 }
+        if !selectedTags.isEmpty { count += 1 }
+        if selectedMealType != nil { count += 1 }
         return count
     }
 
@@ -62,6 +67,14 @@ struct RecipeListView: View {
                 selectedDietaryRestrictions.isSubset(of: Set(recipe.dietaryRestrictions))
             }
         }
+        if !selectedTags.isEmpty {
+            result = result.filter { recipe in
+                !selectedTags.isDisjoint(with: Set(recipe.tags))
+            }
+        }
+        if let mealType = selectedMealType {
+            result = result.filter { $0.mealType == mealType }
+        }
         return result
     }
 
@@ -69,26 +82,6 @@ struct RecipeListView: View {
         NavigationStack {
             List {
                 if !recipes.isEmpty {
-                    // Tags quick access
-                    Section {
-                        NavigationLink {
-                            TagManagementView()
-                        } label: {
-                            Label {
-                                VStack(alignment: .leading) {
-                                    Text("Tags & Collections")
-                                        .fontWeight(.medium)
-                                    Text("Organize recipes with custom tags")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            } icon: {
-                                Image(systemName: "tag")
-                                    .foregroundStyle(.teal)
-                            }
-                        }
-                    }
-
                     // Recommendations teaser
                     Section {
                         NavigationLink {
@@ -138,6 +131,9 @@ struct RecipeListView: View {
                         Button("Recipe as Code", systemImage: "chevron.left.forwardslash.chevron.right") {
                             showingRecipeAsCode = true
                         }
+                        Button("Manage Tags", systemImage: "tag") {
+                            showingTagManagement = true
+                        }
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -157,13 +153,26 @@ struct RecipeListView: View {
             .sheet(isPresented: $showingRecipeAsCode) {
                 RecipeAsCodePreviewView()
             }
+            .sheet(isPresented: $showingTagManagement) {
+                NavigationStack {
+                    TagManagementView()
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Done") { showingTagManagement = false }
+                            }
+                        }
+                }
+            }
             .sheet(isPresented: $showingFilters) {
                 RecipeFilterSheet(
                     selectedCuisine: $selectedCuisine,
                     selectedDifficulty: $selectedDifficulty,
                     maxTimeFilter: $maxTimeFilter,
                     showFavoritesOnly: $showFavoritesOnly,
-                    selectedDietaryRestrictions: $selectedDietaryRestrictions
+                    selectedMealType: $selectedMealType,
+                    selectedDietaryRestrictions: $selectedDietaryRestrictions,
+                    selectedTags: $selectedTags,
+                    availableTags: allTags
                 )
                 .presentationDetents([.medium])
             }
@@ -177,6 +186,11 @@ struct RecipeListView: View {
             .onChange(of: recipes.count) { updateNoWasteMatches() }
             .onChange(of: pantryItems.count) { updateNoWasteMatches() }
         }
+    }
+
+    private var allTags: [String] {
+        let tags = Set(recipes.flatMap(\.tags))
+        return tags.sorted { $0 < $1 }
     }
 
     private func updateNoWasteMatches() {
@@ -339,6 +353,97 @@ struct RecipeListView: View {
 
 // MARK: - Cuisine Filter Sheet
 
+// MARK: - Tag Chip Grid
+
+struct TagChipGrid: View {
+    let availableTags: [String]
+    @Binding var selectedTags: Set<String>
+    @Binding var tagSearch: String
+
+    struct SearchField: View {
+        @Binding var tagSearch: String
+        var body: some View {
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.secondary)
+                TextField("Search tags...", text: $tagSearch)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                if !tagSearch.isEmpty {
+                    Button { tagSearch = "" } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private var visibleTags: [String] {
+        if tagSearch.isEmpty { return availableTags }
+        return availableTags.filter { $0.localizedCaseInsensitiveContains(tagSearch) }
+    }
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(visibleTags, id: \.self) { (tag: String) in
+                    let isSelected = selectedTags.contains(tag)
+                    Button {
+                        if isSelected { selectedTags.remove(tag) }
+                        else { selectedTags.insert(tag) }
+                    } label: {
+                        Text(tag)
+                            .font(.subheadline)
+                            .fontWeight(isSelected ? .semibold : .regular)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(isSelected ? AnyShapeStyle(.tint) : AnyShapeStyle(.clear), in: .capsule)
+                            .overlay(Capsule().strokeBorder(isSelected ? Color.clear : Color.secondary.opacity(0.4)))
+                            .foregroundStyle(isSelected ? .white : .primary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.vertical, 4)
+        }
+    }
+}
+
+
+// MARK: - Dietary Chip Grid
+
+struct DietaryChipGrid: View {
+    @Binding var selectedRestrictions: Set<DietaryRestriction>
+    let sortedRestrictions: [DietaryRestriction]
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(sortedRestrictions, id: \.self) { (restriction: DietaryRestriction) in
+                    let isSelected = selectedRestrictions.contains(restriction)
+                    Button {
+                        if isSelected { selectedRestrictions.remove(restriction) }
+                        else { selectedRestrictions.insert(restriction) }
+                    } label: {
+                        Text(restriction.displayName)
+                            .font(.subheadline)
+                            .fontWeight(isSelected ? .semibold : .regular)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(isSelected ? AnyShapeStyle(.tint) : AnyShapeStyle(.clear), in: .capsule)
+                            .overlay(Capsule().strokeBorder(isSelected ? Color.clear : Color.secondary.opacity(0.4)))
+                            .foregroundStyle(isSelected ? .white : .primary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.vertical, 4)
+        }
+    }
+}
+
 struct CuisineFilterSheet: View {
     @Binding var selectedCuisine: Cuisine?
     @Environment(\.dismiss) private var dismiss
@@ -498,8 +603,12 @@ struct RecipeFilterSheet: View {
     @Binding var selectedDifficulty: RecipeDifficulty?
     @Binding var maxTimeFilter: Int?
     @Binding var showFavoritesOnly: Bool
+    @Binding var selectedMealType: MealType?
     @Binding var selectedDietaryRestrictions: Set<DietaryRestriction>
+    @Binding var selectedTags: Set<String>
+    let availableTags: [String]
     @Environment(\.dismiss) private var dismiss
+    @State private var tagChipSearch = ""
 
     private var sortedRestrictions: [DietaryRestriction] {
         DietaryRestriction.allCases.sorted {
@@ -515,6 +624,16 @@ struct RecipeFilterSheet: View {
             Form {
                 Section {
                     Toggle("Favorites Only", isOn: $showFavoritesOnly)
+                }
+
+                Section("Meal Type") {
+                    Picker("Meal Type", selection: $selectedMealType) {
+                        Text("Any").tag(MealType?.none)
+                        ForEach(MealType.allCases, id: \.self) { type in
+                            Text(type.displayName).tag(MealType?.some(type))
+                        }
+                    }
+                    .pickerStyle(.menu)
                 }
 
                 Section("Cuisine") {
@@ -549,16 +668,22 @@ struct RecipeFilterSheet: View {
                     .pickerStyle(.menu)
                 }
 
-                Section("Dietary Restrictions") {
-                    ForEach(sortedRestrictions, id: \.self) { restriction in
-                        Toggle(restriction.rawValue.capitalized, isOn: Binding(
-                            get: { selectedDietaryRestrictions.contains(restriction) },
-                            set: { isOn in
-                                if isOn { selectedDietaryRestrictions.insert(restriction) }
-                                else { selectedDietaryRestrictions.remove(restriction) }
-                            }
-                        ))
+                if !availableTags.isEmpty {
+                    Section("Tags") {
+                        if availableTags.count > 10 {
+                            TagChipGrid.SearchField(tagSearch: $tagChipSearch)
+                        }
+                        TagChipGrid(availableTags: availableTags, selectedTags: $selectedTags, tagSearch: $tagChipSearch)
+                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     }
+                }
+
+                Section("Dietary Restrictions") {
+                    DietaryChipGrid(
+                        selectedRestrictions: $selectedDietaryRestrictions,
+                        sortedRestrictions: sortedRestrictions
+                    )
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 }
 
                 Section {
@@ -567,7 +692,9 @@ struct RecipeFilterSheet: View {
                         selectedDifficulty = nil
                         maxTimeFilter = nil
                         showFavoritesOnly = false
+                        selectedMealType = nil
                         selectedDietaryRestrictions = []
+                        selectedTags = []
                     }
                     .foregroundStyle(.red)
                 }

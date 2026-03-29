@@ -12,10 +12,30 @@ enum Cuisine: String, Codable, CaseIterable, Sendable {
 
 // MARK: - Dietary Restriction
 
+
 enum DietaryRestriction: String, Codable, CaseIterable, Sendable {
     case vegetarian, vegan, glutenFree, dairyFree, nutFree
     case halal, kosher, lowSodium, lowCarb, keto, paleo
     case whole30, fodmap, pescatarian
+
+    var displayName: String {
+        switch self {
+        case .vegetarian:  return "Vegetarian"
+        case .vegan:       return "Vegan"
+        case .glutenFree:  return "Gluten Free"
+        case .dairyFree:   return "Dairy Free"
+        case .nutFree:     return "Nut Free"
+        case .halal:       return "Halal"
+        case .kosher:      return "Kosher"
+        case .lowSodium:   return "Low Sodium"
+        case .lowCarb:     return "Low Carb"
+        case .keto:        return "Keto"
+        case .paleo:       return "Paleo"
+        case .whole30:     return "Whole30"
+        case .fodmap:      return "FODMAP"
+        case .pescatarian: return "Pescatarian"
+        }
+    }
 }
 
 // MARK: - Difficulty
@@ -210,6 +230,7 @@ final class Recipe {
 
     var nutritionalInfo: NutritionalInfo?
     var safeTemperatures: [SafeTemperature]
+    var mealType: MealType?
     var dietaryRestrictions: [DietaryRestriction]
     var tags: [String]
     var sourceURL: String?
@@ -261,6 +282,7 @@ final class Recipe {
         directions: [RecipeDirection] = [],
         nutritionalInfo: NutritionalInfo? = nil,
         safeTemperatures: [SafeTemperature] = [],
+        mealType: MealType? = nil,
         dietaryRestrictions: [DietaryRestriction] = [],
         tags: [String] = [],
         sourceURL: String? = nil,
@@ -282,6 +304,7 @@ final class Recipe {
         self.cookingLog = []
         self.nutritionalInfo = nutritionalInfo
         self.safeTemperatures = safeTemperatures
+        self.mealType = mealType
         self.dietaryRestrictions = dietaryRestrictions
         self.tags = tags
         self.sourceURL = sourceURL

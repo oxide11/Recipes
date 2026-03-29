@@ -32,6 +32,7 @@ struct RecipeEditorView: View {
     @State private var summary = ""
     @State private var cuisine: Cuisine = .other
     @State private var difficulty: RecipeDifficulty = .intermediate
+    @State private var mealType: MealType? = nil
     @State private var servings = 4
     @State private var prepTime = 15
     @State private var cookTime = 30
@@ -84,6 +85,13 @@ struct RecipeEditorView: View {
             TextField("Recipe Title", text: $title)
             TextField("Summary", text: $summary, axis: .vertical)
                 .lineLimit(3)
+
+            Picker("Meal Type", selection: $mealType) {
+                Text("Unspecified").tag(MealType?.none)
+                ForEach(MealType.allCases, id: \.self) { type in
+                    Text(type.displayName).tag(MealType?.some(type))
+                }
+            }
 
             Picker("Cuisine", selection: $cuisine) {
                 ForEach(Cuisine.allCases, id: \.self) { c in
@@ -207,7 +215,7 @@ struct RecipeEditorView: View {
 
     private var tagsSection: some View {
         Section {
-            FlowLayout(spacing: 8) {
+            WrappingLayout(itemSpacing: 8, rowSpacing: 8) {
                 ForEach(tags, id: \.self) { tag in
                     HStack(spacing: 4) {
                         Text(tag)
@@ -241,7 +249,7 @@ struct RecipeEditorView: View {
 
     private var dietaryRestrictionsSection: some View {
         Section {
-            FlowLayout(spacing: 8) {
+            WrappingLayout(itemSpacing: 8, rowSpacing: 8) {
                 ForEach(DietaryRestriction.allCases, id: \.self) { restriction in
                     let isSelected = selectedRestrictions.contains(restriction)
                     Button {
@@ -251,7 +259,7 @@ struct RecipeEditorView: View {
                             selectedRestrictions.insert(restriction)
                         }
                     } label: {
-                        Text(restriction.rawValue.capitalized)
+                        Text(restriction.displayName)
                             .font(.caption)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 5)
@@ -326,6 +334,7 @@ struct RecipeEditorView: View {
             cookTimeMinutes: cookTime,
             ingredients: recipeIngredients,
             directions: recipeDirections,
+            mealType: mealType,
             dietaryRestrictions: Array(selectedRestrictions),
             tags: tags,
             sourceMarkdown: sourceMarkdown.isEmpty ? nil : sourceMarkdown

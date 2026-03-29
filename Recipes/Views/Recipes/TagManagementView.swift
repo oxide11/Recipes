@@ -96,7 +96,7 @@ struct TagManagementView: View {
                     Text("Add more recipes to get tag suggestions.")
                         .foregroundStyle(.secondary)
                 } else {
-                    FlowLayout(spacing: 8) {
+                    WrappingLayout(itemSpacing: 8, rowSpacing: 8) {
                         ForEach(suggestions, id: \.self) { tag in
                             Button {
                                 newTagName = tag
@@ -278,7 +278,7 @@ struct RecipeTagEditorView: View {
                 .font(.title2)
                 .fontWeight(.bold)
 
-            FlowLayout(spacing: 6) {
+            WrappingLayout(itemSpacing: 6, rowSpacing: 6) {
                 ForEach(recipe.tags, id: \.self) { tag in
                     HStack(spacing: 4) {
                         Text("#\(tag)")

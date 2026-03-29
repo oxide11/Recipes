@@ -300,7 +300,7 @@ struct SettingsView: View {
 
                 if !profile.dietaryRestrictions.isEmpty {
                     LabeledContent("Dietary") {
-                        Text(profile.dietaryRestrictions.map { $0.rawValue.capitalized }.joined(separator: ", "))
+                        Text(profile.dietaryRestrictions.map { $0.displayName }.joined(separator: ", "))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

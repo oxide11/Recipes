@@ -216,7 +216,7 @@ struct RecipeDetailView: View {
             if !recipe.dietaryRestrictions.isEmpty {
                 HStack(spacing: 12) {
                     ForEach(recipe.dietaryRestrictions, id: \.self) { restriction in
-                        Text(restriction.rawValue.capitalized)
+                        Text(restriction.displayName)
                             .font(.caption2)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
@@ -702,7 +702,7 @@ struct RecipeDetailView: View {
                 .font(.title2)
                 .fontWeight(.bold)
 
-            FlowLayout(spacing: 8) {
+            WrappingLayout(itemSpacing: 8, rowSpacing: 8) {
                 ForEach(DietaryRestriction.allCases, id: \.self) { restriction in
                     let isSelected = recipe.dietaryRestrictions.contains(restriction)
                     Button {
@@ -712,7 +712,7 @@ struct RecipeDetailView: View {
                             recipe.dietaryRestrictions.append(restriction)
                         }
                     } label: {
-                        Text(restriction.rawValue.capitalized)
+                        Text(restriction.displayName)
                             .font(.caption)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 5)

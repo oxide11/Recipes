@@ -31,7 +31,7 @@ struct DirectionStepView: View {
 
                 // Tappable ingredient chips with conversion popover + look up
                 if !direction.ingredients.isEmpty {
-                    FlowLayout(spacing: 6) {
+                    WrappingLayout(itemSpacing: 6, rowSpacing: 6) {
                         ForEach(direction.ingredients, id: \.ingredientName) { ref in
                             let color = ingredientColorMap[ref.ingredientName.lowercased()] ?? .accentColor
                             Button {
@@ -292,10 +292,11 @@ struct IngredientConversionPopover: View {
     }
 }
 
-// MARK: - Flow Layout (for ingredient chips)
+// MARK: - Wrapping Layout
 
-struct FlowLayout: Layout {
-    var spacing: CGFloat = 6
+struct WrappingLayout: Layout {
+    var itemSpacing: CGFloat = 6
+    var rowSpacing: CGFloat = 6
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let result = arrange(proposal: proposal, subviews: subviews)
@@ -319,15 +320,13 @@ struct FlowLayout: Layout {
 
         for subview in subviews {
             let size = subview.sizeThatFits(.unspecified)
-
             if x + size.width > maxWidth, x > 0 {
                 x = 0
-                y += rowHeight + spacing
+                y += rowHeight + rowSpacing
                 rowHeight = 0
             }
-
             positions.append(CGPoint(x: x, y: y))
-            x += size.width + spacing
+            x += size.width + itemSpacing
             rowHeight = max(rowHeight, size.height)
             totalHeight = y + rowHeight
         }
@@ -335,3 +334,4 @@ struct FlowLayout: Layout {
         return (CGSize(width: maxWidth, height: totalHeight), positions)
     }
 }
+
