@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipes — Feature Card</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0a0a0a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  .card {
+    width: 1200px;
+    background: linear-gradient(145deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+    border-radius: 32px;
+    padding: 72px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,165,80,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    bottom: -150px;
+    left: -100px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(100,180,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .app-icon {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #ff9a56 0%, #ff6b35 100%);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    box-shadow: 0 8px 24px rgba(255,107,53,0.3);
+  }
+
+  .app-name {
+    font-size: 42px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -1px;
+  }
+
+  .tagline {
+    font-size: 20px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 48px;
+    position: relative;
+    z-index: 1;
+    padding-left: 92px;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .feature {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 28px 28px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: transform 0.2s, background 0.2s;
+  }
+
+  .feature:hover {
+    background: rgba(255,255,255,0.07);
+    transform: translateY(-2px);
+  }
+
+  .feature-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .feature-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .feature-desc {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.5;
+  }
+
+  .highlight {
+    color: #ff9a56;
+    font-weight: 600;
+  }
+
+  .badge-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .badge {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 100px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.3px;
+  }
+
+  .badge.orange {
+    background: rgba(255,154,86,0.12);
+    border-color: rgba(255,154,86,0.2);
+    color: #ff9a56;
+  }
+
+  .footer {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .platform {
+    font-size: 14px;
+    color: rgba(255,255,255,0.3);
+    font-weight: 500;
+  }
+
+  .glass-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 8px 16px;
+    border-radius: 100px;
+    backdrop-filter: blur(10px);
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="header">
+    <div class="app-icon">🍳</div>
+    <div class="app-name">Recipes</div>
+  </div>
+  <div class="tagline">Cook smarter. Waste less. Eat better.</div>
+
+  <div class="features-grid">
+
+    <div class="feature">
+      <span class="feature-icon">👁️</span>
+      <div class="feature-title">Hands-Free Cooking with Blink Navigation</div>
+      <div class="feature-desc">Navigate recipes step-by-step using <span class="highlight">eye blinks and head movements</span> via Apple Switch Control. Voice readback, auto-advancing timers, and screen-awake keep you focused on cooking.</div>
+    </div>
+
+    <div class="feature">
+      <span class="feature-icon">🧠</span>
+      <div class="feature-title">On-Device AI — Fully Private</div>
+      <div class="feature-desc">Generate meal plans, estimate nutrition, and get recipe suggestions powered by <span class="highlight">Apple Intelligence</span>. Your data never leaves your device. No subscriptions, no API keys required.</div>
+    </div>
+
+    <div class="feature">
+      <span class="feature-icon">🥕</span>
+      <div class="feature-title">Zero-Waste Smart Matching</div>
+      <div class="feature-desc">Cross-references your pantry with your recipe library to surface meals you can make <span class="highlight">right now</span> — with coverage percentages and missing ingredient counts.</div>
+    </div>
+
+    <div class="feature">
+      <span class="feature-icon">🔴</span>
+      <div class="feature-title">Live Activity Cooking Timers</div>
+      <div class="feature-desc">Active timers on your <span class="highlight">Lock Screen and Dynamic Island</span>. Know exactly when to flip, stir, or pull from the oven — even from another app.</div>
+    </div>
+
+    <div class="feature">
+      <span class="feature-icon">🛒</span>
+      <div class="feature-title">Voice-Guided Smart Shopping</div>
+      <div class="feature-desc">Auto-generated shopping lists from meal plans — ingredients merged, scaled, organized by aisle, and <span class="highlight">pantry stock subtracted</span>. Go hands-free with voice confirmation.</div>
+    </div>
+
+    <div class="feature">
+      <span class="feature-icon">📸</span>
+      <div class="feature-title">Receipt OCR & Spend Tracking</div>
+      <div class="feature-desc">Snap a grocery receipt — <span class="highlight">Vision OCR extracts items, prices, and totals</span> automatically. Track spending over time and see estimated savings vs. dining out.</div>
+    </div>
+
+    <div class="feature">
+      <span class="feature-icon">📊</span>
+      <div class="feature-title">Nutrition Goals Dashboard</div>
+      <div class="feature-desc">Track daily and weekly <span class="highlight">calories and macros vs. your personal goals</span> with interactive charts. See trends, averages, and per-day breakdowns at a glance.</div>
+    </div>
+
+    <div class="feature">
+      <span class="feature-icon">☁️</span>
+      <div class="feature-title">Shared Family Recipe Library</div>
+      <div class="feature-desc">Sync your recipes across devices via <span class="highlight">iCloud CloudKit</span>. Share a living recipe library with family or roommates — everyone's changes stay in sync.</div>
+    </div>
+
+  </div>
+
+  <div class="badge-row">
+    <span class="badge orange">iOS 26</span>
+    <span class="badge">Liquid Glass</span>
+    <span class="badge">SwiftUI</span>
+    <span class="badge">SwiftData</span>
+    <span class="badge">FoundationModels</span>
+    <span class="badge">WidgetKit</span>
+    <span class="badge">ActivityKit</span>
+  </div>
+
+  <div class="footer">
+    <span class="platform">iPhone &bull; iPad &bull; Built for Apple Intelligence</span>
+    <span class="glass-label">Designed with Liquid Glass</span>
+  </div>
+
+</div>
+
+</body>
+</html>
