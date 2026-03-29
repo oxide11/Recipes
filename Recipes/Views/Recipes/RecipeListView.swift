@@ -21,6 +21,7 @@ struct RecipeListView: View {
     @State private var showingRecipeAsCode = false
     @State private var showingFilters = false
     @State private var cachedNoWasteMatches: [NoWasteMatchingEngine.MatchResult] = []
+    @State private var recipeToDelete: Recipe?
 
     private var activeFilterCount: Int {
         var count = 0
@@ -285,11 +286,17 @@ struct RecipeListView: View {
 
     private var allRecipesSection: some View {
         Section {
-            if filteredRecipes.isEmpty {
+            if recipes.isEmpty {
                 ContentUnavailableView(
                     "No recipes yet",
                     systemImage: "book.pages",
                     description: Text("Add your first recipe to get started.")
+                )
+            } else if filteredRecipes.isEmpty {
+                ContentUnavailableView(
+                    "No matches",
+                    systemImage: "magnifyingglass",
+                    description: Text("Try adjusting your search or filters.")
                 )
             } else {
                 ForEach(filteredRecipes) { recipe in
@@ -298,18 +305,35 @@ struct RecipeListView: View {
                     } label: {
                         RecipeRow(recipe: recipe)
                     }
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            recipeToDelete = recipe
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
                 }
-                .onDelete(perform: deleteRecipes)
             }
         } header: {
             Text("All recipes")
                 .miseSectionHeader()
         }
-    }
-
-    private func deleteRecipes(at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(filteredRecipes[index])
+        .confirmationDialog(
+            "Delete Recipe",
+            isPresented: .init(
+                get: { recipeToDelete != nil },
+                set: { if !$0 { recipeToDelete = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let recipe = recipeToDelete {
+                    modelContext.delete(recipe)
+                    recipeToDelete = nil
+                }
+            }
+        } message: {
+            Text("Are you sure you want to delete \"\(recipeToDelete?.title ?? "")\"? This cannot be undone.")
         }
     }
 }

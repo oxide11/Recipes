@@ -142,6 +142,7 @@ struct ReceiptScannerView: View {
     @State private var recognizedImage: UIImage?
     @State private var isProcessing = false
     @State private var errorMessage: String?
+    @State private var didSaveReceipt = false
 
     private var isScannerAvailable: Bool {
         DataScannerViewController.isSupported && DataScannerViewController.isAvailable
@@ -165,6 +166,7 @@ struct ReceiptScannerView: View {
                     }
                 }
             }
+            .sensoryFeedback(.success, trigger: didSaveReceipt)
             .alert("Scanner Error", isPresented: .init(
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }
@@ -418,6 +420,7 @@ struct ReceiptScannerView: View {
         }
 
         modelContext.insert(receipt)
+        didSaveReceipt = true
         dismiss()
     }
 }

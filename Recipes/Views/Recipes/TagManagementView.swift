@@ -12,6 +12,7 @@ struct TagManagementView: View {
     @State private var newTagName = ""
     @State private var selectedTag: String?
     @State private var showingBatchTag = false
+    @State private var tagToDelete: String?
 
     private var allTags: [TagInfo] {
         var tagCounts: [String: Int] = [:]
@@ -71,7 +72,7 @@ struct TagManagementView: View {
                         }
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive) {
-                                removeTagFromAll(tag.name)
+                                tagToDelete = tag.name
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
@@ -114,6 +115,23 @@ struct TagManagementView: View {
         }
         .navigationTitle("Tags")
         .toolbarBackground(.automatic, for: .navigationBar)
+        .confirmationDialog(
+            "Delete Tag",
+            isPresented: .init(
+                get: { tagToDelete != nil },
+                set: { if !$0 { tagToDelete = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let tag = tagToDelete {
+                    removeTagFromAll(tag)
+                    tagToDelete = nil
+                }
+            }
+        } message: {
+            Text("Remove the tag \"\(tagToDelete ?? "")\" from all recipes?")
+        }
         .sheet(isPresented: $showingBatchTag) {
             if let tag = selectedTag {
                 BatchTagView(tagName: tag, recipes: recipes)

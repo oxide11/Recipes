@@ -89,6 +89,22 @@ struct NutritionTrackingView: View {
             .padding()
             .background(in: .rect(cornerRadius: 12))
             .glassEffect(.regular, in: .rect(cornerRadius: 12))
+        } else {
+            VStack(spacing: 8) {
+                Image(systemName: "target")
+                    .font(.title)
+                    .foregroundStyle(Brand.muted)
+                Text("Set Nutrition Goals")
+                    .font(.headline)
+                Text("Add calorie and macro targets in Settings to track your progress here.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(in: .rect(cornerRadius: 12))
+            .glassEffect(.regular, in: .rect(cornerRadius: 12))
         }
     }
 
@@ -132,9 +148,9 @@ struct NutritionTrackingView: View {
                 .font(.headline)
 
             HStack(spacing: 20) {
-                macroCircle(label: "Protein", value: totals.avgProteinPerDay, unit: "g", color: Brand.warmTan)
+                macroCircle(label: "Protein", value: totals.avgProteinPerDay, unit: "g", color: Brand.ingredientProtein)
                 macroCircle(label: "Carbs", value: totals.avgCarbsPerDay, unit: "g", color: Brand.herbGreen)
-                macroCircle(label: "Fat", value: totals.avgFatPerDay, unit: "g", color: Brand.muted)
+                macroCircle(label: "Fat", value: totals.avgFatPerDay, unit: "g", color: Brand.warmTan)
             }
             .frame(maxWidth: .infinity)
         }
@@ -184,7 +200,7 @@ struct NutritionTrackingView: View {
                         Label("\(Int(day.calories))", systemImage: "flame")
                             .foregroundStyle(Brand.warmTan)
                         Label("\(Int(day.protein))g", systemImage: "figure.walk")
-                            .foregroundStyle(Brand.herbGreen)
+                            .foregroundStyle(Brand.ingredientProtein)
                     }
                     .font(.caption)
 

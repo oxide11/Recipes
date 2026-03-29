@@ -12,6 +12,7 @@ struct PantryView: View {
     @State private var showingAddItem = false
     @State private var showingNoWasteResults = false
     @State private var searchText = ""
+    @State private var itemToDelete: PantryItem?
 
     private var filteredItems: [PantryItem] {
         if searchText.isEmpty { return items }
@@ -103,11 +104,13 @@ struct PantryView: View {
                         Section(category.rawValue.capitalized) {
                             ForEach(categoryItems) { item in
                                 PantryItemRow(item: item)
-                            }
-                            .onDelete { offsets in
-                                for offset in offsets {
-                                    modelContext.delete(categoryItems[offset])
-                                }
+                                    .swipeActions(edge: .trailing) {
+                                        Button(role: .destructive) {
+                                            itemToDelete = item
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
                             }
                         }
                     }
@@ -118,6 +121,12 @@ struct PantryView: View {
                         "Pantry is Empty",
                         systemImage: "refrigerator",
                         description: Text("Scan barcodes or add items manually to start tracking ingredients.")
+                    )
+                } else if filteredItems.isEmpty {
+                    ContentUnavailableView(
+                        "No matches",
+                        systemImage: "magnifyingglass",
+                        description: Text("No pantry items match your search.")
                     )
                 }
             }
@@ -141,6 +150,23 @@ struct PantryView: View {
             }
             .sheet(isPresented: $showingAddItem) {
                 AddPantryItemView()
+            }
+            .confirmationDialog(
+                "Delete Item",
+                isPresented: .init(
+                    get: { itemToDelete != nil },
+                    set: { if !$0 { itemToDelete = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("Delete", role: .destructive) {
+                    if let item = itemToDelete {
+                        modelContext.delete(item)
+                        itemToDelete = nil
+                    }
+                }
+            } message: {
+                Text("Remove \"\(itemToDelete?.name ?? "")\" from your pantry?")
             }
             .sheet(isPresented: $showingNoWasteResults) {
                 NavigationStack {

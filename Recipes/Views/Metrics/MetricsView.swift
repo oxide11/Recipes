@@ -71,7 +71,7 @@ struct MetricsView: View {
                 title: "Time Cooking",
                 value: formatMinutes(metrics.totalTimeCookingMinutes),
                 icon: "clock",
-                color: Brand.muted
+                color: Brand.ingredientDairy
             )
             MetricCard(
                 title: "Time Prepping",
@@ -83,7 +83,7 @@ struct MetricsView: View {
                 title: "Grocery Spend",
                 value: "$\(Int(metrics.totalGrocerySpend))",
                 icon: "cart",
-                color: Brand.herbGreen
+                color: Brand.ingredientSeasoning
             )
         }
     }

@@ -22,6 +22,7 @@ struct CookingLogEntryView: View {
     @State private var photoData: Data?
     @State private var deductedItems: [PantryItem] = []
     @State private var showingDeductionResult = false
+    @State private var didSave = false
 
     init(recipe: Recipe) {
         self.recipe = recipe
@@ -38,7 +39,7 @@ struct CookingLogEntryView: View {
                                 rating = star
                             } label: {
                                 Image(systemName: star <= rating ? "star.fill" : "star")
-                                    .foregroundStyle(.yellow)
+                                    .foregroundStyle(Brand.warmTan)
                                     .font(.title2)
                             }
                             .accessibilityLabel("\(star) star\(star == 1 ? "" : "s")")
@@ -109,6 +110,7 @@ struct CookingLogEntryView: View {
                     photoData = data
                 }
             }
+            .sensoryFeedback(.success, trigger: didSave)
             .alert("Pantry Updated", isPresented: $showingDeductionResult) {
                 Button("OK") { dismiss() }
             } message: {
@@ -137,6 +139,7 @@ struct CookingLogEntryView: View {
         )
         entry.photo = photo
         recipe.cookingLog.append(entry)
+        didSave = true
 
         // Deduct from pantry
         if deductFromPantry {

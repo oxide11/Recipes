@@ -70,9 +70,6 @@ struct RecipeDetailView: View {
                     Button("Log Cooking Session", systemImage: "flame") {
                         showingLogEntry = true
                     }
-                    Button("Start Cooking Mode", systemImage: "play.fill") {
-                        showingCookingMode = true
-                    }
                     Button("Hands-Free Setup", systemImage: "accessibility") {
                         showingBlinkHelp = true
                     }
@@ -456,7 +453,7 @@ struct RecipeDetailView: View {
                     HStack(spacing: 4) {
                         ForEach(1...5, id: \.self) { star in
                             Image(systemName: star <= Int(avg.rounded()) ? "star.fill" : "star")
-                                .foregroundStyle(.yellow)
+                                .foregroundStyle(Brand.warmTan)
                                 .font(.subheadline)
                         }
                         Text(String(format: "%.1f avg", avg))
@@ -497,7 +494,7 @@ struct RecipeDetailView: View {
                                     ForEach(1...5, id: \.self) { star in
                                         Image(systemName: star <= rating ? "star.fill" : "star")
                                             .font(.caption2)
-                                            .foregroundStyle(.yellow)
+                                            .foregroundStyle(Brand.warmTan)
                                     }
                                 }
                             }

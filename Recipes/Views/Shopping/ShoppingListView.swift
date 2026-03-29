@@ -12,6 +12,7 @@ struct ShoppingListView: View {
     @State private var showingGuidedShopping = false
     @State private var showingReceiptScanner = false
     @State private var selectedList: GroceryList?
+    @State private var listToDelete: GroceryList?
 
     var body: some View {
         NavigationStack {
@@ -108,11 +109,12 @@ struct ShoppingListView: View {
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }
-                            }
-                            .onDelete { offsets in
-                                let otherLists = Array(lists.dropFirst())
-                                for offset in offsets {
-                                    modelContext.delete(otherLists[offset])
+                                .swipeActions(edge: .trailing) {
+                                    Button(role: .destructive) {
+                                        listToDelete = list
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
                                 }
                             }
                         }
@@ -142,6 +144,23 @@ struct ShoppingListView: View {
                         showingCreateList = true
                     }
                 }
+            }
+            .confirmationDialog(
+                "Delete List",
+                isPresented: .init(
+                    get: { listToDelete != nil },
+                    set: { if !$0 { listToDelete = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("Delete", role: .destructive) {
+                    if let list = listToDelete {
+                        modelContext.delete(list)
+                        listToDelete = nil
+                    }
+                }
+            } message: {
+                Text("Delete \"\(listToDelete?.name ?? "")\"? This cannot be undone.")
             }
             .sheet(isPresented: $showingCreateList) {
                 CreateShoppingListView()
