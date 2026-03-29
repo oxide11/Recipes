@@ -1,6 +1,27 @@
 import SwiftUI
 import SwiftData
 
+private func expiryDateFormatter(for date: Date) -> DateFormatter {
+    let formatter = DateFormatter()
+    let sameYear = Calendar.current.isDate(date, equalTo: .now, toGranularity: .year)
+    formatter.dateFormat = sameYear ? "MMM d" : "MMM d, yyyy"
+    return formatter
+}
+
+private func daysAgoLabel(for date: Date) -> String {
+    let days = Calendar.current.dateComponents([.day], from: date, to: .now).day ?? 0
+    if days <= 0 { return "Added today" }
+    if days == 1 { return "Added yesterday" }
+    return "Added \(days)d ago"
+}
+
+private func expiryLabel(for date: Date) -> String {
+    let days = Calendar.current.dateComponents([.day], from: .now, to: date).day ?? 0
+    if days <= 0 { return "Today" }
+    if days == 1 { return "Tomorrow" }
+    return "in \(days) days"
+}
+
 // MARK: - Pantry View
 
 struct PantryView: View {
@@ -46,7 +67,7 @@ struct PantryView: View {
                                 Text(item.name)
                                 Spacer()
                                 if let date = item.expirationDate {
-                                    Text(date, style: .relative)
+                                    Text(expiryLabel(for: date))
                                         .font(.caption)
                                         .foregroundStyle(Brand.spiceRed)
                                 }
@@ -261,9 +282,20 @@ struct PantryItemRow: View {
                     Text(item.isExpired ? "Expired" : "Expires")
                         .font(.caption2)
                         .foregroundStyle(item.isExpired ? Brand.spiceRed : Color.secondary)
-                    Text(date, style: .date)
+                    Text(date, formatter: expiryDateFormatter(for: date))
                         .font(.caption2)
                         .foregroundStyle(item.isExpired ? Brand.spiceRed : Color.secondary)
+                }
+            } else {
+                VStack(alignment: .trailing, spacing: 2) {
+                    if item.category == .protein && !item.isFrozen {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Brand.spiceRed)
+                    }
+                    Text(daysAgoLabel(for: item.dateAdded))
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
                 }
             }
         }
@@ -286,6 +318,7 @@ struct BarcodeScannerFullView: View {
     @State private var unit: MeasurementUnit = .piece
     @State private var hasExpiration = false
     @State private var expirationDate = Date().addingTimeInterval(7 * 86400)
+    @State private var isFrozen = false
     @State private var manualName = ""
     @State private var manualCategory: IngredientCategory = .other
 
@@ -409,6 +442,10 @@ struct BarcodeScannerFullView: View {
                         }
                     }
 
+                    if let product = scanner.lookupResult, [.protein, .vegetable, .fruit].contains(product.category) {
+                        Toggle("Frozen", isOn: $isFrozen)
+                    }
+
                     Toggle("Has Expiration Date", isOn: $hasExpiration)
                     if hasExpiration {
                         DatePicker("Expires", selection: $expirationDate, displayedComponents: .date)
@@ -477,6 +514,10 @@ struct BarcodeScannerFullView: View {
                         }
                     }
 
+                    if [.protein, .vegetable, .fruit].contains(manualCategory) {
+                        Toggle("Frozen", isOn: $isFrozen)
+                    }
+
                     Toggle("Has Expiration Date", isOn: $hasExpiration)
                     if hasExpiration {
                         DatePicker("Expires", selection: $expirationDate, displayedComponents: .date)
@@ -505,6 +546,7 @@ struct BarcodeScannerFullView: View {
             unit: unit,
             expirationDate: hasExpiration ? expirationDate : nil
         ) {
+            item.isFrozen = isFrozen
             modelContext.insert(item)
             scanner.resetForNextScan()
         }
@@ -519,6 +561,7 @@ struct BarcodeScannerFullView: View {
             unit: unit,
             expirationDate: hasExpiration ? expirationDate : nil
         )
+        item.isFrozen = isFrozen
         modelContext.insert(item)
         scanner.resetForNextScan()
         manualName = ""
@@ -537,6 +580,7 @@ struct AddPantryItemView: View {
     @State private var unit: MeasurementUnit = .piece
     @State private var hasExpiration = false
     @State private var expirationDate = Date().addingTimeInterval(7 * 86400)
+    @State private var isFrozen = false
 
     var body: some View {
         NavigationStack {
@@ -558,6 +602,10 @@ struct AddPantryItemView: View {
                             Text(u.rawValue).tag(u)
                         }
                     }
+                }
+
+                if category == .protein || category == .vegetable || category == .fruit {
+                    Toggle("Frozen", isOn: $isFrozen)
                 }
 
                 Toggle("Has Expiration Date", isOn: $hasExpiration)
@@ -580,6 +628,7 @@ struct AddPantryItemView: View {
                             unit: unit,
                             expirationDate: hasExpiration ? expirationDate : nil
                         )
+                        item.isFrozen = isFrozen
                         modelContext.insert(item)
                         dismiss()
                     }
@@ -602,6 +651,7 @@ struct EditPantryItemView: View {
     @State private var unit: MeasurementUnit
     @State private var hasExpiration: Bool
     @State private var expirationDate: Date
+    @State private var isFrozen: Bool
 
     init(item: PantryItem) {
         self.item = item
@@ -611,6 +661,7 @@ struct EditPantryItemView: View {
         _unit = State(initialValue: item.unit)
         _hasExpiration = State(initialValue: item.expirationDate != nil)
         _expirationDate = State(initialValue: item.expirationDate ?? Date().addingTimeInterval(7 * 86400))
+        _isFrozen = State(initialValue: item.isFrozen)
     }
 
     var body: some View {
@@ -635,6 +686,10 @@ struct EditPantryItemView: View {
                     }
                 }
 
+                if category == .protein || category == .vegetable || category == .fruit {
+                    Toggle("Frozen", isOn: $isFrozen)
+                }
+
                 Toggle("Has Expiration Date", isOn: $hasExpiration)
                 if hasExpiration {
                     DatePicker("Expires", selection: $expirationDate, displayedComponents: .date)
@@ -653,6 +708,7 @@ struct EditPantryItemView: View {
                         item.quantity = quantity
                         item.unit = unit
                         item.expirationDate = hasExpiration ? expirationDate : nil
+                        item.isFrozen = isFrozen
                         dismiss()
                     }
                     .disabled(name.isEmpty)

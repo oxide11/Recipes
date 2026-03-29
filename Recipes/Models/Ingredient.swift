@@ -206,6 +206,7 @@ final class PantryItem {
     var expirationDate: Date?
     var dateAdded: Date
     var lastUsed: Date?
+    var isFrozen: Bool = false
 
     var isExpired: Bool {
         guard let expiration = expirationDate else { return false }
