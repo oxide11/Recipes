@@ -21,6 +21,18 @@ final class RestaurantJournalEntry {
     var priceRange: PriceRange?
     var tags: [String]
 
+    // Location coordinates for MapKit
+    var latitude: Double?
+    var longitude: Double?
+
+    // Maps metadata
+    var phoneNumber: String?
+    var mapsURL: String?
+
+    var hasCoordinates: Bool {
+        latitude != nil && longitude != nil
+    }
+
     init(
         restaurantName: String,
         location: String? = nil,
@@ -30,7 +42,11 @@ final class RestaurantJournalEntry {
         review: String? = nil,
         wouldRecommend: Bool = true,
         priceRange: PriceRange? = nil,
-        tags: [String] = []
+        tags: [String] = [],
+        latitude: Double? = nil,
+        longitude: Double? = nil,
+        phoneNumber: String? = nil,
+        mapsURL: String? = nil
     ) {
         self.id = UUID()
         self.restaurantName = restaurantName
@@ -44,6 +60,10 @@ final class RestaurantJournalEntry {
         self.wouldRecommend = wouldRecommend
         self.priceRange = priceRange
         self.tags = tags
+        self.latitude = latitude
+        self.longitude = longitude
+        self.phoneNumber = phoneNumber
+        self.mapsURL = mapsURL
     }
 }
 
@@ -89,12 +109,22 @@ final class RestaurantWantToTry {
     var dateAdded: Date
     var hasVisited: Bool
 
+    // Location coordinates for MapKit
+    var latitude: Double?
+    var longitude: Double?
+
+    var hasCoordinates: Bool {
+        latitude != nil && longitude != nil
+    }
+
     init(
         restaurantName: String,
         location: String? = nil,
         cuisine: Cuisine? = nil,
         reason: String? = nil,
-        sourceURL: String? = nil
+        sourceURL: String? = nil,
+        latitude: Double? = nil,
+        longitude: Double? = nil
     ) {
         self.id = UUID()
         self.restaurantName = restaurantName
@@ -104,5 +134,7 @@ final class RestaurantWantToTry {
         self.sourceURL = sourceURL
         self.dateAdded = .now
         self.hasVisited = false
+        self.latitude = latitude
+        self.longitude = longitude
     }
 }

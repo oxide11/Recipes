@@ -121,6 +121,7 @@ final class CookingLogEntry {
     var notes: String?
     var photo: RecipePhoto?
     var substitutionsMade: [String]
+    var timeSavedMinutes: Int?  // Positive = faster than estimate, negative = slower
 
     init(
         date: Date = .now,
@@ -129,7 +130,8 @@ final class CookingLogEntry {
         rating: Int? = nil,
         notes: String? = nil,
         substitutionsMade: [String] = [],
-        photo: RecipePhoto? = nil
+        photo: RecipePhoto? = nil,
+        timeSavedMinutes: Int? = nil
     ) {
         self.id = UUID()
         self.date = date
@@ -139,6 +141,7 @@ final class CookingLogEntry {
         self.notes = notes
         self.substitutionsMade = substitutionsMade
         self.photo = photo
+        self.timeSavedMinutes = timeSavedMinutes
     }
 }
 

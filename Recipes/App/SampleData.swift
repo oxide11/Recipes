@@ -6,6 +6,26 @@ import SwiftData
 /// Populates a ModelContext with realistic test data for every major feature.
 enum SampleData {
 
+    // MARK: - Clear All
+
+    @MainActor
+    static func clearAll(_ context: ModelContext) {
+        try? context.delete(model: Recipe.self)
+        try? context.delete(model: Ingredient.self)
+        try? context.delete(model: PantryItem.self)
+        try? context.delete(model: MealPlan.self)
+        try? context.delete(model: PlannedMeal.self)
+        try? context.delete(model: GroceryList.self)
+        try? context.delete(model: GroceryItem.self)
+        try? context.delete(model: GroceryReceipt.self)
+        try? context.delete(model: RecipePhoto.self)
+        try? context.delete(model: CookingLogEntry.self)
+        try? context.delete(model: RecipeVariation.self)
+        try? context.delete(model: RestaurantJournalEntry.self)
+        try? context.delete(model: RestaurantWantToTry.self)
+        try? context.delete(model: UserProfile.self)
+    }
+
     // MARK: - Public Entry Point
 
     @MainActor

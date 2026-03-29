@@ -9,6 +9,7 @@ struct CookingLogEntryView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
+    @Query private var profiles: [UserProfile]
 
     @State private var rating = 3
     @State private var prepMinutes = ""
@@ -23,6 +24,13 @@ struct CookingLogEntryView: View {
     @State private var deductedItems: [PantryItem] = []
     @State private var showingDeductionResult = false
     @State private var didSave = false
+
+    private var actualTotalMinutes: Int? {
+        let prep = Int(prepMinutes) ?? 0
+        let cook = Int(cookMinutes) ?? 0
+        let total = prep + cook
+        return total > 0 ? total : nil
+    }
 
     init(recipe: Recipe) {
         self.recipe = recipe
@@ -90,6 +98,43 @@ struct CookingLogEntryView: View {
                     }
                 }
 
+                // Time comparison
+                if let actualTotal = actualTotalMinutes, actualTotal > 0 {
+                    Section("Time Comparison") {
+                        let estimated = recipe.estimatedTotalMinutes
+                        let diff = estimated - actualTotal
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("Estimated")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Text("\(estimated) min")
+                                    .fontWeight(.medium)
+                            }
+                            Spacer()
+                            Image(systemName: "arrow.right")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            VStack(alignment: .leading) {
+                                Text("Actual")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Text("\(actualTotal) min")
+                                    .fontWeight(.medium)
+                            }
+                            Spacer()
+                            VStack(alignment: .trailing) {
+                                Text(diff > 0 ? "Saved" : diff < 0 ? "Over" : "On time")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Text("\(abs(diff)) min")
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(diff > 0 ? Brand.herbGreen : diff < 0 ? Brand.spiceRed : Brand.muted)
+                            }
+                        }
+                    }
+                }
+
                 Section("Notes") {
                     TextField("How did it turn out?", text: $notes, axis: .vertical)
                         .lineLimit(4)
@@ -108,6 +153,11 @@ struct CookingLogEntryView: View {
             .task(id: selectedPhoto) {
                 if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) {
                     photoData = data
+                }
+            }
+            .onAppear {
+                if let profile = profiles.first {
+                    deductFromPantry = profile.autoDeductPantry
                 }
             }
             .sensoryFeedback(.success, trigger: didSave)
@@ -130,12 +180,21 @@ struct CookingLogEntryView: View {
             photo = RecipePhoto(imageData: data)
         }
 
+        // Compute time saved vs recipe estimate
+        let timeSaved: Int?
+        if let actual = actualTotalMinutes {
+            timeSaved = recipe.estimatedTotalMinutes - actual
+        } else {
+            timeSaved = nil
+        }
+
         let entry = CookingLogEntry(
             prepTimeMinutes: Int(prepMinutes),
             cookTimeMinutes: Int(cookMinutes),
             rating: rating,
             notes: notes.isEmpty ? nil : notes,
-            substitutionsMade: substitutions
+            substitutionsMade: substitutions,
+            timeSavedMinutes: timeSaved
         )
         entry.photo = photo
         recipe.cookingLog.append(entry)

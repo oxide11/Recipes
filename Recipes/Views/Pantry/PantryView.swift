@@ -13,6 +13,7 @@ struct PantryView: View {
     @State private var showingNoWasteResults = false
     @State private var searchText = ""
     @State private var itemToDelete: PantryItem?
+    @State private var editingItem: PantryItem?
 
     private var filteredItems: [PantryItem] {
         if searchText.isEmpty { return items }
@@ -25,6 +26,11 @@ struct PantryView: View {
 
     private var expiringItems: [PantryItem] {
         items.filter(\.isExpiringSoon)
+    }
+
+    private var spiceRackItems: [PantryItem] {
+        filteredItems.filter { $0.category == .spice || $0.category == .herb }
+            .sorted { $0.name.localizedCompare($1.name) == .orderedAscending }
     }
 
     var body: some View {
@@ -98,12 +104,34 @@ struct PantryView: View {
                     }
                 }
 
-                // Items by category
-                ForEach(IngredientCategory.allCases, id: \.self) { category in
+                // Spice Rack
+                if !spiceRackItems.isEmpty {
+                    Section {
+                        ForEach(spiceRackItems) { item in
+                            PantryItemRow(item: item)
+                                .contentShape(Rectangle())
+                                .onTapGesture { editingItem = item }
+                                .swipeActions(edge: .trailing) {
+                                    Button(role: .destructive) {
+                                        itemToDelete = item
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
+                        }
+                    } header: {
+                        Label("Spice Rack", systemImage: "sparkles")
+                    }
+                }
+
+                // Items by category (excluding spices/herbs shown above)
+                ForEach(IngredientCategory.allCases.filter({ $0 != .spice && $0 != .herb }), id: \.self) { category in
                     if let categoryItems = groupedItems[category], !categoryItems.isEmpty {
                         Section(category.rawValue.capitalized) {
                             ForEach(categoryItems) { item in
                                 PantryItemRow(item: item)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture { editingItem = item }
                                     .swipeActions(edge: .trailing) {
                                         Button(role: .destructive) {
                                             itemToDelete = item
@@ -167,6 +195,9 @@ struct PantryView: View {
                 }
             } message: {
                 Text("Remove \"\(itemToDelete?.name ?? "")\" from your pantry?")
+            }
+            .sheet(item: $editingItem) { item in
+                EditPantryItemView(item: item)
             }
             .sheet(isPresented: $showingNoWasteResults) {
                 NavigationStack {
@@ -248,6 +279,7 @@ struct PantryItemRow: View {
 struct BarcodeScannerFullView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(AIServiceRouter.self) private var aiRouter
 
     @State private var scanner = BarcodeScannerService()
     @State private var quantity: Double = 1
@@ -272,10 +304,23 @@ struct BarcodeScannerFullView: View {
                                 .strokeBorder(.white, lineWidth: 2)
                                 .frame(width: 280, height: 140)
                             Spacer()
-                            Text("Position barcode within the frame")
-                                .font(.subheadline)
-                                .foregroundStyle(.white)
-                                .padding(.bottom, 20)
+
+                            HStack(spacing: 16) {
+                                Text("Position barcode within the frame")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.white)
+
+                                Button {
+                                    scanner.capturePhoto()
+                                } label: {
+                                    Label("Photo", systemImage: "camera.fill")
+                                        .font(.subheadline)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                }
+                                .buttonStyle(.glass)
+                            }
+                            .padding(.bottom, 20)
                         }
                     }
                     .frame(height: 300)
@@ -382,17 +427,41 @@ struct BarcodeScannerFullView: View {
                     .frame(maxWidth: .infinity)
                 }
             } else {
-                // Product not found — manual entry
+                // Product not found — manual entry or AI identification
                 Section("Product Not Found") {
                     Text("Barcode: \(scanner.scannedCode ?? "")")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+
+                    Button {
+                        if scanner.capturedImage == nil {
+                            scanner.capturePhoto()
+                        }
+                        Task { await scanner.llmIdentifyProduct(using: aiRouter) }
+                    } label: {
+                        HStack {
+                            if scanner.isLLMIdentifying {
+                                ProgressView()
+                                    .padding(.trailing, 4)
+                            }
+                            Label("Try AI Identification", systemImage: "sparkles")
+                        }
+                    }
+                    .disabled(scanner.isLLMIdentifying)
 
                     TextField("Item Name", text: $manualName)
                     Picker("Category", selection: $manualCategory) {
                         ForEach(IngredientCategory.allCases, id: \.self) { c in
                             Text(c.rawValue.capitalized).tag(c)
                         }
+                    }
+
+                    if let img = scanner.capturedImage {
+                        Image(uiImage: img)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxHeight: 120)
+                            .clipShape(.rect(cornerRadius: 8))
                     }
                 }
 
@@ -512,6 +581,78 @@ struct AddPantryItemView: View {
                             expirationDate: hasExpiration ? expirationDate : nil
                         )
                         modelContext.insert(item)
+                        dismiss()
+                    }
+                    .disabled(name.isEmpty)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Edit Pantry Item View
+
+struct EditPantryItemView: View {
+    @Bindable var item: PantryItem
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var name: String
+    @State private var category: IngredientCategory
+    @State private var quantity: Double
+    @State private var unit: MeasurementUnit
+    @State private var hasExpiration: Bool
+    @State private var expirationDate: Date
+
+    init(item: PantryItem) {
+        self.item = item
+        _name = State(initialValue: item.name)
+        _category = State(initialValue: item.category)
+        _quantity = State(initialValue: item.quantity)
+        _unit = State(initialValue: item.unit)
+        _hasExpiration = State(initialValue: item.expirationDate != nil)
+        _expirationDate = State(initialValue: item.expirationDate ?? Date().addingTimeInterval(7 * 86400))
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Item Name", text: $name)
+
+                Picker("Category", selection: $category) {
+                    ForEach(IngredientCategory.allCases, id: \.self) { c in
+                        Text(c.rawValue.capitalized).tag(c)
+                    }
+                }
+
+                HStack {
+                    TextField("Qty", value: $quantity, format: .number)
+                        .keyboardType(.decimalPad)
+                        .frame(width: 80)
+                    Picker("Unit", selection: $unit) {
+                        ForEach(MeasurementUnit.allCases, id: \.self) { u in
+                            Text(u.rawValue).tag(u)
+                        }
+                    }
+                }
+
+                Toggle("Has Expiration Date", isOn: $hasExpiration)
+                if hasExpiration {
+                    DatePicker("Expires", selection: $expirationDate, displayedComponents: .date)
+                }
+            }
+            .navigationTitle("Edit Item")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        item.name = name
+                        item.category = category
+                        item.quantity = quantity
+                        item.unit = unit
+                        item.expirationDate = hasExpiration ? expirationDate : nil
                         dismiss()
                     }
                     .disabled(name.isEmpty)

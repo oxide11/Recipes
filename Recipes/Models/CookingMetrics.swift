@@ -16,6 +16,16 @@ struct CookingMetrics: Sendable {
     var favoriteCuisines: [CuisineUsage]
     var topRecipes: [RecipeUsage]
 
+    // Time savings from optimized cooking
+    var totalTimeSavedMinutes: Int
+
+    // Restaurant journal stats
+    var totalRestaurantsVisited: Int
+    var totalDishesOrdered: Int
+    var averageRestaurantRating: Double?
+    var topRestaurantCuisines: [CuisineUsage]
+    var lastRestaurantVisitDate: Date?
+
     var averageCookingSessionMinutes: Double {
         guard totalRecipesCooked > 0 else { return 0 }
         return Double(totalTimeCookingMinutes) / Double(totalRecipesCooked)
@@ -49,6 +59,7 @@ enum MetricsCalculator {
     static func calculate(
         recipes: [Recipe],
         receipts: [GroceryReceipt],
+        restaurantEntries: [RestaurantJournalEntry] = [],
         averageMealOutCost: Double = 18.0
     ) -> CookingMetrics {
         let allLogs = recipes.flatMap(\.cookingLog)
@@ -58,6 +69,9 @@ enum MetricsCalculator {
         let totalPrepTime = allLogs.compactMap(\.prepTimeMinutes).reduce(0, +)
         let totalGrocery = receipts.map(\.totalAmount).reduce(0, +)
         let estimatedSavings = Double(totalCooked) * averageMealOutCost - totalGrocery
+
+        // Time saved
+        let totalTimeSaved = allLogs.compactMap(\.timeSavedMinutes).reduce(0, +)
 
         // Most used ingredients
         var ingredientCounts: [String: Int] = [:]
@@ -89,6 +103,25 @@ enum MetricsCalculator {
             .sorted { $0.cookCount > $1.cookCount }
             .prefix(10)
 
+        // Restaurant stats
+        let totalRestaurants = restaurantEntries.count
+        let allDishes = restaurantEntries.flatMap(\.dishesOrdered)
+        let restaurantRatings = restaurantEntries.compactMap(\.rating)
+        let avgRestaurantRating: Double? = restaurantRatings.isEmpty ? nil
+            : Double(restaurantRatings.reduce(0, +)) / Double(restaurantRatings.count)
+
+        var restaurantCuisineCounts: [Cuisine: Int] = [:]
+        for entry in restaurantEntries {
+            if let cuisine = entry.cuisine {
+                restaurantCuisineCounts[cuisine, default: 0] += 1
+            }
+        }
+        let topRestaurantCuisines = restaurantCuisineCounts
+            .map { CuisineUsage(cuisine: $0.key, count: $0.value) }
+            .sorted { $0.count > $1.count }
+
+        let lastVisit = restaurantEntries.map(\.dateVisited).max()
+
         return CookingMetrics(
             totalRecipesCooked: totalCooked,
             totalTimeCookingMinutes: totalCookTime,
@@ -98,7 +131,13 @@ enum MetricsCalculator {
             estimatedDiningOutSavings: max(0, estimatedSavings),
             mostUsedIngredients: Array(topIngredients),
             favoriteCuisines: topCuisines,
-            topRecipes: Array(topRecipes)
+            topRecipes: Array(topRecipes),
+            totalTimeSavedMinutes: totalTimeSaved,
+            totalRestaurantsVisited: totalRestaurants,
+            totalDishesOrdered: allDishes.count,
+            averageRestaurantRating: avgRestaurantRating,
+            topRestaurantCuisines: topRestaurantCuisines,
+            lastRestaurantVisitDate: lastVisit
         )
     }
 }

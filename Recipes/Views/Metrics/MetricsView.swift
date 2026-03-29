@@ -7,9 +7,10 @@ import Charts
 struct MetricsView: View {
     @Query private var recipes: [Recipe]
     @Query private var receipts: [GroceryReceipt]
+    @Query private var restaurantEntries: [RestaurantJournalEntry]
 
     private var metrics: CookingMetrics {
-        MetricsCalculator.calculate(recipes: recipes, receipts: receipts)
+        MetricsCalculator.calculate(recipes: recipes, receipts: receipts, restaurantEntries: restaurantEntries)
     }
 
     var body: some View {
@@ -21,6 +22,7 @@ struct MetricsView: View {
                     topIngredientsSection
                     topRecipesSection
                     savingsSection
+                    restaurantStatsSection
                 }
                 .padding()
             }
@@ -57,6 +59,15 @@ struct MetricsView: View {
                 icon: "cart",
                 color: Brand.ingredientSeasoning
             )
+
+            if metrics.totalTimeSavedMinutes != 0 {
+                MetricCard(
+                    title: "Time Saved",
+                    value: formatMinutes(metrics.totalTimeSavedMinutes),
+                    icon: "clock.arrow.trianglehead.counterclockwise.rotate.90",
+                    color: Brand.herbGreen
+                )
+            }
         }
     }
 
@@ -174,6 +185,80 @@ struct MetricsView: View {
         .padding()
         .background(in: .rect(cornerRadius: 12))
         .glassEffect(.regular, in: .rect(cornerRadius: 12))
+    }
+
+    // MARK: - Restaurant Stats
+
+    @ViewBuilder
+    private var restaurantStatsSection: some View {
+        if metrics.totalRestaurantsVisited > 0 {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Restaurant Journal")
+                    .font(.headline)
+
+                LazyVGrid(columns: [.init(.flexible()), .init(.flexible())], spacing: 12) {
+                    MetricCard(
+                        title: "Visited",
+                        value: "\(metrics.totalRestaurantsVisited)",
+                        icon: "fork.knife",
+                        color: Brand.warmTan
+                    )
+                    MetricCard(
+                        title: "Dishes Tried",
+                        value: "\(metrics.totalDishesOrdered)",
+                        icon: "list.clipboard",
+                        color: Brand.herbGreen
+                    )
+                }
+
+                if let avgRating = metrics.averageRestaurantRating {
+                    HStack {
+                        Text("Average Rating")
+                            .font(.subheadline)
+                        Spacer()
+                        HStack(spacing: 2) {
+                            ForEach(1...5, id: \.self) { star in
+                                Image(systemName: star <= Int(avgRating.rounded()) ? "star.fill" : "star")
+                                    .font(.caption2)
+                                    .foregroundStyle(Brand.warmTan)
+                            }
+                        }
+                    }
+                }
+
+                if let lastVisit = metrics.lastRestaurantVisitDate {
+                    HStack {
+                        Text("Last Visit")
+                            .font(.subheadline)
+                        Spacer()
+                        Text(lastVisit, style: .relative)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if !metrics.topRestaurantCuisines.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Top Cuisines")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        ForEach(metrics.topRestaurantCuisines.prefix(5)) { cuisine in
+                            HStack {
+                                Text(cuisine.cuisine.rawValue.capitalized)
+                                    .font(.subheadline)
+                                Spacer()
+                                Text("\(cuisine.count)x")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding()
+            .background(in: .rect(cornerRadius: 12))
+            .glassEffect(.regular, in: .rect(cornerRadius: 12))
+        }
     }
 
     private func formatMinutes(_ minutes: Int) -> String {

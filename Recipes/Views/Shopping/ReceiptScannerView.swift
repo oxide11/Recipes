@@ -131,6 +131,9 @@ struct ReceiptScannerRepresentable: UIViewControllerRepresentable {
 struct ReceiptScannerView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(AIServiceRouter.self) private var aiRouter
+
+    var groceryList: GroceryList?
 
     @State private var scannedText = ""
     @State private var isScanning = true
@@ -144,6 +147,9 @@ struct ReceiptScannerView: View {
     @State private var errorMessage: String?
     @State private var didSaveReceipt = false
     @State private var showingSaveConfirmation = false
+    @State private var matchResults: [ReceiptMatchingService.MatchResult] = []
+    @State private var showingMatchPreview = false
+    @State private var isMatching = false
 
     private var isScannerAvailable: Bool {
         DataScannerViewController.isSupported && DataScannerViewController.isAvailable
@@ -152,7 +158,9 @@ struct ReceiptScannerView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                if showingReview {
+                if showingMatchPreview {
+                    matchPreviewView
+                } else if showingReview {
                     reviewView
                 } else {
                     scannerView
@@ -183,6 +191,115 @@ struct ReceiptScannerView: View {
                 Text(errorMessage ?? "")
             }
         }
+    }
+
+    // MARK: - Match Preview View
+
+    private var matchPreviewView: some View {
+        Form {
+            Section {
+                ForEach(matchResults.indices, id: \.self) { index in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(matchResults[index].receiptItem.name)
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                            Text(matchResults[index].receiptItem.price, format: .currency(code: "CAD"))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "arrow.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+
+                        Spacer()
+
+                        if let grocery = matchResults[index].groceryItem {
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text(grocery.name)
+                                    .font(.subheadline)
+                                confidenceLabel(matchResults[index].confidence)
+                            }
+                        } else {
+                            Text("No match")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Toggle("", isOn: $matchResults[index].isConfirmed)
+                            .labelsHidden()
+                            .disabled(matchResults[index].groceryItem == nil)
+                    }
+                }
+            } header: {
+                Text("Receipt → Shopping List")
+            } footer: {
+                Text("Toggle on matches to update actual prices on your shopping list items.")
+            }
+
+            Section {
+                Button {
+                    applyConfirmedMatches()
+                } label: {
+                    HStack {
+                        Spacer()
+                        Label("Apply Matches", systemImage: "checkmark.circle.fill")
+                            .font(.headline)
+                        Spacer()
+                    }
+                    .padding(.vertical, 4)
+                }
+                .buttonStyle(.glass)
+
+                if groceryList != nil {
+                    Button {
+                        runLLMMatching()
+                    } label: {
+                        HStack {
+                            Spacer()
+                            if isMatching {
+                                ProgressView()
+                                    .padding(.trailing, 8)
+                            }
+                            Label("Match with AI", systemImage: "sparkles")
+                            Spacer()
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    .buttonStyle(.glass)
+                    .disabled(isMatching)
+                }
+
+                Button {
+                    // Skip matching, just confirm save
+                    matchResults = []
+                    showingMatchPreview = false
+                    didSaveReceipt = true
+                    showingSaveConfirmation = true
+                } label: {
+                    HStack {
+                        Spacer()
+                        Text("Skip Matching")
+                        Spacer()
+                    }
+                    .padding(.vertical, 4)
+                }
+                .buttonStyle(.glass)
+            }
+            .listRowBackground(Color.clear)
+        }
+        .scrollContentBackground(.hidden)
+    }
+
+    private func confidenceLabel(_ confidence: Double) -> some View {
+        let percent = Int(confidence * 100)
+        let color: Color = confidence >= 0.7 ? Brand.herbGreen : confidence >= 0.4 ? Brand.warmTan : Brand.spiceRed
+        return Text("\(percent)%")
+            .font(.caption2)
+            .foregroundStyle(color)
     }
 
     // MARK: - Scanner View
@@ -426,9 +543,58 @@ struct ReceiptScannerView: View {
             return ReceiptLineItem(name: item.name, price: price, quantity: 1)
         }
 
+        // Link receipt to grocery list
+        if let groceryList {
+            receipt.groceryList = groceryList
+            groceryList.receipts.append(receipt)
+        }
+
         modelContext.insert(receipt)
+
+        // Attempt to match receipt items to grocery items
+        if let groceryList, !groceryList.items.isEmpty {
+            let results = ReceiptMatchingService.matchReceiptItems(receipt.items, to: groceryList.items)
+            let autoMatches = results.filter { $0.confidence >= 0.5 && $0.groceryItem != nil }
+            if !autoMatches.isEmpty {
+                matchResults = results
+                showingMatchPreview = true
+                return
+            }
+        }
+
         didSaveReceipt = true
         showingSaveConfirmation = true
+    }
+
+    private func applyConfirmedMatches() {
+        let confirmed = matchResults.filter { $0.isConfirmed && $0.groceryItem != nil }
+        ReceiptMatchingService.applyMatches(confirmed)
+        matchResults = []
+        showingMatchPreview = false
+        didSaveReceipt = true
+        showingSaveConfirmation = true
+    }
+
+    private func runLLMMatching() {
+        guard let groceryList else { return }
+        isMatching = true
+        let receiptItems = editedItems.compactMap { item -> ReceiptLineItem? in
+            guard !item.name.isEmpty, let price = Double(item.price) else { return nil }
+            return ReceiptLineItem(name: item.name, price: price, quantity: 1)
+        }
+        Task {
+            do {
+                let results = try await ReceiptMatchingService.llmAssistedMatch(
+                    receiptItems: receiptItems,
+                    groceryItems: groceryList.items,
+                    using: aiRouter
+                )
+                matchResults = results
+            } catch {
+                errorMessage = "AI matching failed: \(error.localizedDescription)"
+            }
+            isMatching = false
+        }
     }
 }
 
@@ -436,5 +602,6 @@ struct ReceiptScannerView: View {
 
 #Preview {
     ReceiptScannerView()
+        .environment(AIServiceRouter())
         .modelContainer(for: GroceryReceipt.self, inMemory: true)
 }

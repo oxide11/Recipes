@@ -28,6 +28,8 @@
 		33C70C0D2F795ECA0042AA3F /* MealPrepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C70C0C2F795ECA0042AA3F /* MealPrepView.swift */; };
 		33C70C112F795F050042AA3F /* PlanAndShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C70C102F795F050042AA3F /* PlanAndShopView.swift */; };
 		33C70C132F795F050042AA3F /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C70C122F795F050042AA3F /* ActivityView.swift */; };
+		33C70C152F7965220042AA3F /* ReceiptMatchingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C70C142F7965220042AA3F /* ReceiptMatchingService.swift */; };
+		33C70C172F796CF00042AA3F /* MultiRecipeCookingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C70C162F796CF00042AA3F /* MultiRecipeCookingService.swift */; };
 		33D499DD2F78A47700B319B9 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D499DC2F78A47600B319B9 /* Brand.swift */; };
 		36C4BCC226964689AF30CD5D /* RecipeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4777D7B907B44FB096727535 /* RecipeListView.swift */; };
 		39B6B03D778047D38F6CCCC3 /* SafeCookingTemperatureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27FEE83D3E3490482E34258 /* SafeCookingTemperatureService.swift */; };
@@ -129,6 +131,8 @@
 		33C70C0C2F795ECA0042AA3F /* MealPrepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPrepView.swift; sourceTree = "<group>"; };
 		33C70C102F795F050042AA3F /* PlanAndShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanAndShopView.swift; sourceTree = "<group>"; };
 		33C70C122F795F050042AA3F /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
+		33C70C142F7965220042AA3F /* ReceiptMatchingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptMatchingService.swift; sourceTree = "<group>"; };
+		33C70C162F796CF00042AA3F /* MultiRecipeCookingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiRecipeCookingService.swift; sourceTree = "<group>"; };
 		33D499DC2F78A47600B319B9 /* Brand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brand.swift; sourceTree = "<group>"; };
 		35871CC1E193462DB7CDE628 /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
 		3A30F9E1863F4EA88497ADDE /* ShoppingVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingVoiceService.swift; sourceTree = "<group>"; };
@@ -452,6 +456,8 @@
 				7A1D5836B61243989376811D /* SmartNotificationService.swift */,
 				8541F673885547488ECF6B8E /* SubstitutionEngine.swift */,
 				33C70C0A2F795E960042AA3F /* MealPrepPlanGenerator.swift */,
+				33C70C142F7965220042AA3F /* ReceiptMatchingService.swift */,
+				33C70C162F796CF00042AA3F /* MultiRecipeCookingService.swift */,
 			);
 			path = Domain;
 			sourceTree = "<group>";
@@ -619,6 +625,7 @@
 				964B6CAB4F734412B8E765D3 /* ShoppingListGenerator.swift in Sources */,
 				CEE5C12850044CDFBBB41AFB /* ShoppingVoiceService.swift in Sources */,
 				844C6EF9B5D24338B03ADA18 /* SmartNotificationService.swift in Sources */,
+				33C70C172F796CF00042AA3F /* MultiRecipeCookingService.swift in Sources */,
 				B9754B10ADCF4202A9448D02 /* SubstitutionEngine.swift in Sources */,
 				168E4F00B9D842C8A088F16E /* DirectionStepView.swift in Sources */,
 				2E1976178FF245B69CEC7364 /* IngredientRow.swift in Sources */,
@@ -647,6 +654,7 @@
 				668EACA9253A41C2B6D13025 /* GuidedShoppingView.swift in Sources */,
 				E33EB01CAE7049158EE80E64 /* ReceiptScannerView.swift in Sources */,
 				19B0C500E28745A3BDAECD05 /* ShoppingListView.swift in Sources */,
+				33C70C152F7965220042AA3F /* ReceiptMatchingService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

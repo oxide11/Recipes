@@ -55,13 +55,15 @@ final class GroceryItem {
     var actualPrice: Double?
     var substituteFor: String?
     var notes: String?
+    var isStaple: Bool
 
     init(
         name: String,
         quantity: Double,
         unit: MeasurementUnit,
         storeSection: StoreSection = .other,
-        estimatedPrice: Double? = nil
+        estimatedPrice: Double? = nil,
+        isStaple: Bool = false
     ) {
         self.id = UUID()
         self.name = name
@@ -70,6 +72,7 @@ final class GroceryItem {
         self.storeSection = storeSection
         self.isPurchased = false
         self.estimatedPrice = estimatedPrice
+        self.isStaple = isStaple
     }
 }
 
@@ -86,6 +89,9 @@ final class GroceryList {
 
     @Relationship
     var mealPlan: MealPlan?
+
+    @Relationship(deleteRule: .nullify)
+    var receipts: [GroceryReceipt]
 
     var totalEstimatedCost: Double {
         items.compactMap(\.estimatedPrice).reduce(0, +)
@@ -112,6 +118,7 @@ final class GroceryList {
         self.dateCreated = .now
         self.items = []
         self.mealPlan = mealPlan
+        self.receipts = []
     }
 }
 
@@ -125,6 +132,9 @@ final class GroceryReceipt {
     var date: Date
     var totalAmount: Double
     var items: [ReceiptLineItem]
+
+    @Relationship
+    var groceryList: GroceryList?
 
     init(storeName: String? = nil, date: Date = .now, totalAmount: Double = 0) {
         self.id = UUID()

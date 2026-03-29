@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import MapKit
 
 // MARK: - Restaurant Journal View
 
@@ -13,6 +14,7 @@ struct RestaurantJournalView: View {
     @State private var showingAddWantToTry = false
     @State private var entryToDelete: RestaurantJournalEntry?
     @State private var wantToTryToDelete: RestaurantWantToTry?
+    @State private var showingMap = false
 
     var body: some View {
         NavigationStack {
@@ -33,7 +35,14 @@ struct RestaurantJournalView: View {
             .navigationTitle("Restaurant Journal")
             .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    Button {
+                        showingMap = true
+                    } label: {
+                        Image(systemName: "globe.americas")
+                    }
+                    .accessibilityLabel("View Map")
+
                     Button("Add", systemImage: "plus") {
                         if selectedSegment == 0 {
                             showingAddEntry = true
@@ -48,6 +57,9 @@ struct RestaurantJournalView: View {
             }
             .sheet(isPresented: $showingAddWantToTry) {
                 AddWantToTryView()
+            }
+            .sheet(isPresented: $showingMap) {
+                RestaurantMapView(entries: entries, wantToTry: wantToTry)
             }
         }
     }
@@ -96,6 +108,18 @@ struct RestaurantJournalView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
+                        if !entry.dishesOrdered.isEmpty {
+                            HStack(spacing: 4) {
+                                Image(systemName: "fork.knife")
+                                    .font(.caption2)
+                                    .foregroundStyle(Brand.warmTan)
+                                Text(entry.dishesOrdered.map(\.name).joined(separator: ", "))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+
                         if let review = entry.review {
                             Text(review)
                                 .font(.caption)
@@ -103,6 +127,31 @@ struct RestaurantJournalView: View {
                         }
                     }
                     .padding(.vertical, 2)
+                    .contextMenu {
+                        ShareLink(
+                            item: shareText(for: entry),
+                            subject: Text(entry.restaurantName),
+                            message: Text("Check out \(entry.restaurantName)!")
+                        ) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                        }
+
+                        ShareLink(
+                            item: recommendText(for: entry),
+                            subject: Text("Restaurant Recommendation"),
+                            message: Text("I recommend \(entry.restaurantName)")
+                        ) {
+                            Label("Recommend", systemImage: "hand.thumbsup")
+                        }
+
+                        if entry.hasCoordinates {
+                            Button {
+                                openInMaps(entry.restaurantName, latitude: entry.latitude!, longitude: entry.longitude!)
+                            } label: {
+                                Label("View on Map", systemImage: "map")
+                            }
+                        }
+                    }
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
                             entryToDelete = entry
@@ -164,6 +213,22 @@ struct RestaurantJournalView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+                    .contextMenu {
+                        ShareLink(
+                            item: "Check out \(restaurant.restaurantName)\(restaurant.location.map { " in \($0)" } ?? "")!",
+                            subject: Text(restaurant.restaurantName)
+                        ) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                        }
+
+                        if restaurant.hasCoordinates {
+                            Button {
+                                openInMaps(restaurant.restaurantName, latitude: restaurant.latitude!, longitude: restaurant.longitude!)
+                            } label: {
+                                Label("View on Map", systemImage: "map")
+                            }
+                        }
+                    }
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
                             wantToTryToDelete = restaurant
@@ -192,6 +257,200 @@ struct RestaurantJournalView: View {
             Text("Remove \"\(wantToTryToDelete?.restaurantName ?? "")\" from your list?")
         }
     }
+
+    // MARK: - Helpers
+
+    private func shareText(for entry: RestaurantJournalEntry) -> String {
+        var text = entry.restaurantName
+        if let location = entry.location { text += " — \(location)" }
+        if let cuisine = entry.cuisine { text += " (\(cuisine.rawValue.capitalized))" }
+        if let rating = entry.rating { text += " \(String(repeating: "⭐️", count: rating))" }
+        if let review = entry.review { text += "\n\(review)" }
+        return text
+    }
+
+    private func recommendText(for entry: RestaurantJournalEntry) -> String {
+        var text = "I recommend \(entry.restaurantName)"
+        if let location = entry.location { text += " in \(location)" }
+        if let cuisine = entry.cuisine { text += " for \(cuisine.rawValue.capitalized) food" }
+        text += "!"
+        if let review = entry.review {
+            let excerpt = review.prefix(100)
+            text += " \"\(excerpt)\(review.count > 100 ? "..." : "")\""
+        }
+        return text
+    }
+
+    private func openInMaps(_ name: String, latitude: Double, longitude: Double) {
+        let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        let item = MKMapItem(location: location, address: nil)
+        item.name = name
+        item.openInMaps()
+    }
+}
+
+// MARK: - Restaurant Map View
+
+struct RestaurantMapView: View {
+    let entries: [RestaurantJournalEntry]
+    let wantToTry: [RestaurantWantToTry]
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            Map {
+                ForEach(entries.filter(\.hasCoordinates)) { entry in
+                    Annotation(entry.restaurantName, coordinate: CLLocationCoordinate2D(
+                        latitude: entry.latitude!,
+                        longitude: entry.longitude!
+                    )) {
+                        VStack(spacing: 2) {
+                            Image(systemName: "fork.knife.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(Brand.herbGreen)
+                            Text(entry.restaurantName)
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                        }
+                    }
+                }
+
+                ForEach(wantToTry.filter(\.hasCoordinates)) { restaurant in
+                    Annotation(restaurant.restaurantName, coordinate: CLLocationCoordinate2D(
+                        latitude: restaurant.latitude!,
+                        longitude: restaurant.longitude!
+                    )) {
+                        VStack(spacing: 2) {
+                            Image(systemName: "bookmark.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(Brand.warmTan)
+                            Text(restaurant.restaurantName)
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Restaurant Map")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+            .overlay(alignment: .bottomLeading) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Label("Visited", systemImage: "fork.knife.circle.fill")
+                        .font(.caption2)
+                        .foregroundStyle(Brand.herbGreen)
+                    Label("Want to Try", systemImage: "bookmark.circle.fill")
+                        .font(.caption2)
+                        .foregroundStyle(Brand.warmTan)
+                }
+                .padding(8)
+                .background(.ultraThinMaterial, in: .rect(cornerRadius: 8))
+                .padding()
+            }
+        }
+    }
+}
+
+// MARK: - Location Search Helper
+
+/// Resolved place data from MKLocalSearch, including auto-populated fields.
+struct ResolvedPlace: @unchecked Sendable {
+    let name: String
+    let address: String?
+    let coordinate: CLLocationCoordinate2D
+    let phoneNumber: String?
+    let url: URL?
+    let mapItem: MKMapItem
+
+    /// Heuristic cuisine inference from point-of-interest category or name.
+    var inferredCuisine: Cuisine? {
+        let lower = name.lowercased()
+        if lower.contains("sushi") || lower.contains("ramen") || lower.contains("izakaya") { return .japanese }
+        if lower.contains("pizza") || lower.contains("trattoria") || lower.contains("osteria") { return .italian }
+        if lower.contains("taco") || lower.contains("burrito") { return .mexican }
+        if lower.contains("curry") || lower.contains("tandoori") || lower.contains("masala") { return .indian }
+        if lower.contains("pho") || lower.contains("banh mi") { return .vietnamese }
+        if lower.contains("bibimbap") || lower.contains("korean") { return .korean }
+        if lower.contains("dim sum") || lower.contains("szechuan") || lower.contains("wok") { return .chinese }
+        if lower.contains("thai") || lower.contains("pad thai") { return .thai }
+        if lower.contains("bistro") || lower.contains("brasserie") || lower.contains("crêpe") { return .french }
+        return nil
+    }
+
+    /// Heuristic price range inference.
+    var inferredPriceRange: PriceRange? {
+        let lower = name.lowercased()
+        if lower.contains("fine") || lower.contains("gourmet") { return .fine }
+        if lower.contains("bistro") || lower.contains("steakhouse") { return .upscale }
+        return nil
+    }
+}
+
+@Observable
+@MainActor
+class LocationSearchService {
+    var results: [MKLocalSearchCompletion] = []
+    private var completer: MKLocalSearchCompleter
+    private var delegate: SearchDelegate?
+
+    init() {
+        completer = MKLocalSearchCompleter()
+        completer.resultTypes = .pointOfInterest
+        let del = SearchDelegate()
+        del.parent = self
+        delegate = del
+        completer.delegate = del
+    }
+
+    func search(_ query: String) {
+        completer.queryFragment = query
+    }
+
+    func resolveCoordinates(for completion: MKLocalSearchCompletion) async -> CLLocationCoordinate2D? {
+        let request = MKLocalSearch.Request(completion: completion)
+        let search = MKLocalSearch(request: request)
+        do {
+            let response = try await search.start()
+            return response.mapItems.first?.location.coordinate
+        } catch {
+            return nil
+        }
+    }
+
+    func resolvePlace(for completion: MKLocalSearchCompletion) async -> ResolvedPlace? {
+        let request = MKLocalSearch.Request(completion: completion)
+        request.resultTypes = .pointOfInterest
+        let search = MKLocalSearch(request: request)
+        do {
+            let response = try await search.start()
+            guard let item = response.mapItems.first else { return nil }
+            let address = item.address?.shortAddress ?? item.address?.fullAddress
+            return ResolvedPlace(
+                name: item.name ?? completion.title,
+                address: address,
+                coordinate: item.location.coordinate,
+                phoneNumber: item.phoneNumber,
+                url: item.url,
+                mapItem: item
+            )
+        } catch {
+            return nil
+        }
+    }
+
+    private class SearchDelegate: NSObject, @preconcurrency MKLocalSearchCompleterDelegate {
+        weak var parent: LocationSearchService?
+
+        @MainActor
+        func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+            parent?.results = completer.results
+        }
+    }
 }
 
 // MARK: - Add Restaurant Entry
@@ -206,25 +465,88 @@ struct AddRestaurantEntryView: View {
     @State private var rating = 3
     @State private var review = ""
     @State private var priceRange: PriceRange = .moderate
+    @State private var selectedLatitude: Double?
+    @State private var selectedLongitude: Double?
+    @State private var locationSearch = LocationSearchService()
+    @State private var showingSearchResults = false
+    @State private var resolvedPlace: ResolvedPlace?
+    @State private var dishes: [DishEntry] = []
+    @State private var showingAddDish = false
+    @State private var selectedPhoneNumber: String?
+    @State private var selectedMapsURL: String?
 
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Restaurant Name", text: $name)
-                TextField("Location", text: $location)
+                // Restaurant search
+                Section("Restaurant") {
+                    TextField("Restaurant Name", text: $name)
+                        .onChange(of: name) { _, newValue in
+                            if newValue.count >= 3 {
+                                locationSearch.search(newValue)
+                                showingSearchResults = true
+                            } else {
+                                showingSearchResults = false
+                            }
+                        }
 
-                Picker("Cuisine", selection: $cuisine) {
-                    ForEach(Cuisine.allCases, id: \.self) { c in
-                        Text(c.rawValue.capitalized).tag(c)
+                    if showingSearchResults && !locationSearch.results.isEmpty {
+                        ForEach(locationSearch.results.prefix(5), id: \.self) { result in
+                            Button {
+                                Task { await selectRestaurant(result) }
+                            } label: {
+                                VStack(alignment: .leading) {
+                                    Text(result.title)
+                                        .font(.subheadline)
+                                    Text(result.subtitle)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .tint(.primary)
+                        }
                     }
                 }
 
-                Picker("Price Range", selection: $priceRange) {
-                    ForEach(PriceRange.allCases, id: \.self) { p in
-                        Text(p.displayString).tag(p)
+                // Details (auto-populated, editable)
+                Section("Details") {
+                    TextField("Location", text: $location)
+
+                    Picker("Cuisine", selection: $cuisine) {
+                        ForEach(Cuisine.allCases, id: \.self) { c in
+                            Text(c.rawValue.capitalized).tag(c)
+                        }
+                    }
+
+                    Picker("Price Range", selection: $priceRange) {
+                        ForEach(PriceRange.allCases, id: \.self) { p in
+                            Text(p.displayString).tag(p)
+                        }
+                    }
+
+                    if selectedLatitude != nil {
+                        Label("Location set", systemImage: "mappin.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(Brand.herbGreen)
                     }
                 }
 
+                // Open in Maps
+                if let resolvedPlace {
+                    Section {
+                        Button {
+                            resolvedPlace.mapItem.openInMaps()
+                        } label: {
+                            Label("Open in Apple Maps", systemImage: "map.fill")
+                        }
+
+                        if let phone = resolvedPlace.phoneNumber {
+                            LabeledContent("Phone", value: phone)
+                        }
+                    }
+                }
+
+                // Rating
                 Section("Rating") {
                     HStack {
                         ForEach(1...5, id: \.self) { star in
@@ -241,6 +563,23 @@ struct AddRestaurantEntryView: View {
                     .sensoryFeedback(.selection, trigger: rating)
                 }
 
+                // Dishes Ordered
+                Section("Dishes Ordered") {
+                    ForEach(dishes, id: \.name) { dish in
+                        DishEntryRow(dish: dish)
+                    }
+                    .onDelete { indices in
+                        dishes.remove(atOffsets: indices)
+                    }
+
+                    Button {
+                        showingAddDish = true
+                    } label: {
+                        Label("Add Dish", systemImage: "plus.circle")
+                    }
+                }
+
+                // Review
                 Section("Review") {
                     TextField("What did you think?", text: $review, axis: .vertical)
                         .lineLimit(5)
@@ -260,13 +599,42 @@ struct AddRestaurantEntryView: View {
                             cuisine: cuisine,
                             rating: rating,
                             review: review.isEmpty ? nil : review,
-                            priceRange: priceRange
+                            priceRange: priceRange,
+                            latitude: selectedLatitude,
+                            longitude: selectedLongitude,
+                            phoneNumber: selectedPhoneNumber,
+                            mapsURL: selectedMapsURL
                         )
+                        entry.dishesOrdered = dishes
                         modelContext.insert(entry)
                         dismiss()
                     }
                     .disabled(name.isEmpty)
                 }
+            }
+            .sheet(isPresented: $showingAddDish) {
+                AddDishView { dish in
+                    dishes.append(dish)
+                }
+            }
+        }
+    }
+
+    private func selectRestaurant(_ result: MKLocalSearchCompletion) async {
+        name = result.title
+        showingSearchResults = false
+        if let place = await locationSearch.resolvePlace(for: result) {
+            resolvedPlace = place
+            location = place.address ?? "\(result.title), \(result.subtitle)"
+            selectedLatitude = place.coordinate.latitude
+            selectedLongitude = place.coordinate.longitude
+            selectedPhoneNumber = place.phoneNumber
+            selectedMapsURL = place.url?.absoluteString
+            if let inferredCuisine = place.inferredCuisine {
+                cuisine = inferredCuisine
+            }
+            if let inferredPrice = place.inferredPriceRange {
+                priceRange = inferredPrice
             }
         }
     }
@@ -280,14 +648,77 @@ struct AddWantToTryView: View {
 
     @State private var name = ""
     @State private var location = ""
+    @State private var cuisine: Cuisine = .other
     @State private var reason = ""
+    @State private var selectedLatitude: Double?
+    @State private var selectedLongitude: Double?
+    @State private var locationSearch = LocationSearchService()
+    @State private var showingSearchResults = false
+    @State private var resolvedPlace: ResolvedPlace?
 
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Restaurant Name", text: $name)
-                TextField("Location", text: $location)
-                TextField("Why do you want to try it?", text: $reason, axis: .vertical)
+                // Restaurant search
+                Section("Restaurant") {
+                    TextField("Restaurant Name", text: $name)
+                        .onChange(of: name) { _, newValue in
+                            if newValue.count >= 3 {
+                                locationSearch.search(newValue)
+                                showingSearchResults = true
+                            } else {
+                                showingSearchResults = false
+                            }
+                        }
+
+                    if showingSearchResults && !locationSearch.results.isEmpty {
+                        ForEach(locationSearch.results.prefix(5), id: \.self) { result in
+                            Button {
+                                Task { await selectRestaurant(result) }
+                            } label: {
+                                VStack(alignment: .leading) {
+                                    Text(result.title)
+                                        .font(.subheadline)
+                                    Text(result.subtitle)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .tint(.primary)
+                        }
+                    }
+                }
+
+                Section("Details") {
+                    TextField("Location", text: $location)
+
+                    Picker("Cuisine", selection: $cuisine) {
+                        ForEach(Cuisine.allCases, id: \.self) { c in
+                            Text(c.rawValue.capitalized).tag(c)
+                        }
+                    }
+
+                    if selectedLatitude != nil {
+                        Label("Location set", systemImage: "mappin.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(Brand.herbGreen)
+                    }
+                }
+
+                // Open in Maps
+                if let resolvedPlace {
+                    Section {
+                        Button {
+                            resolvedPlace.mapItem.openInMaps()
+                        } label: {
+                            Label("Open in Apple Maps", systemImage: "map.fill")
+                        }
+                    }
+                }
+
+                Section("Reason") {
+                    TextField("Why do you want to try it?", text: $reason, axis: .vertical)
+                }
             }
             .navigationTitle("Want to Try")
             .navigationBarTitleDisplayMode(.inline)
@@ -300,9 +731,137 @@ struct AddWantToTryView: View {
                         let entry = RestaurantWantToTry(
                             restaurantName: name,
                             location: location.isEmpty ? nil : location,
-                            reason: reason.isEmpty ? nil : reason
+                            cuisine: cuisine,
+                            reason: reason.isEmpty ? nil : reason,
+                            latitude: selectedLatitude,
+                            longitude: selectedLongitude
                         )
                         modelContext.insert(entry)
+                        dismiss()
+                    }
+                    .disabled(name.isEmpty)
+                }
+            }
+        }
+    }
+
+    private func selectRestaurant(_ result: MKLocalSearchCompletion) async {
+        name = result.title
+        showingSearchResults = false
+        if let place = await locationSearch.resolvePlace(for: result) {
+            resolvedPlace = place
+            location = place.address ?? "\(result.title), \(result.subtitle)"
+            selectedLatitude = place.coordinate.latitude
+            selectedLongitude = place.coordinate.longitude
+            if let inferredCuisine = place.inferredCuisine {
+                cuisine = inferredCuisine
+            }
+        }
+    }
+}
+
+// MARK: - Dish Entry Row
+
+struct DishEntryRow: View {
+    let dish: DishEntry
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(dish.name)
+                    .fontWeight(.medium)
+                Spacer()
+                if let rating = dish.rating {
+                    HStack(spacing: 2) {
+                        ForEach(1...5, id: \.self) { star in
+                            Image(systemName: star <= rating ? "star.fill" : "star")
+                                .font(.caption2)
+                                .foregroundStyle(Brand.warmTan)
+                        }
+                    }
+                }
+            }
+
+            if let notes = dish.notes, !notes.isEmpty {
+                Text(notes)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            HStack(spacing: 8) {
+                if dish.wouldOrderAgain {
+                    Label("Would order again", systemImage: "hand.thumbsup.fill")
+                        .font(.caption2)
+                        .foregroundStyle(Brand.herbGreen)
+                }
+                if dish.wantToRecreate {
+                    Label("Want to recreate", systemImage: "frying.pan")
+                        .font(.caption2)
+                        .foregroundStyle(Brand.warmTan)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Add Dish View
+
+struct AddDishView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var name = ""
+    @State private var description = ""
+    @State private var rating = 3
+    @State private var notes = ""
+    @State private var wouldOrderAgain = true
+    @State private var wantToRecreate = false
+
+    let onSave: (DishEntry) -> Void
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Dish Name", text: $name)
+                TextField("Description", text: $description, axis: .vertical)
+                    .lineLimit(3)
+
+                Section("Rating") {
+                    HStack {
+                        ForEach(1...5, id: \.self) { star in
+                            Button {
+                                rating = star
+                            } label: {
+                                Image(systemName: star <= rating ? "star.fill" : "star")
+                                    .foregroundStyle(Brand.warmTan)
+                                    .font(.title2)
+                            }
+                        }
+                    }
+                    .sensoryFeedback(.selection, trigger: rating)
+                }
+
+                TextField("Notes", text: $notes, axis: .vertical)
+                    .lineLimit(3)
+                Toggle("Would Order Again", isOn: $wouldOrderAgain)
+                Toggle("Want to Recreate at Home", isOn: $wantToRecreate)
+            }
+            .navigationTitle("Add Dish")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        let dish = DishEntry(
+                            name: name,
+                            description: description.isEmpty ? nil : description,
+                            rating: rating,
+                            notes: notes.isEmpty ? nil : notes,
+                            wouldOrderAgain: wouldOrderAgain,
+                            wantToRecreate: wantToRecreate
+                        )
+                        onSave(dish)
                         dismiss()
                     }
                     .disabled(name.isEmpty)

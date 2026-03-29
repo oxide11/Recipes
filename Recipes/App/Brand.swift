@@ -1,30 +1,31 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Mise Brand System
 
 enum Brand {
 
     // MARK: - Background Layers
-    /// Primary app background — near-black.
-    static let midnight  = Color(hex: "0e0e0e")
+    /// Primary app background — near-black in dark, warm off-white in light.
+    static let midnight  = Color(light: "f8f7f5", dark: "0e0e0e")
     /// Elevated surfaces: cards, sheets, input fields.
-    static let surface   = Color(hex: "1a1a1a")
+    static let surface   = Color(light: "ffffff", dark: "1a1a1a")
     /// Subtle dividers and 0.5pt borders.
-    static let border    = Color(hex: "2a2a2a")
+    static let border    = Color(light: "e0ddd6", dark: "2a2a2a")
 
     // MARK: - Text
-    /// Primary text on dark backgrounds.
-    static let cream     = Color(hex: "f0ede6")
+    /// Primary text — adapts for readability on both light and dark backgrounds.
+    static let cream     = Color(light: "1a1a1a", dark: "f0ede6")
     /// Secondary text, metadata, captions.
-    static let muted     = Color(hex: "888888")
+    static let muted     = Color(light: "666666", dark: "888888")
 
     // MARK: - Accent
-    /// Primary accent — warm tan. Used for tints, highlights, featured items.
-    static let warmTan   = Color(hex: "c8b89a")
+    /// Primary accent — warm tan. Deeper in light mode for contrast.
+    static let warmTan   = Color(light: "9a8462", dark: "c8b89a")
     /// Freshness, seasonal indicators, success states.
-    static let herbGreen = Color(hex: "7a9e7e")
+    static let herbGreen = Color(light: "5a7e5e", dark: "7a9e7e")
     /// Alerts, urgency, destructive actions.
-    static let spiceRed  = Color(hex: "c0624a")
+    static let spiceRed  = Color(light: "a04a34", dark: "c0624a")
 
     // MARK: - Ingredient Category Colors
     // Chosen to feel at home in the brand palette — muted, warm, distinct.
@@ -57,6 +58,19 @@ extension View {
             .tracking(-0.2)
             .foregroundStyle(Brand.muted)
             .textCase(nil)
+    }
+}
+
+// MARK: - Adaptive Color Initialiser
+
+extension Color {
+    /// Creates a color that adapts to the current interface style (light/dark mode).
+    init(light: String, dark: String) {
+        self.init(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(Color(hex: dark))
+                : UIColor(Color(hex: light))
+        })
     }
 }
 

@@ -7,12 +7,15 @@ struct ShoppingListView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AIServiceRouter.self) private var aiRouter
     @Query(sort: \GroceryList.dateCreated, order: .reverse) private var lists: [GroceryList]
+    @Query private var profiles: [UserProfile]
 
     @State private var showingCreateList = false
     @State private var showingGuidedShopping = false
     @State private var showingReceiptScanner = false
     @State private var selectedList: GroceryList?
     @State private var listToDelete: GroceryList?
+
+    private var currencyCode: String { profiles.first?.preferredCurrencyCode ?? "CAD" }
 
     var body: some View {
         NavigationStack {
@@ -34,7 +37,7 @@ struct ShoppingListView: View {
                                 Text("Estimated")
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
-                                Text(activeList.totalEstimatedCost, format: .currency(code: "USD"))
+                                Text(activeList.totalEstimatedCost, format: .currency(code: currencyCode))
                                     .fontWeight(.medium)
                             }
                             Spacer()
@@ -42,7 +45,7 @@ struct ShoppingListView: View {
                                 Text("Actual")
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
-                                Text(activeList.totalActualCost, format: .currency(code: "USD"))
+                                Text(activeList.totalActualCost, format: .currency(code: currencyCode))
                                     .fontWeight(.medium)
                             }
                         }
@@ -67,6 +70,7 @@ struct ShoppingListView: View {
                                     .foregroundStyle(Brand.herbGreen)
                             }
                         }
+                        .disabled(activeList.items.isEmpty || activeList.items.allSatisfy(\.isPurchased))
                     } header: {
                         Text(activeList.name)
                     }
@@ -77,7 +81,7 @@ struct ShoppingListView: View {
                         if !sectionItems.isEmpty {
                             Section {
                                 ForEach(sectionItems) { item in
-                                    ShoppingItemRow(item: item)
+                                    ShoppingItemRow(item: item, currencyCode: currencyCode)
                                 }
                             } header: {
                                 HStack {
@@ -171,7 +175,7 @@ struct ShoppingListView: View {
                 }
             }
             .sheet(isPresented: $showingReceiptScanner) {
-                ReceiptScannerView()
+                ReceiptScannerView(groceryList: lists.first)
             }
         }
     }
@@ -181,6 +185,7 @@ struct ShoppingListView: View {
 
 struct ShoppingItemRow: View {
     @Bindable var item: GroceryItem
+    var currencyCode: String = "CAD"
 
     var body: some View {
         HStack {
@@ -198,10 +203,19 @@ struct ShoppingItemRow: View {
             .accessibilityLabel(item.isPurchased ? "\(item.name), purchased" : "\(item.name), not purchased")
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(item.name)
-                    .strikethrough(item.isPurchased)
-                    .foregroundStyle(item.isPurchased ? .secondary : .primary)
-                    .fontWeight(item.isPurchased ? .regular : .medium)
+                HStack(spacing: 4) {
+                    Text(item.name)
+                        .strikethrough(item.isPurchased)
+                        .foregroundStyle(item.isPurchased ? .secondary : .primary)
+                        .fontWeight(item.isPurchased ? .regular : .medium)
+
+                    if item.isStaple {
+                        Image(systemName: "star.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Brand.warmTan)
+                            .accessibilityLabel("Staple item")
+                    }
+                }
 
                 Text("\(item.quantity, specifier: "%.1f") \(item.unit.rawValue)")
                     .font(.caption)
@@ -222,14 +236,31 @@ struct ShoppingItemRow: View {
 
             Spacer()
 
-            if let price = item.estimatedPrice {
-                Text(price, format: .currency(code: "USD"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
+            VStack(alignment: .trailing, spacing: 2) {
+                if let actual = item.actualPrice {
+                    Text(actual, format: .currency(code: currencyCode))
+                        .font(.caption)
+                        .foregroundStyle(Brand.herbGreen)
+                        .monospacedDigit()
+                }
+                if let price = item.estimatedPrice {
+                    Text(price, format: .currency(code: currencyCode))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                        .strikethrough(item.actualPrice != nil)
+                }
             }
         }
         .padding(.vertical, 2)
+        .swipeActions(edge: .leading) {
+            Button {
+                withAnimation { item.isStaple.toggle() }
+            } label: {
+                Label(item.isStaple ? "Remove Staple" : "Mark Staple", systemImage: item.isStaple ? "star.slash" : "star.fill")
+            }
+            .tint(Brand.warmTan)
+        }
     }
 }
 
@@ -238,13 +269,57 @@ struct ShoppingItemRow: View {
 struct CreateShoppingListView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query private var existingLists: [GroceryList]
 
     @State private var name = ""
+    @State private var includeStaples = true
+
+    /// Collects unique staple items from all existing lists.
+    private var stapleItems: [GroceryItem] {
+        var seen = Set<String>()
+        var result: [GroceryItem] = []
+        for list in existingLists {
+            for item in list.items where item.isStaple {
+                let key = item.name.lowercased()
+                if !seen.contains(key) {
+                    seen.insert(key)
+                    result.append(item)
+                }
+            }
+        }
+        return result
+    }
 
     var body: some View {
         NavigationStack {
             Form {
                 TextField("List Name", text: $name)
+
+                if !stapleItems.isEmpty {
+                    Section {
+                        Toggle("Include Staple Items", isOn: $includeStaples)
+
+                        if includeStaples {
+                            ForEach(stapleItems) { item in
+                                HStack {
+                                    Image(systemName: "star.fill")
+                                        .font(.caption2)
+                                        .foregroundStyle(Brand.warmTan)
+                                    Text(item.name)
+                                        .font(.subheadline)
+                                    Spacer()
+                                    Text("\(item.quantity, specifier: "%.1f") \(item.unit.rawValue)")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("Staples")
+                    } footer: {
+                        Text("Items you always buy will be added automatically.")
+                    }
+                }
             }
             .navigationTitle("New Shopping List")
             .navigationBarTitleDisplayMode(.inline)
@@ -256,6 +331,22 @@ struct CreateShoppingListView: View {
                     Button("Create") {
                         let list = GroceryList(name: name.isEmpty ? "Shopping List" : name)
                         modelContext.insert(list)
+
+                        if includeStaples {
+                            for staple in stapleItems {
+                                let newItem = GroceryItem(
+                                    name: staple.name,
+                                    quantity: staple.quantity,
+                                    unit: staple.unit,
+                                    storeSection: staple.storeSection,
+                                    estimatedPrice: staple.estimatedPrice,
+                                    isStaple: true
+                                )
+                                modelContext.insert(newItem)
+                                list.items.append(newItem)
+                            }
+                        }
+
                         dismiss()
                     }
                 }

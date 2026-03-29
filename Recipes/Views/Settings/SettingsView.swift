@@ -22,12 +22,19 @@ struct SettingsView: View {
 
     private var profile: UserProfile? { profiles.first }
 
+    @State private var showingClearDataConfirm = false
+
+    private static let commonCurrencies = ["CAD", "USD", "EUR", "GBP", "AUD", "JPY", "MXN", "BRL", "INR"]
+
     var body: some View {
         NavigationStack {
             Form {
                 aiSection
                 measurementSection
+                currencySection
+                mealPrepSection
                 notificationsSection
+                iCloudAndSharingSection
                 profileSection
                 sampleDataSection
                 aboutSection
@@ -123,6 +130,126 @@ struct SettingsView: View {
             Label("AI Configuration", systemImage: "sparkles")
         } footer: {
             Text("API keys are stored securely in your device's Keychain. On-device AI processes data locally — no data leaves your device.")
+        }
+    }
+
+    // MARK: - Currency
+
+    private var currencySection: some View {
+        Section {
+            if let profile {
+                Picker("Currency", selection: Bindable(profile).preferredCurrencyCode) {
+                    ForEach(Self.commonCurrencies, id: \.self) { code in
+                        Text("\(code) (\(currencySymbol(for: code)))")
+                            .tag(code)
+                    }
+                }
+            } else {
+                Text("Create a profile to set currency")
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Label("Currency", systemImage: "dollarsign.circle")
+        } footer: {
+            Text("Used for shopping list cost estimates and receipt totals.")
+        }
+    }
+
+    private func currencySymbol(for code: String) -> String {
+        let locale = Locale(identifier: "en_US")
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = code
+        formatter.locale = locale
+        return formatter.currencySymbol ?? code
+    }
+
+    // MARK: - Meal Prep
+
+    private var mealPrepSection: some View {
+        Section {
+            if let profile {
+                Picker("Meal Prep Mode", selection: Bindable(profile).defaultMealPrepMode) {
+                    Text("Daily Prep").tag(MealPrepMode.daily)
+                    Text("Weekly Prep").tag(MealPrepMode.weekly)
+                }
+
+                Toggle(isOn: Bindable(profile).autoDeductPantry) {
+                    VStack(alignment: .leading) {
+                        Text("Auto-Deduct Pantry")
+                        Text("Reduce pantry quantities when you log a cooking session")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } else {
+                Text("Create a profile to configure meal prep")
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Label("Meal Planning & Cooking", systemImage: "calendar")
+        } footer: {
+            Text("Weekly: Shop Saturday, prep Sunday for the whole week. Daily: Prep each day's meals individually.")
+        }
+    }
+
+    // MARK: - iCloud & Sharing
+
+    private var iCloudAndSharingSection: some View {
+        Section {
+            if let profile {
+                Toggle(isOn: Bindable(profile).iCloudSyncEnabled) {
+                    VStack(alignment: .leading) {
+                        HStack {
+                            Text("iCloud Sync")
+                            Text("(todo)")
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                        Text("Sync recipes, meal plans, and pantry across devices")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .disabled(true)
+
+                Toggle(isOn: Bindable(profile).shareRecipesEnabled) {
+                    HStack {
+                        Text("Share Recipes")
+                        Text("(todo)")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .disabled(true)
+
+                Toggle(isOn: Bindable(profile).shareStatsEnabled) {
+                    HStack {
+                        Text("Share Cooking Stats")
+                        Text("(todo)")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .disabled(true)
+
+                Toggle(isOn: Bindable(profile).shareJournalEnabled) {
+                    HStack {
+                        Text("Share Restaurant Journal")
+                        Text("(todo)")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .disabled(true)
+            } else {
+                Text("Create a profile to configure sharing")
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Label("iCloud & Sharing", systemImage: "icloud")
+        } footer: {
+            Text("These features are coming soon.")
         }
     }
 
@@ -238,6 +365,35 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("This will add sample recipes, pantry items, a meal plan, grocery list, restaurant journal entries, and a user profile.")
+            }
+
+            Button(role: .destructive) {
+                showingClearDataConfirm = true
+            } label: {
+                Label {
+                    VStack(alignment: .leading) {
+                        Text("Clear All Data")
+                            .fontWeight(.medium)
+                        Text("Remove all recipes, meal plans, pantry items, and more")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } icon: {
+                    Image(systemName: "trash")
+                        .foregroundStyle(Brand.spiceRed)
+                }
+            }
+            .confirmationDialog(
+                "Clear All Data?",
+                isPresented: $showingClearDataConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("Delete Everything", role: .destructive) {
+                    SampleData.clearAll(modelContext)
+                    sampleDataLoaded = false
+                }
+            } message: {
+                Text("This will permanently delete all recipes, meal plans, pantry items, shopping lists, journal entries, and your profile. This cannot be undone.")
             }
         } header: {
             Label("Developer", systemImage: "hammer")

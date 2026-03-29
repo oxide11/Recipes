@@ -14,8 +14,11 @@ final class BarcodeScannerService: NSObject {
     var errorMessage: String?
     var lookupResult: OpenFoodFactsService.Product?
     var isLookingUp = false
+    var capturedImage: UIImage?
+    var isLLMIdentifying = false
 
     private(set) var captureSession: AVCaptureSession?
+    private var photoOutput: AVCapturePhotoOutput?
 
     /// Supported barcode types for grocery items.
     static let supportedBarcodeTypes: [AVMetadataObject.ObjectType] = [
@@ -59,6 +62,13 @@ final class BarcodeScannerService: NSObject {
         output.setMetadataObjectsDelegate(self, queue: .main)
         output.metadataObjectTypes = Self.supportedBarcodeTypes
 
+        // Add photo output for LLM-assisted identification
+        let photo = AVCapturePhotoOutput()
+        if session.canAddOutput(photo) {
+            session.addOutput(photo)
+            photoOutput = photo
+        }
+
         captureSession = session
         isScanning = true
         scannedCode = nil
@@ -91,11 +101,90 @@ final class BarcodeScannerService: NSObject {
         do {
             lookupResult = try await OpenFoodFactsService.lookup(barcode: code)
             if lookupResult == nil {
-                errorMessage = "Product not found in database. You can add it manually."
+                errorMessage = "Product not found in database. Try AI identification or add manually."
             }
         } catch {
             errorMessage = "Lookup failed: \(error.localizedDescription)"
         }
+    }
+
+    /// Capture a still photo from the current session for LLM identification.
+    func capturePhoto() {
+        guard let photoOutput, let _ = captureSession else {
+            errorMessage = "Camera not available for photo capture."
+            return
+        }
+        let settings = AVCapturePhotoSettings()
+        photoOutput.capturePhoto(with: settings, delegate: self)
+    }
+
+    /// Use an LLM to identify a product from the barcode and/or captured photo.
+    func llmIdentifyProduct(using aiRouter: AIServiceRouter) async {
+        isLLMIdentifying = true
+        defer { isLLMIdentifying = false }
+
+        guard let image = capturedImage,
+              let imageData = image.jpegData(compressionQuality: 0.7) else {
+            // Try text-only identification with barcode
+            guard let code = scannedCode else {
+                errorMessage = "No barcode or photo available for AI identification."
+                return
+            }
+            do {
+                let prompt = """
+                I scanned a grocery product with barcode: \(code).
+                What product is this? Respond with ONLY a JSON object:
+                {"name": "Product Name", "brand": "Brand or null", "category": "one of: protein, dairy, vegetable, fruit, grain, spice, herb, condiment, oil, liquid, sweetener, nut, other"}
+                """
+                let response = try await aiRouter.generateText(prompt: prompt, taskType: .classification)
+                parseProductResponse(response, barcode: code)
+            } catch {
+                errorMessage = "AI identification failed: \(error.localizedDescription)"
+            }
+            return
+        }
+
+        let base64 = imageData.base64EncodedString()
+        let barcode = scannedCode ?? "unknown"
+
+        do {
+            let prompt = """
+            This is a photo of a grocery product. The barcode is: \(barcode).
+            Identify this product. Respond with ONLY a JSON object:
+            {"name": "Product Name", "brand": "Brand or null", "category": "one of: protein, dairy, vegetable, fruit, grain, spice, herb, condiment, oil, liquid, sweetener, nut, other"}
+            """
+            let response = try await aiRouter.analyzeImage(imageBase64: base64, prompt: prompt)
+            parseProductResponse(response, barcode: barcode)
+        } catch {
+            errorMessage = "AI identification failed: \(error.localizedDescription)"
+        }
+    }
+
+    private func parseProductResponse(_ response: String, barcode: String) {
+        // Extract JSON from response
+        guard let jsonStart = response.firstIndex(of: "{"),
+              let jsonEnd = response.lastIndex(of: "}") else {
+            errorMessage = "Could not parse AI response."
+            return
+        }
+        let jsonString = String(response[jsonStart...jsonEnd])
+        guard let data = jsonString.data(using: .utf8),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let name = json["name"] as? String else {
+            errorMessage = "Could not parse AI response."
+            return
+        }
+
+        let brand = json["brand"] as? String
+        let categoryStr = json["category"] as? String ?? "other"
+        let category = IngredientCategory(rawValue: categoryStr) ?? .other
+
+        lookupResult = OpenFoodFactsService.Product(
+            name: name,
+            brand: brand,
+            category: category,
+            barcode: barcode
+        )
     }
 
     /// Convert the lookup result to a PantryItem.
@@ -131,6 +220,29 @@ extension BarcodeScannerService: AVCaptureMetadataOutputObjectsDelegate {
             scannedCode = code
             stopScanning()
             Task { await lookupScannedProduct() }
+        }
+    }
+}
+
+// MARK: - AVCapturePhotoCaptureDelegate
+
+extension BarcodeScannerService: AVCapturePhotoCaptureDelegate {
+    nonisolated func photoOutput(
+        _ output: AVCapturePhotoOutput,
+        didFinishProcessingPhoto photo: AVCapturePhoto,
+        error: Error?
+    ) {
+        MainActor.assumeIsolated {
+            if let error {
+                errorMessage = "Photo capture failed: \(error.localizedDescription)"
+                return
+            }
+            guard let data = photo.fileDataRepresentation(),
+                  let image = UIImage(data: data) else {
+                errorMessage = "Could not process captured photo."
+                return
+            }
+            capturedImage = image
         }
     }
 }

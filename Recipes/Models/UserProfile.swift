@@ -7,6 +7,11 @@ enum MeasurementSystem: String, Codable, Sendable {
     case metric, imperial
 }
 
+enum MealPrepMode: String, Codable, CaseIterable, Sendable {
+    case daily   // Prep each day's meals individually
+    case weekly  // Shop Saturday, prep Sunday for the whole week
+}
+
 // MARK: - User Profile
 
 @Model
@@ -31,12 +36,25 @@ final class UserProfile {
     var dailyCarbTargetGrams: Int?
     var dailyFatTargetGrams: Int?
 
-    // Budget
+    // Budget & Currency
     var weeklyGroceryBudget: Double?
+    var preferredCurrencyCode: String
+
+    // Meal planning
+    var defaultMealPrepMode: MealPrepMode
 
     // AI preferences
     var preferredAIProvider: AIProvider
     var enableOnDeviceAI: Bool
+
+    // Pantry
+    var autoDeductPantry: Bool
+
+    // iCloud & Sharing (stubs for future CloudKit)
+    var iCloudSyncEnabled: Bool
+    var shareRecipesEnabled: Bool
+    var shareStatsEnabled: Bool
+    var shareJournalEnabled: Bool
 
     // Stats
     var dateJoined: Date
@@ -67,8 +85,15 @@ final class UserProfile {
         self.dailyCarbTargetGrams = nil
         self.dailyFatTargetGrams = nil
         self.weeklyGroceryBudget = nil
+        self.preferredCurrencyCode = "CAD"
+        self.defaultMealPrepMode = .daily
         self.preferredAIProvider = preferredAIProvider
         self.enableOnDeviceAI = true
+        self.autoDeductPantry = true
+        self.iCloudSyncEnabled = false
+        self.shareRecipesEnabled = false
+        self.shareStatsEnabled = false
+        self.shareJournalEnabled = false
         self.dateJoined = .now
         self.totalRecipesCooked = 0
         self.totalTimeCookingMinutes = 0

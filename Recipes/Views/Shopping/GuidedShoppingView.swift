@@ -37,6 +37,10 @@ struct GuidedShoppingView: View {
         return sortedSections[currentSectionIndex]
     }
 
+    private var hasUnpurchasedItems: Bool {
+        !sortedSections.isEmpty
+    }
+
     private var currentItem: GroceryItem? {
         guard let section = currentSection else { return nil }
         let unpurchased = section.1.filter { !$0.isPurchased }
@@ -113,37 +117,59 @@ struct GuidedShoppingView: View {
         VStack(spacing: 24) {
             Spacer()
 
-            Image(systemName: "waveform.circle.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(Brand.herbGreen)
-                .symbolEffect(.pulse)
+            if hasUnpurchasedItems {
+                Image(systemName: "waveform.circle.fill")
+                    .font(.system(size: 80))
+                    .foregroundStyle(Brand.herbGreen)
+                    .symbolEffect(.pulse)
 
-            Text("Ready to Shop")
-                .font(.title2)
-                .fontWeight(.bold)
+                Text("Ready to Shop")
+                    .font(.title2)
+                    .fontWeight(.bold)
 
-            Text("I'll guide you section by section through the store. Say \"got it\" when you find an item, or \"can't find\" for substitutions.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+                Text("I'll guide you section by section through the store. Say \"got it\" when you find an item, or \"can't find\" for substitutions.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+
+                Button {
+                    startGuidedShopping()
+                } label: {
+                    Label("Start Voice Shopping", systemImage: "mic.fill")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                }
+                .buttonStyle(.glass)
+                .tint(Brand.herbGreen)
                 .padding(.horizontal, 32)
 
-            Button {
-                startGuidedShopping()
-            } label: {
-                Label("Start Voice Shopping", systemImage: "mic.fill")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-            }
-            .buttonStyle(.glass)
-            .tint(Brand.herbGreen)
-            .padding(.horizontal, 32)
+                Button("Shop Without Voice") {
+                    isActive = true
+                }
+                .font(.subheadline)
+            } else {
+                Image(systemName: list.items.isEmpty ? "cart" : "checkmark.seal.fill")
+                    .font(.system(size: 80))
+                    .foregroundStyle(list.items.isEmpty ? Brand.muted : Brand.herbGreen)
 
-            Button("Shop Without Voice") {
-                isActive = true
+                Text(list.items.isEmpty ? "No Items to Shop" : "All Done!")
+                    .font(.title2)
+                    .fontWeight(.bold)
+
+                Text(list.items.isEmpty
+                     ? "This list has no items yet. Add items to your shopping list first."
+                     : "Every item on this list has been purchased. Nice work!")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+
+                Button("Done") { dismiss() }
+                    .buttonStyle(.glass)
+                    .padding(.horizontal, 32)
             }
-            .font(.subheadline)
 
             Spacer()
         }
@@ -245,19 +271,34 @@ struct GuidedShoppingView: View {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 48))
                 .foregroundStyle(Brand.herbGreen)
-            Text("Section Complete!")
-                .font(.title3)
-                .fontWeight(.semibold)
 
             if currentSectionIndex < sortedSections.count - 1 {
+                Text("Section Complete!")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+
                 Button("Next Section") {
                     currentSectionIndex += 1
                     currentItemIndex = 0
                 }
                 .buttonStyle(.glass)
             } else {
-                Text("All sections done!")
+                Text("Shopping Complete!")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+
+                Text("\(purchasedItems) of \(totalItems) items purchased")
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
+
+                Button("Done") {
+                    shoppingTask?.cancel()
+                    voiceService.stopSpeaking()
+                    voiceService.stopListening()
+                    dismiss()
+                }
+                .buttonStyle(.glass)
+                .tint(Brand.herbGreen)
             }
         }
         .padding()
@@ -295,6 +336,7 @@ struct GuidedShoppingView: View {
     // MARK: - Actions
 
     private func startGuidedShopping() {
+        guard hasUnpurchasedItems else { return }
         isActive = true
         shoppingTask = Task {
             await voiceService.guideShopping(list: list)

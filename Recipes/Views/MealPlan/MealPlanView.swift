@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AVFoundation
 
 // MARK: - View Mode
 
@@ -14,10 +15,12 @@ struct MealPlanView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \MealPlan.startDate, order: .reverse) private var mealPlans: [MealPlan]
     @Query private var allPlannedMeals: [PlannedMeal]
+    @Query private var profiles: [UserProfile]
 
     @State private var selectedDate = Calendar.current.startOfDay(for: Date())
     @State private var viewMode: MealPlanViewMode = .day
     @State private var showingGenerate = false
+    @State private var didInitViewMode = false
 
     private var calendar: Calendar { .current }
 
@@ -101,7 +104,13 @@ struct MealPlanView: View {
                     GenerateMealPlanSheet(plan: plan)
                 }
             }
-            .task { ensurePlan() }
+            .task {
+                ensurePlan()
+                if !didInitViewMode, let profile = profiles.first {
+                    viewMode = profile.defaultMealPrepMode == .weekly ? .week : .day
+                    didInitViewMode = true
+                }
+            }
             .onChange(of: selectedDate) { ensurePlan() }
         }
     }
@@ -193,6 +202,7 @@ struct DayChip: View {
 
 struct DayMealView: View {
     @Query private var pantryItems: [PantryItem]
+    @Query private var profiles: [UserProfile]
 
     let plan: MealPlan
     let date: Date
@@ -201,8 +211,17 @@ struct DayMealView: View {
     @State private var preselectMealType: MealType = .breakfast
     @State private var showingAddMeal = false
     @State private var showingMealPrep = false
+    @State private var showingMultiCook = false
 
     private let primaryMealTypes: [MealType] = [.breakfast, .lunch, .dinner]
+
+    private var isWeeklyMode: Bool {
+        profiles.first?.defaultMealPrepMode == .weekly
+    }
+
+    private var weekdayIndex: Int {
+        Calendar.current.component(.weekday, from: date)
+    }
 
     private func meals(for type: MealType) -> [PlannedMeal] {
         allMeals.filter {
@@ -220,21 +239,65 @@ struct DayMealView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                // Meal Prep button — visible when 2+ meals have recipes
-                if mealsWithRecipes.count >= 2 {
-                    Button {
-                        showingMealPrep = true
-                    } label: {
+                // Weekly mode contextual banners
+                if isWeeklyMode {
+                    if weekdayIndex == 7 { // Saturday
                         HStack(spacing: 8) {
-                            Image(systemName: "frying.pan.fill")
-                                .font(.system(size: 14))
-                            Text("Meal Prep (\(mealsWithRecipes.count) recipes)")
-                                .font(.system(size: 14, weight: .medium))
+                            Image(systemName: "cart.fill")
+                                .foregroundStyle(Brand.warmTan)
+                            Text("Shop today — stock up for the week!")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(Brand.cream)
                         }
-                        .foregroundStyle(Brand.midnight)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(Brand.warmTan, in: RoundedRectangle(cornerRadius: 10))
+                        .background(Brand.warmTan.opacity(0.15), in: RoundedRectangle(cornerRadius: 10))
+                    } else if weekdayIndex == 1 { // Sunday
+                        HStack(spacing: 8) {
+                            Image(systemName: "frying.pan.fill")
+                                .foregroundStyle(Brand.herbGreen)
+                            Text("Prep day — cook for the week ahead!")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(Brand.cream)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Brand.herbGreen.opacity(0.15), in: RoundedRectangle(cornerRadius: 10))
+                    }
+                }
+
+                // Meal Prep & Cook All buttons — visible when 2+ meals have recipes
+                if mealsWithRecipes.count >= 2 {
+                    HStack(spacing: 10) {
+                        Button {
+                            showingMealPrep = true
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "frying.pan.fill")
+                                    .font(.system(size: 13))
+                                Text("Meal Prep")
+                                    .font(.system(size: 13, weight: .medium))
+                            }
+                            .foregroundStyle(Brand.midnight)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Brand.warmTan, in: RoundedRectangle(cornerRadius: 10))
+                        }
+
+                        Button {
+                            showingMultiCook = true
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "flame.fill")
+                                    .font(.system(size: 13))
+                                Text("Cook All")
+                                    .font(.system(size: 13, weight: .medium))
+                            }
+                            .foregroundStyle(Brand.midnight)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Brand.herbGreen, in: RoundedRectangle(cornerRadius: 10))
+                        }
                     }
                 }
 
@@ -260,6 +323,9 @@ struct DayMealView: View {
         }
         .sheet(isPresented: $showingMealPrep) {
             MealPrepView(meals: mealsWithRecipes, date: date)
+        }
+        .fullScreenCover(isPresented: $showingMultiCook) {
+            MultiRecipeCookingView(meals: mealsWithRecipes)
         }
     }
 }
@@ -780,5 +846,432 @@ struct AddMealView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Multi-Recipe Cooking View
+
+/// Full-screen cooking experience for multiple recipes with interleaved, optimized steps.
+struct MultiRecipeCookingView: View {
+    let meals: [PlannedMeal]
+    @Environment(\.dismiss) private var dismiss
+
+    // MARK: - State
+
+    @State private var plan: MultiRecipeCookingPlan?
+    @State private var isLoading = true
+    @State private var currentStepIndex = 0
+    @State private var timerActive = false
+    @State private var remainingSeconds = 0
+    @State private var timerTask: Task<Void, Never>?
+    @State private var isVoiceEnabled = true
+    private let synthesizer = AVSpeechSynthesizer()
+
+    /// Accent colors for distinguishing recipes — up to 5.
+    private let recipeColors: [Color] = [
+        Brand.warmTan,
+        Brand.herbGreen,
+        Brand.ingredientDairy,
+        Brand.ingredientSeasoning,
+        Brand.spiceRed
+    ]
+
+    private var currentStep: MultiCookingStep? {
+        guard let plan, currentStepIndex < plan.steps.count else { return nil }
+        return plan.steps[currentStepIndex]
+    }
+
+    private var progress: Double {
+        guard let plan, !plan.steps.isEmpty else { return 0 }
+        return Double(currentStepIndex + 1) / Double(plan.steps.count)
+    }
+
+    private func colorForRecipe(_ index: Int) -> Color {
+        recipeColors[index % recipeColors.count]
+    }
+
+    // MARK: - Body
+
+    var body: some View {
+        GeometryReader { geo in
+            VStack(spacing: 0) {
+                if isLoading {
+                    loadingView
+                } else if let step = currentStep {
+                    progressBar
+                    stepContent(step, height: geo.size.height * 0.65)
+                    Spacer(minLength: 0)
+                    controlBar
+                } else {
+                    completionView
+                }
+            }
+        }
+        .background(.black)
+        .preferredColorScheme(.dark)
+        .persistentSystemOverlays(.hidden)
+        .onAppear {
+            UIApplication.shared.isIdleTimerDisabled = true
+            generatePlan()
+        }
+        .onDisappear {
+            UIApplication.shared.isIdleTimerDisabled = false
+            synthesizer.stopSpeaking(at: .immediate)
+            timerTask?.cancel()
+        }
+        .accessibilityAction(.escape) { dismiss() }
+        .accessibilityAction(named: "Next Step") { advanceStep() }
+        .accessibilityAction(named: "Previous Step") { goBack() }
+    }
+
+    // MARK: - Loading View
+
+    private var loadingView: some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            ProgressView()
+                .scaleEffect(1.5)
+                .tint(Brand.warmTan)
+
+            Text("Optimizing cooking steps…")
+                .font(.title3)
+                .fontWeight(.medium)
+                .foregroundStyle(.white)
+
+            VStack(spacing: 8) {
+                ForEach(Array(meals.enumerated()), id: \.offset) { idx, meal in
+                    if let recipe = meal.recipe {
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(colorForRecipe(idx))
+                                .frame(width: 10, height: 10)
+                            Text(recipe.title)
+                                .font(.subheadline)
+                                .foregroundStyle(.white.opacity(0.7))
+                        }
+                    }
+                }
+            }
+
+            Spacer()
+
+            Button("Cancel") { dismiss() }
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.5))
+                .padding(.bottom, 32)
+        }
+    }
+
+    // MARK: - Progress Bar
+
+    private var progressBar: some View {
+        VStack(spacing: 4) {
+            HStack {
+                if let step = currentStep {
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(colorForRecipe(step.recipeIndex))
+                            .frame(width: 8, height: 8)
+                        Text(step.recipeTitle)
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .lineLimit(1)
+                    }
+                }
+                Spacer()
+                if let plan {
+                    Text("Step \(currentStepIndex + 1) of \(plan.steps.count)")
+                        .font(.caption)
+                }
+            }
+            .foregroundStyle(.white.opacity(0.7))
+            .padding(.horizontal)
+
+            ProgressView(value: progress)
+                .tint(currentStep.map { colorForRecipe($0.recipeIndex) } ?? .green)
+        }
+        .padding(.top, 8)
+    }
+
+    // MARK: - Step Content
+
+    private func stepContent(_ step: MultiCookingStep, height: CGFloat) -> some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                // Recipe badge
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(colorForRecipe(step.recipeIndex))
+                        .frame(width: 12, height: 12)
+                    Text(step.recipeTitle)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(colorForRecipe(step.recipeIndex))
+                    Text("· Step \(step.originalStepNumber)")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.white.opacity(0.5))
+                }
+
+                // Parallel note
+                if let note = step.parallelNote {
+                    Text(note)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(.orange)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                }
+
+                // Instruction — large text
+                Text(step.instruction)
+                    .font(.system(size: 26, weight: .medium))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+
+                // Inline ingredients
+                if !step.ingredients.isEmpty {
+                    VStack(spacing: 8) {
+                        ForEach(step.ingredients, id: \.ingredientName) { ref in
+                            HStack {
+                                Circle()
+                                    .fill(colorForRecipe(step.recipeIndex).opacity(0.3))
+                                    .frame(width: 8, height: 8)
+                                Text("\(ref.amount.displayString) \(ref.ingredientName)")
+                                    .font(.title3)
+                                    .foregroundStyle(.white.opacity(0.85))
+                            }
+                        }
+                    }
+                }
+
+                // Timer
+                if let timer = step.timer {
+                    timerView(timer, accentColor: colorForRecipe(step.recipeIndex))
+                }
+
+                // Safe temperature
+                if let temp = step.safeTemperature {
+                    HStack(spacing: 8) {
+                        Image(systemName: "thermometer.medium")
+                            .font(.title2)
+                        Text("\(temp.protein): \(Int(temp.minimumFahrenheit))°F / \(Int(temp.minimumCelsius))°C")
+                            .font(.title3)
+                    }
+                    .foregroundStyle(.red)
+                    .padding()
+                    .background(.red.opacity(0.15), in: .rect(cornerRadius: 12))
+                }
+            }
+            .padding(.vertical, 28)
+        }
+        .frame(maxHeight: height)
+    }
+
+    // MARK: - Timer
+
+    private func timerView(_ timer: TimerStep, accentColor: Color) -> some View {
+        VStack(spacing: 12) {
+            if timerActive {
+                Text(formatTime(remainingSeconds))
+                    .font(.system(size: 60, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(remainingSeconds <= 10 ? .red : accentColor)
+
+                Button("Stop Timer") { stopTimer() }
+                    .font(.title3)
+                    .buttonStyle(.bordered)
+                    .tint(accentColor)
+            } else {
+                Text(timer.displayDuration)
+                    .font(.title)
+                    .foregroundStyle(accentColor)
+
+                Button("Start Timer") { startTimer(seconds: timer.durationSeconds) }
+                    .font(.title3)
+                    .buttonStyle(.bordered)
+                    .tint(accentColor)
+            }
+        }
+        .padding()
+        .background(accentColor.opacity(0.1), in: .rect(cornerRadius: 16))
+        .sensoryFeedback(.impact, trigger: timerActive)
+    }
+
+    // MARK: - Completion View
+
+    private var completionView: some View {
+        VStack(spacing: 20) {
+            Spacer()
+
+            Image(systemName: "checkmark.seal.fill")
+                .font(.system(size: 80))
+                .foregroundStyle(Brand.herbGreen)
+
+            Text("All Done!")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundStyle(.white)
+
+            if let plan {
+                if plan.savedMinutesVsSequential > 0 {
+                    Text("You saved ~\(plan.savedMinutesVsSequential) min by cooking together!")
+                        .font(.title3)
+                        .foregroundStyle(Brand.herbGreen)
+                }
+
+                Text("\(plan.steps.count) steps across \(plan.recipeTitles.count) recipes completed.")
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.7))
+
+                // Recipe summary
+                VStack(spacing: 8) {
+                    ForEach(Array(plan.recipeTitles.enumerated()), id: \.offset) { idx, title in
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(colorForRecipe(idx))
+                            Text(title)
+                                .font(.subheadline)
+                                .foregroundStyle(.white.opacity(0.85))
+                        }
+                    }
+                }
+                .padding(.top, 8)
+            }
+
+            Button("Finish") { dismiss() }
+                .font(.title3)
+                .buttonStyle(.bordered)
+                .tint(Brand.herbGreen)
+                .padding(.top)
+
+            Spacer()
+        }
+        .sensoryFeedback(.success, trigger: currentStepIndex)
+    }
+
+    // MARK: - Control Bar
+
+    private var controlBar: some View {
+        HStack(spacing: 24) {
+            Button { goBack() } label: {
+                Image(systemName: "chevron.left.circle.fill")
+                    .font(.system(size: 48))
+            }
+            .disabled(currentStepIndex == 0)
+            .opacity(currentStepIndex == 0 ? 0.3 : 1)
+            .accessibilityLabel("Previous step")
+
+            Button {
+                isVoiceEnabled.toggle()
+                if !isVoiceEnabled { synthesizer.stopSpeaking(at: .immediate) }
+            } label: {
+                Image(systemName: isVoiceEnabled ? "speaker.wave.3.fill" : "speaker.slash.fill")
+                    .font(.system(size: 32))
+            }
+            .accessibilityLabel(isVoiceEnabled ? "Disable voice" : "Enable voice")
+
+            Button { dismiss() } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 32))
+            }
+            .accessibilityLabel("Exit cooking mode")
+
+            Button { advanceStep() } label: {
+                Image(systemName: "chevron.right.circle.fill")
+                    .font(.system(size: 48))
+            }
+            .disabled(plan.map { currentStepIndex >= $0.steps.count } ?? true)
+            .opacity(plan.map { currentStepIndex >= $0.steps.count } ?? true ? 0.3 : 1)
+            .accessibilityLabel("Next step")
+        }
+        .foregroundStyle(.white)
+        .padding()
+        .padding(.bottom, 8)
+    }
+
+    // MARK: - Actions
+
+    private func generatePlan() {
+        Task {
+            // Use the basic (non-AI) plan generation to avoid requiring the AI router
+            let generated = MultiRecipeCookingService.generateBasicPlan(from: meals)
+            withAnimation {
+                plan = generated
+                isLoading = false
+            }
+            if isVoiceEnabled, let step = currentStep {
+                speakStep(step)
+            }
+        }
+    }
+
+    private func advanceStep() {
+        guard let plan else { return }
+        synthesizer.stopSpeaking(at: .immediate)
+        stopTimer()
+
+        if currentStepIndex < plan.steps.count - 1 {
+            currentStepIndex += 1
+            if isVoiceEnabled, let step = currentStep {
+                speakStep(step)
+            }
+        } else {
+            currentStepIndex = plan.steps.count // show completion
+        }
+    }
+
+    private func goBack() {
+        guard currentStepIndex > 0 else { return }
+        synthesizer.stopSpeaking(at: .immediate)
+        stopTimer()
+        currentStepIndex -= 1
+        if isVoiceEnabled, let step = currentStep {
+            speakStep(step)
+        }
+    }
+
+    private func speakStep(_ step: MultiCookingStep) {
+        var text = "\(step.recipeTitle). Step \(step.originalStepNumber). \(step.instruction)"
+        if let note = step.parallelNote {
+            text = "\(note) \(text)"
+        }
+        if let timer = step.timer {
+            text += ". Timer: \(timer.displayDuration)."
+        }
+        if let temp = step.safeTemperature {
+            text += ". Cook \(temp.protein) to \(Int(temp.minimumFahrenheit)) degrees Fahrenheit."
+        }
+
+        let utterance = AVSpeechUtterance(string: text)
+        utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.9
+        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+        synthesizer.speak(utterance)
+    }
+
+    private func startTimer(seconds: Int) {
+        remainingSeconds = seconds
+        timerActive = true
+
+        timerTask = Task {
+            while remainingSeconds > 0, !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                remainingSeconds -= 1
+            }
+            timerActive = false
+            if remainingSeconds <= 0 {
+                advanceStep()
+            }
+        }
+    }
+
+    private func stopTimer() {
+        timerTask?.cancel()
+        timerActive = false
+    }
+
+    private func formatTime(_ totalSeconds: Int) -> String {
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+        return String(format: "%d:%02d", minutes, seconds)
     }
 }
