@@ -74,7 +74,7 @@ struct NutritionTrackingView: View {
                 ProgressView(value: progressValue, total: 1.5) {
                     EmptyView()
                 }
-                .tint(progressValue > 1.1 ? .red : progressValue > 0.9 ? .green : .orange)
+                .tint(progressValue > 1.1 ? Brand.spiceRed : progressValue > 0.9 ? Brand.herbGreen : Brand.warmTan)
 
                 if let proteinTarget = profile.dailyProteinTargetGrams {
                     HStack {
@@ -104,11 +104,11 @@ struct NutritionTrackingView: View {
                     x: .value("Day", day.date, unit: .day),
                     y: .value("Calories", day.calories)
                 )
-                .foregroundStyle(.orange.gradient)
+                .foregroundStyle(Brand.warmTan.gradient)
 
                 if let profile, let target = profile.dailyCalorieTarget {
                     RuleMark(y: .value("Target", target))
-                        .foregroundStyle(.red.opacity(0.5))
+                        .foregroundStyle(Brand.spiceRed.opacity(0.5))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
                 }
             }
@@ -132,9 +132,9 @@ struct NutritionTrackingView: View {
                 .font(.headline)
 
             HStack(spacing: 20) {
-                macroCircle(label: "Protein", value: totals.avgProteinPerDay, unit: "g", color: .blue)
-                macroCircle(label: "Carbs", value: totals.avgCarbsPerDay, unit: "g", color: .green)
-                macroCircle(label: "Fat", value: totals.avgFatPerDay, unit: "g", color: .orange)
+                macroCircle(label: "Protein", value: totals.avgProteinPerDay, unit: "g", color: Brand.warmTan)
+                macroCircle(label: "Carbs", value: totals.avgCarbsPerDay, unit: "g", color: Brand.herbGreen)
+                macroCircle(label: "Fat", value: totals.avgFatPerDay, unit: "g", color: Brand.muted)
             }
             .frame(maxWidth: .infinity)
         }
@@ -182,9 +182,9 @@ struct NutritionTrackingView: View {
 
                     HStack(spacing: 12) {
                         Label("\(Int(day.calories))", systemImage: "flame")
-                            .foregroundStyle(.orange)
+                            .foregroundStyle(Brand.warmTan)
                         Label("\(Int(day.protein))g", systemImage: "figure.walk")
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(Brand.herbGreen)
                     }
                     .font(.caption)
 

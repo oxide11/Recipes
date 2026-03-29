@@ -32,7 +32,7 @@ struct MetricsView: View {
                                 }
                             } icon: {
                                 Image(systemName: "heart.text.clipboard")
-                                    .foregroundStyle(.pink)
+                                    .foregroundStyle(Brand.spiceRed)
                             }
                             Spacer()
                             Image(systemName: "chevron.right")
@@ -65,25 +65,25 @@ struct MetricsView: View {
                 title: "Recipes Cooked",
                 value: "\(metrics.totalRecipesCooked)",
                 icon: "flame",
-                color: .orange
+                color: Brand.warmTan
             )
             MetricCard(
                 title: "Time Cooking",
                 value: formatMinutes(metrics.totalTimeCookingMinutes),
                 icon: "clock",
-                color: .blue
+                color: Brand.muted
             )
             MetricCard(
                 title: "Time Prepping",
                 value: formatMinutes(metrics.totalTimePrepMinutes),
                 icon: "scissors",
-                color: .green
+                color: Brand.herbGreen
             )
             MetricCard(
                 title: "Grocery Spend",
                 value: "$\(Int(metrics.totalGrocerySpend))",
                 icon: "cart",
-                color: .purple
+                color: Brand.herbGreen
             )
         }
     }
@@ -156,7 +156,7 @@ struct MetricsView: View {
                                     ForEach(1...5, id: \.self) { star in
                                         Image(systemName: star <= Int(rating.rounded()) ? "star.fill" : "star")
                                             .font(.caption2)
-                                            .foregroundStyle(.yellow)
+                                            .foregroundStyle(Brand.warmTan)
                                     }
                                 }
                             }
@@ -166,7 +166,7 @@ struct MetricsView: View {
                             .font(.caption)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(.tint.opacity(0.1), in: .capsule)
+                            .background(Brand.warmTan.opacity(0.15), in: .capsule)
                     }
                 }
             }
@@ -191,12 +191,12 @@ struct MetricsView: View {
                     Text("$\(Int(metrics.estimatedDiningOutSavings))")
                         .font(.title)
                         .fontWeight(.bold)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Brand.herbGreen)
                 }
                 Spacer()
                 Image(systemName: "leaf.fill")
                     .font(.largeTitle)
-                    .foregroundStyle(.green.opacity(0.3))
+                    .foregroundStyle(Brand.herbGreen.opacity(0.3))
             }
         }
         .padding()

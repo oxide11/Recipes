@@ -91,7 +91,7 @@ struct GuidedShoppingView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
-            .tint(.green)
+            .tint(Brand.herbGreen)
 
             if let section = currentSection {
                 HStack {
@@ -115,7 +115,7 @@ struct GuidedShoppingView: View {
 
             Image(systemName: "waveform.circle.fill")
                 .font(.system(size: 80))
-                .foregroundStyle(.green)
+                .foregroundStyle(Brand.herbGreen)
                 .symbolEffect(.pulse)
 
             Text("Ready to Shop")
@@ -137,7 +137,7 @@ struct GuidedShoppingView: View {
                     .padding()
             }
             .buttonStyle(.glass)
-            .tint(.green)
+            .tint(Brand.herbGreen)
             .padding(.horizontal, 32)
 
             Button("Shop Without Voice") {
@@ -210,7 +210,7 @@ struct GuidedShoppingView: View {
                         .padding()
                 }
                 .buttonStyle(.glass)
-                .tint(.green)
+                .tint(Brand.herbGreen)
                 .sensoryFeedback(.success, trigger: item.isPurchased)
 
                 Button {
@@ -244,7 +244,7 @@ struct GuidedShoppingView: View {
         VStack(spacing: 12) {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 48))
-                .foregroundStyle(.green)
+                .foregroundStyle(Brand.herbGreen)
             Text("Section Complete!")
                 .font(.title3)
                 .fontWeight(.semibold)
@@ -267,12 +267,12 @@ struct GuidedShoppingView: View {
         HStack {
             if voiceService.isSpeaking {
                 Image(systemName: "speaker.wave.3.fill")
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Brand.warmTan)
                     .symbolEffect(.variableColor)
                 Text("Speaking...")
             } else if voiceService.isListening {
                 Image(systemName: "mic.fill")
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Brand.spiceRed)
                     .symbolEffect(.pulse)
                 Text("Listening...")
             }

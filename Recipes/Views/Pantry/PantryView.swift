@@ -35,13 +35,13 @@ struct PantryView: View {
                         ForEach(expiringItems) { item in
                             HStack {
                                 Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(.orange)
+                                    .foregroundStyle(Brand.spiceRed)
                                 Text(item.name)
                                 Spacer()
                                 if let date = item.expirationDate {
                                     Text(date, style: .relative)
                                         .font(.caption)
-                                        .foregroundStyle(.orange)
+                                        .foregroundStyle(Brand.spiceRed)
                                 }
                             }
                         }
@@ -51,7 +51,7 @@ struct PantryView: View {
                         } label: {
                             Label("Find Recipes to Use These Up", systemImage: "sparkles")
                         }
-                        .tint(.orange)
+                        .tint(Brand.spiceRed)
                     } header: {
                         Label("Expiring Soon", systemImage: "clock.badge.exclamationmark")
                     }
@@ -91,7 +91,7 @@ struct PantryView: View {
                                 }
                             } icon: {
                                 Image(systemName: "checklist")
-                                    .foregroundStyle(.green)
+                                    .foregroundStyle(Brand.herbGreen)
                             }
                         }
                     }
@@ -192,7 +192,7 @@ struct PantryItemRow: View {
                     if !SeasonalAwarenessService.isInSeason(item.name) {
                         Label("Off season", systemImage: "leaf.arrow.triangle.circlepath")
                             .font(.caption2)
-                            .foregroundStyle(.orange)
+                            .foregroundStyle(Brand.muted)
                     }
                 }
             }
@@ -203,10 +203,10 @@ struct PantryItemRow: View {
                 VStack(alignment: .trailing) {
                     Text(item.isExpired ? "Expired" : "Expires")
                         .font(.caption2)
-                        .foregroundStyle(item.isExpired ? .red : .secondary)
+                        .foregroundStyle(item.isExpired ? Brand.spiceRed : Color.secondary)
                     Text(date, style: .date)
                         .font(.caption2)
-                        .foregroundStyle(item.isExpired ? .red : .secondary)
+                        .foregroundStyle(item.isExpired ? Brand.spiceRed : Color.secondary)
                 }
             }
         }
@@ -298,7 +298,7 @@ struct BarcodeScannerFullView: View {
                 if let error = scanner.errorMessage {
                     Text(error)
                         .font(.caption)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Brand.spiceRed)
                         .padding()
                 }
 

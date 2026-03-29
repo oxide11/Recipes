@@ -26,7 +26,7 @@ struct ShoppingListView: View {
                                 Text("\(activeList.items.filter(\.isPurchased).count)/\(activeList.items.count) items")
                             }
                         }
-                        .tint(.green)
+                        .tint(Brand.herbGreen)
 
                         HStack {
                             VStack(alignment: .leading) {
@@ -63,7 +63,7 @@ struct ShoppingListView: View {
                             } icon: {
                                 Image(systemName: "waveform.circle.fill")
                                     .font(.title2)
-                                    .foregroundStyle(.green)
+                                    .foregroundStyle(Brand.herbGreen)
                             }
                         }
                     } header: {
@@ -191,7 +191,7 @@ struct ShoppingItemRow: View {
                 if let sub = item.substituteFor {
                     Label("Substituting: \(sub)", systemImage: "arrow.triangle.2.circlepath")
                         .font(.caption2)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Brand.warmTan)
                 }
 
                 if let notes = item.notes {
