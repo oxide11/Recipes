@@ -410,6 +410,10 @@ struct MealCard: View {
         Set(pantryItems.map { $0.name.lowercased() })
     }
 
+    private var groceryNames: Set<String> {
+        Set(groceryLists.flatMap(\.items).map { $0.name.lowercased() })
+    }
+
     private var coverage: (covered: Int, total: Int) {
         guard let recipe = meal.recipe else { return (0, 0) }
         let total = recipe.ingredients.count
@@ -419,6 +423,10 @@ struct MealCard: View {
 
     private var missingIngredients: [Ingredient] {
         meal.recipe?.ingredients.filter { !pantryNames.contains($0.name.lowercased()) } ?? []
+    }
+
+    private var trulyMissingIngredients: [Ingredient] {
+        missingIngredients.filter { !groceryNames.contains($0.name.lowercased()) }
     }
 
     var body: some View {
@@ -448,6 +456,14 @@ struct MealCard: View {
                                 .font(.miseMeta)
                         }
                         .foregroundStyle(Brand.herbGreen)
+                    } else if trulyMissingIngredients.isEmpty {
+                        HStack(spacing: 4) {
+                            Image(systemName: "cart.badge.checkmark")
+                                .font(.system(size: 10))
+                            Text("All on shopping list")
+                                .font(.miseMeta)
+                        }
+                        .foregroundStyle(Brand.warmTan)
                     } else {
                         Button {
                             addMissingToShopping()
@@ -457,7 +473,7 @@ struct MealCard: View {
                                     .font(.system(size: 11))
                                 Text(addedToCart
                                      ? "Added to shopping list"
-                                     : "Add \(missingIngredients.count) missing to shopping list")
+                                     : "Add \(trulyMissingIngredients.count) missing to shopping list")
                                     .font(.miseMeta)
                             }
                             .foregroundStyle(addedToCart ? Brand.herbGreen : Brand.warmTan)
@@ -473,7 +489,7 @@ struct MealCard: View {
     }
 
     private func addMissingToShopping() {
-        guard !missingIngredients.isEmpty else { return }
+        guard !trulyMissingIngredients.isEmpty else { return }
 
         let list: GroceryList
         if let existing = groceryLists.first {
@@ -484,7 +500,7 @@ struct MealCard: View {
         }
 
         let existingNames = Set(list.items.map { $0.name.lowercased() })
-        for ingredient in missingIngredients {
+        for ingredient in trulyMissingIngredients {
             guard !existingNames.contains(ingredient.name.lowercased()) else { continue }
             let item = GroceryItem(
                 name: ingredient.name,

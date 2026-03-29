@@ -55,7 +55,7 @@ final class GroceryItem {
     var actualPrice: Double?
     var substituteFor: String?
     var notes: String?
-    var isStaple: Bool
+    var isStaple: Bool = false
 
     init(
         name: String,

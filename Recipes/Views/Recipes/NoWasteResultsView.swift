@@ -66,20 +66,17 @@ struct NoWasteResultsView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Filter bar
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    Picker("Time", selection: $timeFilter) {
-                        ForEach(TimeFilter.allCases, id: \.self) { filter in
-                            Text(filter.rawValue).tag(filter)
-                        }
+            VStack(spacing: 8) {
+                Picker("Time", selection: $timeFilter) {
+                    ForEach(TimeFilter.allCases, id: \.self) { filter in
+                        Text(filter.rawValue).tag(filter)
                     }
-                    .pickerStyle(.segmented)
-
-                    Toggle("Have all ingredients", isOn: $showFullCoverageOnly)
-                        .fixedSize()
                 }
-                .padding(.horizontal)
+                .pickerStyle(.segmented)
+
+                Toggle("Have all ingredients", isOn: $showFullCoverageOnly)
             }
+            .padding(.horizontal)
             .padding(.vertical, 8)
 
             if filteredMatches.isEmpty {

@@ -9,12 +9,15 @@ struct RecipeListView: View {
     @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
 
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
+    @Query private var profiles: [UserProfile]
 
     @State private var searchText = ""
     @State private var selectedCuisine: Cuisine?
     @State private var selectedDifficulty: RecipeDifficulty?
     @State private var maxTimeFilter: Int?
     @State private var showFavoritesOnly = false
+    @State private var selectedDietaryRestrictions: Set<DietaryRestriction> = []
+    @State private var hasLoadedProfile = false
     @State private var showingAddRecipe = false
     @State private var showingRecipeGenerator = false
     @State private var showingImport = false
@@ -29,6 +32,7 @@ struct RecipeListView: View {
         if selectedDifficulty != nil { count += 1 }
         if maxTimeFilter != nil { count += 1 }
         if showFavoritesOnly { count += 1 }
+        if !selectedDietaryRestrictions.isEmpty { count += 1 }
         return count
     }
 
@@ -52,6 +56,11 @@ struct RecipeListView: View {
         }
         if showFavoritesOnly {
             result = result.filter { $0.isFavorite || $0.isAutoFavorite }
+        }
+        if !selectedDietaryRestrictions.isEmpty {
+            result = result.filter { recipe in
+                selectedDietaryRestrictions.isSubset(of: Set(recipe.dietaryRestrictions))
+            }
         }
         return result
     }
@@ -107,7 +116,6 @@ struct RecipeListView: View {
                     }
 
                     seasonalSection
-                    favoritesSection
                 }
 
                 allRecipesSection
@@ -136,16 +144,6 @@ struct RecipeListView: View {
                     .accessibilityLabel("Add recipe")
                 }
 
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        showingFilters = true
-                    } label: {
-                        Label("Filters", systemImage: activeFilterCount > 0
-                              ? "line.3.horizontal.decrease.circle.fill"
-                              : "line.3.horizontal.decrease.circle")
-                    }
-                    .badge(activeFilterCount)
-                }
             }
             .sheet(isPresented: $showingAddRecipe) {
                 RecipeEditorView()
@@ -164,11 +162,18 @@ struct RecipeListView: View {
                     selectedCuisine: $selectedCuisine,
                     selectedDifficulty: $selectedDifficulty,
                     maxTimeFilter: $maxTimeFilter,
-                    showFavoritesOnly: $showFavoritesOnly
+                    showFavoritesOnly: $showFavoritesOnly,
+                    selectedDietaryRestrictions: $selectedDietaryRestrictions
                 )
                 .presentationDetents([.medium])
             }
-            .task { updateNoWasteMatches() }
+            .task {
+                updateNoWasteMatches()
+                if !hasLoadedProfile, let profile = profiles.first {
+                    selectedDietaryRestrictions = Set(profile.dietaryRestrictions)
+                    hasLoadedProfile = true
+                }
+            }
             .onChange(of: recipes.count) { updateNoWasteMatches() }
             .onChange(of: pantryItems.count) { updateNoWasteMatches() }
         }
@@ -241,13 +246,14 @@ struct RecipeListView: View {
         if !seasonal.isEmpty {
             Section {
                 ScrollView(.horizontal) {
-                    LazyHStack(spacing: 12) {
+                    LazyHStack(alignment: .top, spacing: 12) {
                         ForEach(seasonal.prefix(8)) { recipe in
                             RecipeCardCompact(recipe: recipe)
                         }
                     }
                     .padding(.horizontal)
                 }
+                .contentMargins(.vertical, 12, for: .scrollContent)
                 .listRowInsets(EdgeInsets())
             } header: {
                 HStack(spacing: 4) {
@@ -261,28 +267,6 @@ struct RecipeListView: View {
     }
 
     @ViewBuilder
-    private var favoritesSection: some View {
-        let favorites = filteredRecipes.filter { $0.isFavorite || $0.isAutoFavorite }
-
-        if !favorites.isEmpty {
-            Section {
-                ForEach(favorites.prefix(5)) { recipe in
-                    NavigationLink {
-                        RecipeDetailView(recipe: recipe)
-                    } label: {
-                        RecipeRow(recipe: recipe)
-                    }
-                }
-            } header: {
-                HStack(spacing: 4) {
-                    Image(systemName: "heart")
-                        .foregroundStyle(Brand.spiceRed)
-                    Text("Favorites")
-                }
-                .miseSectionHeader()
-            }
-        }
-    }
 
     private var allRecipesSection: some View {
         Section {
@@ -315,8 +299,23 @@ struct RecipeListView: View {
                 }
             }
         } header: {
-            Text("All recipes")
-                .miseSectionHeader()
+            HStack {
+                Text("All recipes")
+                    .miseSectionHeader()
+                Spacer()
+                Button {
+                    showingFilters = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: activeFilterCount > 0
+                              ? "line.3.horizontal.decrease.circle.fill"
+                              : "line.3.horizontal.decrease.circle")
+                        Text("Filters")
+                    }
+                    .font(.caption)
+                }
+                .badge(activeFilterCount)
+            }
         }
         .confirmationDialog(
             "Delete Recipe",
@@ -499,11 +498,25 @@ struct RecipeFilterSheet: View {
     @Binding var selectedDifficulty: RecipeDifficulty?
     @Binding var maxTimeFilter: Int?
     @Binding var showFavoritesOnly: Bool
+    @Binding var selectedDietaryRestrictions: Set<DietaryRestriction>
     @Environment(\.dismiss) private var dismiss
+
+    private var sortedRestrictions: [DietaryRestriction] {
+        DietaryRestriction.allCases.sorted {
+            let aSelected = selectedDietaryRestrictions.contains($0)
+            let bSelected = selectedDietaryRestrictions.contains($1)
+            if aSelected != bSelected { return aSelected }
+            return $0.rawValue < $1.rawValue
+        }
+    }
 
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    Toggle("Favorites Only", isOn: $showFavoritesOnly)
+                }
+
                 Section("Cuisine") {
                     Picker("Cuisine", selection: $selectedCuisine) {
                         Text("All Cuisines").tag(Cuisine?.none)
@@ -521,7 +534,7 @@ struct RecipeFilterSheet: View {
                             Text(level.rawValue.capitalized).tag(RecipeDifficulty?.some(level))
                         }
                     }
-                    .pickerStyle(.segmented)
+                    .pickerStyle(.menu)
                 }
 
                 Section("Max Total Time") {
@@ -533,11 +546,19 @@ struct RecipeFilterSheet: View {
                         Text("60 min").tag(Int?.some(60))
                         Text("90 min").tag(Int?.some(90))
                     }
-                    .pickerStyle(.segmented)
+                    .pickerStyle(.menu)
                 }
 
-                Section {
-                    Toggle("Favorites Only", isOn: $showFavoritesOnly)
+                Section("Dietary Restrictions") {
+                    ForEach(sortedRestrictions, id: \.self) { restriction in
+                        Toggle(restriction.rawValue.capitalized, isOn: Binding(
+                            get: { selectedDietaryRestrictions.contains(restriction) },
+                            set: { isOn in
+                                if isOn { selectedDietaryRestrictions.insert(restriction) }
+                                else { selectedDietaryRestrictions.remove(restriction) }
+                            }
+                        ))
+                    }
                 }
 
                 Section {
@@ -546,6 +567,7 @@ struct RecipeFilterSheet: View {
                         selectedDifficulty = nil
                         maxTimeFilter = nil
                         showFavoritesOnly = false
+                        selectedDietaryRestrictions = []
                     }
                     .foregroundStyle(.red)
                 }

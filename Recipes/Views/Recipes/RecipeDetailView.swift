@@ -186,6 +186,7 @@ struct RecipeDetailView: View {
                         }
                     }
                 }
+                .contentMargins(.vertical, 12, for: .scrollContent)
             }
         }
     }
