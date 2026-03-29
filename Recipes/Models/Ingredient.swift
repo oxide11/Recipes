@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import SwiftData
 import FoundationModels
 
@@ -19,6 +20,25 @@ enum IngredientCategory: String, Codable, CaseIterable, Sendable {
     case legume
     case herb
     case other
+
+    var sortOrder: Int {
+        switch self {
+        case .protein:   return 0
+        case .vegetable: return 1
+        case .fruit:     return 2
+        case .grain:     return 3
+        case .dairy:     return 4
+        case .spice:     return 5
+        case .oil:       return 6
+        case .condiment: return 7
+        case .liquid:    return 8
+        case .sweetener: return 9
+        case .nut:       return 10
+        case .legume:    return 11
+        case .herb:      return 12
+        case .other:     return 13
+        }
+    }
 
     var displayColor: IngredientColor {
         switch self {
@@ -43,6 +63,25 @@ enum IngredientCategory: String, Codable, CaseIterable, Sendable {
 enum IngredientColor: String, Codable, Sendable {
     case red, green, orange, amber, blue, purple, yellow
     case teal, cyan, pink, brown, mint, lime, gray
+
+    var swiftUIColor: Color {
+        switch self {
+        case .red:    return .red
+        case .green:  return .green
+        case .orange: return .orange
+        case .amber:  return .yellow.opacity(0.8)
+        case .blue:   return .blue
+        case .purple: return .purple
+        case .yellow: return .yellow
+        case .teal:   return .teal
+        case .cyan:   return .cyan
+        case .pink:   return .pink
+        case .brown:  return .brown
+        case .mint:   return .mint
+        case .lime:   return .green.opacity(0.7)
+        case .gray:   return .gray
+        }
+    }
 }
 
 // MARK: - Season

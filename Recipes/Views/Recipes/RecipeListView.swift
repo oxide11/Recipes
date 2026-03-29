@@ -20,6 +20,7 @@ struct RecipeListView: View {
     @State private var showingImport = false
     @State private var showingRecipeAsCode = false
     @State private var showingFilters = false
+    @State private var cachedNoWasteMatches: [NoWasteMatchingEngine.MatchResult] = []
 
     private var activeFilterCount: Int {
         var count = 0
@@ -166,19 +167,25 @@ struct RecipeListView: View {
                 )
                 .presentationDetents([.medium])
             }
+            .task { updateNoWasteMatches() }
+            .onChange(of: recipes.count) { updateNoWasteMatches() }
+            .onChange(of: pantryItems.count) { updateNoWasteMatches() }
         }
+    }
+
+    private func updateNoWasteMatches() {
+        cachedNoWasteMatches = NoWasteMatchingEngine.matchRecipes(
+            recipes: recipes,
+            pantryItems: pantryItems,
+            maxMissing: 2
+        )
     }
 
     // MARK: - Sections
 
     @ViewBuilder
     private var noWasteTeaser: some View {
-        let matches = NoWasteMatchingEngine.matchRecipes(
-            recipes: recipes,
-            pantryItems: pantryItems,
-            maxMissing: 2
-        )
-        let topMatches = Array(matches.prefix(3))
+        let topMatches = Array(cachedNoWasteMatches.prefix(3))
 
         if !topMatches.isEmpty {
             Section {

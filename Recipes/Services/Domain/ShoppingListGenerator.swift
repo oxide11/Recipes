@@ -29,12 +29,23 @@ enum ShoppingListGenerator {
                 let scaledQty = ingredient.amount.quantity * servingScale
 
                 if var existing = aggregated[key] {
-                    // Same unit — add quantities
                     if existing.unit == ingredient.amount.unit {
                         existing.quantity += scaledQty
+                    } else if let converted = MeasurementConversionService.convert(
+                        amount: IngredientAmount(quantity: scaledQty, unit: ingredient.amount.unit),
+                        to: existing.unit
+                    ) {
+                        existing.quantity += converted.quantity
                     } else {
-                        // Different units — convert if possible, otherwise keep larger
-                        existing.quantity += scaledQty
+                        // Incompatible units (e.g. volume vs weight) — keep as separate entry
+                        let altKey = key + "_\(ingredient.amount.unit.rawValue)"
+                        aggregated[altKey] = AggregatedIngredient(
+                            name: ingredient.name,
+                            quantity: scaledQty,
+                            unit: ingredient.amount.unit,
+                            category: ingredient.category
+                        )
+                        continue
                     }
                     aggregated[key] = existing
                 } else {
@@ -57,8 +68,13 @@ enum ShoppingListGenerator {
             if let pantry = pantryMatch {
                 if pantry.unit == agg.unit {
                     agg.quantity = max(0, agg.quantity - pantry.quantity)
+                } else if let converted = MeasurementConversionService.convert(
+                    amount: IngredientAmount(quantity: pantry.quantity, unit: pantry.unit),
+                    to: agg.unit
+                ) {
+                    agg.quantity = max(0, agg.quantity - converted.quantity)
                 }
-                // If units differ, keep full amount (can't reliably subtract)
+                // If units are truly incompatible (volume vs weight), keep full amount
             }
 
             aggregated[key] = agg

@@ -123,26 +123,27 @@ final class RecommendationAgent {
         let inSeason = SeasonalAwarenessService.recommendations(for: season)
         let seasonalNames = Set(inSeason.map(\.name))
 
-        return recipes
-            .filter { recipe in
-                let names = Set(recipe.ingredients.map { $0.name.lowercased() })
-                return !names.intersection(seasonalNames).isEmpty
-            }
-            .sorted { r1, r2 in
-                let s1 = SeasonalAwarenessService.seasonalityScore(ingredientNames: r1.ingredients.map(\.name))
-                let s2 = SeasonalAwarenessService.seasonalityScore(ingredientNames: r2.ingredients.map(\.name))
-                return s1 > s2
-            }
-            .prefix(2)
-            .map { recipe in
-                Recommendation(
-                    title: recipe.title,
-                    reason: "Perfect for \(season.rawValue) with fresh seasonal ingredients",
-                    category: .seasonal,
-                    score: 35,
-                    recipeID: recipe.id
-                )
-            }
+        let matching = recipes.filter { recipe in
+            let names = Set(recipe.ingredients.map { $0.name.lowercased() })
+            return !names.intersection(seasonalNames).isEmpty
+        }
+
+        let scored: [(Recipe, Double)] = matching.map { recipe in
+            let score = SeasonalAwarenessService.seasonalityScore(ingredientNames: recipe.ingredients.map(\.name))
+            return (recipe, score)
+        }
+
+        let topRecipes = scored.sorted { $0.1 > $1.1 }.prefix(2).map(\.0)
+
+        return topRecipes.map { recipe in
+            Recommendation(
+                title: recipe.title,
+                reason: "Perfect for \(season.rawValue) with fresh seasonal ingredients",
+                category: .seasonal,
+                score: 35,
+                recipeID: recipe.id
+            )
+        }
     }
 
     // MARK: - Quick Meals

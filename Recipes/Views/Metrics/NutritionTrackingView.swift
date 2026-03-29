@@ -104,7 +104,7 @@ struct NutritionTrackingView: View {
                     x: .value("Day", day.date, unit: .day),
                     y: .value("Calories", day.calories)
                 )
-                .foregroundStyle(.tint.gradient)
+                .foregroundStyle(.orange.gradient)
 
                 if let profile, let target = profile.dailyCalorieTarget {
                     RuleMark(y: .value("Target", target))

@@ -123,12 +123,14 @@ final class AIServiceRouter {
 
     /// Try on-device first, fall back to cloud providers.
     private func hybridGeneration(prompt: String, taskType: AITaskType) async throws -> String {
+        var errors: [Error] = []
+
         // Try on-device first
         if await foundationModelService.isAvailable {
             do {
                 return try await useOnDevice(prompt: prompt, taskType: taskType)
             } catch {
-                // Fall through to cloud
+                errors.append(error)
             }
         }
 
@@ -137,16 +139,20 @@ final class AIServiceRouter {
             do {
                 return try await claudeService.generateRecipe(prompt: prompt)
             } catch {
-                // Fall through
+                errors.append(error)
             }
         }
 
         // Try OpenAI
         if openAIService.isConfigured {
-            return try await openAIService.generateRecipe(prompt: prompt)
+            do {
+                return try await openAIService.generateRecipe(prompt: prompt)
+            } catch {
+                errors.append(error)
+            }
         }
 
-        throw AIServiceError.allProvidersFailed([])
+        throw AIServiceError.allProvidersFailed(errors)
     }
 }
 

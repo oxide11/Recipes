@@ -211,7 +211,7 @@ struct RecipeDetailView: View {
     }
 
     private var sortedIngredients: [Ingredient] {
-        recipe.ingredients.sorted { $0.category.sortOrder < $1.category.sortOrder }
+        recipe.ingredients.sorted(by: { $0.category.sortOrder < $1.category.sortOrder })
     }
 
     private var ingredientsSection: some View {
@@ -484,7 +484,8 @@ struct RecipeDetailView: View {
                 }
 
                 // Individual log entries
-                ForEach(recipe.cookingLog.sorted { $0.date > $1.date }) { entry in
+                let sortedLog = recipe.cookingLog.sorted(by: { $0.date > $1.date })
+                ForEach(Array(sortedLog.enumerated()), id: \.element.id) { index, entry in
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
                             Text(entry.date, style: .date)
@@ -513,7 +514,7 @@ struct RecipeDetailView: View {
                         }
                     }
                     .padding(.vertical, 4)
-                    if entry.id != recipe.cookingLog.sorted(by: { $0.date > $1.date }).last?.id {
+                    if index < sortedLog.count - 1 {
                         Divider()
                     }
                 }

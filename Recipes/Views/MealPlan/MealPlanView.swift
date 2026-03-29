@@ -40,9 +40,10 @@ struct MealPlanView: View {
 
     private var weekStart: Date {
         let weekday = calendar.component(.weekday, from: selectedDate)
-        let daysFromMonday = (weekday + 5) % 7
+        let firstWeekday = calendar.firstWeekday
+        let daysFromStart = (weekday - firstWeekday + 7) % 7
         return calendar.startOfDay(
-            for: calendar.date(byAdding: .day, value: -daysFromMonday, to: selectedDate)!
+            for: calendar.date(byAdding: .day, value: -daysFromStart, to: selectedDate)!
         )
     }
 
@@ -405,12 +406,14 @@ struct MealCard: View {
 
     private func storeSection(for category: IngredientCategory) -> StoreSection {
         switch category {
-        case .protein:        return .meat
-        case .produce:        return .produce
-        case .dryGoods:       return .dryGoods
-        case .dairy:          return .dairy
-        case .seasoning:      return .spices
-        case .liquidAndSauce: return .condiments
+        case .protein:                return .meat
+        case .vegetable, .fruit:      return .produce
+        case .grain, .legume, .nut:   return .dryGoods
+        case .dairy:                  return .dairy
+        case .spice, .herb:           return .spices
+        case .condiment, .sweetener:  return .condiments
+        case .oil, .liquid:           return .condiments
+        case .other:                  return .other
         }
     }
 }
