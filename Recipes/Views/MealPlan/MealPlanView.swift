@@ -200,6 +200,7 @@ struct DayMealView: View {
 
     @State private var preselectMealType: MealType = .breakfast
     @State private var showingAddMeal = false
+    @State private var showingMealPrep = false
 
     private let primaryMealTypes: [MealType] = [.breakfast, .lunch, .dinner]
 
@@ -209,9 +210,34 @@ struct DayMealView: View {
         }
     }
 
+    /// All meals for this day that have a linked recipe.
+    private var mealsWithRecipes: [PlannedMeal] {
+        allMeals.filter {
+            Calendar.current.isDate($0.date, inSameDayAs: date) && $0.recipe != nil
+        }
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
+                // Meal Prep button — visible when 2+ meals have recipes
+                if mealsWithRecipes.count >= 2 {
+                    Button {
+                        showingMealPrep = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "frying.pan.fill")
+                                .font(.system(size: 14))
+                            Text("Meal Prep (\(mealsWithRecipes.count) recipes)")
+                                .font(.system(size: 14, weight: .medium))
+                        }
+                        .foregroundStyle(Brand.midnight)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Brand.warmTan, in: RoundedRectangle(cornerRadius: 10))
+                    }
+                }
+
                 ForEach(primaryMealTypes, id: \.self) { mealType in
                     MealSlotSection(
                         mealType: mealType,
@@ -231,6 +257,9 @@ struct DayMealView: View {
         }
         .sheet(isPresented: $showingAddMeal) {
             AddMealView(plan: plan, preselectMealType: preselectMealType, preselectDate: date)
+        }
+        .sheet(isPresented: $showingMealPrep) {
+            MealPrepView(meals: mealsWithRecipes, date: date)
         }
     }
 }

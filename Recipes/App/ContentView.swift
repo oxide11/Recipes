@@ -14,24 +14,12 @@ struct ContentView: View {
                 RecipeListView()
             }
 
-            Tab("Pantry", systemImage: "refrigerator", value: .pantry) {
-                PantryView()
+            Tab("Plan & Shop", systemImage: "cart", value: .planAndShop) {
+                PlanAndShopView()
             }
 
-            Tab("Meal Plan", systemImage: "calendar", value: .mealPlan) {
-                MealPlanView()
-            }
-
-            Tab("Shopping", systemImage: "cart", value: .shopping) {
-                ShoppingListView()
-            }
-
-            Tab("Journal", systemImage: "fork.knife.circle", value: .journal) {
-                RestaurantJournalView()
-            }
-
-            Tab("Metrics", systemImage: "chart.bar", value: .metrics) {
-                MetricsView()
+            Tab("Activity", systemImage: "chart.bar", value: .activity) {
+                ActivityView()
             }
 
             Tab("Settings", systemImage: "gear", value: .settings) {
@@ -53,7 +41,7 @@ struct ContentView: View {
 // MARK: - App Tab
 
 enum AppTab: String, Hashable {
-    case recipes, pantry, mealPlan, shopping, journal, metrics, settings
+    case recipes, planAndShop, activity, settings
 }
 
 #Preview("Empty") {

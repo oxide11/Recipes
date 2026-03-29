@@ -16,34 +16,6 @@ struct MetricsView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    // Nutrition tracking link
-                    NavigationLink {
-                        NutritionTrackingView()
-                    } label: {
-                        HStack {
-                            Label {
-                                VStack(alignment: .leading) {
-                                    Text("Nutrition Tracking")
-                                        .fontWeight(.medium)
-                                        .foregroundStyle(.primary)
-                                    Text("Daily & weekly nutrition vs. your goals")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            } icon: {
-                                Image(systemName: "heart.text.clipboard")
-                                    .foregroundStyle(Brand.spiceRed)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding()
-                        .background(in: .rect(cornerRadius: 12))
-                        .glassEffect(.regular, in: .rect(cornerRadius: 12))
-                    }
-
                     overviewCards
                     cuisineChart
                     topIngredientsSection
