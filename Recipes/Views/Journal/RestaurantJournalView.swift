@@ -11,6 +11,8 @@ struct RestaurantJournalView: View {
     @State private var selectedSegment = 0
     @State private var showingAddEntry = false
     @State private var showingAddWantToTry = false
+    @State private var entryToDelete: RestaurantJournalEntry?
+    @State private var wantToTryToDelete: RestaurantWantToTry?
 
     var body: some View {
         NavigationStack {
@@ -70,7 +72,7 @@ struct RestaurantJournalView: View {
                                     ForEach(1...5, id: \.self) { star in
                                         Image(systemName: star <= rating ? "star.fill" : "star")
                                             .font(.caption2)
-                                            .foregroundStyle(.yellow)
+                                            .foregroundStyle(Brand.warmTan)
                                     }
                                 }
                             }
@@ -102,12 +104,32 @@ struct RestaurantJournalView: View {
                     }
                     .padding(.vertical, 2)
                 }
-                .onDelete { offsets in
-                    for offset in offsets {
-                        modelContext.delete(entries[offset])
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        entryToDelete = entry
+                    } label: {
+                        Label("Delete", systemImage: "trash")
                     }
                 }
+                }
             }
+        }
+        .confirmationDialog(
+            "Delete Entry",
+            isPresented: .init(
+                get: { entryToDelete != nil },
+                set: { if !$0 { entryToDelete = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let entry = entryToDelete {
+                    modelContext.delete(entry)
+                    entryToDelete = nil
+                }
+            }
+        } message: {
+            Text("Delete your review of \"\(entryToDelete?.restaurantName ?? "")\"?")
         }
     }
 
@@ -128,7 +150,7 @@ struct RestaurantJournalView: View {
                             Spacer()
                             if restaurant.hasVisited {
                                 Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(.green)
+                                    .foregroundStyle(Brand.herbGreen)
                             }
                         }
 
@@ -144,12 +166,32 @@ struct RestaurantJournalView: View {
                         }
                     }
                 }
-                .onDelete { offsets in
-                    for offset in offsets {
-                        modelContext.delete(wantToTry[offset])
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        wantToTryToDelete = restaurant
+                    } label: {
+                        Label("Delete", systemImage: "trash")
                     }
                 }
+                }
             }
+        }
+        .confirmationDialog(
+            "Delete Restaurant",
+            isPresented: .init(
+                get: { wantToTryToDelete != nil },
+                set: { if !$0 { wantToTryToDelete = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let item = wantToTryToDelete {
+                    modelContext.delete(item)
+                    wantToTryToDelete = nil
+                }
+            }
+        } message: {
+            Text("Remove \"\(wantToTryToDelete?.restaurantName ?? "")\" from your list?")
         }
     }
 }
@@ -192,7 +234,7 @@ struct AddRestaurantEntryView: View {
                                 rating = star
                             } label: {
                                 Image(systemName: star <= rating ? "star.fill" : "star")
-                                    .foregroundStyle(.yellow)
+                                    .foregroundStyle(Brand.warmTan)
                                     .font(.title2)
                             }
                             .accessibilityLabel("\(star) star\(star == 1 ? "" : "s")")

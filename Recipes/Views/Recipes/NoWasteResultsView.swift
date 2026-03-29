@@ -155,7 +155,7 @@ struct NoWasteRecipeRow: View {
                 HStack(spacing: 4) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.caption2)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Brand.herbGreen)
                     Text("Have: \(matchedNames.joined(separator: ", "))")
                         .font(.caption)
                         .lineLimit(1)
@@ -168,10 +168,10 @@ struct NoWasteRecipeRow: View {
 
     private var coverageColor: Color {
         switch match.coveragePercent {
-        case 90...100: return .green
-        case 70..<90:  return .yellow
-        case 50..<70:  return .orange
-        default:       return .red
+        case 90...100: return Brand.herbGreen
+        case 70..<90:  return Brand.warmTan
+        case 50..<70:  return Brand.ingredientSeasoning
+        default:       return Brand.spiceRed
         }
     }
 }

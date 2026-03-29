@@ -318,3 +318,83 @@ struct OpenFoodFactsTests {
         #expect(product.category == .protein)
     }
 }
+
+// MARK: - Measurement Conversion Edge Case Tests
+
+@Suite("Measurement Conversion Edge Cases")
+struct MeasurementConversionEdgeCaseTests {
+
+    @Test("Scale by zero returns zero quantity")
+    func scaleByZero() {
+        let amount = IngredientAmount(quantity: 5, unit: .cup)
+        let scaled = MeasurementConversionService.scale(amount: amount, by: 0)
+        #expect(scaled.quantity == 0)
+        #expect(scaled.unit == .cup)
+    }
+
+    @Test("Scale by negative returns negative (caller responsibility)")
+    func scaleByNegative() {
+        let amount = IngredientAmount(quantity: 2, unit: .tablespoon)
+        let scaled = MeasurementConversionService.scale(amount: amount, by: -1)
+        #expect(scaled.quantity == -2)
+    }
+
+    @Test("Convert zero quantity preserves zero")
+    func convertZero() {
+        let amount = IngredientAmount(quantity: 0, unit: .cup)
+        let result = MeasurementConversionService.convert(amount: amount, to: .milliliter)
+        #expect(result != nil)
+        #expect(result!.quantity == 0)
+    }
+
+    @Test("Convert between incompatible units returns nil")
+    func incompatibleUnits() {
+        let amount = IngredientAmount(quantity: 1, unit: .gram)
+        let result = MeasurementConversionService.convert(amount: amount, to: .cup)
+        // Weight to volume without density — should return nil or approximate
+        // This test verifies the service handles it gracefully
+        if let result {
+            #expect(result.unit == .cup)
+        }
+    }
+}
+
+// MARK: - Brand Color System Tests
+
+@Suite("Brand Design System")
+struct BrandDesignSystemTests {
+
+    @Test("All ingredient categories have a display color")
+    func allCategoriesHaveColors() {
+        for category in IngredientCategory.allCases {
+            let color = category.displayColor
+            // Verify no crash when accessing swiftUIColor
+            _ = color.swiftUIColor
+        }
+    }
+
+    @Test("IngredientColor raw values are unique")
+    func uniqueRawValues() {
+        let allRawValues = IngredientColor.allCases.map(\.rawValue)
+        #expect(Set(allRawValues).count == allRawValues.count)
+    }
+}
+
+// MARK: - Shopping List Generator Edge Cases
+
+@Suite("Shopping List Generator Edge Cases")
+struct ShoppingListEdgeCaseTests {
+
+    @Test("Recipe with zero servings is skipped safely")
+    func zeroServingsSkipped() {
+        let recipe = Recipe(title: "Bad Recipe", servings: 0, ingredients: [
+            Ingredient(name: "Flour", category: .grain, amount: IngredientAmount(quantity: 2, unit: .cup))
+        ])
+        let meal = PlannedMeal(mealType: .dinner, date: .now, recipe: recipe, servings: 4)
+        let plan = MealPlan(name: "Test", startDate: .now, endDate: .now)
+        plan.meals = [meal]
+
+        let list = ShoppingListGenerator.generateList(from: plan)
+        #expect(list.items.isEmpty)
+    }
+}

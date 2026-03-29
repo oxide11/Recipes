@@ -2,6 +2,14 @@ import WidgetKit
 import SwiftUI
 import AppIntents
 
+// MARK: - Widget Brand Colors (mirroring main app Brand tokens)
+
+private enum WidgetBrand {
+    static let warmTan = Color(red: 200/255, green: 184/255, blue: 154/255)
+    static let herbGreen = Color(red: 122/255, green: 158/255, blue: 126/255)
+    static let muted = Color(red: 136/255, green: 136/255, blue: 136/255)
+}
+
 // MARK: - Meal Plan Widget
 
 /// Shows today's planned meals on the home screen and lock screen.
@@ -208,7 +216,7 @@ struct CookingTimerLiveActivityView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "flame.fill")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(WidgetBrand.warmTan)
                 Text(context.attributes.recipeTitle)
                     .font(.headline)
                     .lineLimit(1)
@@ -224,7 +232,7 @@ struct CookingTimerLiveActivityView: View {
 
             HStack {
                 Image(systemName: "timer")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(WidgetBrand.warmTan)
                 Text(formatTime(context.state.remainingSeconds))
                     .font(.title2)
                     .fontWeight(.bold)

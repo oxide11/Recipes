@@ -239,22 +239,7 @@ struct PantryItemRow: View {
     }
 
     private func categoryColor(_ category: IngredientCategory) -> Color {
-        switch category.displayColor {
-        case .red: return .red
-        case .green: return .green
-        case .orange: return .orange
-        case .amber: return .yellow
-        case .blue: return .blue
-        case .purple: return .purple
-        case .yellow: return .yellow
-        case .teal: return .teal
-        case .cyan: return .cyan
-        case .pink: return .pink
-        case .brown: return .brown
-        case .mint: return .mint
-        case .lime: return .green.opacity(0.7)
-        case .gray: return .gray
-        }
+        category.displayColor.swiftUIColor
     }
 }
 

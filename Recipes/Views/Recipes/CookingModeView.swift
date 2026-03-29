@@ -17,6 +17,8 @@ struct CookingModeView: View {
     @State private var remainingSeconds = 0
     @State private var timerTask: Task<Void, Never>?
     @State private var isVoiceEnabled = true
+    @State private var showingTutorial = false
+    @AppStorage("hasSeenCookingModeTutorial") private var hasSeenTutorial = false
     private let synthesizer = AVSpeechSynthesizer()
 
     private var currentStep: RecipeDirection? {
@@ -52,8 +54,22 @@ struct CookingModeView: View {
         .persistentSystemOverlays(.hidden)
         .onAppear {
             UIApplication.shared.isIdleTimerDisabled = true
-            if isVoiceEnabled, let step = currentStep {
+            if !hasSeenTutorial {
+                showingTutorial = true
+            } else if isVoiceEnabled, let step = currentStep {
                 speakStep(step)
+            }
+        }
+        .overlay {
+            if showingTutorial {
+                CookingModeTutorialOverlay {
+                    hasSeenTutorial = true
+                    showingTutorial = false
+                    if isVoiceEnabled, let step = currentStep {
+                        speakStep(step)
+                    }
+                }
+                .transition(.opacity)
             }
         }
         .onDisappear {
@@ -423,6 +439,64 @@ struct BlinkNavigationHelpView: View {
 
             Text(text)
                 .font(.subheadline)
+        }
+    }
+}
+
+// MARK: - Cooking Mode Tutorial Overlay
+
+struct CookingModeTutorialOverlay: View {
+    let onDismiss: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.85)
+                .ignoresSafeArea()
+
+            VStack(spacing: 28) {
+                Image(systemName: "hand.tap.fill")
+                    .font(.system(size: 48))
+                    .foregroundStyle(Brand.warmTan)
+
+                Text("Cooking Mode")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+
+                VStack(alignment: .leading, spacing: 16) {
+                    tutorialRow(icon: "chevron.left.chevron.right", text: "Swipe or tap arrows to navigate steps")
+                    tutorialRow(icon: "speaker.wave.3.fill", text: "Each step is read aloud automatically")
+                    tutorialRow(icon: "timer", text: "Timers auto-advance to the next step")
+                    tutorialRow(icon: "display", text: "Screen stays awake while cooking")
+                    tutorialRow(icon: "accessibility", text: "Works with Switch Control for hands-free use")
+                }
+
+                Button {
+                    withAnimation { onDismiss() }
+                } label: {
+                    Text("Got It")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                }
+                .buttonStyle(.glass)
+                .tint(Brand.warmTan)
+                .padding(.horizontal, 32)
+            }
+            .padding(32)
+        }
+        .accessibilityAction(.escape) { onDismiss() }
+    }
+
+    private func tutorialRow(icon: String, text: String) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(Brand.warmTan)
+                .frame(width: 28)
+            Text(text)
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.85))
         }
     }
 }

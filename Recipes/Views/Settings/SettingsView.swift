@@ -49,7 +49,7 @@ struct SettingsView: View {
                 Label("Apple Intelligence", systemImage: "apple.intelligence")
                 Spacer()
                 Text(onDeviceAvailable ? "Available" : "Unavailable")
-                    .foregroundStyle(onDeviceAvailable ? .green : .secondary)
+                    .foregroundStyle(onDeviceAvailable ? Brand.herbGreen : .secondary)
             }
 
             // Preferred provider
@@ -139,7 +139,7 @@ struct SettingsView: View {
                     }
                 } icon: {
                     Image(systemName: "bell.badge")
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Brand.warmTan)
                 }
             }
         }

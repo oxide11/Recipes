@@ -284,7 +284,7 @@ struct OnboardingView: View {
 
             Image(systemName: "leaf.circle.fill")
                 .font(.system(size: 60))
-                .foregroundStyle(.green)
+                .foregroundStyle(Brand.herbGreen)
 
             Text("Dietary Preferences")
                 .font(.title2)
@@ -313,7 +313,7 @@ struct OnboardingView: View {
                                 .frame(maxWidth: .infinity)
                                 .background(
                                     selectedRestrictions.contains(restriction)
-                                        ? Color.green.opacity(0.2)
+                                        ? Brand.herbGreen.opacity(0.2)
                                         : Color.clear,
                                     in: .capsule
                                 )
@@ -321,7 +321,7 @@ struct OnboardingView: View {
                                     Capsule()
                                         .strokeBorder(
                                             selectedRestrictions.contains(restriction)
-                                                ? .green : .secondary.opacity(0.3),
+                                                ? Brand.herbGreen : .secondary.opacity(0.3),
                                             lineWidth: 1
                                         )
                                 )
@@ -355,7 +355,7 @@ struct OnboardingView: View {
 
             Image(systemName: "globe.americas.fill")
                 .font(.system(size: 60))
-                .foregroundStyle(.blue)
+                .foregroundStyle(Brand.ingredientDairy)
 
             Text("Favorite Cuisines")
                 .font(.title2)
@@ -384,7 +384,7 @@ struct OnboardingView: View {
                                 .frame(maxWidth: .infinity)
                                 .background(
                                     selectedCuisines.contains(cuisine)
-                                        ? Color.blue.opacity(0.2)
+                                        ? Brand.warmTan.opacity(0.2)
                                         : Color.clear,
                                     in: .capsule
                                 )
@@ -392,7 +392,7 @@ struct OnboardingView: View {
                                     Capsule()
                                         .strokeBorder(
                                             selectedCuisines.contains(cuisine)
-                                                ? .blue : .secondary.opacity(0.3),
+                                                ? Brand.warmTan : .secondary.opacity(0.3),
                                             lineWidth: 1
                                         )
                                 )

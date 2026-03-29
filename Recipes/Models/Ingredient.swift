@@ -66,20 +66,20 @@ enum IngredientColor: String, Codable, Sendable {
 
     var swiftUIColor: Color {
         switch self {
-        case .red:    return .red
-        case .green:  return .green
-        case .orange: return .orange
-        case .amber:  return .yellow.opacity(0.8)
-        case .blue:   return .blue
-        case .purple: return .purple
-        case .yellow: return .yellow
-        case .teal:   return .teal
-        case .cyan:   return .cyan
-        case .pink:   return .pink
-        case .brown:  return .brown
-        case .mint:   return .mint
-        case .lime:   return .green.opacity(0.7)
-        case .gray:   return .gray
+        case .red:    return Brand.ingredientProtein
+        case .green:  return Brand.ingredientProduce
+        case .orange: return Brand.warmTan
+        case .amber:  return Brand.ingredientDryGoods
+        case .blue:   return Brand.ingredientDairy
+        case .purple: return Brand.ingredientSeasoning
+        case .yellow: return Brand.warmTan.opacity(0.8)
+        case .teal:   return Brand.ingredientLiquid
+        case .cyan:   return Brand.ingredientLiquid.opacity(0.8)
+        case .pink:   return Brand.spiceRed.opacity(0.6)
+        case .brown:  return Brand.ingredientDryGoods.opacity(0.8)
+        case .mint:   return Brand.herbGreen.opacity(0.7)
+        case .lime:   return Brand.herbGreen.opacity(0.5)
+        case .gray:   return Brand.muted
         }
     }
 }
