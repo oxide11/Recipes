@@ -103,14 +103,13 @@ struct RestaurantJournalView: View {
                         }
                     }
                     .padding(.vertical, 2)
-                }
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        entryToDelete = entry
-                    } label: {
-                        Label("Delete", systemImage: "trash")
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            entryToDelete = entry
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
                     }
-                }
                 }
             }
         }
@@ -165,14 +164,13 @@ struct RestaurantJournalView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-                }
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        wantToTryToDelete = restaurant
-                    } label: {
-                        Label("Delete", systemImage: "trash")
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            wantToTryToDelete = restaurant
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
                     }
-                }
                 }
             }
         }
