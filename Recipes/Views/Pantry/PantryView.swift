@@ -31,6 +31,7 @@ struct PantryView: View {
 
     @State private var showingScanner = false
     @State private var showingAddItem = false
+    @State private var showingBulkPhoto = false
     @State private var showingNoWasteResults = false
     @State private var searchText = ""
     @State private var itemToDelete: PantryItem?
@@ -47,6 +48,20 @@ struct PantryView: View {
 
     private var expiringItems: [PantryItem] {
         items.filter(\.isExpiringSoon)
+    }
+
+    @ViewBuilder
+    private func pantryItemRow(_ item: PantryItem) -> some View {
+        PantryItemRow(item: item)
+            .contentShape(Rectangle())
+            .onTapGesture { editingItem = item }
+            .swipeActions(edge: .trailing) {
+                Button(role: .destructive) {
+                    itemToDelete = item
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
     }
 
     private var spiceRackItems: [PantryItem] {
@@ -150,16 +165,7 @@ struct PantryView: View {
                     if let categoryItems = groupedItems[category], !categoryItems.isEmpty {
                         Section(category.rawValue.capitalized) {
                             ForEach(categoryItems) { item in
-                                PantryItemRow(item: item)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture { editingItem = item }
-                                    .swipeActions(edge: .trailing) {
-                                        Button(role: .destructive) {
-                                            itemToDelete = item
-                                        } label: {
-                                            Label("Delete", systemImage: "trash")
-                                        }
-                                    }
+                                pantryItemRow(item)
                             }
                         }
                     }
@@ -188,10 +194,16 @@ struct PantryView: View {
                         showingScanner = true
                     }
                     .accessibilityLabel("Scan barcode")
-                    Button("Add", systemImage: "plus") {
-                        showingAddItem = true
+                    Menu {
+                        Button("Add Item Manually", systemImage: "square.and.pencil") {
+                            showingAddItem = true
+                        }
+                        Button("Add from Photo", systemImage: "camera.viewfinder") {
+                            showingBulkPhoto = true
+                        }
+                    } label: {
+                        Image(systemName: "plus")
                     }
-                    .accessibilityLabel("Add pantry item")
                 }
             }
             .sheet(isPresented: $showingScanner) {
@@ -199,6 +211,9 @@ struct PantryView: View {
             }
             .sheet(isPresented: $showingAddItem) {
                 AddPantryItemView()
+            }
+            .sheet(isPresented: $showingBulkPhoto) {
+                BulkPhotoAddView()
             }
             .confirmationDialog(
                 "Delete Item",
