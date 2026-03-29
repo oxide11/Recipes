@@ -52,7 +52,7 @@ struct DirectionStepView: View {
                                         category: ingredientCategoryMap[ref.ingredientName.lowercased()] ?? .other
                                     )
                                 } label: {
-                                    Label("Look Up "\(ref.ingredientName)"", systemImage: "character.book.closed")
+                                    Label("Look Up '\(ref.ingredientName)'", systemImage: "character.book.closed")
                                 }
                                 Button {
                                     selectedConversion = ref

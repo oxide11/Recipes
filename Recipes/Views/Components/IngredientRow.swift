@@ -73,7 +73,7 @@ struct IngredientRow: View {
             Button {
                 showingLookup = true
             } label: {
-                Label("Look Up "\(ingredient.name)"", systemImage: "character.book.closed")
+                Label("Look Up '\(ingredient.name)'", systemImage: "character.book.closed")
             }
         }
         .sheet(isPresented: $showingLookup) {

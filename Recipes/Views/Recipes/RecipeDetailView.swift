@@ -421,6 +421,7 @@ struct RecipeDetailView: View {
                     DirectionStepView(
                         direction: direction,
                         ingredientColorMap: ingredientColors,
+                        ingredientCategoryMap: ingredientCategories,
                         recipeTitle: recipe.title,
                         totalSteps: recipe.directions.count
                     )
