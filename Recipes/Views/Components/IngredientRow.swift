@@ -7,6 +7,7 @@ struct IngredientRow: View {
     var servingMultiplier: Double = 1.0
     var isChecked: Bool = false
     var onToggle: (() -> Void)? = nil
+    @State private var showingLookup = false
 
     private var scaledAmount: IngredientAmount {
         MeasurementConversionService.scale(
@@ -68,6 +69,16 @@ struct IngredientRow: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(ingredient.name), \(scaledAmount.displayString)\(ingredient.isOptional ? ", optional" : "")")
         .accessibilityAddTraits(isChecked ? [.isSelected] : [])
+        .contextMenu {
+            Button {
+                showingLookup = true
+            } label: {
+                Label("Look Up "\(ingredient.name)"", systemImage: "character.book.closed")
+            }
+        }
+        .sheet(isPresented: $showingLookup) {
+            IngredientLookupView(ingredientName: ingredient.name, category: ingredient.category)
+        }
     }
 
     private func colorForCategory(_ category: IngredientCategory) -> Color {

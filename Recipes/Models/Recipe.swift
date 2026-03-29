@@ -77,7 +77,8 @@ struct RecipeDirection: Codable, Hashable, Identifiable, Sendable {
 }
 
 /// References an ingredient with its measurement inline in a direction step.
-struct DirectionIngredientRef: Codable, Hashable, Sendable {
+struct DirectionIngredientRef: Codable, Hashable, Sendable, Identifiable {
+    var id: String { ingredientName }
     var ingredientName: String
     var amount: IngredientAmount
 }

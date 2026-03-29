@@ -41,6 +41,7 @@ enum AITaskType {
     case blindSpotDetection
     case mealPlanGeneration
     case cookingOptimization
+    case ingredientLookup
 }
 
 // MARK: - AI Service Router

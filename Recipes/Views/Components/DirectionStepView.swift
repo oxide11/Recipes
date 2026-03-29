@@ -6,10 +6,14 @@ import SwiftUI
 /// timer controls, and safe temperature badges.
 struct DirectionStepView: View {
     let direction: RecipeDirection
+    var ingredientColorMap: [String: Color] = [:]
+    var ingredientCategoryMap: [String: IngredientCategory] = [:]
 
     @State private var timerActive = false
     @State private var remainingSeconds: Int = 0
     @State private var timerTask: Task<Void, Never>?
+    @State private var selectedConversion: DirectionIngredientRef?
+    @State private var lookupIngredient: (name: String, category: IngredientCategory)?
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -22,18 +26,40 @@ struct DirectionStepView: View {
                 .background(.tint, in: .circle)
 
             VStack(alignment: .leading, spacing: 8) {
-                // Instruction text with inline ingredient references
+                // Instruction text with color-coded ingredient + amount references
                 Text(attributedInstruction)
 
-                // Inline ingredients used in this step
+                // Tappable ingredient chips with conversion popover + look up
                 if !direction.ingredients.isEmpty {
                     FlowLayout(spacing: 6) {
                         ForEach(direction.ingredients, id: \.ingredientName) { ref in
-                            Text("\(ref.amount.displayString) \(ref.ingredientName)")
-                                .font(.caption)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(.tint.opacity(0.1), in: .capsule)
+                            let color = ingredientColorMap[ref.ingredientName.lowercased()] ?? .accentColor
+                            Button {
+                                selectedConversion = ref
+                            } label: {
+                                Text("\(ref.amount.displayString) \(ref.ingredientName)")
+                                    .font(.caption)
+                                    .foregroundStyle(color)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(color.opacity(0.12), in: .capsule)
+                            }
+                            .buttonStyle(.plain)
+                            .contextMenu {
+                                Button {
+                                    lookupIngredient = (
+                                        name: ref.ingredientName,
+                                        category: ingredientCategoryMap[ref.ingredientName.lowercased()] ?? .other
+                                    )
+                                } label: {
+                                    Label("Look Up "\(ref.ingredientName)"", systemImage: "character.book.closed")
+                                }
+                                Button {
+                                    selectedConversion = ref
+                                } label: {
+                                    Label("Convert Units", systemImage: "arrow.triangle.swap")
+                                }
+                            }
                         }
                     }
                 }
@@ -63,6 +89,18 @@ struct DirectionStepView: View {
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Step \(direction.stepNumber). \(direction.instruction)")
+        .popover(item: $selectedConversion) { ref in
+            IngredientConversionPopover(ref: ref)
+                .presentationCompactAdaptation(.popover)
+        }
+        .sheet(isPresented: Binding(
+            get: { lookupIngredient != nil },
+            set: { if !$0 { lookupIngredient = nil } }
+        )) {
+            if let lookup = lookupIngredient {
+                IngredientLookupView(ingredientName: lookup.name, category: lookup.category)
+            }
+        }
     }
 
     // MARK: - Timer View
@@ -149,13 +187,108 @@ struct DirectionStepView: View {
 
     private var attributedInstruction: AttributedString {
         var result = AttributedString(direction.instruction)
-        // Bold any ingredient references in the instruction text
         for ref in direction.ingredients {
-            if let range = result.range(of: ref.ingredientName, options: .caseInsensitive) {
+            let color = ingredientColorMap[ref.ingredientName.lowercased()]
+
+            // Try to match "amount ingredient" first (e.g. "2 cup flour")
+            let fullPattern = "\(ref.amount.displayString) \(ref.ingredientName)"
+            if let range = result.range(of: fullPattern, options: .caseInsensitive) {
                 result[range].font = .body.bold()
+                if let color { result[range].foregroundColor = color }
+            } else if let range = result.range(of: ref.ingredientName, options: .caseInsensitive) {
+                // Fallback: just highlight the ingredient name
+                result[range].font = .body.bold()
+                if let color { result[range].foregroundColor = color }
             }
         }
         return result
+    }
+}
+
+// MARK: - Ingredient Conversion Popover
+
+/// Shows useful unit conversions for a tapped ingredient chip.
+struct IngredientConversionPopover: View {
+    let ref: DirectionIngredientRef
+
+    private var conversions: [IngredientAmount] {
+        let amount = ref.amount
+        let targets = Self.conversionTargets(for: amount.unit)
+        return targets.compactMap { target in
+            MeasurementConversionService.convert(amount: amount, to: target)
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            // Header: original amount
+            HStack(spacing: 6) {
+                Image(systemName: "arrow.triangle.swap")
+                    .foregroundStyle(Brand.warmTan)
+                Text(ref.ingredientName.capitalized)
+                    .fontWeight(.semibold)
+            }
+            .font(.subheadline)
+
+            Divider()
+
+            // Original
+            HStack {
+                Text(ref.amount.displayString)
+                    .fontWeight(.medium)
+                Spacer()
+                Text("original")
+                    .font(.caption)
+                    .foregroundStyle(Brand.muted)
+            }
+            .font(.subheadline)
+
+            // Conversions
+            ForEach(conversions, id: \.unit) { converted in
+                HStack {
+                    Text(converted.displayString)
+                        .fontWeight(.medium)
+                    Spacer()
+                    Text(converted.unit.rawValue)
+                        .font(.caption)
+                        .foregroundStyle(Brand.muted)
+                }
+                .font(.subheadline)
+            }
+
+            if conversions.isEmpty {
+                Text("No conversions available")
+                    .font(.caption)
+                    .foregroundStyle(Brand.muted)
+            }
+        }
+        .padding()
+        .frame(minWidth: 200)
+    }
+
+    /// Returns the most useful conversion targets for a given unit.
+    private static func conversionTargets(for unit: MeasurementUnit) -> [MeasurementUnit] {
+        switch unit {
+        // Volume imperial → metric + other imperial
+        case .teaspoon:    return [.tablespoon, .milliliter]
+        case .tablespoon:  return [.teaspoon, .cup, .milliliter]
+        case .cup:         return [.tablespoon, .milliliter, .liter]
+        case .fluidOunce:  return [.tablespoon, .cup, .milliliter]
+        // Volume metric → imperial
+        case .milliliter:  return [.teaspoon, .tablespoon, .cup, .fluidOunce]
+        case .liter:       return [.cup, .milliliter, .fluidOunce]
+        // Weight imperial → metric
+        case .ounce:       return [.gram, .pound]
+        case .pound:       return [.gram, .kilogram, .ounce]
+        // Weight metric → imperial
+        case .gram:        return [.ounce, .pound, .kilogram]
+        case .kilogram:    return [.gram, .pound, .ounce]
+        // Temperature
+        case .fahrenheit:  return [.celsius]
+        case .celsius:     return [.fahrenheit]
+        // Count units — no meaningful conversions
+        default:           return []
+        }
     }
 }
 

@@ -18,8 +18,18 @@ struct CookingModeView: View {
     @State private var timerTask: Task<Void, Never>?
     @State private var isVoiceEnabled = true
     @State private var showingTutorial = false
+    @State private var selectedConversion: DirectionIngredientRef?
     @AppStorage("hasSeenCookingModeTutorial") private var hasSeenTutorial = false
     private let synthesizer = AVSpeechSynthesizer()
+
+    /// Maps lowercased ingredient names to their category color for syntax-style highlighting.
+    private var ingredientColors: [String: Color] {
+        var map: [String: Color] = [:]
+        for ingredient in recipe.ingredients {
+            map[ingredient.name.lowercased()] = ingredient.category.displayColor.swiftUIColor
+        }
+        return map
+    }
 
     private var currentStep: RecipeDirection? {
         guard currentStepIndex < recipe.directions.count else { return nil }
@@ -82,6 +92,10 @@ struct CookingModeView: View {
         .accessibilityAction(.escape) { dismiss() }
         .accessibilityAction(named: "Next Step") { advanceStep() }
         .accessibilityAction(named: "Previous Step") { goBack() }
+        .popover(item: $selectedConversion) { ref in
+            IngredientConversionPopover(ref: ref)
+                .presentationCompactAdaptation(.popover)
+        }
     }
 
     // MARK: - Progress Bar
@@ -118,26 +132,32 @@ struct CookingModeView: View {
                     .frame(width: 80, height: 80)
                     .background(.tint, in: .circle)
 
-                // Instruction — large text for readability
-                Text(step.instruction)
+                // Instruction — large text with color-coded ingredients
+                Text(coloredInstruction(step))
                     .font(.system(size: 28, weight: .medium))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
                     .accessibilityLabel("Step \(step.stepNumber). \(step.instruction)")
 
-                // Inline ingredients
+                // Inline ingredients with category colors — tap to convert
                 if !step.ingredients.isEmpty {
                     VStack(spacing: 8) {
                         ForEach(step.ingredients, id: \.ingredientName) { ref in
-                            HStack {
-                                Circle()
-                                    .fill(.tint.opacity(0.3))
-                                    .frame(width: 8, height: 8)
-                                Text("\(ref.amount.displayString) \(ref.ingredientName)")
-                                    .font(.title3)
-                                    .foregroundStyle(.white.opacity(0.85))
+                            let color = ingredientColors[ref.ingredientName.lowercased()] ?? .accentColor
+                            Button {
+                                selectedConversion = ref
+                            } label: {
+                                HStack {
+                                    Circle()
+                                        .fill(color.opacity(0.6))
+                                        .frame(width: 8, height: 8)
+                                    Text("\(ref.amount.displayString) \(ref.ingredientName)")
+                                        .font(.title3)
+                                        .foregroundStyle(color)
+                                }
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -304,6 +324,24 @@ struct CookingModeView: View {
         if isVoiceEnabled, let step = currentStep {
             speakStep(step)
         }
+    }
+
+    private func coloredInstruction(_ step: RecipeDirection) -> AttributedString {
+        var result = AttributedString(step.instruction)
+        for ref in step.ingredients {
+            let color = ingredientColors[ref.ingredientName.lowercased()]
+
+            // Try to match "amount ingredient" first (e.g. "2 cup flour")
+            let fullPattern = "\(ref.amount.displayString) \(ref.ingredientName)"
+            if let range = result.range(of: fullPattern, options: .caseInsensitive) {
+                result[range].font = .system(size: 28, weight: .bold)
+                if let color { result[range].foregroundColor = color }
+            } else if let range = result.range(of: ref.ingredientName, options: .caseInsensitive) {
+                result[range].font = .system(size: 28, weight: .bold)
+                if let color { result[range].foregroundColor = color }
+            }
+        }
+        return result
     }
 
     private func speakStep(_ step: RecipeDirection) {
