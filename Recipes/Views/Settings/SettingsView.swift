@@ -5,6 +5,7 @@ import FoundationModels
 // MARK: - Settings View
 
 struct SettingsView: View {
+    @Environment(\.modelContext) private var modelContext
     @Environment(AIServiceRouter.self) private var aiRouter
     @Query private var profiles: [UserProfile]
 
@@ -16,6 +17,8 @@ struct SettingsView: View {
     @State private var measurementSystem: MeasurementSystem = .imperial
     @State private var onDeviceAvailable = false
     @State private var showingSavedAlert = false
+    @State private var showingSampleDataConfirm = false
+    @State private var sampleDataLoaded = false
 
     private var profile: UserProfile? { profiles.first }
 
@@ -26,6 +29,7 @@ struct SettingsView: View {
                 measurementSection
                 notificationsSection
                 profileSection
+                sampleDataSection
                 aboutSection
             }
             .navigationTitle("Settings")
@@ -199,6 +203,44 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showingProfileEditor) {
             ProfileEditorView(profile: profile)
+        }
+    }
+
+    // MARK: - Sample Data
+
+    private var sampleDataSection: some View {
+        Section {
+            Button {
+                showingSampleDataConfirm = true
+            } label: {
+                Label {
+                    VStack(alignment: .leading) {
+                        Text("Load Sample Data")
+                            .fontWeight(.medium)
+                        Text("Populate the app with recipes, pantry items, a meal plan, and more")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } icon: {
+                    Image(systemName: "tray.and.arrow.down")
+                        .foregroundStyle(Brand.warmTan)
+                }
+            }
+            .disabled(sampleDataLoaded)
+            .confirmationDialog(
+                "Load Sample Data?",
+                isPresented: $showingSampleDataConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("Load Sample Data") {
+                    SampleData.populate(modelContext)
+                    sampleDataLoaded = true
+                }
+            } message: {
+                Text("This will add sample recipes, pantry items, a meal plan, grocery list, restaurant journal entries, and a user profile.")
+            }
+        } header: {
+            Label("Developer", systemImage: "hammer")
         }
     }
 

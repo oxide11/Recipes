@@ -56,6 +56,30 @@ enum AppTab: String, Hashable {
     case recipes, pantry, mealPlan, shopping, journal, metrics, settings
 }
 
-#Preview {
+#Preview("Empty") {
     ContentView()
+        .modelContainer(for: Recipe.self, inMemory: true)
+        .environment(AIServiceRouter())
 }
+
+#Preview("With Sample Data") {
+    ContentView()
+        .environment(AIServiceRouter())
+        .modelContainer(previewContainer)
+}
+
+@MainActor
+let previewContainer: ModelContainer = {
+    let schema = Schema([
+        Recipe.self, Ingredient.self, PantryItem.self,
+        MealPlan.self, PlannedMeal.self,
+        GroceryList.self, GroceryItem.self, GroceryReceipt.self,
+        RecipePhoto.self, CookingLogEntry.self, RecipeVariation.self,
+        RestaurantJournalEntry.self, RestaurantWantToTry.self,
+        UserProfile.self,
+    ])
+    let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: schema, configurations: [config])
+    SampleData.populate(container.mainContext)
+    return container
+}()
