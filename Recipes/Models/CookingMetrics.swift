@@ -5,25 +5,25 @@ import SwiftData
 
 /// Aggregated cooking statistics for the user's dashboard and year-in-review.
 struct CookingMetrics: Sendable {
-    var totalRecipesCooked: Int
-    var totalTimeCookingMinutes: Int
-    var totalTimePrepMinutes: Int
-    var totalTimeShoppingMinutes: Int
-    var totalGrocerySpend: Double
-    var estimatedDiningOutSavings: Double
+    var totalRecipesCooked: Int = 0
+    var totalTimeCookingMinutes: Int = 0
+    var totalTimePrepMinutes: Int = 0
+    var totalTimeShoppingMinutes: Int = 0
+    var totalGrocerySpend: Double = 0
+    var estimatedDiningOutSavings: Double = 0
 
-    var mostUsedIngredients: [IngredientUsage]
-    var favoriteCuisines: [CuisineUsage]
-    var topRecipes: [RecipeUsage]
+    var mostUsedIngredients: [IngredientUsage] = []
+    var favoriteCuisines: [CuisineUsage] = []
+    var topRecipes: [RecipeUsage] = []
 
     // Time savings from optimized cooking
-    var totalTimeSavedMinutes: Int
+    var totalTimeSavedMinutes: Int = 0
 
     // Restaurant journal stats
-    var totalRestaurantsVisited: Int
-    var totalDishesOrdered: Int
+    var totalRestaurantsVisited: Int = 0
+    var totalDishesOrdered: Int = 0
     var averageRestaurantRating: Double?
-    var topRestaurantCuisines: [CuisineUsage]
+    var topRestaurantCuisines: [CuisineUsage] = []
     var lastRestaurantVisitDate: Date?
 
     var averageCookingSessionMinutes: Double {

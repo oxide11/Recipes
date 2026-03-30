@@ -131,8 +131,7 @@ struct RecommendationCard: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(in: .rect(cornerRadius: 12))
-        .glassEffect(.regular, in: .rect(cornerRadius: 12))
+        .glassCard()
         .padding(.horizontal)
     }
 }

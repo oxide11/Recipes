@@ -363,8 +363,7 @@ struct RecipeAsCodeEditorView: View {
                 TextEditor(text: $editorText)
                     .font(.system(.body, design: .monospaced))
                     .padding(4)
-                    .background(in: .rect(cornerRadius: 8))
-                    .glassEffect(.regular, in: .rect(cornerRadius: 8))
+                    .glassCard(cornerRadius: 8)
                     .padding(.horizontal)
             }
             .navigationTitle("Recipe as Code")

@@ -9,9 +9,7 @@ struct MetricsView: View {
     @Query private var receipts: [GroceryReceipt]
     @Query private var restaurantEntries: [RestaurantJournalEntry]
 
-    private var metrics: CookingMetrics {
-        MetricsCalculator.calculate(recipes: recipes, receipts: receipts, restaurantEntries: restaurantEntries)
-    }
+    @State private var metrics = CookingMetrics()
 
     var body: some View {
         NavigationStack {
@@ -28,6 +26,12 @@ struct MetricsView: View {
             }
             .navigationTitle("Cooking Metrics")
             .toolbarBackground(.automatic, for: .navigationBar)
+            .task(id: recipes.count) {
+                metrics = MetricsCalculator.calculate(recipes: recipes, receipts: receipts, restaurantEntries: restaurantEntries)
+            }
+            .task(id: receipts.count) {
+                metrics = MetricsCalculator.calculate(recipes: recipes, receipts: receipts, restaurantEntries: restaurantEntries)
+            }
         }
     }
 
@@ -116,8 +120,7 @@ struct MetricsView: View {
                 .frame(height: CGFloat(cuisines.count) * 36 + 16)
             }
             .padding()
-            .background(in: .rect(cornerRadius: 16))
-            .glassEffect(.regular, in: .rect(cornerRadius: 16))
+            .glassCard(cornerRadius: 16)
         }
     }
 
@@ -141,8 +144,7 @@ struct MetricsView: View {
                 }
             }
             .padding()
-            .background(in: .rect(cornerRadius: 12))
-        .glassEffect(.regular, in: .rect(cornerRadius: 12))
+            .glassCard()
         }
     }
 
@@ -161,13 +163,7 @@ struct MetricsView: View {
                             Text(recipe.title)
                                 .fontWeight(.medium)
                             if let rating = recipe.averageRating {
-                                HStack(spacing: 2) {
-                                    ForEach(1...5, id: \.self) { star in
-                                        Image(systemName: star <= Int(rating.rounded()) ? "star.fill" : "star")
-                                            .font(.caption2)
-                                            .foregroundStyle(Brand.warmTan)
-                                    }
-                                }
+                                StarRatingView(rating: Int(rating.rounded()))
                             }
                         }
                         Spacer()
@@ -180,8 +176,7 @@ struct MetricsView: View {
                 }
             }
             .padding()
-            .background(in: .rect(cornerRadius: 12))
-        .glassEffect(.regular, in: .rect(cornerRadius: 12))
+            .glassCard()
         }
     }
 
@@ -209,8 +204,7 @@ struct MetricsView: View {
             }
         }
         .padding()
-        .background(in: .rect(cornerRadius: 12))
-        .glassEffect(.regular, in: .rect(cornerRadius: 12))
+        .glassCard()
     }
 
     // MARK: - Restaurant Stats
@@ -282,8 +276,7 @@ struct MetricsView: View {
                 }
             }
             .padding()
-            .background(in: .rect(cornerRadius: 12))
-            .glassEffect(.regular, in: .rect(cornerRadius: 12))
+            .glassCard()
         }
     }
 
@@ -321,8 +314,7 @@ struct MetricCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(in: .rect(cornerRadius: 12))
-        .glassEffect(.regular, in: .rect(cornerRadius: 12))
+        .glassCard()
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title): \(value)")
     }

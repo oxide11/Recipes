@@ -18,6 +18,7 @@ struct RecipeDetailView: View {
     @State private var showNutrition = false
     @State private var checkedIngredients: Set<UUID> = []
     @State private var isEstimatingNutrition = false
+    @State private var nutritionEstimateError: String?
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var isEditing = false
 
@@ -513,10 +514,17 @@ struct RecipeDetailView: View {
             }
             .buttonStyle(.plain)
             .disabled(isEstimatingNutrition)
+
+            if let error = nutritionEstimateError {
+                Text(error)
+                    .font(.caption)
+                    .foregroundStyle(Brand.spiceRed)
+            }
         }
     }
 
     private func estimateNutrition() async {
+        nutritionEstimateError = nil
         isEstimatingNutrition = true
         defer { isEstimatingNutrition = false }
 
@@ -572,7 +580,7 @@ struct RecipeDetailView: View {
                 showNutrition = true
             }
         } catch {
-            // Silently fail — button will remain visible so user can retry
+            nutritionEstimateError = "Couldn't estimate nutrition. Tap to retry."
         }
     }
 
@@ -596,8 +604,7 @@ struct RecipeDetailView: View {
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(in: .rect(cornerRadius: 8))
-                    .glassEffect(.regular, in: .rect(cornerRadius: 8))
+                    .glassCard(cornerRadius: 8)
                 }
             }
         }
@@ -620,11 +627,7 @@ struct RecipeDetailView: View {
                 // Average rating
                 if let avg = recipe.averageRating {
                     HStack(spacing: 4) {
-                        ForEach(1...5, id: \.self) { star in
-                            Image(systemName: star <= Int(avg.rounded()) ? "star.fill" : "star")
-                                .foregroundStyle(Brand.warmTan)
-                                .font(.subheadline)
-                        }
+                        StarRatingView(rating: Int(avg.rounded()), font: .subheadline)
                         Text(String(format: "%.1f avg", avg))
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -659,13 +662,7 @@ struct RecipeDetailView: View {
                                 .foregroundStyle(.secondary)
                             Spacer()
                             if let rating = entry.rating {
-                                HStack(spacing: 2) {
-                                    ForEach(1...5, id: \.self) { star in
-                                        Image(systemName: star <= rating ? "star.fill" : "star")
-                                            .font(.caption2)
-                                            .foregroundStyle(Brand.warmTan)
-                                    }
-                                }
+                                StarRatingView(rating: rating)
                             }
                         }
                         if let notes = entry.notes {

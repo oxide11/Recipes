@@ -179,12 +179,6 @@ struct DirectionStepView: View {
         Task { await CookingTimerLiveActivityManager.shared.endTimer() }
     }
 
-    private func formatTime(_ totalSeconds: Int) -> String {
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
-        return String(format: "%d:%02d", minutes, seconds)
-    }
-
     private var attributedInstruction: AttributedString {
         var result = AttributedString(direction.instruction)
         for ref in direction.ingredients {

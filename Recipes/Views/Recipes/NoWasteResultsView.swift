@@ -10,28 +10,29 @@ struct NoWasteResultsView: View {
     var expiringOnly: Bool = false
     var maxMinutes: Int? = nil
 
-    private var matches: [NoWasteMatchingEngine.MatchResult] {
+    @State private var matches: [NoWasteMatchingEngine.MatchResult] = []
+    @State private var timeFilter: TimeFilter = .any
+    @State private var showFullCoverageOnly = false
+
+    private func computeMatches() {
         if expiringOnly {
-            return NoWasteMatchingEngine.recipesForExpiringItems(
+            matches = NoWasteMatchingEngine.recipesForExpiringItems(
                 recipes: recipes,
                 pantryItems: pantryItems
             )
         } else if let maxMinutes {
-            return NoWasteMatchingEngine.lastMinuteRecipes(
+            matches = NoWasteMatchingEngine.lastMinuteRecipes(
                 recipes: recipes,
                 pantryItems: pantryItems,
                 maxMinutes: maxMinutes
             )
         } else {
-            return NoWasteMatchingEngine.matchRecipes(
+            matches = NoWasteMatchingEngine.matchRecipes(
                 recipes: recipes,
                 pantryItems: pantryItems
             )
         }
     }
-
-    @State private var timeFilter: TimeFilter = .any
-    @State private var showFullCoverageOnly = false
 
     enum TimeFilter: String, CaseIterable {
         case any = "Any Time"
@@ -96,6 +97,7 @@ struct NoWasteResultsView: View {
             }
         }
         .navigationTitle(expiringOnly ? "Use It Up" : "What Can I Make?")
+        .task { computeMatches() }
     }
 }
 

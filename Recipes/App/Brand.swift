@@ -59,6 +59,13 @@ extension View {
             .foregroundStyle(Brand.muted)
             .textCase(nil)
     }
+
+    /// Liquid Glass card background — pairs `.background(in:)` with `.glassEffect(.regular, in:)`.
+    func glassCard(cornerRadius: CGFloat = 12) -> some View {
+        self
+            .background(in: .rect(cornerRadius: cornerRadius))
+            .glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+    }
 }
 
 // MARK: - Adaptive Color Initialiser

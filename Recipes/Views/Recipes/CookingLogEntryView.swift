@@ -41,19 +41,8 @@ struct CookingLogEntryView: View {
         NavigationStack {
             Form {
                 Section("Rating") {
-                    HStack {
-                        ForEach(1...5, id: \.self) { star in
-                            Button {
-                                rating = star
-                            } label: {
-                                Image(systemName: star <= rating ? "star.fill" : "star")
-                                    .foregroundStyle(Brand.warmTan)
-                                    .font(.title2)
-                            }
-                            .accessibilityLabel("\(star) star\(star == 1 ? "" : "s")")
-                        }
-                    }
-                    .sensoryFeedback(.selection, trigger: rating)
+                    StarRatingView(rating: rating, font: .title2) { rating = $0 }
+                        .sensoryFeedback(.selection, trigger: rating)
                 }
 
                 Section("Servings & Time") {

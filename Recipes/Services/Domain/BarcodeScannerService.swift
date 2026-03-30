@@ -271,6 +271,10 @@ final class CameraPreviewUIView: UIView {
     }
 
     var previewLayer: AVCaptureVideoPreviewLayer {
-        layer as! AVCaptureVideoPreviewLayer
+        // Safe: layerClass override guarantees this type, but guard defensively.
+        guard let preview = layer as? AVCaptureVideoPreviewLayer else {
+            fatalError("layerClass must be AVCaptureVideoPreviewLayer")
+        }
+        return preview
     }
 }

@@ -80,13 +80,7 @@ struct RestaurantJournalView: View {
                                 .fontWeight(.semibold)
                             Spacer()
                             if let rating = entry.rating {
-                                HStack(spacing: 2) {
-                                    ForEach(1...5, id: \.self) { star in
-                                        Image(systemName: star <= rating ? "star.fill" : "star")
-                                            .font(.caption2)
-                                            .foregroundStyle(Brand.warmTan)
-                                    }
-                                }
+                                StarRatingView(rating: rating)
                             }
                         }
 
@@ -548,19 +542,8 @@ struct AddRestaurantEntryView: View {
 
                 // Rating
                 Section("Rating") {
-                    HStack {
-                        ForEach(1...5, id: \.self) { star in
-                            Button {
-                                rating = star
-                            } label: {
-                                Image(systemName: star <= rating ? "star.fill" : "star")
-                                    .foregroundStyle(Brand.warmTan)
-                                    .font(.title2)
-                            }
-                            .accessibilityLabel("\(star) star\(star == 1 ? "" : "s")")
-                        }
-                    }
-                    .sensoryFeedback(.selection, trigger: rating)
+                    StarRatingView(rating: rating, font: .title2) { rating = $0 }
+                        .sensoryFeedback(.selection, trigger: rating)
                 }
 
                 // Dishes Ordered
@@ -772,13 +755,7 @@ struct DishEntryRow: View {
                     .fontWeight(.medium)
                 Spacer()
                 if let rating = dish.rating {
-                    HStack(spacing: 2) {
-                        ForEach(1...5, id: \.self) { star in
-                            Image(systemName: star <= rating ? "star.fill" : "star")
-                                .font(.caption2)
-                                .foregroundStyle(Brand.warmTan)
-                        }
-                    }
+                    StarRatingView(rating: rating)
                 }
             }
 
@@ -826,18 +803,8 @@ struct AddDishView: View {
                     .lineLimit(3)
 
                 Section("Rating") {
-                    HStack {
-                        ForEach(1...5, id: \.self) { star in
-                            Button {
-                                rating = star
-                            } label: {
-                                Image(systemName: star <= rating ? "star.fill" : "star")
-                                    .foregroundStyle(Brand.warmTan)
-                                    .font(.title2)
-                            }
-                        }
-                    }
-                    .sensoryFeedback(.selection, trigger: rating)
+                    StarRatingView(rating: rating, font: .title2) { rating = $0 }
+                        .sensoryFeedback(.selection, trigger: rating)
                 }
 
                 TextField("Notes", text: $notes, axis: .vertical)

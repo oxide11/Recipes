@@ -12,19 +12,18 @@ struct NutritionTrackingView: View {
 
     @State private var selectedPeriod: TrackingPeriod = .week
     @State private var referenceDate = Date()
+    @State private var trackedDays: [DayNutrition] = []
+    @State private var totals = NutritionTotals(totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0, days: 0)
 
     private var profile: UserProfile? { profiles.first }
 
-    private var trackedDays: [DayNutrition] {
-        NutritionTracker.calculateDays(
+    private func recalculate() {
+        trackedDays = NutritionTracker.calculateDays(
             recipes: recipes,
             period: selectedPeriod,
             referenceDate: referenceDate
         )
-    }
-
-    private var totals: NutritionTotals {
-        NutritionTracker.totals(from: trackedDays)
+        totals = NutritionTracker.totals(from: trackedDays)
     }
 
     var body: some View {
@@ -40,6 +39,9 @@ struct NutritionTrackingView: View {
         }
         .navigationTitle("Nutrition")
         .toolbarBackground(.automatic, for: .navigationBar)
+        .task { recalculate() }
+        .onChange(of: selectedPeriod) { _, _ in recalculate() }
+        .onChange(of: referenceDate) { _, _ in recalculate() }
     }
 
     // MARK: - Period Picker
@@ -87,8 +89,7 @@ struct NutritionTrackingView: View {
                 }
             }
             .padding()
-            .background(in: .rect(cornerRadius: 12))
-            .glassEffect(.regular, in: .rect(cornerRadius: 12))
+            .glassCard()
         } else {
             VStack(spacing: 8) {
                 Image(systemName: "target")
@@ -103,8 +104,7 @@ struct NutritionTrackingView: View {
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(in: .rect(cornerRadius: 12))
-            .glassEffect(.regular, in: .rect(cornerRadius: 12))
+            .glassCard()
         }
     }
 
@@ -136,8 +136,7 @@ struct NutritionTrackingView: View {
             }
         }
         .padding()
-        .background(in: .rect(cornerRadius: 12))
-        .glassEffect(.regular, in: .rect(cornerRadius: 12))
+        .glassCard()
     }
 
     // MARK: - Macro Breakdown
@@ -155,8 +154,7 @@ struct NutritionTrackingView: View {
             .frame(maxWidth: .infinity)
         }
         .padding()
-        .background(in: .rect(cornerRadius: 12))
-        .glassEffect(.regular, in: .rect(cornerRadius: 12))
+        .glassCard()
     }
 
     private func macroCircle(label: String, value: Double, unit: String, color: Color) -> some View {
@@ -211,8 +209,7 @@ struct NutritionTrackingView: View {
             }
         }
         .padding()
-        .background(in: .rect(cornerRadius: 12))
-        .glassEffect(.regular, in: .rect(cornerRadius: 12))
+        .glassCard()
     }
 }
 

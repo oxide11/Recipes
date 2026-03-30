@@ -60,8 +60,7 @@ struct RecipeAsCodePreviewView: View {
                 .font(.system(.body, design: .monospaced))
                 .frame(minHeight: 250)
                 .padding(8)
-                .background(in: .rect(cornerRadius: 8))
-                .glassEffect(.regular, in: .rect(cornerRadius: 8))
+                .glassCard(cornerRadius: 8)
 
             if let error = parseError {
                 Label(error, systemImage: "exclamationmark.triangle")
