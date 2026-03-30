@@ -2,6 +2,20 @@ import SwiftUI
 import SwiftData
 import PhotosUI
 
+// MARK: - Mode
+
+private enum AddMode: String, CaseIterable {
+    case photo = "Food Photo"
+    case receipt = "Receipt"
+
+    var icon: String {
+        switch self {
+        case .photo: return "camera.viewfinder"
+        case .receipt: return "doc.text.viewfinder"
+        }
+    }
+}
+
 // MARK: - Identified Item
 
 private struct IdentifiedItem: Identifiable {
@@ -10,6 +24,7 @@ private struct IdentifiedItem: Identifiable {
     var category: IngredientCategory
     var quantity: Double
     var isFrozen: Bool
+    var price: Double?
     var isSelected: Bool = true
 }
 
@@ -20,9 +35,11 @@ struct BulkPhotoAddView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AIServiceRouter.self) private var aiRouter
 
+    @State private var mode: AddMode = .photo
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var selectedImage: UIImage?
     @State private var identifiedItems: [IdentifiedItem] = []
+    @State private var detectedStoreName: String = ""
     @State private var isAnalyzing = false
     @State private var errorMessage: String?
     @State private var didAnalyze = false
@@ -30,6 +47,21 @@ struct BulkPhotoAddView: View {
     var body: some View {
         NavigationStack {
             Form {
+                // Mode picker
+                Section {
+                    Picker("Mode", selection: $mode) {
+                        ForEach(AddMode.allCases, id: \.self) { m in
+                            Label(m.rawValue, systemImage: m.icon).tag(m)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .onChange(of: mode) {
+                        identifiedItems = []
+                        didAnalyze = false
+                        errorMessage = nil
+                    }
+                }
+
                 // Photo picker
                 Section {
                     if let image = selectedImage {
@@ -50,7 +82,9 @@ struct BulkPhotoAddView: View {
                         .frame(maxWidth: .infinity)
                     }
                 } footer: {
-                    Text("Take a photo of your fridge, counter, or grocery haul. The AI will identify what it sees.")
+                    Text(mode == .receipt
+                         ? "Take a photo of your grocery receipt. The AI will extract food items and prices."
+                         : "Take a photo of your fridge, counter, or grocery haul. The AI will identify what it sees.")
                 }
 
                 // Analyze button
@@ -63,10 +97,10 @@ struct BulkPhotoAddView: View {
                                 Spacer()
                                 if isAnalyzing {
                                     ProgressView().padding(.trailing, 8)
-                                    Text("Identifying items…")
+                                    Text(mode == .receipt ? "Reading receipt…" : "Identifying items…")
                                 } else {
                                     Image(systemName: "sparkles")
-                                    Text("Identify Items")
+                                    Text(mode == .receipt ? "Read Receipt" : "Identify Items")
                                 }
                                 Spacer()
                             }
@@ -79,6 +113,13 @@ struct BulkPhotoAddView: View {
                 if let error = errorMessage {
                     Section {
                         Text(error).foregroundStyle(.red)
+                    }
+                }
+
+                // Store name (receipt mode)
+                if mode == .receipt && didAnalyze && !identifiedItems.isEmpty {
+                    Section("Store") {
+                        TextField("Store name (optional)", text: $detectedStoreName)
                     }
                 }
 
@@ -99,7 +140,7 @@ struct BulkPhotoAddView: View {
                                             .frame(width: 40)
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
-                                        if item.category == .protein || item.category == .vegetable || item.category == .fruit {
+                                        if [IngredientCategory.protein, .vegetable, .fruit].contains(item.category) {
                                             Toggle("Frozen", isOn: $item.isFrozen)
                                                 .font(.caption)
                                                 .labelsHidden()
@@ -108,6 +149,11 @@ struct BulkPhotoAddView: View {
                                                     .font(.caption2)
                                                     .foregroundStyle(.blue)
                                             }
+                                        }
+                                        if let price = item.price {
+                                            Text("$\(price, specifier: "%.2f")")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
                                         }
                                     }
                                 }
@@ -125,7 +171,7 @@ struct BulkPhotoAddView: View {
                         }
                     } header: {
                         HStack {
-                            Text("Identified Items")
+                            Text(mode == .receipt ? "Receipt Items" : "Identified Items")
                             Spacer()
                             Button("Select All") {
                                 for i in identifiedItems.indices { identifiedItems[i].isSelected = true }
@@ -133,7 +179,11 @@ struct BulkPhotoAddView: View {
                             .font(.caption)
                         }
                     } footer: {
-                        Text("Tap the circle to include or exclude an item. Edit names or categories as needed.")
+                        if mode == .receipt, let total = receiptTotal {
+                            Text("Selected total: $\(total, specifier: "%.2f")")
+                        } else {
+                            Text("Tap the circle to include or exclude an item. Edit names or categories as needed.")
+                        }
                     }
 
                     Section {
@@ -151,7 +201,7 @@ struct BulkPhotoAddView: View {
                     }
                 }
             }
-            .navigationTitle("Add from Photo")
+            .navigationTitle(mode == .receipt ? "Scan Receipt" : "Add from Photo")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -168,12 +218,19 @@ struct BulkPhotoAddView: View {
         identifiedItems.filter(\.isSelected).count
     }
 
+    private var receiptTotal: Double? {
+        let selected = identifiedItems.filter(\.isSelected).compactMap(\.price)
+        guard !selected.isEmpty else { return nil }
+        return selected.reduce(0, +)
+    }
+
     private func loadPhoto() async {
         guard let item = selectedPhotoItem,
               let data = try? await item.loadTransferable(type: Data.self),
               let image = UIImage(data: data) else { return }
         selectedImage = image
         identifiedItems = []
+        detectedStoreName = ""
         didAnalyze = false
         errorMessage = nil
     }
@@ -185,24 +242,23 @@ struct BulkPhotoAddView: View {
         isAnalyzing = true
         errorMessage = nil
 
-        let prompt = """
-        This is a photo of food items (fridge, freezer, counter, or grocery haul).
-        List every distinct food item you can identify.
-        Respond with ONLY a JSON array, no explanation:
-        [{"name": "chicken breast", "category": "protein", "quantity": 2, "frozen": true}, {"name": "spinach", "category": "vegetable", "quantity": 1, "frozen": false}]
-        Valid categories: protein, vegetable, fruit, grain, dairy, spice, herb, condiment, oil, liquid, sweetener, nut, legume, other
-        Estimate quantity as a whole number (e.g. number of items, bags, or containers visible). Use "frozen": true if the item appears to be frozen or is in a freezer context.
-        """
+        let prompt = mode == .receipt ? receiptPrompt : foodPhotoPrompt
 
         do {
             let response = try await aiRouter.analyzeImage(
                 imageBase64: jpeg.base64EncodedString(),
                 prompt: prompt
             )
-            identifiedItems = parseItems(from: response)
+            if mode == .receipt {
+                parseReceiptResponse(response)
+            } else {
+                identifiedItems = parseFoodItems(from: response)
+            }
             didAnalyze = true
             if identifiedItems.isEmpty {
-                errorMessage = "No food items identified. Try a clearer photo."
+                errorMessage = mode == .receipt
+                    ? "No food items found on receipt. Try a clearer photo."
+                    : "No food items identified. Try a clearer photo."
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -211,7 +267,30 @@ struct BulkPhotoAddView: View {
         isAnalyzing = false
     }
 
-    private func parseItems(from response: String) -> [IdentifiedItem] {
+    private var foodPhotoPrompt: String {
+        """
+        This is a photo of food items (fridge, freezer, counter, or grocery haul).
+        List every distinct food item you can identify.
+        Respond with ONLY a JSON array, no explanation:
+        [{"name": "chicken breast", "category": "protein", "quantity": 2, "frozen": true}]
+        Valid categories: protein, vegetable, fruit, grain, dairy, spice, herb, condiment, oil, liquid, sweetener, nut, legume, other
+        Estimate quantity as a whole number. Use "frozen": true if the item appears frozen.
+        """
+    }
+
+    private var receiptPrompt: String {
+        """
+        This is a photo of a grocery receipt.
+        Extract the store name and all food/grocery items with their prices and quantities.
+        Ignore non-food items (cleaning supplies, paper goods, etc).
+        Respond with ONLY a JSON object, no explanation:
+        {"store": "Store Name or null", "items": [{"name": "Chicken Breast", "category": "protein", "quantity": 1, "price": 8.99}]}
+        Valid categories: protein, vegetable, fruit, grain, dairy, spice, herb, condiment, oil, liquid, sweetener, nut, legume, other
+        Normalize abbreviated names (e.g. "CHKN BRST" → "Chicken Breast"). Use null for price if not readable.
+        """
+    }
+
+    private func parseFoodItems(from response: String) -> [IdentifiedItem] {
         guard let start = response.firstIndex(of: "["),
               let end = response.lastIndex(of: "]") else { return [] }
         let jsonString = String(response[start...end])
@@ -226,8 +305,41 @@ struct BulkPhotoAddView: View {
         }
     }
 
+    private func parseReceiptResponse(_ response: String) {
+        guard let start = response.firstIndex(of: "{"),
+              let end = response.lastIndex(of: "}") else { return }
+        let jsonString = String(response[start...end])
+        guard let data = jsonString.data(using: .utf8),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
+
+        detectedStoreName = json["store"] as? String ?? ""
+
+        guard let items = json["items"] as? [[String: Any]] else { return }
+        identifiedItems = items.compactMap { dict in
+            guard let name = dict["name"] as? String, !name.isEmpty else { return nil }
+            let category = IngredientCategory(rawValue: dict["category"] as? String ?? "") ?? .other
+            let quantity = (dict["quantity"] as? Double) ?? (dict["quantity"] as? Int).map(Double.init) ?? 1
+            let price = dict["price"] as? Double
+            return IdentifiedItem(name: name, category: category, quantity: quantity, isFrozen: false, price: price)
+        }
+    }
+
     private func addSelectedItems() {
-        for item in identifiedItems where item.isSelected {
+        let selected = identifiedItems.filter(\.isSelected)
+
+        if mode == .receipt {
+            let total = selected.compactMap(\.price).reduce(0, +)
+            let receipt = GroceryReceipt(
+                storeName: detectedStoreName.isEmpty ? nil : detectedStoreName,
+                totalAmount: total
+            )
+            receipt.items = selected.map {
+                ReceiptLineItem(name: $0.name, price: $0.price ?? 0, quantity: Int($0.quantity))
+            }
+            modelContext.insert(receipt)
+        }
+
+        for item in selected {
             let pantryItem = PantryItem(
                 name: item.name,
                 category: item.category,
@@ -235,8 +347,10 @@ struct BulkPhotoAddView: View {
                 unit: .piece
             )
             pantryItem.isFrozen = item.isFrozen
+            pantryItem.purchasePrice = item.price
             modelContext.insert(pantryItem)
         }
+
         dismiss()
     }
 }

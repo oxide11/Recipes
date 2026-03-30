@@ -85,9 +85,9 @@ struct MetricsView: View {
         if !cuisines.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Favourite Cuisines")
+                    Text("Most Cooked Cuisines")
                         .font(.headline)
-                    Text("Based on your saved recipes")
+                    Text("Based on your cooking history")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
