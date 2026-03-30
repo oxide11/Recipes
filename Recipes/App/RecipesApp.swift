@@ -50,6 +50,7 @@ struct RecipesApp: App {
         WindowGroup {
             ContentView()
                 .environment(aiRouter)
+                .preferredColorScheme(.dark)
         }
         .modelContainer(Self.container)
     }

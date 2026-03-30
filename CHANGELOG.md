@@ -32,6 +32,11 @@
 - Deleted non-functional `inferStepsViaCloud` from `RecipeIngestionService` — always returned nil
 
 ### Added
+- New `DashboardView` ("Mise" tab) — obsidian-themed home screen with serif headers, AI insight card with glow border, today's meals, weekly budget donut chart, and custom tab bar
+- iPad-optimized multi-column layout — DashboardView uses `horizontalSizeClass` to show side-by-side meals + budget columns on iPad, single column on iPhone
+- Quick Stats card on iPad — shows recipe count, pantry items, and today's meals at a glance
+- App now forces dark mode via `preferredColorScheme(.dark)` at the app level
+- "Mise" tab added to ContentView as the default landing tab with `sparkles` icon
 - Extracted reusable `StarRatingView` component — replaces 8 duplicated star rating patterns across 5 files
 - Extracted `.glassCard(cornerRadius:)` view modifier — replaces 20+ duplicated `.background(in:) + .glassEffect()` pairs
 - Extracted shared `formatTime(_:)` utility — replaces 3 identical implementations across DirectionStepView, CookingModeView, and RecipesWidgets

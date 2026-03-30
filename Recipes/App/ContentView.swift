@@ -4,12 +4,17 @@ import SwiftData
 // MARK: - Content View (Root Navigation)
 
 struct ContentView: View {
-    @State private var selectedTab: AppTab = .recipes
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    @State private var selectedTab: AppTab = .mise
     @State private var showingOnboarding = false
     @Query private var profiles: [UserProfile]
 
     var body: some View {
         TabView(selection: $selectedTab) {
+            Tab("Mise", systemImage: "sparkles", value: .mise) {
+                DashboardView()
+            }
+
             Tab("Recipes", systemImage: "book.pages", value: .recipes) {
                 RecipeListView()
             }
@@ -41,7 +46,7 @@ struct ContentView: View {
 // MARK: - App Tab
 
 enum AppTab: String, Hashable {
-    case recipes, planAndShop, activity, settings
+    case mise, recipes, planAndShop, activity, settings
 }
 
 #Preview("Empty") {
