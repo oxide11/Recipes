@@ -49,7 +49,7 @@ struct MealPlanTimelineProvider: TimelineProvider {
         // In production, fetch from shared SwiftData container
         let entry = placeholder(in: context)
         let timeline = Timeline(entries: [entry], policy: .after(
-            Calendar.current.date(byAdding: .hour, value: 1, to: .now)!
+            Calendar.current.date(byAdding: .hour, value: 1, to: .now) ?? .now.addingTimeInterval(3600)
         ))
         completion(timeline)
     }

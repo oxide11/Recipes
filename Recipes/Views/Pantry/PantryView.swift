@@ -1,11 +1,22 @@
 import SwiftUI
 import SwiftData
 
+private let expiryDateFormatterSameYear: DateFormatter = {
+    let f = DateFormatter()
+    f.dateFormat = "MMM d"
+    return f
+}()
+
+private let expiryDateFormatterOtherYear: DateFormatter = {
+    let f = DateFormatter()
+    f.dateFormat = "MMM d, yyyy"
+    return f
+}()
+
 private func expiryDateFormatter(for date: Date) -> DateFormatter {
-    let formatter = DateFormatter()
-    let sameYear = Calendar.current.isDate(date, equalTo: .now, toGranularity: .year)
-    formatter.dateFormat = sameYear ? "MMM d" : "MMM d, yyyy"
-    return formatter
+    Calendar.current.isDate(date, equalTo: .now, toGranularity: .year)
+        ? expiryDateFormatterSameYear
+        : expiryDateFormatterOtherYear
 }
 
 private func daysAgoLabel(for date: Date) -> String {

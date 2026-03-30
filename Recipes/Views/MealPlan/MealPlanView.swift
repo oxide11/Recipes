@@ -36,8 +36,9 @@ struct MealPlanView: View {
     private func ensurePlan() {
         guard activePlan == nil else { return }
         let year = calendar.component(.year, from: selectedDate)
-        let start = calendar.date(from: DateComponents(year: year, month: 1, day: 1))!
-        let end   = calendar.date(from: DateComponents(year: year + 1, month: 12, day: 31))!
+        guard let start = calendar.date(from: DateComponents(year: year, month: 1, day: 1)),
+              let end = calendar.date(from: DateComponents(year: year + 1, month: 12, day: 31))
+        else { return }
         modelContext.insert(MealPlan(name: "My Meals", startDate: start, endDate: end))
     }
 
@@ -46,12 +47,12 @@ struct MealPlanView: View {
         let firstWeekday = calendar.firstWeekday
         let daysFromStart = (weekday - firstWeekday + 7) % 7
         return calendar.startOfDay(
-            for: calendar.date(byAdding: .day, value: -daysFromStart, to: selectedDate)!
+            for: calendar.date(byAdding: .day, value: -daysFromStart, to: selectedDate) ?? selectedDate
         )
     }
 
     private var weekDays: [Date] {
-        (0..<7).map { calendar.date(byAdding: .day, value: $0, to: weekStart)! }
+        (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: weekStart) }
     }
 
     private var mealsPerDay: [Date: Int] {
