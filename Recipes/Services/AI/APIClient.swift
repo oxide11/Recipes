@@ -10,13 +10,13 @@ enum APIClient {
     /// - Parameters:
     ///   - url: Full endpoint URL.
     ///   - method: HTTP method (e.g. "POST").
-    ///   - body: JSON-serializable dictionary for the request body.
+    ///   - bodyData: Pre-serialized JSON body data.
     ///   - headers: Additional HTTP headers (e.g. auth, API version).
     /// - Returns: Raw response data on success.
     static func request(
         url: URL,
         method: String = "POST",
-        body: [String: Any],
+        bodyData: Data,
         headers: [String: String]
     ) async throws -> Data {
         var request = URLRequest(url: url)
@@ -25,7 +25,7 @@ enum APIClient {
         for (key, value) in headers {
             request.setValue(value, forHTTPHeaderField: key)
         }
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        request.httpBody = bodyData
 
         let (data, response) = try await URLSession.shared.data(for: request)
 

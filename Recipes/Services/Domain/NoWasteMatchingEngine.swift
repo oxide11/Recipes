@@ -204,7 +204,7 @@ final class NoWasteMatchingEngine {
         }
 
         // Word-level matching first (O(words)): "chicken breast" matches "chicken"
-        let words = name.components(separatedBy: .whitespaces)
+        let words = name.components(separatedBy: CharacterSet.whitespaces)
         for word in words where word.count > 3 {
             if let items = index[word], !items.isEmpty {
                 return items

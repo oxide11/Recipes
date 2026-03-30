@@ -5,6 +5,15 @@
 ### Fixed
 - Fixed main actor-isolated property warning in `RecipeGeneratorView` where `selectedImage` was referenced from a Sendable closure (line 182)
 - Fixed identical main actor-isolated property warning in `BulkPhotoAddView` (line 46)
+- Added missing `IngredientNormalizer.swift` to Xcode project (file existed on disk but wasn't in project navigator)
+- Added missing `APIClient.swift` to Xcode project (same issue)
+- Added missing `DashboardView.swift` to Xcode project with `Views/Dashboard` group
+- Added missing `StarRatingView.swift` to Xcode project
+- Added missing `FormatTime.swift` to Xcode project
+- Fixed `Cannot infer contextual base in reference to member 'whitespaces'` in `NoWasteMatchingEngine` by using explicit `CharacterSet.whitespaces`
+- Fixed `Sending 'body' risks causing data races` in `ClaudeService` and `OpenAIService` by serializing `[String: Any]` body to `Data` before the async boundary in `APIClient`
+- Fixed trailing closure warning in `ShoppingVoiceService.speak()` by extracting `AsyncStream` into a local variable
+- Removed deprecated `.previewDevice()` modifier from `DashboardView` `#Preview` macro
 - Fixed `NSRange` crash on emoji/multibyte strings in `RecipeIngestionService.stripHTML` by using `NSRange(startIndex..., in:)` instead of `NSRange(location:length:)`
 - Fixed `CheckedContinuation` double-resume crash in `ShoppingVoiceService.listenForConfirmation` with `hasResumed` guard
 - Fixed unsafe `MainActor.assumeIsolated` in `AVSpeechSynthesizerDelegate` callback — replaced with `Task { @MainActor in }`

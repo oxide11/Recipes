@@ -38,9 +38,10 @@ final class ShoppingVoiceService: NSObject {
         synthesizer.speak(utterance)
 
         // Wait for speech to finish using an async stream instead of polling
-        for await _ in AsyncStream<Void> { continuation in
+        let stream = AsyncStream<Void> { continuation in
             self.speechFinishedContinuation = continuation
-        } {
+        }
+        for await _ in stream {
             break
         }
         speechFinishedContinuation = nil

@@ -109,10 +109,11 @@ final class OpenAIService {
         body: [String: Any],
         apiKey: String
     ) async throws -> Data {
-        try await APIClient.request(
+        let bodyData = try JSONSerialization.data(withJSONObject: body)
+        return try await APIClient.request(
             url: baseURL.appendingPathComponent(endpoint),
             method: method,
-            body: body,
+            bodyData: bodyData,
             headers: ["Authorization": "Bearer \(apiKey)"]
         )
     }

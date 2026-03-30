@@ -1,58 +1,18 @@
 import SwiftUI
 import SwiftData
 
-// MARK: - Dashboard Design Tokens
-
-private enum DashboardStyle {
-    static let obsidian = Color(red: 0.08, green: 0.08, blue: 0.08)
-    static let cardBackground = Color(white: 0.12)
-    static let produce = Color(hex: "2ECC71")
-    static let meat = Color(hex: "E74C3C")
-    static let grains = Color(hex: "F5B041")
-
-    static let aiGlow = AngularGradient(
-        colors: [.cyan, .purple, .orange, .green, .cyan],
-        center: .center
-    )
-}
-
-// MARK: - Dashboard Tab
-
-enum DashboardTab: String, CaseIterable {
-    case mise, pantry, recipes, plan, shop
-
-    var icon: String {
-        switch self {
-        case .mise:    return "sparkles"
-        case .pantry:  return "archivebox"
-        case .recipes: return "book.closed"
-        case .plan:    return "calendar"
-        case .shop:    return "cart"
-        }
-    }
-
-    var label: String {
-        switch self {
-        case .mise:    return "Mise"
-        case .pantry:  return "Pantry"
-        case .recipes: return "Recipes"
-        case .plan:    return "Plan"
-        case .shop:    return "Shop"
-        }
-    }
-}
-
-// MARK: - Dashboard View
+// MARK: - Dashboard View (Mise Tab)
 
 struct DashboardView: View {
-    @Environment(\.horizontalSizeClass) private var sizeClass
     @Query(sort: \PantryItem.expirationDate) private var pantryItems: [PantryItem]
     @Query private var plannedMeals: [PlannedMeal]
-    @Query private var recipes: [Recipe]
+    @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
     @Query private var receipts: [GroceryReceipt]
     @Query private var profiles: [UserProfile]
 
-    @State private var selectedTab: DashboardTab = .mise
+    private var userName: String {
+        profiles.first?.displayName ?? ""
+    }
 
     private var todaysMeals: [PlannedMeal] {
         let today = Calendar.current.startOfDay(for: Date())
@@ -65,161 +25,72 @@ struct DashboardView: View {
         pantryItems.filter { $0.isExpiringSoon && !$0.isExpired }
     }
 
+    private var quickRecipes: [Recipe] {
+        recipes.filter { $0.estimatedTotalMinutes <= 30 }
+    }
+
     private var weeklySpend: Double {
         let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: .now) ?? .now
         return receipts.filter { $0.date >= weekAgo }.reduce(0) { $0 + $1.totalAmount }
     }
 
+    private var weeklyCookCount: Int {
+        let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: .now) ?? .now
+        return recipes.reduce(0) { total, recipe in
+            total + recipe.cookingLog.filter { $0.date >= weekAgo }.count
+        }
+    }
+
     var body: some View {
-        ZStack(alignment: .bottom) {
-            DashboardStyle.obsidian
-                .ignoresSafeArea()
-
-            if sizeClass == .regular {
-                iPadLayout
-            } else {
-                iPhoneLayout
-            }
-
-            customTabBar
-        }
-        .preferredColorScheme(.dark)
-    }
-
-    // MARK: - iPhone Layout
-
-    private var iPhoneLayout: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                headerSection
-                aiInsightCard
-                todaysMealsSection
-                weeklyBudgetSection
-            }
-            .padding()
-            .padding(.bottom, 90) // Tab bar clearance
-        }
-    }
-
-    // MARK: - iPad Layout (Multi-Column)
-
-    private var iPadLayout: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                headerSection
-                aiInsightCard
-
-                HStack(alignment: .top, spacing: 20) {
-                    // Left column — meals
-                    VStack(alignment: .leading, spacing: 16) {
-                        todaysMealsSection
-                    }
-                    .frame(maxWidth: .infinity)
-
-                    // Right column — budget + quick stats
-                    VStack(alignment: .leading, spacing: 16) {
-                        weeklyBudgetSection
-                        quickStatsCard
-                    }
-                    .frame(maxWidth: .infinity)
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    headerSection
+                    todaysMealsSection
+                    expiringSoonSection
+                    quickRecipesSection
+                    weeklySummarySection
                 }
+                .padding()
             }
-            .padding(.horizontal, 32)
-            .padding(.vertical)
-            .padding(.bottom, 90)
+            .background(Brand.midnight)
+            .navigationTitle("Mise")
         }
     }
 
     // MARK: - Header
 
     private var headerSection: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(greetingText)
-                    .font(.system(.largeTitle, design: .serif).weight(.medium))
-                    .foregroundStyle(.white)
+        VStack(alignment: .leading, spacing: 4) {
+            Text(greetingText)
+                .font(.miseDisplay)
+                .foregroundStyle(Brand.cream)
 
-                Text(dateString)
-                    .font(.system(.body, design: .rounded))
-                    .foregroundStyle(.gray)
-            }
-
-            Spacer()
-
-            Button {
-                selectedTab = .shop
-            } label: {
-                Image(systemName: "dollarsign.circle.fill")
-                    .font(.title2)
-                    .foregroundStyle(.gray)
-            }
+            Text(DashboardView.dateString)
+                .font(.miseMeta)
+                .foregroundStyle(Brand.muted)
         }
     }
 
     private var greetingText: String {
         let hour = Calendar.current.component(.hour, from: .now)
+        let name = userName.isEmpty ? "" : ", \(userName)"
         switch hour {
-        case 5..<12:  return "Good Morning."
-        case 12..<17: return "Good Afternoon."
-        case 17..<22: return "Good Evening."
-        default:      return "Good Night."
+        case 5..<12:  return "Good Morning\(name)"
+        case 12..<17: return "Good Afternoon\(name)"
+        case 17..<22: return "Good Evening\(name)"
+        default:      return "Good Night\(name)"
         }
     }
 
-    private var dateString: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEEE, MMMM d, yyyy"
-        return formatter.string(from: .now)
-    }
+    private static let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "EEEE, MMMM d"
+        return f
+    }()
 
-    // MARK: - AI Insight Card
-
-    private var aiInsightCard: some View {
-        HStack(spacing: 14) {
-            Image(systemName: "sparkles")
-                .font(.system(size: 28))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.orange, .red],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .frame(width: 44)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text("AI Insight")
-                    .font(.system(.subheadline, design: .rounded).weight(.bold))
-                    .foregroundStyle(.white)
-
-                if expiringItems.isEmpty {
-                    Text("All pantry items are fresh. You're on top of it!")
-                        .font(.system(.caption, design: .rounded))
-                        .foregroundStyle(.gray)
-                } else {
-                    let names = expiringItems.prefix(3).map(\.name).joined(separator: ", ")
-                    Text("Pantry expiring: \(names). Tap to find recipes!")
-                        .font(.system(.caption, design: .rounded))
-                        .foregroundStyle(.gray)
-                }
-
-                Text("View Recipes")
-                    .font(.system(.caption, design: .rounded).weight(.bold))
-                    .foregroundStyle(.cyan)
-            }
-
-            Spacer(minLength: 0)
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(.ultraThinMaterial)
-                .environment(\.colorScheme, .dark)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(DashboardStyle.aiGlow, lineWidth: 2)
-        )
+    private static var dateString: String {
+        dateFormatter.string(from: .now)
     }
 
     // MARK: - Today's Meals
@@ -227,264 +98,181 @@ struct DashboardView: View {
     private var todaysMealsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Today's Meals")
-                .font(.system(.headline, design: .rounded))
-                .foregroundStyle(.white)
+                .font(.miseHeading)
+                .foregroundStyle(Brand.cream)
 
             if todaysMeals.isEmpty {
-                // Show mock cards when no meals planned
-                MealCardView(
-                    meal: .init(type: "Lunch", name: "Quinoa Salad", iconColor: DashboardStyle.produce)
-                )
-                MealCardView(
-                    meal: .init(type: "Dinner", name: "Pan-Seared Chicken", iconColor: DashboardStyle.meat)
-                )
+                HStack(spacing: 10) {
+                    Image(systemName: "calendar.badge.plus")
+                        .font(.title3)
+                        .foregroundStyle(Brand.muted)
+                    Text("No meals planned today — head to Plan & Shop to get started.")
+                        .font(.miseBody)
+                        .foregroundStyle(Brand.muted)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .glassCard()
             } else {
                 ForEach(todaysMeals, id: \.id) { meal in
-                    MealCardView(
-                        meal: .init(
-                            type: meal.mealType.displayName,
-                            name: meal.recipe?.title ?? "Unplanned",
-                            iconColor: colorForMealType(meal.mealType)
-                        )
-                    )
+                    if let recipe = meal.recipe {
+                        NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                            mealRow(meal: meal, recipeName: recipe.title)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        mealRow(meal: meal, recipeName: "Unplanned")
+                    }
                 }
             }
         }
+    }
+
+    private func mealRow(meal: PlannedMeal, recipeName: String) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(meal.mealType.displayName)
+                    .font(.miseMeta)
+                    .foregroundStyle(Brand.muted)
+                Text(recipeName)
+                    .font(.miseBody)
+                    .fontWeight(.medium)
+                    .foregroundStyle(Brand.cream)
+            }
+
+            Spacer()
+
+            Circle()
+                .fill(colorForMealType(meal.mealType).opacity(0.2))
+                .frame(width: 40, height: 40)
+                .overlay {
+                    Image(systemName: meal.isCompleted ? "checkmark" : "fork.knife")
+                        .font(.callout)
+                        .foregroundStyle(colorForMealType(meal.mealType))
+                }
+        }
+        .padding()
+        .glassCard()
     }
 
     private func colorForMealType(_ type: MealType) -> Color {
         switch type {
         case .breakfast: return .orange
-        case .lunch:     return DashboardStyle.produce
-        case .dinner:    return DashboardStyle.meat
-        case .snack:     return DashboardStyle.grains
+        case .lunch:     return Brand.herbGreen
+        case .dinner:    return Brand.spiceRed
+        case .snack:     return Brand.warmTan
         default:         return Brand.warmTan
         }
     }
 
-    // MARK: - Weekly Budget
+    // MARK: - Expiring Soon
 
-    private var weeklyBudgetSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Weekly Budget")
-                .font(.system(.headline, design: .rounded))
-                .foregroundStyle(.white)
+    private var expiringSoonSection: some View {
+        Group {
+            if !expiringItems.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Expiring Soon")
+                        .font(.miseHeading)
+                        .foregroundStyle(Brand.cream)
 
-            BudgetCardView(totalSpend: weeklySpend, receipts: receipts)
-        }
-    }
+                    ForEach(expiringItems.prefix(5), id: \.id) { item in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(item.name)
+                                    .font(.miseBody)
+                                    .foregroundStyle(Brand.cream)
+                                if let expDate = item.expirationDate {
+                                    Text(daysUntilText(expDate))
+                                        .font(.miseMeta)
+                                        .foregroundStyle(Brand.spiceRed)
+                                }
+                            }
 
-    // MARK: - Quick Stats (iPad only)
+                            Spacer()
 
-    private var quickStatsCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Quick Stats")
-                .font(.system(.headline, design: .rounded))
-                .foregroundStyle(.white)
-
-            HStack(spacing: 16) {
-                statItem(value: "\(recipes.count)", label: "Recipes", icon: "book.closed", color: Brand.warmTan)
-                statItem(value: "\(pantryItems.count)", label: "Pantry Items", icon: "archivebox", color: DashboardStyle.produce)
-                statItem(value: "\(todaysMeals.count)", label: "Today's Meals", icon: "fork.knife", color: DashboardStyle.grains)
-            }
-            .padding()
-            .background(DashboardStyle.cardBackground, in: .rect(cornerRadius: 16))
-        }
-    }
-
-    private func statItem(value: String, label: String, icon: String, color: Color) -> some View {
-        VStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(color)
-            Text(value)
-                .font(.system(.title3, design: .rounded).weight(.bold))
-                .foregroundStyle(.white)
-            Text(label)
-                .font(.system(.caption2, design: .rounded))
-                .foregroundStyle(.gray)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    // MARK: - Custom Tab Bar
-
-    private var customTabBar: some View {
-        HStack(spacing: 0) {
-            ForEach(DashboardTab.allCases, id: \.self) { tab in
-                Button {
-                    selectedTab = tab
-                } label: {
-                    VStack(spacing: 4) {
-                        Image(systemName: tab.icon)
-                            .font(.system(size: 20))
-                        Text(tab.label)
-                            .font(.system(.caption2, design: .rounded))
-                    }
-                    .foregroundStyle(selectedTab == tab ? .white : .gray)
-                    .frame(maxWidth: .infinity)
-                }
-            }
-        }
-        .padding(.top, 12)
-        .padding(.bottom, 8)
-        .background(
-            .ultraThinMaterial,
-            in: .rect(topLeadingRadius: 20, topTrailingRadius: 20)
-        )
-        .environment(\.colorScheme, .dark)
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(Color.white.opacity(0.1))
-                .frame(height: 0.5)
-        }
-    }
-}
-
-// MARK: - Meal Card View
-
-struct MealCardView: View {
-    struct MealData {
-        let type: String
-        let name: String
-        let iconColor: Color
-    }
-
-    let meal: MealData
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(meal.type)
-                    .font(.system(.caption, design: .rounded))
-                    .foregroundStyle(.gray)
-                Text(meal.name)
-                    .font(.system(.body, design: .rounded).weight(.medium))
-                    .foregroundStyle(.white)
-            }
-
-            Spacer()
-
-            Circle()
-                .fill(meal.iconColor.opacity(0.2))
-                .frame(width: 50, height: 50)
-                .overlay {
-                    Image(systemName: "fork.knife")
-                        .foregroundStyle(meal.iconColor)
-                }
-        }
-        .padding()
-        .background(DashboardStyle.cardBackground, in: .rect(cornerRadius: 16))
-        .contextMenu {
-            Button {
-                // Mark as cooked
-            } label: {
-                Label("Cooked", systemImage: "checkmark")
-            }
-            Button {
-                // Swap meal
-            } label: {
-                Label("Swap", systemImage: "arrow.triangle.2.circlepath")
-            }
-        }
-    }
-}
-
-// MARK: - Budget Card View
-
-struct BudgetCardView: View {
-    let totalSpend: Double
-    let receipts: [GroceryReceipt]
-
-    private var recentDays: [(label: String, amount: Double)] {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: .now)
-        var days: [(String, Double)] = []
-
-        for offset in 0..<7 {
-            guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { continue }
-            let dayReceipts = receipts.filter { calendar.isDate($0.date, inSameDayAs: date) }
-            let total = dayReceipts.reduce(0) { $0 + $1.totalAmount }
-            guard total > 0 else { continue }
-
-            let label: String
-            if offset == 0 { label = "Today" }
-            else if offset == 1 { label = "Yesterday" }
-            else {
-                let formatter = DateFormatter()
-                formatter.dateFormat = "EEEE"
-                label = formatter.string(from: date)
-            }
-            days.append((label, total))
-        }
-
-        return days.isEmpty
-            ? [("Today", 5), ("Sunday", 20)] // Mock data fallback
-            : days
-    }
-
-    var body: some View {
-        HStack(spacing: 20) {
-            // Donut chart
-            donutChart
-                .frame(width: 100, height: 100)
-
-            // Legend
-            VStack(alignment: .leading, spacing: 6) {
-                ForEach(Array(recentDays.prefix(4).enumerated()), id: \.offset) { index, day in
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(index == 0 ? DashboardStyle.produce : DashboardStyle.grains)
-                            .frame(width: 8, height: 8)
-                        Text("\(day.label) ($\(Int(day.amount)))")
-                            .font(.system(.caption, design: .rounded))
-                            .foregroundStyle(.gray)
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.callout)
+                                .foregroundStyle(Brand.spiceRed.opacity(0.7))
+                        }
+                        .padding()
+                        .glassCard()
                     }
                 }
             }
-
-            Spacer()
         }
-        .padding()
-        .background(DashboardStyle.cardBackground, in: .rect(cornerRadius: 16))
     }
 
-    private var donutChart: some View {
-        let displaySpend = totalSpend > 0 ? totalSpend : 25.0
-        let budget = 500.0
-        let fraction = min(displaySpend / budget, 1.0)
+    private func daysUntilText(_ date: Date) -> String {
+        let days = Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: .now), to: Calendar.current.startOfDay(for: date)).day ?? 0
+        if days <= 0 { return "Expires today" }
+        if days == 1 { return "Expires tomorrow" }
+        return "Expires in \(days) days"
+    }
 
-        return ZStack {
-            Circle()
-                .stroke(Color.gray.opacity(0.3), lineWidth: 8)
+    // MARK: - Quick Recipes
 
-            Circle()
-                .trim(from: 0, to: fraction * 0.6)
-                .stroke(DashboardStyle.produce, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                .rotationEffect(.degrees(-90))
+    private var quickRecipesSection: some View {
+        Group {
+            if !quickRecipes.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Quick Recipes")
+                        .font(.miseHeading)
+                        .foregroundStyle(Brand.cream)
 
-            Circle()
-                .trim(from: fraction * 0.6, to: fraction)
-                .stroke(DashboardStyle.grains, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                .rotationEffect(.degrees(-90))
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(quickRecipes.prefix(10), id: \.id) { recipe in
+                                NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                                    RecipeCardCompact(recipe: recipe)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-            Text("$\(Int(displaySpend))")
-                .font(.system(.body, design: .rounded).weight(.bold))
-                .foregroundStyle(.white)
+    // MARK: - Weekly Summary
+
+    private var weeklySummarySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("This Week")
+                .font(.miseHeading)
+                .foregroundStyle(Brand.cream)
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                MetricCard(
+                    title: "Cooked",
+                    value: "\(weeklyCookCount)",
+                    icon: "flame",
+                    color: Brand.warmTan
+                )
+                MetricCard(
+                    title: "Pantry Items",
+                    value: "\(pantryItems.count)",
+                    icon: "archivebox",
+                    color: Brand.herbGreen
+                )
+                MetricCard(
+                    title: "Recipes",
+                    value: "\(recipes.count)",
+                    icon: "book.closed",
+                    color: Brand.warmTan
+                )
+                MetricCard(
+                    title: "Spent",
+                    value: "$\(Int(weeklySpend))",
+                    icon: "dollarsign.circle",
+                    color: Brand.spiceRed
+                )
+            }
         }
     }
 }
 
-// MARK: - Preview Mock Data
-
-private struct MockMealData {
-    static let lunch = MealCardView.MealData(
-        type: "Lunch", name: "Quinoa Salad", iconColor: DashboardStyle.produce
-    )
-    static let dinner = MealCardView.MealData(
-        type: "Dinner", name: "Pan-Seared Chicken", iconColor: DashboardStyle.meat
-    )
-}
+// MARK: - Previews
 
 #Preview("Dashboard - iPhone") {
     DashboardView()
@@ -492,9 +280,8 @@ private struct MockMealData {
         .environment(AIServiceRouter())
 }
 
-#Preview("Dashboard - iPad") {
+#Preview("Dashboard - With Data") {
     DashboardView()
-        .modelContainer(for: Recipe.self, inMemory: true)
         .environment(AIServiceRouter())
-        .previewDevice("iPad Pro (12.9-inch)")
+        .modelContainer(previewContainer)
 }
