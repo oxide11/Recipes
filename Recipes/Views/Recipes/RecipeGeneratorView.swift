@@ -178,8 +178,9 @@ struct RecipeGeneratorView: View {
                     .clipShape(.rect(cornerRadius: 10))
                     .frame(maxWidth: .infinity)
             }
+            let hasImage = selectedImage != nil
             PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                Label(selectedImage != nil ? "Change Photo" : "Choose a Food Photo",
+                Label(hasImage ? "Change Photo" : "Choose a Food Photo",
                       systemImage: "photo.on.rectangle")
                     .frame(maxWidth: .infinity)
             }

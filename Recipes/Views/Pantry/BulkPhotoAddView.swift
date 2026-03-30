@@ -41,9 +41,10 @@ struct BulkPhotoAddView: View {
                             .frame(maxWidth: .infinity)
                     }
 
+                    let hasImage = selectedImage != nil
                     PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
                         Label(
-                            selectedImage != nil ? "Change Photo" : "Take or Choose a Photo",
+                            hasImage ? "Change Photo" : "Take or Choose a Photo",
                             systemImage: "camera.viewfinder"
                         )
                         .frame(maxWidth: .infinity)

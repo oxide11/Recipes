@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		00C6EEC5450D4B9792825A4B /* ProfileEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504D081F52EA48BB963AB1C4 /* ProfileEditorView.swift */; };
 		02702C9286DD44EF95719293 /* RecommendedStaplesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27936BE83EA477BB6758073 /* RecommendedStaplesView.swift */; };
-		A1B2C3D4E5F60001A2B3C4D5 /* BulkPhotoAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60002A2B3C4D5 /* BulkPhotoAddView.swift */; };
 		066D44CEEFF24E74B821C3A2 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72441A5178548CB936211BA /* SettingsView.swift */; };
 		0C8D34DCFD1A42F2A05FB31B /* RecipeIngestionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 807D5F4245314AB9B26CADE6 /* RecipeIngestionService.swift */; };
 		10A6794B495342E19035A6D9 /* FoundationModelService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F362151716504F929FE67AEF /* FoundationModelService.swift */; };
@@ -56,6 +55,7 @@
 		9ADD12E06269422A819545B7 /* PantryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BC9D2656D7149B882946A31 /* PantryView.swift */; };
 		9D5303D071304B1A9CC24B7E /* BarcodeScannerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3AE1CBAE054D8084DE6B08 /* BarcodeScannerService.swift */; };
 		9DB11F0C6C8F4C54AC4BB1E4 /* NutritionTrackingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 019C23B87CB14D4D83597931 /* NutritionTrackingView.swift */; };
+		A1B2C3D4E5F60001A2B3C4D5 /* BulkPhotoAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60002A2B3C4D5 /* BulkPhotoAddView.swift */; };
 		A485294F9BD5426693D9B32E /* RecipeExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E7FB75248E14C35A7ED27A3 /* RecipeExportService.swift */; };
 		A8132B5B34B14A059736CC90 /* CookingMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC659C0562E2460DBF7B1A4B /* CookingMetrics.swift */; };
 		AD3913A7F5994E7FBF269F70 /* AIServiceRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F7E5AEBFC8C42DA8054120E /* AIServiceRouter.swift */; };
@@ -128,6 +128,7 @@
 		303ED6C8336C499EA53B3F85 /* NutritionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionCardView.swift; sourceTree = "<group>"; };
 		336DDE732F789011008C60D3 /* Recipes.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Recipes.xctestplan; sourceTree = "<group>"; };
 		336DDE742F789281008C60D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		3370E6FD2F79F6E1001996F7 /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		33795FBD2F7994FA0023EA3A /* IngredientLookupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientLookupView.swift; sourceTree = "<group>"; };
 		33C70C082F78B7920042AA3F /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		33C70C0A2F795E960042AA3F /* MealPrepPlanGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPrepPlanGenerator.swift; sourceTree = "<group>"; };
@@ -165,6 +166,7 @@
 		9238A7C22AE446A896A69D52 /* RecipesWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RecipesWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		94A6F610343A47A3BD1A44EE /* ServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceTests.swift; sourceTree = "<group>"; };
 		97302434ED4640FCB6663802 /* SeasonalAwarenessService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonalAwarenessService.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60002A2B3C4D5 /* BulkPhotoAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulkPhotoAddView.swift; sourceTree = "<group>"; };
 		A27FEE83D3E3490482E34258 /* SafeCookingTemperatureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeCookingTemperatureService.swift; sourceTree = "<group>"; };
 		ABD0CFE6206849ED964035E3 /* RecipeAsCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAsCode.swift; sourceTree = "<group>"; };
 		B1679C5591E34A36892F5A73 /* IngredientRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientRow.swift; sourceTree = "<group>"; };
@@ -178,7 +180,6 @@
 		CED78F4CD33E44F481DD5C0E /* RecipeGeneratorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeGeneratorView.swift; sourceTree = "<group>"; };
 		CEE871D65829484395E4B9D2 /* RecipesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipesTests.swift; sourceTree = "<group>"; };
 		D27936BE83EA477BB6758073 /* RecommendedStaplesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendedStaplesView.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60002A2B3C4D5 /* BulkPhotoAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulkPhotoAddView.swift; sourceTree = "<group>"; };
 		D30C2876B88E44C98DBA09B0 /* RecipeAsCodePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAsCodePreviewView.swift; sourceTree = "<group>"; };
 		D98BE22DB3A042FDA0F8B29D /* RecipeEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeEditorView.swift; sourceTree = "<group>"; };
 		E3F5053E6FBF44BABA15F527 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
@@ -476,6 +477,7 @@
 				6A904C57627D4567B4BCF305 /* RecipesTests */,
 				75EF7A75947649A0A1B32937 /* RecipesWidgets */,
 				AC66A0D50C3641CEA47F64AC /* Products */,
+				3370E6FD2F79F6E1001996F7 /* CHANGELOG.md */,
 			);
 			sourceTree = "<group>";
 		};
