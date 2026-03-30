@@ -10,6 +10,16 @@ import FoundationModels
 @MainActor
 final class FoundationModelService {
 
+    /// Reusable session to avoid repeated allocation overhead.
+    private var cachedSession: LanguageModelSession?
+
+    private func session() -> LanguageModelSession {
+        if let cachedSession { return cachedSession }
+        let newSession = LanguageModelSession()
+        cachedSession = newSession
+        return newSession
+    }
+
     /// Check device eligibility for on-device foundation models.
     var isAvailable: Bool {
         get async {
@@ -27,7 +37,7 @@ final class FoundationModelService {
         maxTimeMinutes: Int? = nil,
         dietaryRestrictions: [DietaryRestriction] = []
     ) async throws -> GeneratedRecipe {
-        let session = LanguageModelSession()
+        let session = session()
 
         var prompt = "Generate a recipe using these ingredients: \(ingredients.joined(separator: ", "))."
         if let cuisine { prompt += " Cuisine style: \(cuisine.rawValue)." }
@@ -47,7 +57,7 @@ final class FoundationModelService {
         ingredients: [String],
         servings: Int
     ) async throws -> NutritionalEstimate {
-        let session = LanguageModelSession()
+        let session = session()
 
         let prompt = """
         Estimate the nutritional information per serving for a recipe with \(servings) servings \
@@ -65,7 +75,7 @@ final class FoundationModelService {
         reason: String,
         context: String
     ) async throws -> SubstitutionSuggestions {
-        let session = LanguageModelSession()
+        let session = session()
 
         let prompt = """
         Suggest substitutions for "\(ingredient)" in the context of: \(context). \
@@ -79,7 +89,7 @@ final class FoundationModelService {
 
     /// Infer cooking steps from a declarative recipe definition.
     func inferSteps(from definition: RecipeDefinition) async throws -> InferredRecipeSteps {
-        let session = LanguageModelSession()
+        let session = session()
 
         let ingredientList = definition.ingredients
             .map { "\($0.name): \($0.amount)\($0.preparation.map { ", \($0)" } ?? "")" }
@@ -112,7 +122,7 @@ final class FoundationModelService {
         ingredients: [String],
         userHistory: String
     ) async throws -> RecipeClassification {
-        let session = LanguageModelSession()
+        let session = session()
 
         let prompt = """
         Classify this recipe for personalized recommendations.
@@ -132,7 +142,7 @@ final class FoundationModelService {
         cookedIngredients: [String],
         preferences: String
     ) async throws -> BlindSpotSuggestions {
-        let session = LanguageModelSession()
+        let session = session()
 
         let prompt = """
         The user frequently cooks: \(cookedCuisines.joined(separator: ", ")).

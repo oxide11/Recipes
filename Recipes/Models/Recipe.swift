@@ -258,7 +258,13 @@ final class Recipe {
 
     /// Estimated total meal prep time including prep and cook time.
     var estimatedTotalMinutes: Int {
+        // Use computed value to avoid desync with stored totalTimeMinutes
         prepTimeMinutes + cookTimeMinutes
+    }
+
+    /// Call after modifying prepTimeMinutes or cookTimeMinutes to keep stored property in sync.
+    func syncTotalTime() {
+        totalTimeMinutes = prepTimeMinutes + cookTimeMinutes
     }
 
     /// Human-readable duration, e.g. "30 min", "1h 30min", "2h".

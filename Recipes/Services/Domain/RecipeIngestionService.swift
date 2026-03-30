@@ -315,13 +315,13 @@ final class RecipeIngestionService {
         ]
         for pattern in blockPatterns {
             if let regex = try? NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators, .caseInsensitive]) {
-                text = regex.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: " ")
+                text = regex.stringByReplacingMatches(in: text, range: NSRange(text.startIndex..., in: text), withTemplate: " ")
             }
         }
 
         // Remove remaining HTML tags
         if let regex = try? NSRegularExpression(pattern: "<[^>]+>", options: []) {
-            text = regex.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: " ")
+            text = regex.stringByReplacingMatches(in: text, range: NSRange(text.startIndex..., in: text), withTemplate: " ")
         }
 
         // Decode common HTML entities

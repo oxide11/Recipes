@@ -16,6 +16,7 @@ final class ShoppingVoiceService: NSObject {
 
     var isListening = false
     var isSpeaking = false
+    private var speechFinishedContinuation: AsyncStream<Void>.Continuation?
     var lastHeardText: String?
     var currentItemName: String?
 
@@ -36,15 +37,19 @@ final class ShoppingVoiceService: NSObject {
         isSpeaking = true
         synthesizer.speak(utterance)
 
-        // Wait for speech to finish
-        while isSpeaking {
-            try? await Task.sleep(for: .milliseconds(100))
+        // Wait for speech to finish using an async stream instead of polling
+        for await _ in AsyncStream<Void> { continuation in
+            self.speechFinishedContinuation = continuation
+        } {
+            break
         }
+        speechFinishedContinuation = nil
     }
 
     func stopSpeaking() {
         synthesizer.stopSpeaking(at: .immediate)
         isSpeaking = false
+        speechFinishedContinuation?.finish()
     }
 
     // MARK: - Speech Recognition
@@ -77,18 +82,23 @@ final class ShoppingVoiceService: NSObject {
         isListening = true
 
         let result = await withCheckedContinuation { (continuation: CheckedContinuation<ShoppingResponse, Never>) in
+            var hasResumed = false
             recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
+                guard !hasResumed else { return }
+
                 guard let result else {
                     if error != nil {
+                        hasResumed = true
                         continuation.resume(returning: .error)
                     }
                     return
                 }
 
                 let text = result.bestTranscription.formattedString.lowercased()
-                self?.lastHeardText = text
+                Task { @MainActor in self?.lastHeardText = text }
 
                 if result.isFinal {
+                    hasResumed = true
                     let response = Self.parseResponse(text)
                     continuation.resume(returning: response)
                 }
@@ -151,7 +161,7 @@ final class ShoppingVoiceService: NSObject {
     // MARK: - Parse Response
 
     private static func parseResponse(_ text: String) -> ShoppingResponse {
-        let positiveWords = ["yes", "got it", "found it", "yep", "yeah", "check", "done"]
+        let positiveWords = ["yes", "got it", "found it", "yep", "yeah", "check"]
         let negativeWords = ["no", "nope", "can't find", "not here", "don't see"]
         let substituteWords = ["substitute", "replace", "swap", "alternative"]
         let skipWords = ["skip", "next", "move on", "pass"]
@@ -171,7 +181,11 @@ final class ShoppingVoiceService: NSObject {
 
 extension ShoppingVoiceService: AVSpeechSynthesizerDelegate {
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        MainActor.assumeIsolated { isSpeaking = false }
+        Task { @MainActor in
+            isSpeaking = false
+            speechFinishedContinuation?.yield()
+            speechFinishedContinuation?.finish()
+        }
     }
 }
 

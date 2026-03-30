@@ -85,7 +85,7 @@ final class RecommendationAgent {
             .filter { recipe in
                 guard let avgRating = recipe.averageRating, avgRating >= 4.0 else { return false }
                 let lastCooked = recipe.cookingLog.map(\.date).max()
-                return lastCooked == nil || lastCooked! < thirtyDaysAgo
+                return lastCooked.map { $0 < thirtyDaysAgo } ?? true
             }
             .prefix(3)
             .map { recipe in

@@ -103,7 +103,7 @@ enum MeasurementConversionService {
             }
         case .imperial:
             switch unit {
-            case .milliliter where true: return .fluidOunce
+            case .milliliter: return .fluidOunce
             case .liter:                return .cup
             case .gram:                 return .ounce
             case .kilogram:             return .pound

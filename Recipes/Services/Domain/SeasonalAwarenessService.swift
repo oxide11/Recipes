@@ -67,11 +67,16 @@ enum SeasonalAwarenessService {
         return seasonalData.filter { $0.peakSeasons.contains(current) }
     }
 
+    /// Pre-built dictionary for O(1) lookups instead of linear scan.
+    private static let seasonalLookup: [String: SeasonalIngredient] = {
+        Dictionary(uniqueKeysWithValues: seasonalData.map { ($0.name, $0) })
+    }()
+
     /// Check if a specific ingredient is in season.
     static func isInSeason(_ ingredientName: String) -> Bool {
         let current = Season.current
         let name = ingredientName.lowercased()
-        guard let ingredient = seasonalData.first(where: { $0.name == name }) else {
+        guard let ingredient = seasonalLookup[name] else {
             return true // Unknown ingredients assumed available
         }
         return ingredient.peakSeasons.contains(current)

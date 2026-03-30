@@ -499,11 +499,15 @@ enum RecipeExportService {
 
     // MARK: - Helpers
 
-    private static func formattedDate() -> String {
+    private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
-        return formatter.string(from: Date())
+        return formatter
+    }()
+
+    private static func formattedDate() -> String {
+        dateFormatter.string(from: Date())
     }
 }
 

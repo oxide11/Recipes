@@ -201,23 +201,25 @@ final class NoWasteMatchingEngine {
     ) -> [PantryItem]? {
         let name = ingredientName.lowercased().trimmingCharacters(in: .whitespaces)
 
-        // Exact match
+        // O(1) exact match
         if let items = index[name], !items.isEmpty {
             return items
         }
 
-        // Check if pantry item name contains the ingredient name
-        for (key, items) in index {
-            if key.contains(name) || name.contains(key) {
-                return items
-            }
-        }
-
-        // Word-level matching: "chicken breast" matches "chicken"
+        // Word-level matching first (O(words)): "chicken breast" matches "chicken"
         let words = name.components(separatedBy: .whitespaces)
         for word in words where word.count > 3 {
             if let items = index[word], !items.isEmpty {
                 return items
+            }
+        }
+
+        // Substring fallback only for short ingredient lists (capped to avoid O(n²))
+        if index.count <= 200 {
+            for (key, items) in index {
+                if key.contains(name) || name.contains(key) {
+                    return items
+                }
             }
         }
 

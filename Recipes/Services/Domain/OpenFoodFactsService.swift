@@ -30,7 +30,8 @@ enum OpenFoodFactsService {
 
     /// Look up a product by barcode using the Open Food Facts API.
     static func lookup(barcode: String) async throws -> Product? {
-        let urlString = "https://world.openfoodfacts.org/api/v2/product/\(barcode).json?fields=product_name,brands,categories_tags,image_url,nutriments,quantity"
+        let sanitized = barcode.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? barcode
+        let urlString = "https://world.openfoodfacts.org/api/v2/product/\(sanitized).json?fields=product_name,brands,categories_tags,image_url,nutriments,quantity"
 
         guard let url = URL(string: urlString) else {
             return nil
