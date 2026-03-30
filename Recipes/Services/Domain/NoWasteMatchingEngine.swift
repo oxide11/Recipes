@@ -97,7 +97,7 @@ final class NoWasteMatchingEngine {
         for ingredient in recipe.ingredients {
             if ingredient.isOptional { continue }
 
-            let name = ingredient.name.lowercased()
+            let name = IngredientNormalizer.normalize(ingredient.name)
 
             if let pantryMatches = findPantryMatch(for: name, in: pantryIndex) {
                 let isExpiring = pantryMatches.contains { $0.isExpiringSoon }
@@ -174,15 +174,12 @@ final class NoWasteMatchingEngine {
         var index: [String: [PantryItem]] = [:]
 
         for item in items {
-            let name = item.name.lowercased().trimmingCharacters(in: .whitespaces)
+            let name = IngredientNormalizer.normalize(item.name)
             index[name, default: []].append(item)
 
             // Add singular/plural variants
-            if name.hasSuffix("s") {
-                let singular = String(name.dropLast())
-                index[singular, default: []].append(item)
-            } else {
-                index[name + "s", default: []].append(item)
+            for variant in IngredientNormalizer.variants(of: name) where variant != name {
+                index[variant, default: []].append(item)
             }
 
             // Common aliases
@@ -199,7 +196,7 @@ final class NoWasteMatchingEngine {
         for ingredientName: String,
         in index: [String: [PantryItem]]
     ) -> [PantryItem]? {
-        let name = ingredientName.lowercased().trimmingCharacters(in: .whitespaces)
+        let name = IngredientNormalizer.normalize(ingredientName)
 
         // O(1) exact match
         if let items = index[name], !items.isEmpty {

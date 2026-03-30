@@ -150,9 +150,6 @@ final class RecipeIngestionService {
         var steps: InferredRecipeSteps?
         if isOnDevice {
             steps = try await foundationService.inferSteps(from: definition)
-        } else {
-            // Fall back to cloud AI for step inference
-            steps = try await inferStepsViaCloud(definition: definition)
         }
 
         return RecipeIngestionResult(
@@ -438,84 +435,7 @@ final class RecipeIngestionService {
 
     /// Infer ingredient category from name.
     private func inferIngredientCategory(_ name: String) -> IngredientCategory {
-        let lower = name.lowercased()
-
-        let proteins = ["chicken", "beef", "pork", "lamb", "turkey", "fish", "salmon", "tuna", "shrimp", "tofu", "egg"]
-        let vegetables = ["onion", "garlic", "tomato", "pepper", "carrot", "potato", "celery", "broccoli", "spinach", "mushroom", "zucchini", "lettuce", "cucumber", "corn", "pea", "bean", "cabbage", "kale", "cauliflower"]
-        let fruits = ["apple", "banana", "lemon", "lime", "orange", "berry", "strawberry", "blueberry", "avocado", "mango", "peach", "pear"]
-        let grains = ["flour", "rice", "pasta", "bread", "oat", "quinoa", "noodle", "tortilla", "couscous"]
-        let dairy = ["milk", "cream", "butter", "cheese", "yogurt", "sour cream"]
-        let spices = ["salt", "pepper", "cumin", "paprika", "cinnamon", "turmeric", "oregano", "thyme", "chili"]
-        let herbs = ["basil", "parsley", "cilantro", "rosemary", "sage", "dill", "mint", "chive"]
-        let oils = ["oil", "olive oil", "vegetable oil", "coconut oil", "sesame oil"]
-        let condiments = ["soy sauce", "vinegar", "ketchup", "mustard", "mayo", "hot sauce", "worcestershire"]
-
-        if proteins.contains(where: lower.contains) { return .protein }
-        if herbs.contains(where: lower.contains) { return .herb }
-        if vegetables.contains(where: lower.contains) { return .vegetable }
-        if fruits.contains(where: lower.contains) { return .fruit }
-        if dairy.contains(where: lower.contains) { return .dairy }
-        if grains.contains(where: lower.contains) { return .grain }
-        if spices.contains(where: lower.contains) { return .spice }
-        if oils.contains(where: lower.contains) { return .oil }
-        if condiments.contains(where: lower.contains) { return .condiment }
-
-        return .other
-    }
-
-    // MARK: - Cloud Fallback for Step Inference
-
-    private func inferStepsViaCloud(definition: RecipeDefinition) async throws -> InferredRecipeSteps? {
-        let ingredientList = definition.ingredients
-            .map { "\($0.name): \($0.amount)\($0.preparation.map { ", \($0)" } ?? "")" }
-            .joined(separator: "\n  - ")
-
-        let outcomeList = definition.outcomes.joined(separator: "\n  - ")
-
-        let prompt = """
-        Given this recipe definition, infer the cooking steps. Return JSON:
-        {
-          "steps": [{"stepNumber": 1, "instruction": "...", "durationSeconds": 0, "ingredientsUsed": ["..."]}],
-          "estimatedPrepMinutes": 15,
-          "estimatedCookMinutes": 30,
-          "difficulty": "intermediate"
-        }
-
-        Title: \(definition.title)
-        Servings: \(definition.servings ?? 4)
-        Ingredients: \(ingredientList)
-        Desired outcomes: \(outcomeList)
-        """
-
-        let response = try await aiRouter.generateText(prompt: prompt, taskType: .stepInference)
-
-        let cleaned = response
-            .replacingOccurrences(of: "```json", with: "")
-            .replacingOccurrences(of: "```", with: "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-
-        guard let data = cleaned.data(using: .utf8) else { return nil }
-
-        struct CloudSteps: Decodable {
-            var steps: [CloudStep]
-            var estimatedPrepMinutes: Int
-            var estimatedCookMinutes: Int
-            var difficulty: String
-        }
-        struct CloudStep: Decodable {
-            var stepNumber: Int
-            var instruction: String
-            var durationSeconds: Int
-            var ingredientsUsed: [String]
-        }
-
-        guard let _ = try? JSONDecoder().decode(CloudSteps.self, from: data) else {
-            return nil
-        }
-
-        // Convert to InferredRecipeSteps (can't construct @Generable directly,
-        // so we return nil and let the caller use the raw directions)
-        return nil
+        IngredientNormalizer.inferCategory(fromName: name)
     }
 
     // MARK: - JSON Parsing

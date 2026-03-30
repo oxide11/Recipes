@@ -537,7 +537,7 @@ struct RecipeExportView: View {
     @State private var selectedFormat: RecipeExportFormat = .pdf
     @State private var previewImage: UIImage?
     @State private var plainTextPreview: String = ""
-    @State private var exportData: Data?
+    @State private var shareActivityItems: [Any] = []
     @State private var showShareSheet = false
     @State private var isGenerating = false
 
@@ -562,8 +562,8 @@ struct RecipeExportView: View {
                 updatePreview()
             }
             .sheet(isPresented: $showShareSheet) {
-                if let items = shareItems() {
-                    ShareSheet(activityItems: items)
+                if !shareActivityItems.isEmpty {
+                    ShareSheet(activityItems: shareActivityItems)
                 }
             }
         }
@@ -701,40 +701,21 @@ struct RecipeExportView: View {
 
     private func performExport() {
         isGenerating = true
-        let items = generateExportItems()
+        switch selectedFormat {
+        case .pdf:
+            let data = RecipeExportService.generatePDF(from: recipe)
+            shareActivityItems = [data]
+        case .cardImage:
+            let image = previewImage ?? RecipeExportService.generateCardImage(from: recipe)
+            shareActivityItems = [image]
+        case .plainText:
+            let text = plainTextPreview.isEmpty
+                ? RecipeExportService.generatePlainText(from: recipe)
+                : plainTextPreview
+            shareActivityItems = [text]
+        }
         isGenerating = false
-        exportData = items.data
         showShareSheet = true
-    }
-
-    private func generateExportItems() -> (data: Data?, items: [Any]) {
-        switch selectedFormat {
-        case .pdf:
-            let data = RecipeExportService.generatePDF(from: recipe)
-            return (data, [data])
-        case .cardImage:
-            let image = RecipeExportService.generateCardImage(from: recipe)
-            let data = image.pngData()
-            return (data, [image])
-        case .plainText:
-            let text = RecipeExportService.generatePlainText(from: recipe)
-            let data = text.data(using: .utf8)
-            return (data, [text])
-        }
-    }
-
-    private func shareItems() -> [Any]? {
-        switch selectedFormat {
-        case .pdf:
-            let data = RecipeExportService.generatePDF(from: recipe)
-            return [data]
-        case .cardImage:
-            let image = RecipeExportService.generateCardImage(from: recipe)
-            return [image]
-        case .plainText:
-            let text = RecipeExportService.generatePlainText(from: recipe)
-            return [text]
-        }
     }
 }
 

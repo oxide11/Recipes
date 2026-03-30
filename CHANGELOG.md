@@ -28,7 +28,13 @@
 - Cached expensive `matches` computation in `NoWasteResultsView` via `@State` + `.task` instead of recomputing on every render
 - Cached `MetricsView.metrics` and `NutritionTrackingView.trackedDays/totals` via `@State` + `.task`
 
+### Removed
+- Deleted non-functional `inferStepsViaCloud` from `RecipeIngestionService` — always returned nil
+
 ### Added
 - Extracted reusable `StarRatingView` component — replaces 8 duplicated star rating patterns across 5 files
 - Extracted `.glassCard(cornerRadius:)` view modifier — replaces 20+ duplicated `.background(in:) + .glassEffect()` pairs
 - Extracted shared `formatTime(_:)` utility — replaces 3 identical implementations across DirectionStepView, CookingModeView, and RecipesWidgets
+- Extracted `IngredientNormalizer` utility — unifies ingredient name normalization and category inference previously duplicated in RecipeIngestionService, OpenFoodFactsService, and NoWasteMatchingEngine
+- Extracted `APIClient` shared networking layer — deduplicates HTTP request/response handling between ClaudeService and OpenAIService
+- Fixed `RecipeExportService` double generation — share sheet now reuses preview data instead of regenerating

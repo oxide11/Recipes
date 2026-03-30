@@ -8,7 +8,6 @@ import Foundation
 @MainActor
 final class OpenAIService {
     private let baseURL = URL(string: "https://api.openai.com/v1")!
-    private let session = URLSession.shared
 
     var apiKey: String? {
         KeychainService.retrieve(key: .openAIAPIKey)
@@ -110,24 +109,12 @@ final class OpenAIService {
         body: [String: Any],
         apiKey: String
     ) async throws -> Data {
-        let url = baseURL.appendingPathComponent(endpoint)
-        var request = URLRequest(url: url)
-        request.httpMethod = method
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-
-        let (data, response) = try await session.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw AIServiceError.invalidResponse
-        }
-
-        guard (200...299).contains(httpResponse.statusCode) else {
-            throw AIServiceError.httpError(statusCode: httpResponse.statusCode, data: data)
-        }
-
-        return data
+        try await APIClient.request(
+            url: baseURL.appendingPathComponent(endpoint),
+            method: method,
+            body: body,
+            headers: ["Authorization": "Bearer \(apiKey)"]
+        )
     }
 }
 

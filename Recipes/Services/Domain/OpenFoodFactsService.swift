@@ -120,48 +120,6 @@ enum OpenFoodFactsService {
 
     /// Infer an IngredientCategory from Open Food Facts category tags.
     private static func inferCategory(from tags: [String]) -> IngredientCategory {
-        let joined = tags.joined(separator: " ").lowercased()
-
-        if joined.contains("meat") || joined.contains("poultry") || joined.contains("fish") || joined.contains("seafood") {
-            return .protein
-        }
-        if joined.contains("vegetable") || joined.contains("salad") {
-            return .vegetable
-        }
-        if joined.contains("fruit") || joined.contains("berry") {
-            return .fruit
-        }
-        if joined.contains("dairy") || joined.contains("milk") || joined.contains("cheese") || joined.contains("yogurt") {
-            return .dairy
-        }
-        if joined.contains("grain") || joined.contains("bread") || joined.contains("pasta") || joined.contains("cereal") || joined.contains("rice") {
-            return .grain
-        }
-        if joined.contains("spice") || joined.contains("seasoning") {
-            return .spice
-        }
-        if joined.contains("oil") {
-            return .oil
-        }
-        if joined.contains("sauce") || joined.contains("condiment") || joined.contains("ketchup") || joined.contains("mustard") {
-            return .condiment
-        }
-        if joined.contains("beverage") || joined.contains("drink") || joined.contains("juice") || joined.contains("water") {
-            return .liquid
-        }
-        if joined.contains("sugar") || joined.contains("honey") || joined.contains("syrup") || joined.contains("sweetener") {
-            return .sweetener
-        }
-        if joined.contains("nut") || joined.contains("almond") || joined.contains("cashew") || joined.contains("peanut") {
-            return .nut
-        }
-        if joined.contains("bean") || joined.contains("lentil") || joined.contains("legume") || joined.contains("chickpea") {
-            return .legume
-        }
-        if joined.contains("herb") || joined.contains("basil") || joined.contains("parsley") || joined.contains("cilantro") {
-            return .herb
-        }
-
-        return .other
+        IngredientNormalizer.inferCategory(fromTags: tags)
     }
 }

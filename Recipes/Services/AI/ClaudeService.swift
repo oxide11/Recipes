@@ -9,7 +9,6 @@ import Foundation
 final class ClaudeService {
     private let baseURL = URL(string: "https://api.anthropic.com/v1")!
     private let apiVersion = "2023-06-01"
-    private let session = URLSession.shared
 
     var apiKey: String? {
         KeychainService.retrieve(key: .claudeAPIKey)
@@ -145,25 +144,15 @@ final class ClaudeService {
         body: [String: Any],
         apiKey: String
     ) async throws -> Data {
-        let url = baseURL.appendingPathComponent(endpoint)
-        var request = URLRequest(url: url)
-        request.httpMethod = method
-        request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
-        request.setValue(apiVersion, forHTTPHeaderField: "anthropic-version")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-
-        let (data, response) = try await session.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw AIServiceError.invalidResponse
-        }
-
-        guard (200...299).contains(httpResponse.statusCode) else {
-            throw AIServiceError.httpError(statusCode: httpResponse.statusCode, data: data)
-        }
-
-        return data
+        try await APIClient.request(
+            url: baseURL.appendingPathComponent(endpoint),
+            method: method,
+            body: body,
+            headers: [
+                "x-api-key": apiKey,
+                "anthropic-version": apiVersion,
+            ]
+        )
     }
 }
 
