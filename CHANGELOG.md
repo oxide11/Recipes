@@ -27,6 +27,20 @@
 - Fixed silent error swallowing in `RecipeDetailView.estimateNutrition()` — now shows user-facing error state
 - Fixed force cast `as!` in `BarcodeScannerService.CameraPreviewUIView` — replaced with safe `as?` guard
 
+### Changed
+- Rewrote `DashboardView` with data-driven, actionable content replacing static/mock placeholders:
+  - **Quick Actions row** — scan receipt, generate recipe, add pantry, quick meal shortcuts
+  - **Pantry Health card** — live expired/expiring-soon counts with item names, replaces static "all fresh" text
+  - **Today's Meals** — shows real planned meals sorted by type with completion status, duration, and empty-state guidance instead of mock data
+  - **Cooking Activity card** — this-week cook count, streak tracker, total recipes, favorites count, last-cooked recipe with star rating
+  - **Weekly Budget** — progress bar against user's `weeklyGroceryBudget` with color-coded thresholds, replaces fake donut chart
+  - **Seasonal Spotlight** — flow-layout tags from `SeasonalAwarenessService.currentlyInSeason()` for non-year-round ingredients
+  - **Quick Meals card** (iPad) — ≤30 min recipes sorted by cook count with ratings
+- Removed redundant custom tab bar (`DashboardTab` enum + `customTabBar`) that duplicated the system `TabView` in `ContentView`
+- Replaced mock `BudgetCardView` / `MealCardView` subviews with inline data-driven sections
+- Greeting header now shows user's display name from `UserProfile`
+- Date string uses `Date.formatted()` instead of manually created `DateFormatter`
+
 ### Improved
 - Optimized O(n²) pantry matching in `NoWasteMatchingEngine` with word-level O(1) lookup before substring fallback, capped at 200 entries
 - Cached `LanguageModelSession` in `FoundationModelService` to avoid per-call recreation
