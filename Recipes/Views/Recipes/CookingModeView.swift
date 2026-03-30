@@ -11,16 +11,22 @@ import Speech
 struct CookingModeView: View {
     let recipe: Recipe
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
 
     @State private var currentStepIndex = 0
-    @State private var timerActive = false
-    @State private var remainingSeconds = 0
-    @State private var timerTask: Task<Void, Never>?
+    @State private var stepTimers: [Int: Int] = [:]           // stepIndex → remainingSeconds
+    @State private var stepTimerTasks: [Int: Task<Void, Never>] = [:]
+    @State private var checkedIngredients: [Int: Set<String>] = [:]  // stepIndex → ingredient names
     @State private var isVoiceEnabled = true
     @State private var showingTutorial = false
     @State private var selectedConversion: DirectionIngredientRef?
     @AppStorage("hasSeenCookingModeTutorial") private var hasSeenTutorial = false
     private let synthesizer = AVSpeechSynthesizer()
+
+    // Cooking log
+    private let sessionStartDate = Date()
+    @State private var logRating: Int? = nil
+    @State private var logNotes = ""
 
     /// Maps lowercased ingredient names to their category color for syntax-style highlighting.
     private var ingredientColors: [String: Color] {
@@ -85,7 +91,7 @@ struct CookingModeView: View {
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
             synthesizer.stopSpeaking(at: .immediate)
-            timerTask?.cancel()
+            stepTimerTasks.values.forEach { $0.cancel() }
             Task { await CookingTimerLiveActivityManager.shared.endTimer() }
         }
         // Accessibility: Support Switch Control and blink-based navigation
@@ -116,6 +122,29 @@ struct CookingModeView: View {
 
             ProgressView(value: progress)
                 .tint(.green)
+
+            // Persistent banner for all active timers
+            let otherTimers = stepTimers.sorted { $0.key < $1.key }
+            ForEach(otherTimers, id: \.key) { stepIdx, remaining in
+                HStack(spacing: 8) {
+                    Image(systemName: "timer")
+                    Text("Step \(stepIdx + 1):")
+                    Text(formatTime(remaining))
+                        .monospacedDigit()
+                        .fontWeight(.semibold)
+                        .foregroundStyle(remaining <= 10 ? .red : .orange)
+                    Spacer()
+                    Button("Stop") { stopTimer(for: stepIdx) }
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.85))
+                .padding(.horizontal)
+                .padding(.vertical, 6)
+                .background(.orange.opacity(0.2), in: .rect(cornerRadius: 8))
+                .padding(.horizontal)
+            }
         }
         .padding(.top, 8)
     }
@@ -125,13 +154,6 @@ struct CookingModeView: View {
     private func stepContent(_ step: RecipeDirection, height: CGFloat) -> some View {
         ScrollView {
             VStack(spacing: 24) {
-                // Step number badge
-                Text("\(step.stepNumber)")
-                    .font(.system(size: 48, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .frame(width: 80, height: 80)
-                    .background(.tint, in: .circle)
-
                 // Instruction — large text with color-coded ingredients
                 Text(coloredInstruction(step))
                     .font(.system(size: 28, weight: .medium))
@@ -140,31 +162,50 @@ struct CookingModeView: View {
                     .padding(.horizontal, 24)
                     .accessibilityLabel("Step \(step.stepNumber). \(step.instruction)")
 
-                // Inline ingredients with category colors — tap to convert
-                if !step.ingredients.isEmpty {
-                    VStack(spacing: 8) {
-                        ForEach(step.ingredients, id: \.ingredientName) { ref in
-                            let color = ingredientColors[ref.ingredientName.lowercased()] ?? .accentColor
-                            Button {
-                                selectedConversion = ref
-                            } label: {
-                                HStack {
-                                    Circle()
-                                        .fill(color.opacity(0.6))
-                                        .frame(width: 8, height: 8)
-                                    Text("\(ref.amount.displayString) \(ref.ingredientName)")
-                                        .font(.title3)
-                                        .foregroundStyle(color)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                }
-
                 // Timer
                 if let timer = step.timer {
                     timerView(timer)
+                }
+
+                // Ingredient chips — tap to check off, long press to convert units
+                if !step.ingredients.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Ingredients for this step")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.4))
+                            .padding(.horizontal, 24)
+
+                        WrappingLayout(itemSpacing: 8, rowSpacing: 8) {
+                            ForEach(step.ingredients, id: \.ingredientName) { ref in
+                                let color = ingredientColors[ref.ingredientName.lowercased()] ?? .accentColor
+                                let isChecked = checkedIngredients[currentStepIndex]?.contains(ref.ingredientName) ?? false
+                                Button {
+                                    var checked = checkedIngredients[currentStepIndex] ?? []
+                                    if isChecked { checked.remove(ref.ingredientName) }
+                                    else { checked.insert(ref.ingredientName) }
+                                    checkedIngredients[currentStepIndex] = checked
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: isChecked ? "checkmark.circle.fill" : "circle")
+                                            .font(.caption)
+                                        Text("\(ref.amount.displayString) \(ref.ingredientName.lowercased())")
+                                            .font(.subheadline)
+                                            .strikethrough(isChecked)
+                                    }
+                                    .foregroundStyle(isChecked ? .white.opacity(0.35) : color)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 7)
+                                    .background(isChecked ? .white.opacity(0.06) : color.opacity(0.15), in: .capsule)
+                                }
+                                .buttonStyle(.plain)
+                                .simultaneousGesture(LongPressGesture().onEnded { _ in
+                                    selectedConversion = ref
+                                })
+                                .sensoryFeedback(.selection, trigger: isChecked)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                    }
                 }
 
                 // Safe temperature
@@ -188,25 +229,26 @@ struct CookingModeView: View {
     // MARK: - Timer
 
     private func timerView(_ timer: TimerStep) -> some View {
-        VStack(spacing: 12) {
-            if timerActive {
-                Text(formatTime(remainingSeconds))
+        let remaining = stepTimers[currentStepIndex]
+        let isRunning = remaining != nil
+
+        return VStack(spacing: 12) {
+            if let remaining {
+                Text(formatTime(remaining))
                     .font(.system(size: 64, weight: .bold, design: .rounded))
                     .monospacedDigit()
-                    .foregroundStyle(remainingSeconds <= 10 ? .red : .orange)
+                    .foregroundStyle(remaining <= 10 ? .red : .orange)
 
                 Button("Stop Timer") {
-                    stopTimer()
+                    stopTimer(for: currentStepIndex)
                 }
                 .font(.title3)
                 .buttonStyle(.glass)
             } else {
-                Text(timer.displayDuration)
-                    .font(.title)
-                    .foregroundStyle(.orange)
-
-                Button("Start Timer") {
-                    startTimer(seconds: timer.durationSeconds)
+                Button {
+                    startTimer(seconds: timer.durationSeconds, stepIndex: currentStepIndex)
+                } label: {
+                    Label("Start \(timer.displayDuration) timer", systemImage: "timer")
                 }
                 .font(.title3)
                 .buttonStyle(.glass)
@@ -215,35 +257,82 @@ struct CookingModeView: View {
         }
         .padding()
         .background(.orange.opacity(0.1), in: .rect(cornerRadius: 16))
-        .sensoryFeedback(.impact, trigger: timerActive)
+        .sensoryFeedback(.impact, trigger: isRunning)
     }
 
     // MARK: - Completion
 
     private var completionView: some View {
-        VStack(spacing: 20) {
-            Spacer()
-            Image(systemName: "checkmark.seal.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(.green)
+        ScrollView {
+            VStack(spacing: 24) {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 72))
+                    .foregroundStyle(.green)
 
-            Text("All Done!")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundStyle(.white)
+                Text("All Done!")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
 
-            Text("You've completed all \(recipe.directions.count) steps.")
-                .font(.title3)
-                .foregroundStyle(.white.opacity(0.7))
+                Text("You've completed all \(recipe.directions.count) steps.")
+                    .font(.title3)
+                    .foregroundStyle(.white.opacity(0.7))
 
-            Button("Finish") {
-                dismiss()
+                // Rating
+                VStack(spacing: 8) {
+                    Text("How did it turn out?")
+                        .font(.headline)
+                        .foregroundStyle(.white.opacity(0.85))
+
+                    HStack(spacing: 12) {
+                        ForEach(1...5, id: \.self) { star in
+                            Image(systemName: star <= (logRating ?? 0) ? "star.fill" : "star")
+                                .font(.system(size: 36))
+                                .foregroundStyle(star <= (logRating ?? 0) ? .yellow : .white.opacity(0.3))
+                                .onTapGesture {
+                                    logRating = logRating == star ? nil : star
+                                }
+                        }
+                    }
+                }
+                .padding()
+                .background(.white.opacity(0.05), in: .rect(cornerRadius: 16))
+
+                // Notes
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Notes (optional)")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.6))
+                    TextField("How did it go? Any substitutions?", text: $logNotes, axis: .vertical)
+                        .lineLimit(3...5)
+                        .font(.body)
+                        .foregroundStyle(.white)
+                        .padding(12)
+                        .background(.white.opacity(0.08), in: .rect(cornerRadius: 12))
+                }
+
+                // Actions
+                VStack(spacing: 12) {
+                    Button {
+                        saveLog()
+                        dismiss()
+                    } label: {
+                        Text("Save & Finish")
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.glass)
+                    .tint(.green)
+
+                    Button("Skip") {
+                        dismiss()
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.5))
+                }
             }
-            .font(.title3)
-            .buttonStyle(.glass)
-            .tint(.green)
-            .padding(.top)
-            Spacer()
+            .padding(24)
         }
         .sensoryFeedback(.success, trigger: currentStepIndex)
     }
@@ -272,6 +361,7 @@ struct CookingModeView: View {
             } label: {
                 Image(systemName: isVoiceEnabled ? "speaker.wave.3.fill" : "speaker.slash.fill")
                     .font(.system(size: 32))
+                    .frame(width: 36, height: 36)
             }
             .accessibilityLabel(isVoiceEnabled ? "Disable voice" : "Enable voice")
 
@@ -304,7 +394,6 @@ struct CookingModeView: View {
 
     private func advanceStep() {
         synthesizer.stopSpeaking(at: .immediate)
-        stopTimer()
 
         if currentStepIndex < recipe.directions.count - 1 {
             currentStepIndex += 1
@@ -319,7 +408,6 @@ struct CookingModeView: View {
     private func goBack() {
         guard currentStepIndex > 0 else { return }
         synthesizer.stopSpeaking(at: .immediate)
-        stopTimer()
         currentStepIndex -= 1
         if isVoiceEnabled, let step = currentStep {
             speakStep(step)
@@ -359,39 +447,56 @@ struct CookingModeView: View {
         synthesizer.speak(utterance)
     }
 
-    private func startTimer(seconds: Int) {
-        remainingSeconds = seconds
-        timerActive = true
+    private func startTimer(seconds: Int, stepIndex: Int) {
+        stepTimers[stepIndex] = seconds
 
         CookingTimerLiveActivityManager.shared.startTimer(
             recipeTitle: recipe.title,
             totalCookTimeMinutes: recipe.cookTimeMinutes,
-            stepNumber: (currentStep?.stepNumber ?? 1),
-            stepInstruction: currentStep?.instruction ?? "",
+            stepNumber: stepIndex + 1,
+            stepInstruction: recipe.directions[stepIndex].instruction,
             durationSeconds: seconds,
             totalSteps: recipe.directions.count
         )
 
-        timerTask = Task {
-            while remainingSeconds > 0, !Task.isCancelled {
+        stepTimerTasks[stepIndex]?.cancel()
+        stepTimerTasks[stepIndex] = Task {
+            while (stepTimers[stepIndex] ?? 0) > 0, !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(1))
-                remainingSeconds -= 1
+                if let current = stepTimers[stepIndex] {
+                    stepTimers[stepIndex] = current - 1
+                }
             }
-            timerActive = false
+
+            guard !Task.isCancelled else { return }
+            stepTimers.removeValue(forKey: stepIndex)
+            stepTimerTasks.removeValue(forKey: stepIndex)
             await CookingTimerLiveActivityManager.shared.endTimer()
 
-            // Vibrate when timer completes
-            if remainingSeconds <= 0 {
-                // Auto-advance after timer
+            // Auto-advance only if we're still on this step
+            if currentStepIndex == stepIndex {
                 advanceStep()
             }
         }
     }
 
-    private func stopTimer() {
-        timerTask?.cancel()
-        timerActive = false
-        Task { await CookingTimerLiveActivityManager.shared.endTimer() }
+    private func stopTimer(for stepIndex: Int) {
+        stepTimerTasks[stepIndex]?.cancel()
+        stepTimers.removeValue(forKey: stepIndex)
+        stepTimerTasks.removeValue(forKey: stepIndex)
+        if stepTimers.isEmpty {
+            Task { await CookingTimerLiveActivityManager.shared.endTimer() }
+        }
+    }
+
+    private func saveLog() {
+        let elapsed = Int(Date().timeIntervalSince(sessionStartDate) / 60)
+        let entry = CookingLogEntry(
+            cookTimeMinutes: elapsed > 0 ? elapsed : nil,
+            rating: logRating,
+            notes: logNotes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : logNotes
+        )
+        recipe.cookingLog.append(entry)
     }
 
     private func formatTime(_ totalSeconds: Int) -> String {
