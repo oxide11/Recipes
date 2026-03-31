@@ -62,8 +62,8 @@ enum SeasonalAwarenessService {
     ]
 
     /// Get ingredients that are currently in season.
-    static func currentlyInSeason() -> [SeasonalIngredient] {
-        let current = Season.current
+    static func currentlyInSeason(hemisphere: Hemisphere = .northern) -> [SeasonalIngredient] {
+        let current = Season.current(for: hemisphere)
         return seasonalData.filter { $0.peakSeasons.contains(current) }
     }
 

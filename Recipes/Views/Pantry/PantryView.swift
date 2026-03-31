@@ -36,6 +36,8 @@ private func expiryLabel(for date: Date) -> String {
 // MARK: - Pantry View
 
 struct PantryView: View {
+    var startWithAddSheet: Bool = false
+
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var items: [PantryItem]
     @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
@@ -198,6 +200,7 @@ struct PantryView: View {
             }
             .navigationTitle("Pantry")
             .searchable(text: $searchText, prompt: "Search pantry...")
+            .onAppear { if startWithAddSheet { showingAddItem = true } }
             .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {

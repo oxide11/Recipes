@@ -41,6 +41,9 @@ struct RecipeGeneratorView: View {
     // Photo mode
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var selectedImage: UIImage?
+    @State private var showingPhotoDialog = false
+    @State private var showingCamera = false
+    @State private var showingPhotoLibrary = false
 
     // Describe mode
     @State private var descriptionInput = ""
@@ -159,6 +162,16 @@ struct RecipeGeneratorView: View {
                 dietaryRestrictions = Set(profile.dietaryRestrictions)
                 hasLoadedProfile = true
             }
+            .confirmationDialog("Add Photo", isPresented: $showingPhotoDialog) {
+                Button("Take Photo") { showingCamera = true }
+                Button("Choose from Library") { showingPhotoLibrary = true }
+                Button("Cancel", role: .cancel) {}
+            }
+            .fullScreenCover(isPresented: $showingCamera) {
+                CameraPicker(image: $selectedImage)
+                    .ignoresSafeArea()
+            }
+            .photosPicker(isPresented: $showingPhotoLibrary, selection: $selectedPhotoItem, matching: .images)
             .onChange(of: selectedPhotoItem) {
                 Task { await loadSelectedPhoto() }
             }
@@ -179,8 +192,10 @@ struct RecipeGeneratorView: View {
                     .frame(maxWidth: .infinity)
             }
             let hasImage = selectedImage != nil
-            PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                Label(hasImage ? "Change Photo" : "Choose a Food Photo",
+            Button {
+                showingPhotoDialog = true
+            } label: {
+                Label(hasImage ? "Change Photo" : "Take or Choose a Food Photo",
                       systemImage: "photo.on.rectangle")
                     .frame(maxWidth: .infinity)
             }

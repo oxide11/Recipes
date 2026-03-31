@@ -7,6 +7,11 @@ enum MeasurementSystem: String, Codable, Sendable {
     case metric, imperial
 }
 
+enum Hemisphere: String, Codable, CaseIterable, Sendable {
+    case northern = "Northern"
+    case southern = "Southern"
+}
+
 enum MealPrepMode: String, Codable, CaseIterable, Sendable {
     case daily   // Prep each day's meals individually
     case weekly  // Shop Saturday, prep Sunday for the whole week
@@ -46,6 +51,9 @@ final class UserProfile {
     // AI preferences
     var preferredAIProvider: AIProvider
     var enableOnDeviceAI: Bool
+
+    // Location
+    var hemisphere: Hemisphere
 
     // Pantry
     var autoDeductPantry: Bool
@@ -89,6 +97,7 @@ final class UserProfile {
         self.defaultMealPrepMode = .daily
         self.preferredAIProvider = preferredAIProvider
         self.enableOnDeviceAI = true
+        self.hemisphere = .northern
         self.autoDeductPantry = true
         self.iCloudSyncEnabled = false
         self.shareRecipesEnabled = false

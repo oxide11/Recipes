@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import UIKit
 
 // MARK: - Recipe Import View
 
@@ -15,6 +16,10 @@ struct RecipeImportView: View {
     @State private var recipeCodeText = ""
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var photoData: Data?
+    @State private var showingPhotoDialog = false
+    @State private var showingCamera = false
+    @State private var showingPhotoLibrary = false
+    @State private var cameraImage: UIImage?
 
     @State private var ingestionService: RecipeIngestionService?
     @State private var result: RecipeIngestionResult?
@@ -22,7 +27,7 @@ struct RecipeImportView: View {
     @State private var isProcessing = false
     @State private var showingPreview = false
 
-    enum ImportSource: String, CaseIterable {
+    enum ImportSource: String, CaseIterable, Hashable {
         case url = "URL"
         case text = "Text"
         case photo = "Photo"
@@ -31,83 +36,81 @@ struct RecipeImportView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                // Source picker
-                Picker("Source", selection: $selectedTab) {
-                    ForEach(ImportSource.allCases, id: \.self) { source in
-                        Text(source.rawValue).tag(source)
+            formContent
+                .navigationTitle("Import Recipe")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { dismiss() }
                     }
                 }
-                .pickerStyle(.segmented)
-                .listRowBackground(Color.clear)
+                .onAppear { ingestionService = RecipeIngestionService(aiRouter: aiRouter) }
+        }
+    }
 
-                // Source-specific input
-                switch selectedTab {
-                case .url:
-                    urlInputSection
-                case .text:
-                    textInputSection
-                case .photo:
-                    photoInputSection
-                case .code:
-                    recipeCodeSection
-                }
-
-                // Import button
-                Section {
-                    Button {
-                        Task { await performImport() }
-                    } label: {
-                        HStack {
-                            Spacer()
-                            if isProcessing {
-                                ProgressView()
-                                    .padding(.trailing, 8)
-                                Text(ingestionService?.progress ?? "Processing...")
-                            } else {
-                                Image(systemName: "arrow.down.doc")
-                                Text("Import Recipe")
-                            }
-                            Spacer()
-                        }
-                    }
-                    .disabled(!canImport || isProcessing)
-                }
-
-                // Error
-                if let error = errorMessage {
-                    Section {
-                        Label(error, systemImage: "exclamationmark.triangle")
-                            .foregroundStyle(.red)
-                    }
-                }
-
-                // Preview
-                if let result {
-                    importPreviewSection(result)
+    private var formContent: some View {
+        Form {
+            Picker("Source", selection: $selectedTab) {
+                ForEach(ImportSource.allCases, id: \.self) { (source: ImportSource) in
+                    Text(source.rawValue).tag(source)
                 }
             }
-            .navigationTitle("Import Recipe")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
+            .pickerStyle(.segmented)
+            .listRowBackground(Color.clear)
+
+            sourceInputSection
+            Section { importButton }
+            errorSection
+            if let result { importPreviewSection(result) }
+        }
+        .confirmationDialog("Add Photo", isPresented: $showingPhotoDialog) {
+            Button("Take Photo") { showingCamera = true }
+            Button("Choose from Library") { showingPhotoLibrary = true }
+            Button("Cancel", role: .cancel) {}
+        }
+        .fullScreenCover(isPresented: $showingCamera) {
+            CameraPicker(image: $cameraImage).ignoresSafeArea()
+        }
+        .onChange(of: cameraImage) {
+            if let img = cameraImage {
+                photoData = img.jpegData(compressionQuality: 0.8)
+                cameraImage = nil
             }
-            .onChange(of: selectedPhoto) { _, newItem in
-                Task {
-                    if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                        photoData = data
-                    }
+        }
+        .photosPicker(isPresented: $showingPhotoLibrary, selection: $selectedPhoto, matching: .images)
+        .onChange(of: selectedPhoto) { _, newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                    photoData = data
                 }
-            }
-            .onAppear {
-                ingestionService = RecipeIngestionService(aiRouter: aiRouter)
             }
         }
     }
 
     // MARK: - Input Sections
+
+    @ViewBuilder
+    private var sourceInputSection: some View {
+        switch selectedTab {
+        case .url:   urlInputSection
+        case .text:  textInputSection
+        case .photo: photoInputSection
+        case .code:  recipeCodeSection
+        }
+    }
+
+    @ViewBuilder
+    private var errorSection: some View {
+        if let error = errorMessage {
+            Section {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle")
+                    Text(error)
+                }
+                .foregroundStyle(.red)
+            }
+        }
+    }
 
     private var urlInputSection: some View {
         Section("Recipe URL") {
@@ -137,7 +140,9 @@ struct RecipeImportView: View {
     private var photoInputSection: some View {
         let hasPhoto = photoData != nil
         return Section("Recipe Photo") {
-            PhotosPicker(selection: $selectedPhoto, matching: .images) {
+            Button {
+                showingPhotoDialog = true
+            } label: {
                 if hasPhoto {
                     Label("Photo Selected", systemImage: "checkmark.circle.fill")
                         .foregroundStyle(.green)
@@ -215,6 +220,26 @@ struct RecipeImportView: View {
     }
 
     // MARK: - Actions
+
+    @ViewBuilder
+    private var importButton: some View {
+        Button {
+            Task { await performImport() }
+        } label: {
+            HStack {
+                Spacer()
+                if isProcessing {
+                    ProgressView().padding(.trailing, 8)
+                    Text(ingestionService?.progress ?? "Processing...")
+                } else {
+                    Image(systemName: "arrow.down.doc")
+                    Text("Import Recipe")
+                }
+                Spacer()
+            }
+        }
+        .disabled(!canImport || isProcessing)
+    }
 
     private var canImport: Bool {
         switch selectedTab {

@@ -29,6 +29,9 @@ final class ShoppingVoiceService: NSObject {
     // MARK: - Text-to-Speech
 
     func speak(_ text: String) async {
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .voicePrompt, options: .duckOthers)
+        try? AVAudioSession.sharedInstance().setActive(true)
+
         let utterance = AVSpeechUtterance(string: text)
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate
         utterance.pitchMultiplier = 1.0

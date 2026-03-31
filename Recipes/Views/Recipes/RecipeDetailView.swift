@@ -20,6 +20,9 @@ struct RecipeDetailView: View {
     @State private var isEstimatingNutrition = false
     @State private var nutritionEstimateError: String?
     @State private var selectedPhoto: PhotosPickerItem?
+    @State private var showingPhotoDialog = false
+    @State private var showingCamera = false
+    @State private var showingPhotoLibrary = false
     @State private var isEditing = false
 
     init(recipe: Recipe) {
@@ -110,7 +113,9 @@ struct RecipeDetailView: View {
                         Button("Export Recipe", systemImage: "square.and.arrow.up") {
                             showingExport = true
                         }
-                        PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                        Button {
+                            showingPhotoDialog = true
+                        } label: {
                             Label("Add Photo", systemImage: "camera")
                         }
                         ShareLink(item: recipeShareText)
@@ -133,6 +138,23 @@ struct RecipeDetailView: View {
         .sheet(isPresented: $showingExport) {
             RecipeExportView(recipe: recipe)
         }
+        .confirmationDialog("Add Photo", isPresented: $showingPhotoDialog) {
+            Button("Take Photo") { showingCamera = true }
+            Button("Choose from Library") { showingPhotoLibrary = true }
+            Button("Cancel", role: .cancel) {}
+        }
+        .fullScreenCover(isPresented: $showingCamera) {
+            CameraPicker(image: Binding(
+                get: { nil },
+                set: { uiImage in
+                    if let data = uiImage?.jpegData(compressionQuality: 0.8) {
+                        recipe.photos.append(RecipePhoto(imageData: data))
+                    }
+                }
+            ))
+            .ignoresSafeArea()
+        }
+        .photosPicker(isPresented: $showingPhotoLibrary, selection: $selectedPhoto, matching: .images)
         .onChange(of: selectedPhoto) { _, newItem in
             Task {
                 if let data = try? await newItem?.loadTransferable(type: Data.self) {

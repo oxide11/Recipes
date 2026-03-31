@@ -433,6 +433,10 @@ struct CookingModeView: View {
     }
 
     private func speakStep(_ step: RecipeDirection) {
+        // Override mute switch so cooking guidance plays like navigation audio
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .voicePrompt, options: .duckOthers)
+        try? AVAudioSession.sharedInstance().setActive(true)
+
         var text = "Step \(step.stepNumber). \(step.instruction)"
         if let timer = step.timer {
             text += ". Timer: \(timer.displayDuration)."

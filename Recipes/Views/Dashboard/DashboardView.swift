@@ -26,6 +26,12 @@ struct DashboardView: View {
     @Query private var receipts: [GroceryReceipt]
     @Query private var profiles: [UserProfile]
 
+    @State private var showingReceiptScanner = false
+    @State private var showingRecipeGenerator = false
+    @State private var showingAddPantry = false
+    @State private var showingQuickMeals = false
+    @State private var selectedSeasonalIngredient: IngredientFilter? = nil
+
     // MARK: - Computed Data
 
     private var profile: UserProfile? { profiles.first }
@@ -93,8 +99,12 @@ struct DashboardView: View {
             .sorted { $0.cookCount > $1.cookCount }
     }
 
+    private var hemisphere: Hemisphere {
+        profile?.hemisphere ?? .northern
+    }
+
     private var seasonalIngredients: [String] {
-        SeasonalAwarenessService.currentlyInSeason()
+        SeasonalAwarenessService.currentlyInSeason(hemisphere: hemisphere)
             .filter { !$0.availableAllYear }
             .prefix(6)
             .map(\.name)
@@ -113,6 +123,21 @@ struct DashboardView: View {
             }
             .background(Brand.midnight)
             .navigationTitle("Mise")
+            .sheet(isPresented: $showingReceiptScanner) {
+                ReceiptScannerView()
+            }
+            .sheet(isPresented: $showingRecipeGenerator) {
+                RecipeGeneratorView()
+            }
+            .sheet(isPresented: $showingAddPantry) {
+                PantryView(startWithAddSheet: true)
+            }
+            .sheet(isPresented: $showingQuickMeals) {
+                QuickMealsView(recipes: quickRecipes)
+            }
+            .sheet(item: $selectedSeasonalIngredient) { filter in
+                SeasonalRecipesView(ingredient: filter.name, recipes: recipes)
+            }
         }
     }
 
@@ -209,27 +234,38 @@ struct DashboardView: View {
     private var quickActionsRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
-                quickActionButton(icon: "camera.fill", label: "Scan Receipt", color: Brand.warmTan)
-                quickActionButton(icon: "wand.and.stars", label: "Generate Recipe", color: .cyan)
-                quickActionButton(icon: "plus.circle.fill", label: "Add Pantry", color: DashboardStyle.produce)
-                quickActionButton(icon: "timer", label: "Quick Meal", color: DashboardStyle.grains)
+                quickActionButton(icon: "camera.fill", label: "Scan Receipt", color: Brand.warmTan) {
+                    showingReceiptScanner = true
+                }
+                quickActionButton(icon: "wand.and.stars", label: "Generate Recipe", color: .cyan) {
+                    showingRecipeGenerator = true
+                }
+                quickActionButton(icon: "plus.circle.fill", label: "Add Pantry", color: DashboardStyle.produce) {
+                    showingAddPantry = true
+                }
+                quickActionButton(icon: "timer", label: "Quick Meal", color: DashboardStyle.grains) {
+                    showingQuickMeals = true
+                }
             }
         }
     }
 
-    private func quickActionButton(icon: String, label: String, color: Color) -> some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(color)
-                .frame(width: 48, height: 48)
-                .background(color.opacity(0.15), in: Circle())
+    private func quickActionButton(icon: String, label: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.title3)
+                    .foregroundStyle(color)
+                    .frame(width: 48, height: 48)
+                    .background(color.opacity(0.15), in: Circle())
 
-            Text(label)
-                .font(.system(.caption2, design: .rounded))
-                .foregroundStyle(Brand.muted)
+                Text(label)
+                    .font(.miseMeta)
+                    .foregroundStyle(Brand.muted)
+            }
+            .frame(width: 80)
         }
-        .frame(width: 80)
+        .buttonStyle(.plain)
     }
 
     // MARK: - Pantry Health
@@ -516,14 +552,23 @@ struct DashboardView: View {
 
             FlowLayout(spacing: 8) {
                 ForEach(seasonalIngredients, id: \.self) { ingredient in
-                    Text(ingredient.capitalized)
-                        .font(.miseMeta.weight(.medium))
-                        .foregroundStyle(Brand.cream)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Brand.herbGreen.opacity(0.25), in: Capsule())
+                    Button {
+                        selectedSeasonalIngredient = IngredientFilter(name: ingredient)
+                    } label: {
+                        Text(ingredient.capitalized)
+                            .font(.miseMeta.weight(.medium))
+                            .foregroundStyle(Brand.cream)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Brand.herbGreen.opacity(0.25), in: Capsule())
+                    }
+                    .buttonStyle(.plain)
                 }
             }
+
+            Text("Tap an ingredient to find matching recipes")
+                .font(.miseMeta)
+                .foregroundStyle(Brand.muted)
         }
         .padding()
         .glassCard(cornerRadius: 16)
@@ -570,6 +615,135 @@ struct DashboardView: View {
         }
         .padding()
         .glassCard(cornerRadius: 16)
+    }
+}
+
+// MARK: - Ingredient Filter (Identifiable wrapper for sheet)
+
+struct IngredientFilter: Identifiable {
+    let id = UUID()
+    let name: String
+}
+
+// MARK: - Seasonal Recipes View
+
+struct SeasonalRecipesView: View {
+    let ingredient: String
+    let recipes: [Recipe]
+    @Environment(\.dismiss) private var dismiss
+
+    private var matchingRecipes: [Recipe] {
+        recipes.filter { recipe in
+            recipe.ingredients.contains { $0.name.localizedCaseInsensitiveContains(ingredient) }
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if matchingRecipes.isEmpty {
+                    VStack(spacing: 16) {
+                        Spacer()
+                        Image(systemName: "leaf")
+                            .font(.system(size: 48))
+                            .foregroundStyle(Brand.herbGreen)
+                        Text("No recipes with \(ingredient.capitalized)")
+                            .font(.miseHeading)
+                            .foregroundStyle(Brand.cream)
+                        Text("Add a recipe that uses \(ingredient.lowercased()) to see it here.")
+                            .font(.miseBody)
+                            .foregroundStyle(Brand.muted)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                        Spacer()
+                    }
+                } else {
+                    List(matchingRecipes) { recipe in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(recipe.title)
+                                .font(.miseBody.weight(.medium))
+                                .foregroundStyle(Brand.cream)
+                            Text(recipe.formattedDuration)
+                                .font(.miseMeta)
+                                .foregroundStyle(Brand.muted)
+                        }
+                        .listRowBackground(Brand.surface)
+                    }
+                    .scrollContentBackground(.hidden)
+                }
+            }
+            .background(Brand.midnight)
+            .navigationTitle("\(ingredient.capitalized) Recipes")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                        .foregroundStyle(Brand.warmTan)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Quick Meals View
+
+struct QuickMealsView: View {
+    let recipes: [Recipe]
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if recipes.isEmpty {
+                    VStack(spacing: 16) {
+                        Spacer()
+                        Image(systemName: "timer")
+                            .font(.system(size: 48))
+                            .foregroundStyle(Brand.warmTan)
+                        Text("No Quick Recipes Yet")
+                            .font(.miseHeading)
+                            .foregroundStyle(Brand.cream)
+                        Text("Recipes under 30 minutes will appear here.")
+                            .font(.miseBody)
+                            .foregroundStyle(Brand.muted)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                        Spacer()
+                    }
+                } else {
+                    List(recipes) { recipe in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(recipe.title)
+                                    .font(.miseBody.weight(.medium))
+                                    .foregroundStyle(Brand.cream)
+                                Text(recipe.cuisine.rawValue.capitalized)
+                                    .font(.miseMeta)
+                                    .foregroundStyle(Brand.muted)
+                            }
+                            Spacer()
+                            Text(recipe.formattedDuration)
+                                .font(.miseMeta)
+                                .foregroundStyle(Brand.warmTan)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Brand.warmTan.opacity(0.15), in: Capsule())
+                        }
+                        .listRowBackground(Brand.surface)
+                    }
+                    .scrollContentBackground(.hidden)
+                }
+            }
+            .background(Brand.midnight)
+            .navigationTitle("Quick Meals")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                        .foregroundStyle(Brand.warmTan)
+                }
+            }
+        }
     }
 }
 

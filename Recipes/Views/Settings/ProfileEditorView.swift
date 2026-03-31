@@ -14,6 +14,7 @@ struct ProfileEditorView: View {
     @State private var displayName: String
     @State private var skillLevel: RecipeDifficulty
     @State private var measurementSystem: MeasurementSystem
+    @State private var hemisphere: Hemisphere
     @State private var dietaryRestrictions: Set<DietaryRestriction>
     @State private var preferredCuisines: Set<Cuisine>
     @State private var dislikedIngredients: String
@@ -28,6 +29,7 @@ struct ProfileEditorView: View {
         _displayName = State(initialValue: profile?.displayName ?? "")
         _skillLevel = State(initialValue: profile?.skillLevel ?? .intermediate)
         _measurementSystem = State(initialValue: profile?.measurementSystem ?? .imperial)
+        _hemisphere = State(initialValue: profile?.hemisphere ?? .northern)
         _dietaryRestrictions = State(initialValue: Set(profile?.dietaryRestrictions ?? []))
         _preferredCuisines = State(initialValue: Set(profile?.preferredCuisines ?? []))
         _dislikedIngredients = State(initialValue: profile?.dislikedIngredients.joined(separator: ", ") ?? "")
@@ -76,6 +78,11 @@ struct ProfileEditorView: View {
             Picker("Measurement System", selection: $measurementSystem) {
                 Text("Imperial (cups, oz, °F)").tag(MeasurementSystem.imperial)
                 Text("Metric (ml, g, °C)").tag(MeasurementSystem.metric)
+            }
+
+            Picker("Hemisphere", selection: $hemisphere) {
+                Text("Northern (Canada, US, Europe…)").tag(Hemisphere.northern)
+                Text("Southern (Australia, NZ, S. America…)").tag(Hemisphere.southern)
             }
         }
     }
@@ -171,6 +178,7 @@ struct ProfileEditorView: View {
         profile.displayName = displayName
         profile.skillLevel = skillLevel
         profile.measurementSystem = measurementSystem
+        profile.hemisphere = hemisphere
         profile.dietaryRestrictions = Array(dietaryRestrictions)
         profile.preferredCuisines = Array(preferredCuisines)
         profile.dislikedIngredients = dislikedIngredients
@@ -209,95 +217,143 @@ struct OnboardingView: View {
 
     var body: some View {
         TabView(selection: $currentPage) {
-            // Page 1: Welcome
-            welcomePage
-                .tag(0)
-
-            // Page 2: Dietary
-            dietaryPage
-                .tag(1)
-
-            // Page 3: Cuisines
-            cuisinePage
-                .tag(2)
+            welcomePage.tag(0)
+            dietaryPage.tag(1)
+            cuisinePage.tag(2)
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
+        .background(Brand.midnight.ignoresSafeArea())
         .interactiveDismissDisabled()
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
+        .onChange(of: currentPage) {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
     }
 
     private var welcomePage: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 0) {
             Spacer()
 
-            Image(systemName: "fork.knife.circle.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(.tint)
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(Brand.warmTan.opacity(0.15))
+                    .frame(width: 100, height: 100)
+                Image(systemName: "fork.knife")
+                    .font(.system(size: 40, weight: .medium))
+                    .foregroundStyle(Brand.warmTan)
+            }
+            .padding(.bottom, 24)
 
             Text("Welcome to Recipes")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-
-            Text("Your AI-powered kitchen companion. Let's personalize your experience.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 32, weight: .bold))
+                .foregroundStyle(Brand.cream)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+                .padding(.bottom, 10)
 
-            VStack(spacing: 12) {
-                TextField("What should we call you?", text: $displayName)
-                    .textFieldStyle(.roundedBorder)
+            Text("Your AI-powered kitchen companion.\nLet's personalize your experience.")
+                .font(.subheadline)
+                .foregroundStyle(Brand.muted)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+                .padding(.bottom, 40)
+
+            // Name field
+            VStack(alignment: .leading, spacing: 6) {
+                Text("What should we call you?")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Brand.muted)
+                    .padding(.horizontal, 4)
+                TextField("Your name", text: $displayName)
                     .textContentType(.name)
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+                    .background(Brand.surface, in: RoundedRectangle(cornerRadius: 12))
+                    .foregroundStyle(Brand.cream)
+            }
+            .padding(.horizontal, 32)
+            .padding(.bottom, 20)
 
-                Picker("Cooking Level", selection: $skillLevel) {
+            // Cooking level chips
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Cooking level")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Brand.muted)
+                    .padding(.horizontal, 4)
+                HStack(spacing: 8) {
                     ForEach(RecipeDifficulty.allCases, id: \.self) { level in
-                        Text(level.rawValue.capitalized).tag(level)
+                        Button {
+                            skillLevel = level
+                        } label: {
+                            Text(level.rawValue.capitalized)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(skillLevel == level ? Brand.midnight : Brand.cream)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                                .padding(.vertical, 10)
+                                .frame(maxWidth: .infinity)
+                                .background(
+                                    skillLevel == level ? Brand.warmTan : Brand.surface,
+                                    in: Capsule()
+                                )
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, 32)
             }
+            .padding(.horizontal, 32)
 
             Spacer()
 
             Button {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 withAnimation { currentPage = 1 }
             } label: {
                 Text("Next")
                     .font(.headline)
+                    .foregroundStyle(Brand.midnight)
                     .frame(maxWidth: .infinity)
-                    .padding()
+                    .padding(.vertical, 16)
+                    .background(displayName.isEmpty ? Brand.muted : Brand.warmTan, in: RoundedRectangle(cornerRadius: 14))
             }
-            .buttonStyle(.glass)
+            .buttonStyle(.plain)
             .padding(.horizontal, 32)
             .disabled(displayName.isEmpty)
 
-            Spacer()
-                .frame(height: 40)
+            Spacer().frame(height: 48)
         }
     }
 
     private var dietaryPage: some View {
-        VStack(spacing: 20) {
-            Spacer()
-                .frame(height: 40)
+        VStack(spacing: 0) {
+            Spacer().frame(height: 48)
 
-            Image(systemName: "leaf.circle.fill")
-                .font(.system(size: 60))
-                .foregroundStyle(Brand.herbGreen)
+            ZStack {
+                Circle()
+                    .fill(Brand.herbGreen.opacity(0.15))
+                    .frame(width: 80, height: 80)
+                Image(systemName: "leaf.fill")
+                    .font(.system(size: 32))
+                    .foregroundStyle(Brand.herbGreen)
+            }
+            .padding(.bottom, 16)
 
             Text("Dietary Preferences")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.system(size: 26, weight: .bold))
+                .foregroundStyle(Brand.cream)
+                .padding(.bottom, 8)
 
             Text("Select any that apply. You can change these anytime.")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Brand.muted)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 40)
+                .padding(.bottom, 20)
 
             ScrollView {
-                LazyVGrid(columns: [.init(.adaptive(minimum: 120))], spacing: 10) {
+                LazyVGrid(columns: [.init(.adaptive(minimum: 130))], spacing: 10) {
                     ForEach(DietaryRestriction.allCases, id: \.self) { restriction in
                         Button {
                             if selectedRestrictions.contains(restriction) {
@@ -307,29 +363,21 @@ struct OnboardingView: View {
                             }
                         } label: {
                             Text(restriction.displayName)
-                                .font(.subheadline)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(selectedRestrictions.contains(restriction) ? Brand.midnight : Brand.cream)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity)
                                 .background(
-                                    selectedRestrictions.contains(restriction)
-                                        ? Brand.herbGreen.opacity(0.2)
-                                        : Color.clear,
-                                    in: .capsule
-                                )
-                                .overlay(
-                                    Capsule()
-                                        .strokeBorder(
-                                            selectedRestrictions.contains(restriction)
-                                                ? Brand.herbGreen : .secondary.opacity(0.3),
-                                            lineWidth: 1
-                                        )
+                                    selectedRestrictions.contains(restriction) ? Brand.herbGreen : Brand.surface,
+                                    in: Capsule()
                                 )
                         }
                         .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal, 24)
+                .padding(.bottom, 8)
             }
 
             Button {
@@ -337,38 +385,47 @@ struct OnboardingView: View {
             } label: {
                 Text("Next")
                     .font(.headline)
+                    .foregroundStyle(Brand.midnight)
                     .frame(maxWidth: .infinity)
-                    .padding()
+                    .padding(.vertical, 16)
+                    .background(Brand.warmTan, in: RoundedRectangle(cornerRadius: 14))
             }
-            .buttonStyle(.glass)
+            .buttonStyle(.plain)
             .padding(.horizontal, 32)
+            .padding(.top, 8)
 
-            Spacer()
-                .frame(height: 40)
+            Spacer().frame(height: 48)
         }
     }
 
     private var cuisinePage: some View {
-        VStack(spacing: 20) {
-            Spacer()
-                .frame(height: 40)
+        VStack(spacing: 0) {
+            Spacer().frame(height: 48)
 
-            Image(systemName: "globe.americas.fill")
-                .font(.system(size: 60))
-                .foregroundStyle(Brand.ingredientDairy)
+            ZStack {
+                Circle()
+                    .fill(Brand.warmTan.opacity(0.15))
+                    .frame(width: 80, height: 80)
+                Image(systemName: "globe.americas.fill")
+                    .font(.system(size: 32))
+                    .foregroundStyle(Brand.warmTan)
+            }
+            .padding(.bottom, 16)
 
             Text("Favorite Cuisines")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.system(size: 26, weight: .bold))
+                .foregroundStyle(Brand.cream)
+                .padding(.bottom, 8)
 
             Text("Pick cuisines you love. AI will prioritize these in recommendations.")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Brand.muted)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 40)
+                .padding(.bottom, 20)
 
             ScrollView {
-                LazyVGrid(columns: [.init(.adaptive(minimum: 100))], spacing: 8) {
+                LazyVGrid(columns: [.init(.adaptive(minimum: 100))], spacing: 10) {
                     ForEach(Cuisine.allCases, id: \.self) { cuisine in
                         Button {
                             if selectedCuisines.contains(cuisine) {
@@ -378,29 +435,21 @@ struct OnboardingView: View {
                             }
                         } label: {
                             Text(cuisine.rawValue.capitalized)
-                                .font(.caption)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(selectedCuisines.contains(cuisine) ? Brand.midnight : Brand.cream)
                                 .padding(.horizontal, 10)
-                                .padding(.vertical, 8)
+                                .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity)
                                 .background(
-                                    selectedCuisines.contains(cuisine)
-                                        ? Brand.warmTan.opacity(0.2)
-                                        : Color.clear,
-                                    in: .capsule
-                                )
-                                .overlay(
-                                    Capsule()
-                                        .strokeBorder(
-                                            selectedCuisines.contains(cuisine)
-                                                ? Brand.warmTan : .secondary.opacity(0.3),
-                                            lineWidth: 1
-                                        )
+                                    selectedCuisines.contains(cuisine) ? Brand.warmTan : Brand.surface,
+                                    in: Capsule()
                                 )
                         }
                         .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal, 24)
+                .padding(.bottom, 8)
             }
 
             Button {
@@ -408,16 +457,17 @@ struct OnboardingView: View {
             } label: {
                 Text("Get Started")
                     .font(.headline)
+                    .foregroundStyle(Brand.midnight)
                     .frame(maxWidth: .infinity)
-                    .padding()
+                    .padding(.vertical, 16)
+                    .background(Brand.herbGreen, in: RoundedRectangle(cornerRadius: 14))
             }
-            .buttonStyle(.glass)
-            .tint(.green)
+            .buttonStyle(.plain)
             .padding(.horizontal, 32)
+            .padding(.top, 8)
             .sensoryFeedback(.success, trigger: currentPage)
 
-            Spacer()
-                .frame(height: 40)
+            Spacer().frame(height: 48)
         }
     }
 

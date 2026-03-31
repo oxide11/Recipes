@@ -89,13 +89,25 @@ enum IngredientColor: String, Codable, Sendable {
 enum Season: String, Codable, CaseIterable, Sendable {
     case spring, summer, autumn, winter
 
-    static var current: Season {
+    static var current: Season { current(for: .northern) }
+
+    static func current(for hemisphere: Hemisphere) -> Season {
         let month = Calendar.current.component(.month, from: .now)
-        switch month {
-        case 3...5:  return .spring
-        case 6...8:  return .summer
-        case 9...11: return .autumn
-        default:     return .winter
+        switch hemisphere {
+        case .northern:
+            switch month {
+            case 3...5:  return .spring
+            case 6...8:  return .summer
+            case 9...11: return .autumn
+            default:     return .winter
+            }
+        case .southern:
+            switch month {
+            case 3...5:  return .autumn
+            case 6...8:  return .winter
+            case 9...11: return .spring
+            default:     return .summer
+            }
         }
     }
 }
