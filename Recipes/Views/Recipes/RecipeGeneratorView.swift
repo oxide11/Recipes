@@ -5,6 +5,8 @@ import PhotosUI
 // MARK: - AI Recipe Generator View
 
 struct RecipeGeneratorView: View {
+    var initialCuisine: Cuisine? = nil
+
     @Environment(AIServiceRouter.self) private var aiRouter
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -47,6 +49,9 @@ struct RecipeGeneratorView: View {
 
     // Describe mode
     @State private var descriptionInput = ""
+
+    // Optional pre-fill (e.g. from seasonal ingredient tap)
+    var initialIngredient: String? = nil
 
     var body: some View {
         NavigationStack {
@@ -158,6 +163,14 @@ struct RecipeGeneratorView: View {
                 }
             }
             .onAppear {
+                if let ingredient = initialIngredient {
+                    mode = .describe
+                    descriptionInput = "Generate a recipe that features \(ingredient.lowercased()) as a key ingredient."
+                }
+                if let cuisine = initialCuisine {
+                    selectedCuisine = cuisine
+                    mode = .describe
+                }
                 guard !hasLoadedProfile, let profile else { return }
                 dietaryRestrictions = Set(profile.dietaryRestrictions)
                 hasLoadedProfile = true

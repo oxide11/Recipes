@@ -16,13 +16,14 @@ struct RecipeImportView: View {
     @State private var recipeCodeText = ""
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var photoData: Data?
-    @State private var showingPhotoDialog = false
     @State private var showingCamera = false
     @State private var showingPhotoLibrary = false
     @State private var cameraImage: UIImage?
+    @State private var showingBrowser = false
 
     @State private var ingestionService: RecipeIngestionService?
     @State private var result: RecipeIngestionResult?
+    @State private var selectedDietaryTags: Set<DietaryRestriction> = []
     @State private var errorMessage: String?
     @State private var isProcessing = false
     @State private var showingPreview = false
@@ -58,30 +59,29 @@ struct RecipeImportView: View {
             .pickerStyle(.segmented)
             .listRowBackground(Color.clear)
 
-            sourceInputSection
-            Section { importButton }
+            if result == nil {
+                sourceInputSection
+                Section { importButton }
+            }
             errorSection
             if let result { importPreviewSection(result) }
-        }
-        .confirmationDialog("Add Photo", isPresented: $showingPhotoDialog) {
-            Button("Take Photo") { showingCamera = true }
-            Button("Choose from Library") { showingPhotoLibrary = true }
-            Button("Cancel", role: .cancel) {}
         }
         .fullScreenCover(isPresented: $showingCamera) {
             CameraPicker(image: $cameraImage).ignoresSafeArea()
         }
         .onChange(of: cameraImage) {
             if let img = cameraImage {
-                photoData = img.jpegData(compressionQuality: 0.8)
+                photoData = img.jpegData(compressionQuality: 0.5)
                 cameraImage = nil
             }
         }
         .photosPicker(isPresented: $showingPhotoLibrary, selection: $selectedPhoto, matching: .images)
         .onChange(of: selectedPhoto) { _, newItem in
             Task {
-                if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                    photoData = data
+                if let data = try? await newItem?.loadTransferable(type: Data.self),
+                   let image = UIImage(data: data) {
+                    // Always convert to JPEG — library photos may be HEIC
+                    photoData = image.jpegData(compressionQuality: 0.5)
                 }
             }
         }
@@ -120,7 +120,20 @@ struct RecipeImportView: View {
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
 
-            Text("Supports most recipe websites. We'll extract the recipe automatically.")
+            Button {
+                showingBrowser = true
+            } label: {
+                Label("Browse for a Recipe", systemImage: "globe")
+            }
+            .sheet(isPresented: $showingBrowser) {
+                RecipeBrowserView { importedURL in
+                    urlString = importedURL
+                    selectedTab = .url
+                    Task { await performImport(urlOverride: importedURL) }
+                }
+            }
+
+            Text("Paste a URL above, or browse the web to find one.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -138,20 +151,39 @@ struct RecipeImportView: View {
     }
 
     private var photoInputSection: some View {
-        let hasPhoto = photoData != nil
-        return Section("Recipe Photo") {
-            Button {
-                showingPhotoDialog = true
-            } label: {
-                if hasPhoto {
-                    Label("Photo Selected", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                } else {
-                    Label("Choose Photo", systemImage: "photo.on.rectangle")
+        Section("Recipe Photo") {
+            if let photoData, let image = UIImage(data: photoData) {
+                HStack {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    Text("Photo ready to import")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button(role: .destructive) {
+                        self.photoData = nil
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.red)
+                    }
+                }
+            } else {
+                Button {
+                    showingCamera = true
+                } label: {
+                    Label("Take Photo", systemImage: "camera")
+                }
+
+                Button {
+                    showingPhotoLibrary = true
+                } label: {
+                    Label("Choose from Library", systemImage: "photo.on.rectangle")
                 }
             }
 
-            Text("Take a photo of a recipe card, cookbook page, or screenshot.")
+            Text("Photograph a recipe card, cookbook page, or handwritten recipe.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -181,6 +213,7 @@ struct RecipeImportView: View {
 
     // MARK: - Preview
 
+    @ViewBuilder
     private func importPreviewSection(_ result: RecipeIngestionResult) -> some View {
         Section("Preview") {
             VStack(alignment: .leading, spacing: 8) {
@@ -211,11 +244,66 @@ struct RecipeImportView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+        }
 
-            Button("Save to Recipes") {
-                saveImportedRecipe(result)
+        Section {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Dietary Tags")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                Text("Tap to add or remove. We've made our best guess.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                FlowLayout(spacing: 8) {
+                    ForEach(DietaryRestriction.allCases, id: \.self) { tag in
+                        let selected = selectedDietaryTags.contains(tag)
+                        Button {
+                            if selected {
+                                selectedDietaryTags.remove(tag)
+                            } else {
+                                selectedDietaryTags.insert(tag)
+                            }
+                        } label: {
+                            Text(tag.displayName)
+                                .font(.caption)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(selected ? Color.green.opacity(0.2) : Color.secondary.opacity(0.12), in: Capsule())
+                                .foregroundStyle(selected ? .green : .secondary)
+                                .overlay(Capsule().strokeBorder(selected ? Color.green.opacity(0.5) : Color.clear, lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
             }
-            .buttonStyle(.glass)
+            .padding(.vertical, 4)
+        }
+
+        Section {
+            Button {
+                saveImportedRecipe(result)
+            } label: {
+                Text("Add to My Recipes")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.green)
+            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 4, trailing: 16))
+
+            Button("Start Over") {
+                self.result = nil
+                selectedDietaryTags = []
+                urlString = ""
+                pastedText = ""
+                photoData = nil
+                recipeCodeText = ""
+            }
+            .frame(maxWidth: .infinity)
+            .foregroundStyle(.secondary)
+            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 8, trailing: 16))
         }
     }
 
@@ -224,7 +312,7 @@ struct RecipeImportView: View {
     @ViewBuilder
     private var importButton: some View {
         Button {
-            Task { await performImport() }
+            Task { await performImport(urlOverride: nil) }
         } label: {
             HStack {
                 Spacer()
@@ -250,7 +338,7 @@ struct RecipeImportView: View {
         }
     }
 
-    private func performImport() async {
+    private func performImport(urlOverride: String? = nil) async {
         guard let service = ingestionService else { return }
 
         isProcessing = true
@@ -260,7 +348,8 @@ struct RecipeImportView: View {
         do {
             switch selectedTab {
             case .url:
-                guard let url = URL(string: urlString) else {
+                let target = urlOverride ?? urlString
+                guard let url = URL(string: target) else {
                     errorMessage = "Invalid URL."
                     isProcessing = false
                     return
@@ -282,12 +371,33 @@ struct RecipeImportView: View {
         }
 
         isProcessing = false
+
+        // Seed dietary tags from AI detection
+        if let r = result {
+            let detected = (r.dietaryInfo ?? []).compactMap { info in
+                DietaryRestriction.allCases.first {
+                    $0.rawValue.lowercased() == info.lowercased()
+                        .replacingOccurrences(of: "-", with: "")
+                        .replacingOccurrences(of: " ", with: "")
+                }
+            }
+            selectedDietaryTags = Set(detected)
+        }
     }
 
     private func saveImportedRecipe(_ result: RecipeIngestionResult) {
         guard let service = ingestionService else { return }
         let recipe = service.convertToRecipe(result)
+        recipe.dietaryRestrictions = Array(selectedDietaryTags)
+        for ingredient in recipe.ingredients {
+            modelContext.insert(ingredient)
+        }
         modelContext.insert(recipe)
-        dismiss()
+        do {
+            try modelContext.save()
+            dismiss()
+        } catch {
+            errorMessage = "Couldn't save recipe: \(error.localizedDescription)"
+        }
     }
 }

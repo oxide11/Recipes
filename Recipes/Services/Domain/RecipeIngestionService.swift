@@ -206,6 +206,31 @@ final class RecipeIngestionService {
             }
         }
 
+        // Derive a human-readable source name
+        let sourceName: String?
+        let sourceURL: String?
+        switch result.source ?? "" {
+        case let s where s.hasPrefix("http"):
+            sourceURL = s
+            sourceName = URL(string: s).flatMap { url in
+                url.host.map { host in
+                    host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
+                }
+            }
+        case "image":
+            sourceURL = nil
+            sourceName = "Photo Import"
+        case "text":
+            sourceURL = nil
+            sourceName = "Text Import"
+        case "recipe-as-code":
+            sourceURL = nil
+            sourceName = "Recipe Code"
+        default:
+            sourceURL = nil
+            sourceName = nil
+        }
+
         return Recipe(
             title: result.title,
             cuisine: cuisine,
@@ -216,7 +241,8 @@ final class RecipeIngestionService {
             directions: directions,
             nutritionalInfo: nutritionalInfo,
             dietaryRestrictions: dietaryRestrictions,
-            sourceURL: result.source
+            sourceURL: sourceURL,
+            sourceName: sourceName
         )
     }
 

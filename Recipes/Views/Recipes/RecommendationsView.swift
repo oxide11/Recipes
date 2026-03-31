@@ -109,29 +109,52 @@ struct RecommendationsView: View {
 
 struct RecommendationCard: View {
     let recommendation: RecommendationAgent.Recommendation
+    @State private var showingGenerator = false
+
+    private var cuisineMatch: Cuisine? {
+        guard let suggestion = recommendation.cuisineSuggestion else { return nil }
+        return Cuisine.allCases.first {
+            $0.rawValue.lowercased() == suggestion.lowercased()
+        }
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(recommendation.title)
-                .font(.subheadline)
-                .fontWeight(.semibold)
+        Button {
+            showingGenerator = true
+        } label: {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(recommendation.title)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
 
-            Text(recommendation.reason)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
+                Text(recommendation.reason)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
 
-            if let cuisine = recommendation.cuisineSuggestion {
-                Text(cuisine.capitalized)
-                    .font(.caption2)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(.tint.opacity(0.1), in: .capsule)
+                if let cuisine = recommendation.cuisineSuggestion {
+                    Text(cuisine.capitalized)
+                        .font(.caption2)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(.tint.opacity(0.1), in: .capsule)
+                }
             }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .glassCard()
+            .padding(.horizontal)
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .glassCard()
-        .padding(.horizontal)
+        .buttonStyle(.plain)
+        .sheet(isPresented: $showingGenerator) {
+            RecipeGeneratorView(initialCuisine: cuisineMatch)
+        }
     }
 }

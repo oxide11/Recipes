@@ -566,7 +566,7 @@ struct DashboardView: View {
                 }
             }
 
-            Text("Tap an ingredient to find matching recipes")
+            Text("Tap an ingredient to find something to make")
                 .font(.miseMeta)
                 .foregroundStyle(Brand.muted)
         }
@@ -631,6 +631,7 @@ struct SeasonalRecipesView: View {
     let ingredient: String
     let recipes: [Recipe]
     @Environment(\.dismiss) private var dismiss
+    @State private var showingGenerator = false
 
     private var matchingRecipes: [Recipe] {
         recipes.filter { recipe in
@@ -642,7 +643,7 @@ struct SeasonalRecipesView: View {
         NavigationStack {
             Group {
                 if matchingRecipes.isEmpty {
-                    VStack(spacing: 16) {
+                    VStack(spacing: 20) {
                         Spacer()
                         Image(systemName: "leaf")
                             .font(.system(size: 48))
@@ -650,12 +651,27 @@ struct SeasonalRecipesView: View {
                         Text("No recipes with \(ingredient.capitalized)")
                             .font(.miseHeading)
                             .foregroundStyle(Brand.cream)
-                        Text("Add a recipe that uses \(ingredient.lowercased()) to see it here.")
+                        Text("\(ingredient.capitalized) is at its best right now — let's make something delicious with it.")
                             .font(.miseBody)
                             .foregroundStyle(Brand.muted)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
+                        Button {
+                            showingGenerator = true
+                        } label: {
+                            Label("Let's Cook With It", systemImage: "sparkles")
+                                .font(.headline)
+                                .foregroundStyle(Brand.midnight)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(Brand.herbGreen, in: RoundedRectangle(cornerRadius: 14))
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 40)
                         Spacer()
+                    }
+                    .sheet(isPresented: $showingGenerator) {
+                        RecipeGeneratorView(initialIngredient: ingredient)
                     }
                 } else {
                     List(matchingRecipes) { recipe in
@@ -749,7 +765,7 @@ struct QuickMealsView: View {
 
 // MARK: - Flow Layout (for seasonal tags)
 
-private struct FlowLayout: Layout {
+struct FlowLayout: Layout {
     var spacing: CGFloat = 8
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {

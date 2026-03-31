@@ -248,6 +248,7 @@ final class Recipe {
     var dietaryRestrictions: [DietaryRestriction]
     var tags: [String]
     var sourceURL: String?
+    var sourceName: String?
     var sourceMarkdown: String?
     var isFavorite: Bool
     var dateCreated: Date
@@ -306,6 +307,7 @@ final class Recipe {
         dietaryRestrictions: [DietaryRestriction] = [],
         tags: [String] = [],
         sourceURL: String? = nil,
+        sourceName: String? = nil,
         sourceMarkdown: String? = nil
     ) {
         self.id = UUID()
@@ -328,6 +330,7 @@ final class Recipe {
         self.dietaryRestrictions = dietaryRestrictions
         self.tags = tags
         self.sourceURL = sourceURL
+        self.sourceName = sourceName
         self.sourceMarkdown = sourceMarkdown
         self.isFavorite = false
         self.dateCreated = .now

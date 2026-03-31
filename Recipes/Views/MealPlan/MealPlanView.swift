@@ -920,6 +920,7 @@ struct MultiRecipeCookingView: View {
     @State private var stepTimerTasks: [Int: Task<Void, Never>] = [:]
     @State private var checkedIngredients: [Int: Set<String>] = [:]
     @State private var isVoiceEnabled = true
+    @State private var lastSpokenRecipeIndex: Int? = nil
     private let synthesizer = AVSpeechSynthesizer()
 
     /// Accent colors for distinguishing recipes — up to 5.
@@ -1337,7 +1338,13 @@ struct MultiRecipeCookingView: View {
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .voicePrompt, options: .duckOthers)
         try? AVAudioSession.sharedInstance().setActive(true)
 
-        var text = "\(step.recipeTitle). Step \(step.originalStepNumber). \(step.instruction)"
+        let stepPosition = currentStepIndex + 1
+        let recipeChanged = lastSpokenRecipeIndex != step.recipeIndex
+        lastSpokenRecipeIndex = step.recipeIndex
+
+        var text = recipeChanged
+            ? "\(step.recipeTitle). Step \(stepPosition). \(step.instruction)"
+            : "Step \(stepPosition). \(step.instruction)"
         if let note = step.parallelNote {
             text = "\(note) \(text)"
         }

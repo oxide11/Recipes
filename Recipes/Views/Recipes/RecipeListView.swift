@@ -178,10 +178,7 @@ struct RecipeListView: View {
             }
             .task {
                 updateNoWasteMatches()
-                if !hasLoadedProfile, let profile = profiles.first {
-                    selectedDietaryRestrictions = Set(profile.dietaryRestrictions)
-                    hasLoadedProfile = true
-                }
+                hasLoadedProfile = true
             }
             .onChange(of: recipes.count) { updateNoWasteMatches() }
             .onChange(of: pantryItems.count) { updateNoWasteMatches() }
@@ -328,11 +325,11 @@ struct RecipeListView: View {
                         Image(systemName: activeFilterCount > 0
                               ? "line.3.horizontal.decrease.circle.fill"
                               : "line.3.horizontal.decrease.circle")
-                        Text("Filters")
+                        Text(activeFilterCount > 0 ? "Filters (\(activeFilterCount))" : "Filters")
                     }
                     .font(.caption)
+                    .foregroundStyle(activeFilterCount > 0 ? .primary : .secondary)
                 }
-                .badge(activeFilterCount)
             }
         }
         .confirmationDialog(

@@ -276,28 +276,41 @@ struct OnboardingView: View {
             .padding(.horizontal, 32)
             .padding(.bottom, 20)
 
-            // Cooking level chips
-            VStack(alignment: .leading, spacing: 8) {
+            // Cooking level selection
+            VStack(alignment: .leading, spacing: 10) {
                 Text("Cooking level")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(Brand.muted)
                     .padding(.horizontal, 4)
-                HStack(spacing: 8) {
-                    ForEach(RecipeDifficulty.allCases, id: \.self) { level in
+
+                let levels: [(RecipeDifficulty, String, String)] = [
+                    (.beginner,     "🌱", "Beginner"),
+                    (.intermediate, "🍳", "Intermediate"),
+                    (.advanced,     "👨‍🍳", "Advanced"),
+                    (.expert,       "⭐", "Expert"),
+                ]
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                    ForEach(levels, id: \.0) { level, emoji, label in
                         Button {
                             skillLevel = level
                         } label: {
-                            Text(level.rawValue.capitalized)
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(skillLevel == level ? Brand.midnight : Brand.cream)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                                .padding(.vertical, 10)
-                                .frame(maxWidth: .infinity)
-                                .background(
-                                    skillLevel == level ? Brand.warmTan : Brand.surface,
-                                    in: Capsule()
-                                )
+                            VStack(spacing: 6) {
+                                Text(emoji)
+                                    .font(.system(size: 26))
+                                Text(label)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(skillLevel == level ? Brand.midnight : Brand.cream)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                skillLevel == level ? Brand.warmTan : Brand.surface,
+                                in: RoundedRectangle(cornerRadius: 14)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .strokeBorder(skillLevel == level ? Brand.warmTan : Color.clear, lineWidth: 2)
+                            )
                         }
                         .buttonStyle(.plain)
                     }
@@ -425,7 +438,7 @@ struct OnboardingView: View {
                 .padding(.bottom, 20)
 
             ScrollView {
-                LazyVGrid(columns: [.init(.adaptive(minimum: 100))], spacing: 10) {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                     ForEach(Cuisine.allCases, id: \.self) { cuisine in
                         Button {
                             if selectedCuisines.contains(cuisine) {
@@ -436,6 +449,8 @@ struct OnboardingView: View {
                         } label: {
                             Text(cuisine.rawValue.capitalized)
                                 .font(.system(size: 14, weight: .medium))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.85)
                                 .foregroundStyle(selectedCuisines.contains(cuisine) ? Brand.midnight : Brand.cream)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 10)
