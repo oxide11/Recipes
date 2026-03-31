@@ -36,8 +36,9 @@ struct MealPlanView: View {
     private func ensurePlan() {
         guard activePlan == nil else { return }
         let year = calendar.component(.year, from: selectedDate)
-        guard let start = calendar.date(from: DateComponents(year: year, month: 1, day: 1)),
-              let end = calendar.date(from: DateComponents(year: year + 1, month: 12, day: 31))
+        guard
+            let start = calendar.date(from: DateComponents(year: year, month: 1, day: 1)),
+            let end   = calendar.date(from: DateComponents(year: year + 1, month: 12, day: 31))
         else { return }
         modelContext.insert(MealPlan(name: "My Meals", startDate: start, endDate: end))
     }
@@ -536,6 +537,16 @@ struct WeekMealView: View {
     let allMeals: [PlannedMeal]
     let weekDays: [Date]
 
+    @State private var showingPrepList = false
+
+    private var weekMealsWithRecipes: [PlannedMeal] {
+        weekDays.flatMap { day in
+            allMeals.filter {
+                Calendar.current.isDate($0.date, inSameDayAs: day) && $0.recipe != nil
+            }
+        }
+    }
+
     private func meals(for day: Date) -> [PlannedMeal] {
         allMeals
             .filter { Calendar.current.isDate($0.date, inSameDayAs: day) }
@@ -575,6 +586,33 @@ struct WeekMealView: View {
                         .miseSectionHeader()
                 }
             }
+        }
+        .safeAreaInset(edge: .bottom) {
+            if !weekMealsWithRecipes.isEmpty {
+                Button {
+                    showingPrepList = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "frying.pan.fill")
+                        Text("Week Prep List")
+                            .font(.system(size: 15, weight: .semibold))
+                    }
+                    .foregroundStyle(Brand.midnight)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Brand.warmTan, in: RoundedRectangle(cornerRadius: 14))
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 8)
+                .background(.ultraThinMaterial)
+            }
+        }
+        .sheet(isPresented: $showingPrepList) {
+            MealPrepView(
+                meals: weekMealsWithRecipes,
+                date: weekDays.first ?? .now,
+                weekEndDate: weekDays.last
+            )
         }
     }
 }

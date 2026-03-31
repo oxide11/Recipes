@@ -518,41 +518,41 @@ struct RecipeRow: View {
     let recipe: Recipe
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(recipe.title)
                     .font(.system(size: 14, weight: .medium))
                     .tracking(-0.2)
                     .foregroundStyle(Brand.cream)
 
-                Spacer()
-
-                if recipe.isFavorite || recipe.isAutoFavorite {
-                    Image(systemName: "heart")
-                        .foregroundStyle(Brand.spiceRed)
-                        .font(.caption)
-                }
-            }
-
-            HStack(spacing: 4) {
-                Image(systemName: "clock")
-                Text(recipe.formattedDuration)
-                Text("·").opacity(0.5)
-                Image(systemName: "fork.knife")
-                Text(recipe.cuisine.rawValue.capitalized)
-                if recipe.cookCount > 0 {
+                HStack(spacing: 4) {
+                    Image(systemName: "clock")
+                    Text(recipe.formattedDuration)
                     Text("·").opacity(0.5)
-                    Image(systemName: "flame")
-                    Text("Cooked \(recipe.cookCount)×")
+                    Image(systemName: "fork.knife")
+                    Text(recipe.cuisine.rawValue.capitalized)
+                    if recipe.cookCount > 0 {
+                        Text("·").opacity(0.5)
+                        Image(systemName: "flame")
+                        Text("Cooked \(recipe.cookCount)×")
+                    }
+                }
+                .font(.miseMeta)
+                .foregroundStyle(Brand.muted)
+
+                if !recipe.variations.isEmpty {
+                    Text("\(recipe.variations.count) variation\(recipe.variations.count == 1 ? "" : "s")")
+                        .font(.miseMeta)
+                        .foregroundStyle(Brand.muted.opacity(0.6))
                 }
             }
-            .font(.miseMeta)
-            .foregroundStyle(Brand.muted)
 
-            if !recipe.variations.isEmpty {
-                Text("\(recipe.variations.count) variation\(recipe.variations.count == 1 ? "" : "s")")
-                    .font(.miseMeta)
-                    .foregroundStyle(Brand.muted.opacity(0.6))
+            Spacer()
+
+            if recipe.isFavorite || recipe.isAutoFavorite {
+                Image(systemName: "heart.fill")
+                    .foregroundStyle(Brand.spiceRed)
+                    .font(.caption)
             }
         }
         .padding(.vertical, 4)

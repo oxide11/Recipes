@@ -98,9 +98,23 @@ struct RecipeDirection: Codable, Hashable, Identifiable, Sendable {
 
 /// References an ingredient with its measurement inline in a direction step.
 struct DirectionIngredientRef: Codable, Hashable, Sendable, Identifiable {
-    var id: String { ingredientName }
+    var id: UUID
     var ingredientName: String
     var amount: IngredientAmount
+
+    init(ingredientName: String, amount: IngredientAmount) {
+        self.id = UUID()
+        self.ingredientName = ingredientName
+        self.amount = amount
+    }
+
+    // Backwards-compatible decode: older records have no `id` field
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = (try? container.decode(UUID.self, forKey: .id)) ?? UUID()
+        self.ingredientName = try container.decode(String.self, forKey: .ingredientName)
+        self.amount = try container.decode(IngredientAmount.self, forKey: .amount)
+    }
 }
 
 // MARK: - Safe Cooking Temperature

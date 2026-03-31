@@ -139,10 +139,32 @@ struct IngredientAmount: Codable, Hashable, Sendable {
     var unit: MeasurementUnit
 
     var displayString: String {
-        let formatted = quantity.truncatingRemainder(dividingBy: 1) == 0
-            ? String(format: "%.0f", quantity)
-            : String(format: "%.1f", quantity)
-        return "\(formatted) \(unit.rawValue)"
+        "\(Self.formatQuantity(quantity)) \(unit.rawValue)"
+    }
+
+    static func formatQuantity(_ quantity: Double) -> String {
+        let whole = Int(quantity)
+        let fraction = quantity - Double(whole)
+
+        // Common fractions with tolerance
+        let fractions: [(value: Double, symbol: String)] = [
+            (1.0/8,  "⅛"), (1.0/4,  "¼"), (1.0/3,  "⅓"),
+            (3.0/8,  "⅜"), (1.0/2,  "½"), (5.0/8,  "⅝"),
+            (2.0/3,  "⅔"), (3.0/4,  "¾"), (7.0/8,  "⅞")
+        ]
+        let tolerance = 0.04
+
+        if fraction < tolerance {
+            // Whole number
+            return "\(whole)"
+        }
+
+        if let match = fractions.first(where: { abs(fraction - $0.value) < tolerance }) {
+            return whole > 0 ? "\(whole)\(match.symbol)" : match.symbol
+        }
+
+        // Fallback to 1 decimal place
+        return String(format: "%.1f", quantity)
     }
 }
 

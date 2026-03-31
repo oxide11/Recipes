@@ -53,10 +53,10 @@ final class PlannedMeal {
     var mealType: MealType
     var date: Date
 
-    @Relationship
+    @Relationship(deleteRule: .nullify)
     var recipe: Recipe?
 
-    @Relationship
+    @Relationship(deleteRule: .nullify)
     var variation: RecipeVariation?
 
     var servings: Int

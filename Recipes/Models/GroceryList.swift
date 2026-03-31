@@ -87,7 +87,7 @@ final class GroceryList {
     @Relationship(deleteRule: .cascade)
     var items: [GroceryItem]
 
-    @Relationship
+    @Relationship(deleteRule: .nullify)
     var mealPlan: MealPlan?
 
     @Relationship(deleteRule: .nullify)
@@ -133,7 +133,7 @@ final class GroceryReceipt {
     var totalAmount: Double
     var items: [ReceiptLineItem]
 
-    @Relationship
+    @Relationship(deleteRule: .nullify)
     var groceryList: GroceryList?
 
     init(storeName: String? = nil, date: Date = .now, totalAmount: Double = 0) {
