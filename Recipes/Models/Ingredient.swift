@@ -121,7 +121,7 @@ enum MeasurementUnit: String, Codable, CaseIterable, Sendable {
     // Weight
     case ounce, pound, gram, kilogram
     // Count
-    case piece, pinch, dash, bunch, clove, slice, whole
+    case piece, pinch, dash, bunch, clove, slice, whole, can
     // Unquantified
     case asNeeded
     // Temperature

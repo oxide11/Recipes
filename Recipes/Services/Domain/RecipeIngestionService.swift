@@ -60,6 +60,10 @@ final class RecipeIngestionService {
           "nutritionPerServing": {"calories": 350, "proteinGrams": 12, "carbsGrams": 45, "fatGrams": 14}
         }
 
+        Important: For canned/packaged goods like "1 (14 ounce) can sweetened condensed milk", \
+        use the container count as the quantity — amount should be "1 can" and name "sweetened condensed milk". \
+        Never use the ounce count as the ingredient quantity.
+
         Webpage content:
         \(truncated)
         """
@@ -96,6 +100,10 @@ final class RecipeIngestionService {
           "dietaryInfo": [],
           "nutritionPerServing": {"calories": 350, "proteinGrams": 12, "carbsGrams": 45, "fatGrams": 14}
         }
+
+        Important: For canned/packaged goods like "1 (14 ounce) can sweetened condensed milk", \
+        use the container count as the quantity — amount should be "1 can" and name "sweetened condensed milk". \
+        Never use the ounce count as the ingredient quantity.
 
         Recipe text:
         \(text)
@@ -135,6 +143,10 @@ final class RecipeIngestionService {
               "dietaryInfo": [],
               "nutritionPerServing": null
             }
+
+            Important: For canned/packaged goods like "1 (14 ounce) can sweetened condensed milk", \
+            use the container count as the quantity — amount should be "1 can" and name "sweetened condensed milk". \
+            Never use the ounce count as the ingredient quantity.
             """
         )
 
@@ -258,6 +270,15 @@ final class RecipeIngestionService {
             sourceURL: sourceURL,
             sourceName: sourceName
         )
+
+        // Add domain as a tag for URL imports
+        if let host = sourceURL.flatMap({ URL(string: $0)?.host }) {
+            let strippedHost = host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
+            let components = strippedHost.components(separatedBy: ".")
+            if components.count >= 2, let domain = components.dropLast().last {
+                recipe.tags.append(domain)
+            }
+        }
 
         // Fetch and attach the recipe image if one was found
         if let imageURLString = result.imageURL,
@@ -452,6 +473,7 @@ final class RecipeIngestionService {
 
     /// Parse a full ingredient string (e.g. from JSON-LD) into name, amount, and preparation.
     /// Handles strings like "4 cloves garlic, pressed or minced" or "½ teaspoon garlic powder".
+    /// Also handles "1 (14 ounce) can sweetened condensed milk" → amount="1 can", name="sweetened condensed milk".
     private func parseFullIngredientString(_ str: String) -> RecipeIngestionResult.ParsedIngredient {
         var s = str.trimmingCharacters(in: .whitespaces)
 
@@ -463,14 +485,26 @@ final class RecipeIngestionService {
             s = String(s[..<commaIdx]).trimmingCharacters(in: .whitespaces)
         }
 
+        // Strip parenthetical size descriptors like "(14 ounce)" or "(12 fluid ounce)"
+        s = s.replacingOccurrences(of: #"\([^)]*\)"#, with: "", options: .regularExpression)
+             .trimmingCharacters(in: .whitespaces)
+
         // Try to pull a leading quantity token (number or fraction)
         var tokens = s.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
         var amountTokens: [String] = []
 
         if let first = tokens.first, parseFraction(first) != nil {
             amountTokens.append(tokens.removeFirst())
-            // Optional unit token right after the number
-            if let unit = tokens.first, matchUnit(unit.lowercased()) != nil {
+            // Mixed number: "1 1/2" — next token is also a fraction
+            if let next = tokens.first, parseFraction(next) != nil, next.contains("/") {
+                amountTokens.append(tokens.removeFirst())
+            }
+            // Optional unit token right after the number (try two-word units first, e.g. "fluid ounce")
+            if tokens.count >= 2,
+               let _ = matchUnit("\(tokens[0]) \(tokens[1])".lowercased()) {
+                amountTokens.append(tokens.removeFirst())
+                amountTokens.append(tokens.removeFirst())
+            } else if let unit = tokens.first, matchUnit(unit.lowercased()) != nil {
                 amountTokens.append(tokens.removeFirst())
             }
         }
@@ -553,7 +587,11 @@ final class RecipeIngestionService {
     // MARK: - Ingredient Parsing Helpers
 
     private func parseAmount(_ amountString: String) -> IngredientAmount {
-        let parts = amountString.trimmingCharacters(in: .whitespaces).components(separatedBy: .whitespaces)
+        // Strip parenthetical qualifiers like "(14 ounce)" from strings such as "1 (14 ounce) can"
+        let cleaned = amountString
+            .replacingOccurrences(of: #"\([^)]*\)"#, with: "", options: .regularExpression)
+            .trimmingCharacters(in: .whitespaces)
+        let parts = cleaned.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
 
         let joined = parts.joined(separator: " ").lowercased()
         guard !parts.isEmpty, parts[0] != "",
@@ -568,11 +606,23 @@ final class RecipeIngestionService {
         if let num = parseFraction(parts[0]) {
             quantity = num
             unitStartIndex = 1
+            // Mixed number: "1 1/2 cups" — combine whole + fraction parts
+            if parts.count > 1, let frac = parseFraction(parts[1]), parts[1].contains("/") {
+                quantity += frac
+                unitStartIndex = 2
+            }
         }
 
-        // Try to match unit
-        let unitString = parts[unitStartIndex...].joined(separator: " ").lowercased()
-        let unit = matchUnit(unitString) ?? .piece
+        // Try to match unit — fall back to shorter prefixes so "ounce can" matches "ounce"
+        let remainingParts = Array(parts[unitStartIndex...])
+        var unit: MeasurementUnit = .piece
+        for length in stride(from: remainingParts.count, through: 1, by: -1) {
+            let candidate = remainingParts.prefix(length).joined(separator: " ").lowercased()
+            if let matched = matchUnit(candidate) {
+                unit = matched
+                break
+            }
+        }
 
         return IngredientAmount(quantity: quantity, unit: unit)
     }
@@ -610,6 +660,12 @@ final class RecipeIngestionService {
             "clove": .clove, "cloves": .clove,
             "slice": .slice, "slices": .slice,
             "piece": .piece, "pieces": .piece, "whole": .whole,
+            "can": .can, "cans": .can,
+            "jar": .whole, "jars": .whole,
+            "bottle": .whole, "bottles": .whole,
+            "package": .whole, "packages": .whole, "pkg": .whole,
+            "stick": .whole, "sticks": .whole,
+            "fluid ounces": .fluidOunce,
         ]
 
         return unitMap[str]

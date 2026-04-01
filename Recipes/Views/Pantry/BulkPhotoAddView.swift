@@ -38,9 +38,6 @@ struct BulkPhotoAddView: View {
     @State private var mode: AddMode = .photo
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var selectedImage: UIImage?
-    @State private var showingPhotoDialog = false
-    @State private var showingCamera = false
-    @State private var showingPhotoLibrary = false
     @State private var identifiedItems: [IdentifiedItem] = []
     @State private var detectedStoreName: String = ""
     @State private var isAnalyzing = false
@@ -76,16 +73,14 @@ struct BulkPhotoAddView: View {
                             .frame(maxWidth: .infinity)
                     }
 
-                    let hasImage = selectedImage != nil
-                    Button {
-                        showingPhotoDialog = true
-                    } label: {
-                        Label(
-                            hasImage ? "Change Photo" : "Take or Choose a Photo",
-                            systemImage: "camera.viewfinder"
-                        )
-                        .frame(maxWidth: .infinity)
+                    PhotoPickerButton(selection: $selectedPhotoItem, hasPhoto: selectedImage != nil) { uiImage in
+                        selectedImage = uiImage
+                        identifiedItems = []
+                        detectedStoreName = ""
+                        didAnalyze = false
+                        errorMessage = nil
                     }
+                    .frame(maxWidth: .infinity)
                 } footer: {
                     Text(mode == .receipt
                          ? "Take a photo of your grocery receipt. The AI will extract food items and prices."
@@ -213,16 +208,6 @@ struct BulkPhotoAddView: View {
                     Button("Cancel") { dismiss() }
                 }
             }
-            .confirmationDialog("Add Photo", isPresented: $showingPhotoDialog) {
-                Button("Take Photo") { showingCamera = true }
-                Button("Choose from Library") { showingPhotoLibrary = true }
-                Button("Cancel", role: .cancel) {}
-            }
-            .fullScreenCover(isPresented: $showingCamera) {
-                CameraPicker(image: $selectedImage)
-                    .ignoresSafeArea()
-            }
-            .photosPicker(isPresented: $showingPhotoLibrary, selection: $selectedPhotoItem, matching: .images)
             .onChange(of: selectedPhotoItem) {
                 Task { await loadPhoto() }
             }

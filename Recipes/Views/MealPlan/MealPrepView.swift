@@ -202,7 +202,7 @@ struct MealPrepView: View {
         let tasks = indices.map { group.tasks[$0] }
         let allDone = tasks.allSatisfy(\.isCompleted)
         let totalAmount = combinedDisplay(tasks.map(\.amount))
-        let recipeNames = tasks.map(\.recipeName).uniqued().joined(separator: ", ")
+        let _ = tasks.map(\.recipeName).uniqued().joined(separator: ", ")
 
         // Use first task that has detail for the info button (all tasks same action, pick first with detail)
         let detailSource = tasks.first(where: { $0.detail != nil })

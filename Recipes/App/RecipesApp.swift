@@ -6,6 +6,7 @@ import SwiftData
 @main
 struct RecipesApp: App {
     @State private var aiRouter = AIServiceRouter()
+    @State private var timerDeepLink = TimerDeepLink()
 
     private static let schema = Schema([
         Recipe.self,
@@ -50,7 +51,9 @@ struct RecipesApp: App {
         WindowGroup {
             ContentView()
                 .environment(aiRouter)
+                .environment(timerDeepLink)
                 .preferredColorScheme(.dark)
+                .onOpenURL { timerDeepLink.handle($0) }
         }
         .modelContainer(Self.container)
     }

@@ -20,13 +20,15 @@ struct RecipeDetailView: View {
     @State private var isEstimatingNutrition = false
     @State private var nutritionEstimateError: String?
     @State private var selectedPhoto: PhotosPickerItem?
-    @State private var showingPhotoDialog = false
-    @State private var showingCamera = false
-    @State private var showingPhotoLibrary = false
+    @State private var showingAddPhoto = false
     @State private var isEditing = false
+    @State private var isReadyToShow = false
 
-    init(recipe: Recipe) {
+    var scrollToStep: Int? = nil
+
+    init(recipe: Recipe, scrollToStep: Int? = nil) {
         self.recipe = recipe
+        self.scrollToStep = scrollToStep
         _selectedServings = State(initialValue: recipe.servings)
     }
 
@@ -55,6 +57,7 @@ struct RecipeDetailView: View {
 
     var body: some View {
         ScrollView {
+            ScrollViewReader { proxy in
             VStack(alignment: .leading, spacing: 20) {
                 headerSection
                 photoGallerySection
@@ -73,7 +76,17 @@ struct RecipeDetailView: View {
                 cookingLogSection
             }
             .padding()
+            .opacity(isReadyToShow ? 1 : 0)
+            .task(id: scrollToStep) {
+                if let step = scrollToStep,
+                   let dir = recipe.directions.first(where: { $0.stepNumber == step }) {
+                    try? await Task.sleep(for: .milliseconds(100))
+                    proxy.scrollTo(dir.id, anchor: .top)
+                }
+                withAnimation(.easeIn(duration: 0.15)) { isReadyToShow = true }
+            }
             .animation(.snappy(duration: 0.25), value: isEditing)
+            } // ScrollViewReader
         }
         .navigationTitle(recipe.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -114,7 +127,7 @@ struct RecipeDetailView: View {
                             showingExport = true
                         }
                         Button {
-                            showingPhotoDialog = true
+                            showingAddPhoto = true
                         } label: {
                             Label("Add Photo", systemImage: "camera")
                         }
@@ -138,60 +151,69 @@ struct RecipeDetailView: View {
         .sheet(isPresented: $showingExport) {
             RecipeExportView(recipe: recipe)
         }
-        .confirmationDialog("Add Photo", isPresented: $showingPhotoDialog) {
-            Button("Take Photo") { showingCamera = true }
-            Button("Choose from Library") { showingPhotoLibrary = true }
-            Button("Cancel", role: .cancel) {}
-        }
-        .fullScreenCover(isPresented: $showingCamera) {
-            CameraPicker(image: Binding(
-                get: { nil },
-                set: { uiImage in
-                    if let data = uiImage?.jpegData(compressionQuality: 0.8) {
-                        recipe.photos.append(RecipePhoto(imageData: data))
-                    }
-                }
-            ))
-            .ignoresSafeArea()
-        }
-        .photosPicker(isPresented: $showingPhotoLibrary, selection: $selectedPhoto, matching: .images)
-        .onChange(of: selectedPhoto) { _, newItem in
-            Task {
-                if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                    let photo = RecipePhoto(imageData: data)
-                    recipe.photos.append(photo)
+        .background(
+            PhotoPickerButton(
+                selection: $selectedPhoto,
+                hasPhoto: !recipe.photos.isEmpty,
+                isPresented: $showingAddPhoto
+            ) { uiImage in
+                if let data = uiImage.jpegData(compressionQuality: 0.8) {
+                    recipe.photos.append(RecipePhoto(imageData: data))
                 }
             }
-        }
+            .task(id: selectedPhoto) {
+                if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) {
+                    recipe.photos.append(RecipePhoto(imageData: data))
+                }
+            }
+            .hidden()
+        )
     }
 
     // MARK: - Sections
 
+    /// All photos to show at the top: recipe photos + up to 3 most recent log photos.
+    private var galleryPhotos: [(photo: RecipePhoto, isLogPhoto: Bool)] {
+        let recipePhotos = recipe.photos.map { (photo: $0, isLogPhoto: false) }
+        let logPhotos = recipe.cookingLog
+            .sorted { $0.date > $1.date }
+            .compactMap(\.photo)
+            .prefix(3)
+            .map { (photo: $0, isLogPhoto: true) }
+        return recipePhotos + logPhotos
+    }
+
     @ViewBuilder
     private var photoGallerySection: some View {
-        if !recipe.photos.isEmpty {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Photos")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    Spacer()
-                    Text("\(recipe.photos.count)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
+        let photos = galleryPhotos
+        if !photos.isEmpty {
+            if photos.count == 1, let uiImage = UIImage(data: photos[0].photo.imageData) {
+                // Single photo: show centered and wider
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 200)
+                    .clipShape(.rect(cornerRadius: 12))
+            } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 12) {
-                        ForEach(recipe.photos) { photo in
-                            if let uiImage = UIImage(data: photo.imageData) {
+                        ForEach(photos, id: \.photo.id) { entry in
+                            if let uiImage = UIImage(data: entry.photo.imageData) {
                                 Image(uiImage: uiImage)
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)
                                     .frame(width: 200, height: 150)
                                     .clipShape(.rect(cornerRadius: 12))
                                     .overlay(alignment: .bottomTrailing) {
-                                        if let caption = photo.caption {
+                                        if entry.isLogPhoto {
+                                            Image(systemName: "flame.fill")
+                                                .font(.caption2)
+                                                .padding(6)
+                                                .background(in: .circle)
+                                                .glassEffect(.regular, in: .circle)
+                                                .padding(8)
+                                        } else if let caption = entry.photo.caption {
                                             Text(caption)
                                                 .font(.caption2)
                                                 .padding(4)
@@ -201,8 +223,10 @@ struct RecipeDetailView: View {
                                         }
                                     }
                                     .contextMenu {
-                                        Button("Delete", systemImage: "trash", role: .destructive) {
-                                            recipe.photos.removeAll { $0.id == photo.id }
+                                        if !entry.isLogPhoto {
+                                            Button("Delete", systemImage: "trash", role: .destructive) {
+                                                recipe.photos.removeAll { $0.id == entry.photo.id }
+                                            }
                                         }
                                     }
                             }
@@ -452,8 +476,10 @@ struct RecipeDetailView: View {
                         ingredientColorMap: ingredientColors,
                         ingredientCategoryMap: ingredientCategories,
                         recipeTitle: recipe.title,
+                        recipeID: recipe.id,
                         totalSteps: recipe.directions.count
                     )
+                    .id(direction.id)
                 }
             }
         }

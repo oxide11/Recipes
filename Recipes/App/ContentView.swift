@@ -5,6 +5,7 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(TimerDeepLink.self) private var timerDeepLink
     @State private var selectedTab: AppTab = .mise
     @State private var showingOnboarding = false
     @Query private var profiles: [UserProfile]
@@ -32,6 +33,9 @@ struct ContentView: View {
             }
         }
         .tabViewStyle(.sidebarAdaptable)
+        .onChange(of: timerDeepLink.pendingRecipeID) { _, newID in
+            if newID != nil { selectedTab = .recipes }
+        }
         .onAppear {
             if profiles.isEmpty {
                 showingOnboarding = true

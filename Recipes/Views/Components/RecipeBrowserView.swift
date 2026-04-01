@@ -140,6 +140,7 @@ struct RecipeBrowserView: View {
 // MARK: - Web View State
 
 @Observable
+@MainActor
 final class WebViewState {
     var currentURL: String = ""
     var isLoading: Bool = false

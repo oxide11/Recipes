@@ -93,6 +93,7 @@ enum MetricsCalculator {
             cuisineCounts[recipe.cuisine, default: 0] += recipe.cookCount
         }
         let topCuisines = cuisineCounts
+            .filter { $0.value > 0 }
             .map { CuisineUsage(cuisine: $0.key, count: $0.value) }
             .sorted { $0.count > $1.count }
 

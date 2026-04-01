@@ -6,7 +6,7 @@ import SwiftData
 struct RecipeListView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AIServiceRouter.self) private var aiRouter
-    @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
+    @Query(sort: \Recipe.title) private var recipes: [Recipe]
 
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
     @Query private var profiles: [UserProfile]
@@ -28,6 +28,10 @@ struct RecipeListView: View {
     @State private var showingTagManagement = false
     @State private var cachedNoWasteMatches: [NoWasteMatchingEngine.MatchResult] = []
     @State private var recipeToDelete: Recipe?
+    @Environment(TimerDeepLink.self) private var timerDeepLink
+    @State private var isShowingDeepLinkedRecipe = false
+    @State private var deepLinkedRecipe: Recipe? = nil
+    @State private var deepLinkedStep: Int? = nil
 
     private var activeFilterCount: Int {
         var count = 0
@@ -75,6 +79,11 @@ struct RecipeListView: View {
         if let mealType = selectedMealType {
             result = result.filter { $0.mealType == mealType }
         }
+        if !showFavoritesOnly {
+            let favs = result.filter { $0.isFavorite || $0.isAutoFavorite }
+            let rest = result.filter { !$0.isFavorite && !$0.isAutoFavorite }
+            result = favs + rest
+        }
         return result
     }
 
@@ -115,6 +124,20 @@ struct RecipeListView: View {
             }
             .navigationTitle("Recipes")
             .searchable(text: $searchText, prompt: "Search recipes...")
+            .navigationDestination(isPresented: $isShowingDeepLinkedRecipe) {
+                if let recipe = deepLinkedRecipe {
+                    RecipeDetailView(recipe: recipe, scrollToStep: deepLinkedStep)
+                }
+            }
+            .onChange(of: timerDeepLink.pendingRecipeID) { _, id in
+                guard let id else { return }
+                deepLinkedRecipe = recipes.first { $0.id == id }
+                if deepLinkedRecipe != nil {
+                    deepLinkedStep = timerDeepLink.pendingStep
+                    isShowingDeepLinkedRecipe = true
+                    timerDeepLink.clear()
+                }
+            }
             .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
@@ -565,22 +588,35 @@ struct RecipeCardCompact: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            RoundedRectangle(cornerRadius: 10)
-                .fill(.clear)
-                .frame(width: 130, height: 86)
-                .glassEffect(.regular, in: .rect(cornerRadius: 10))
-                .overlay {
-                    VStack(spacing: 4) {
-                        Image(systemName: "fork.knife")
-                            .font(.title3)
-                            .foregroundStyle(Brand.warmTan.opacity(0.7))
-                        if recipe.cookCount > 0 {
-                            Text("\(recipe.cookCount)×")
-                                .font(.miseMeta)
-                                .foregroundStyle(Brand.muted)
+            Group {
+                let firstPhoto = recipe.photos.first
+                    ?? recipe.cookingLog.sorted { $0.date > $1.date }.first?.photo
+                if let photo = firstPhoto,
+                   let uiImage = UIImage(data: photo.imageData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 130, height: 86)
+                        .clipShape(.rect(cornerRadius: 10))
+                } else {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(.clear)
+                        .frame(width: 130, height: 86)
+                        .glassEffect(.regular, in: .rect(cornerRadius: 10))
+                        .overlay {
+                            VStack(spacing: 4) {
+                                Image(systemName: "fork.knife")
+                                    .font(.title3)
+                                    .foregroundStyle(Brand.warmTan.opacity(0.7))
+                                if recipe.cookCount > 0 {
+                                    Text("\(recipe.cookCount)×")
+                                        .font(.miseMeta)
+                                        .foregroundStyle(Brand.muted)
+                                }
+                            }
                         }
-                    }
                 }
+            }
 
             Text(recipe.title)
                 .font(.system(size: 12, weight: .medium))

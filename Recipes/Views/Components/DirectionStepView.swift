@@ -10,8 +10,10 @@ struct DirectionStepView: View {
     var ingredientCategoryMap: [String: IngredientCategory] = [:]
 
     @State private var timerActive = false
-    @State private var remainingSeconds: Int = 0
-    @State private var timerTask: Task<Void, Never>?
+    @State private var isPaused = false
+    @State private var endDate: Date? = nil
+    @State private var pausedSeconds: Int = 0
+    @State private var liveActivity = CookingTimerLiveActivityManager()
     @State private var selectedConversion: DirectionIngredientRef?
     @State private var lookupIngredient: (name: String, category: IngredientCategory)?
 
@@ -105,78 +107,108 @@ struct DirectionStepView: View {
 
     // MARK: - Timer View
 
+    var recipeTitle: String = ""
+    var recipeID: UUID = UUID()
+    var totalSteps: Int = 1
+
     private func timerView(_ timer: TimerStep) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "timer")
-
+        VStack(alignment: .leading, spacing: 6) {
             if timerActive {
-                Text(formatTime(remainingSeconds))
-                    .monospacedDigit()
-                    .fontWeight(.semibold)
-
-                Button("Stop") {
-                    stopTimer()
+                // Countdown display
+                Group {
+                    if isPaused {
+                        Text(formatTime(pausedSeconds))
+                            .monospacedDigit()
+                    } else if let end = endDate {
+                        Text(end, style: .timer)
+                            .monospacedDigit()
+                    }
                 }
-                .buttonStyle(.glass)
-                .controlSize(.small)
+                .fontWeight(.semibold)
+                .foregroundStyle(isPaused ? Color.secondary : Color.orange)
+
+                HStack(spacing: 6) {
+                    Button(isPaused ? "Resume" : "Pause") {
+                        if isPaused { resumeTimer() } else { pauseTimer() }
+                    }
+                    .buttonStyle(.glass)
+                    .controlSize(.small)
+                    .tint(.orange)
+
+                    Button("Stop") { stopTimer() }
+                        .buttonStyle(.glass)
+                        .controlSize(.small)
+                        .tint(.red)
+                }
             } else {
+                // Duration stacked above start button
                 Text(timer.displayDuration)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.orange)
 
-                Button("Start Timer") {
+                Button {
                     startTimer(seconds: timer.durationSeconds)
+                } label: {
+                    Label("Start Timer", systemImage: "timer")
                 }
                 .buttonStyle(.glass)
                 .controlSize(.small)
+                .tint(.orange)
             }
         }
         .font(.caption)
-        .padding(8)
-        .background(.orange.opacity(0.1), in: .rect(cornerRadius: 8))
+        .task(id: endDate) {
+            guard let end = endDate, !isPaused else { return }
+            let interval = end.timeIntervalSinceNow
+            guard interval > 0 else {
+                timerActive = false
+                endDate = nil
+                await liveActivity.end()
+                return
+            }
+            try? await Task.sleep(for: .seconds(interval))
+            if !Task.isCancelled, !isPaused {
+                timerActive = false
+                endDate = nil
+                await liveActivity.end()
+            }
+        }
     }
 
-    @State private var timerStartTrigger = false
-    var recipeTitle: String = ""
-    var totalSteps: Int = 1
-
     private func startTimer(seconds: Int) {
-        remainingSeconds = seconds
+        endDate = Date().addingTimeInterval(Double(seconds))
         timerActive = true
-        timerStartTrigger.toggle()
-
-        // Start Live Activity on lock screen
-        CookingTimerLiveActivityManager.shared.startTimer(
+        isPaused = false
+        liveActivity.start(
             recipeTitle: recipeTitle,
-            totalCookTimeMinutes: seconds / 60,
+            recipeID: recipeID,
             stepNumber: direction.stepNumber,
             stepInstruction: direction.instruction,
             durationSeconds: seconds,
             totalSteps: totalSteps
         )
+    }
 
-        timerTask = Task {
-            while remainingSeconds > 0, !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(1))
-                remainingSeconds -= 1
+    private func pauseTimer() {
+        guard let end = endDate else { return }
+        pausedSeconds = max(0, Int(end.timeIntervalSinceNow))
+        isPaused = true
+        endDate = nil
+        Task { await liveActivity.pause() }
+    }
 
-                // Update Live Activity every 5 seconds
-                if remainingSeconds % 5 == 0 {
-                    await CookingTimerLiveActivityManager.shared.updateTimer(
-                        stepNumber: direction.stepNumber,
-                        stepInstruction: direction.instruction,
-                        remainingSeconds: remainingSeconds,
-                        totalSteps: totalSteps
-                    )
-                }
-            }
-            timerActive = false
-            await CookingTimerLiveActivityManager.shared.endTimer()
-        }
+    private func resumeTimer() {
+        endDate = Date().addingTimeInterval(Double(pausedSeconds))
+        isPaused = false
+        Task { await liveActivity.resume(remainingSeconds: pausedSeconds) }
     }
 
     private func stopTimer() {
-        timerTask?.cancel()
         timerActive = false
-        Task { await CookingTimerLiveActivityManager.shared.endTimer() }
+        isPaused = false
+        endDate = nil
+        pausedSeconds = 0
+        Task { await liveActivity.end() }
     }
 
     private var attributedInstruction: AttributedString {

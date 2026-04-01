@@ -26,6 +26,19 @@
 	<string>Recipes needs microphone access for voice-guided shopping so you can confirm items while your hands are full.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Recipes uses speech recognition for the guided shopping experience, allowing you to confirm items hands-free.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>recipes</string>
+			</array>
+			<key>CFBundleURLName</key>
+			<string>com.recipes.timer</string>
+		</dict>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 </dict>

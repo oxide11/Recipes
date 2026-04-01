@@ -41,6 +41,8 @@ struct PhotoPickerButton: View {
     @Binding var selection: PhotosPickerItem?
     let hasPhoto: Bool
 
+    /// Optionally trigger the picker from an external boolean (e.g. from a Menu item).
+    var isPresented: Binding<Bool>? = nil
     /// Called when a photo is taken directly with the camera.
     var onCameraImage: ((UIImage) -> Void)? = nil
 
@@ -72,6 +74,12 @@ struct PhotoPickerButton: View {
             if let img = cameraImage {
                 onCameraImage?(img)
                 cameraImage = nil
+            }
+        }
+        .onChange(of: isPresented?.wrappedValue ?? false) { _, triggered in
+            if triggered {
+                showingDialog = true
+                isPresented?.wrappedValue = false
             }
         }
     }

@@ -88,9 +88,12 @@ enum SeasonalAwarenessService {
     }
 
     /// Score a recipe based on how seasonal its ingredients are.
+    /// Only considers ingredients that exist in the seasonal database — pantry staples
+    /// and unknown ingredients are ignored so they don't inflate the score.
     static func seasonalityScore(ingredientNames: [String]) -> Double {
-        guard !ingredientNames.isEmpty else { return 0 }
-        let inSeasonCount = ingredientNames.filter { isInSeason($0) }.count
-        return Double(inSeasonCount) / Double(ingredientNames.count)
+        let known = ingredientNames.filter { seasonalLookup[$0.lowercased()] != nil }
+        guard !known.isEmpty else { return 0 }
+        let inSeasonCount = known.filter { isInSeason($0) }.count
+        return Double(inSeasonCount) / Double(known.count)
     }
 }

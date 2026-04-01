@@ -21,9 +21,6 @@ struct CookingLogEntryView: View {
     @State private var servingsCooked: Int
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var photoData: Data?
-    @State private var showingPhotoDialog = false
-    @State private var showingCamera = false
-    @State private var showingPhotoLibrary = false
     @State private var deductedItems: [PantryItem] = []
     @State private var showingDeductionResult = false
     @State private var didSave = false
@@ -65,16 +62,8 @@ struct CookingLogEntryView: View {
                 }
 
                 Section("Photo") {
-                    let hasPhoto = photoData != nil
-                    Button {
-                        showingPhotoDialog = true
-                    } label: {
-                        if hasPhoto {
-                            Label("Photo attached", systemImage: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
-                        } else {
-                            Label("Add a photo", systemImage: "camera")
-                        }
+                    PhotoPickerButton(selection: $selectedPhoto, hasPhoto: photoData != nil) { uiImage in
+                        photoData = uiImage.jpegData(compressionQuality: 0.8)
                     }
                 }
 
@@ -144,21 +133,6 @@ struct CookingLogEntryView: View {
                     Button("Save") { saveEntry() }
                 }
             }
-            .confirmationDialog("Add Photo", isPresented: $showingPhotoDialog) {
-                Button("Take Photo") { showingCamera = true }
-                Button("Choose from Library") { showingPhotoLibrary = true }
-                Button("Cancel", role: .cancel) {}
-            }
-            .fullScreenCover(isPresented: $showingCamera) {
-                CameraPicker(image: Binding(
-                    get: { nil },
-                    set: { uiImage in
-                        photoData = uiImage?.jpegData(compressionQuality: 0.8)
-                    }
-                ))
-                .ignoresSafeArea()
-            }
-            .photosPicker(isPresented: $showingPhotoLibrary, selection: $selectedPhoto, matching: .images)
             .task(id: selectedPhoto) {
                 if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) {
                     photoData = data

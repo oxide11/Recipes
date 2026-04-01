@@ -199,12 +199,14 @@ struct CookingTimerAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         var stepNumber: Int
         var stepInstruction: String
-        var remainingSeconds: Int
         var totalSteps: Int
+        /// Non-nil while the timer is counting down; nil when paused or ended.
+        var endDate: Date?
+        var isPaused: Bool
     }
 
     var recipeTitle: String
-    var totalCookTimeMinutes: Int
+    var recipeID: String   // UUID string — used for the widgetURL deep link
 }
 
 // MARK: - Live Activity View
@@ -231,22 +233,91 @@ struct CookingTimerLiveActivityView: View {
                 .lineLimit(2)
 
             HStack {
-                Image(systemName: "timer")
+                Image(systemName: context.state.isPaused ? "pause.circle" : "timer")
                     .foregroundStyle(WidgetBrand.warmTan)
-                Text(formatTime(context.state.remainingSeconds))
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .monospacedDigit()
+                if context.state.isPaused {
+                    Text("Paused")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundStyle(WidgetBrand.muted)
+                } else if let end = context.state.endDate {
+                    Text(end, style: .timer)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .monospacedDigit()
+                        .foregroundStyle(WidgetBrand.warmTan)
+                }
                 Spacer()
             }
         }
         .padding()
+        .widgetURL(deepLinkURL(for: context))
     }
 
-    private func formatTime(_ totalSeconds: Int) -> String {
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
-        return String(format: "%d:%02d", minutes, seconds)
+    private func deepLinkURL(for context: ActivityViewContext<CookingTimerAttributes>) -> URL? {
+        URL(string: "recipes://timer/\(context.attributes.recipeID)/\(context.state.stepNumber)")
+    }
+}
+
+// MARK: - Cooking Timer Live Activity Widget
+
+struct CookingTimerLiveActivity: Widget {
+    var body: some WidgetConfiguration {
+        ActivityConfiguration(for: CookingTimerAttributes.self) { context in
+            // Lock screen / notification banner
+            CookingTimerLiveActivityView(context: context)
+        } dynamicIsland: { context in
+            DynamicIsland {
+                DynamicIslandExpandedRegion(.leading) {
+                    Label(context.attributes.recipeTitle, systemImage: "flame.fill")
+                        .font(.caption)
+                        .foregroundStyle(WidgetBrand.warmTan)
+                        .lineLimit(1)
+                }
+                DynamicIslandExpandedRegion(.trailing) {
+                    Text("Step \(context.state.stepNumber)/\(context.state.totalSteps)")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                DynamicIslandExpandedRegion(.bottom) {
+                    HStack {
+                        Text(context.state.stepInstruction)
+                            .font(.caption)
+                            .lineLimit(2)
+                        Spacer()
+                        if context.state.isPaused {
+                            Text("Paused")
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundStyle(WidgetBrand.muted)
+                        } else if let end = context.state.endDate {
+                            Text(end, style: .timer)
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .monospacedDigit()
+                                .foregroundStyle(WidgetBrand.warmTan)
+                        }
+                    }
+                }
+            } compactLeading: {
+                Image(systemName: context.state.isPaused ? "pause.circle" : "timer")
+                    .foregroundStyle(WidgetBrand.warmTan)
+            } compactTrailing: {
+                if context.state.isPaused {
+                    Text("II")
+                        .font(.caption2)
+                        .foregroundStyle(WidgetBrand.muted)
+                } else if let end = context.state.endDate {
+                    Text(end, style: .timer)
+                        .font(.caption2)
+                        .monospacedDigit()
+                        .foregroundStyle(WidgetBrand.warmTan)
+                }
+            } minimal: {
+                Image(systemName: "timer")
+                    .foregroundStyle(WidgetBrand.warmTan)
+            }
+        }
     }
 }
 
@@ -256,5 +327,6 @@ struct CookingTimerLiveActivityView: View {
 struct RecipesWidgetBundle: WidgetBundle {
     var body: some Widget {
         MealPlanWidget()
+        CookingTimerLiveActivity()
     }
 }

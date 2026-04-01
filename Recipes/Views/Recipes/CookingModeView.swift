@@ -14,8 +14,11 @@ struct CookingModeView: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var currentStepIndex = 0
-    @State private var stepTimers: [Int: Int] = [:]           // stepIndex → remainingSeconds
+    @State private var stepEndDates: [Int: Date] = [:]
+    @State private var stepPausedSeconds: [Int: Int] = [:]
+    @State private var stepIsPaused: Set<Int> = []
     @State private var stepTimerTasks: [Int: Task<Void, Never>] = [:]
+    @State private var stepLiveActivities: [Int: CookingTimerLiveActivityManager] = [:]
     @State private var checkedIngredients: [Int: Set<String>] = [:]  // stepIndex → ingredient names
     @State private var isVoiceEnabled = true
     @State private var showingTutorial = false
@@ -92,7 +95,7 @@ struct CookingModeView: View {
             UIApplication.shared.isIdleTimerDisabled = false
             synthesizer.stopSpeaking(at: .immediate)
             stepTimerTasks.values.forEach { $0.cancel() }
-            Task { await CookingTimerLiveActivityManager.shared.endTimer() }
+            Task { for m in stepLiveActivities.values { await m.end() } }
         }
         // Accessibility: Support Switch Control and blink-based navigation
         .accessibilityAction(.escape) { dismiss() }
@@ -124,19 +127,33 @@ struct CookingModeView: View {
                 .tint(.green)
 
             // Persistent banner for all active timers
-            let otherTimers = stepTimers.sorted { $0.key < $1.key }
-            ForEach(otherTimers, id: \.key) { stepIdx, remaining in
+            let activeSteps = stepEndDates.keys.sorted().filter { !stepIsPaused.contains($0) }
+                + stepIsPaused.sorted().filter { stepEndDates[$0] == nil }
+            ForEach(activeSteps, id: \.self) { stepIdx in
                 HStack(spacing: 8) {
-                    Image(systemName: "timer")
+                    Image(systemName: stepIsPaused.contains(stepIdx) ? "pause.circle" : "timer")
                     Text("Step \(stepIdx + 1):")
-                    Text(formatTime(remaining))
-                        .monospacedDigit()
-                        .fontWeight(.semibold)
-                        .foregroundStyle(remaining <= 10 ? .red : .orange)
+                    if stepIsPaused.contains(stepIdx), let secs = stepPausedSeconds[stepIdx] {
+                        Text(formatTime(secs))
+                            .monospacedDigit()
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.secondary)
+                    } else if let end = stepEndDates[stepIdx] {
+                        Text(end, style: .timer)
+                            .monospacedDigit()
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.orange)
+                    }
                     Spacer()
+                    if stepIsPaused.contains(stepIdx) {
+                        Button("Resume") { resumeTimer(stepIndex: stepIdx) }
+                            .font(.caption).foregroundStyle(.orange)
+                    } else {
+                        Button("Pause") { pauseTimer(stepIndex: stepIdx) }
+                            .font(.caption).foregroundStyle(.orange)
+                    }
                     Button("Stop") { stopTimer(for: stepIdx) }
-                        .font(.caption)
-                        .foregroundStyle(.orange)
+                        .font(.caption).foregroundStyle(.red)
                 }
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.85))
@@ -229,35 +246,63 @@ struct CookingModeView: View {
     // MARK: - Timer
 
     private func timerView(_ timer: TimerStep) -> some View {
-        let remaining = stepTimers[currentStepIndex]
-        let isRunning = remaining != nil
+        let endDate = stepEndDates[currentStepIndex]
+        let isPaused = stepIsPaused.contains(currentStepIndex)
+        let pausedSecs = stepPausedSeconds[currentStepIndex]
+        let isActive = endDate != nil || isPaused
 
         return VStack(spacing: 12) {
-            if let remaining {
-                Text(formatTime(remaining))
-                    .font(.system(size: 64, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(remaining <= 10 ? .red : .orange)
+            if isActive {
+                Group {
+                    if isPaused, let secs = pausedSecs {
+                        Text(formatTime(secs))
+                    } else if let end = endDate {
+                        Text(end, style: .timer)
+                    }
+                }
+                .font(.system(size: 64, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(isPaused ? Color.secondary : Color.orange)
 
-                Button("Stop Timer") {
-                    stopTimer(for: currentStepIndex)
+                HStack(spacing: 12) {
+                    Button(isPaused ? "Resume" : "Pause") {
+                        if isPaused {
+                            resumeTimer(stepIndex: currentStepIndex)
+                        } else {
+                            pauseTimer(stepIndex: currentStepIndex)
+                        }
+                    }
+                    .font(.title3)
+                    .buttonStyle(.glass)
+                    .tint(.orange)
+
+                    Button("Stop Timer") {
+                        stopTimer(for: currentStepIndex)
+                    }
+                    .font(.title3)
+                    .buttonStyle(.glass)
                 }
-                .font(.title3)
-                .buttonStyle(.glass)
             } else {
-                Button {
-                    startTimer(seconds: timer.durationSeconds, stepIndex: currentStepIndex)
-                } label: {
-                    Label("Start \(timer.displayDuration) timer", systemImage: "timer")
+                VStack(spacing: 8) {
+                    Text(timer.displayDuration)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.orange)
+
+                    Button {
+                        startTimer(seconds: timer.durationSeconds, stepIndex: currentStepIndex)
+                    } label: {
+                        Label("Start Timer", systemImage: "timer")
+                    }
+                    .font(.title3)
+                    .buttonStyle(.glass)
+                    .tint(.orange)
                 }
-                .font(.title3)
-                .buttonStyle(.glass)
-                .tint(.orange)
             }
         }
         .padding()
         .background(.orange.opacity(0.1), in: .rect(cornerRadius: 16))
-        .sensoryFeedback(.impact, trigger: isRunning)
+        .sensoryFeedback(.impact, trigger: isActive)
     }
 
     // MARK: - Completion
@@ -452,44 +497,67 @@ struct CookingModeView: View {
     }
 
     private func startTimer(seconds: Int, stepIndex: Int) {
-        stepTimers[stepIndex] = seconds
+        let endDate = Date().addingTimeInterval(Double(seconds))
+        stepEndDates[stepIndex] = endDate
+        stepIsPaused.remove(stepIndex)
 
-        CookingTimerLiveActivityManager.shared.startTimer(
+        let manager = CookingTimerLiveActivityManager()
+        stepLiveActivities[stepIndex] = manager
+        manager.start(
             recipeTitle: recipe.title,
-            totalCookTimeMinutes: recipe.cookTimeMinutes,
+            recipeID: recipe.id,
             stepNumber: stepIndex + 1,
             stepInstruction: recipe.directions[stepIndex].instruction,
             durationSeconds: seconds,
             totalSteps: recipe.directions.count
         )
 
+        scheduleCompletion(stepIndex: stepIndex, endDate: endDate)
+    }
+
+    private func pauseTimer(stepIndex: Int) {
+        guard let end = stepEndDates[stepIndex] else { return }
+        stepPausedSeconds[stepIndex] = max(0, Int(end.timeIntervalSinceNow))
+        stepIsPaused.insert(stepIndex)
+        stepEndDates.removeValue(forKey: stepIndex)
+        stepTimerTasks[stepIndex]?.cancel()
+        Task { await stepLiveActivities[stepIndex]?.pause() }
+    }
+
+    private func resumeTimer(stepIndex: Int) {
+        guard let secs = stepPausedSeconds[stepIndex] else { return }
+        stepIsPaused.remove(stepIndex)
+        let endDate = Date().addingTimeInterval(Double(secs))
+        stepEndDates[stepIndex] = endDate
+        Task { await stepLiveActivities[stepIndex]?.resume(remainingSeconds: secs) }
+        scheduleCompletion(stepIndex: stepIndex, endDate: endDate)
+    }
+
+    private func scheduleCompletion(stepIndex: Int, endDate: Date) {
         stepTimerTasks[stepIndex]?.cancel()
         stepTimerTasks[stepIndex] = Task {
-            while (stepTimers[stepIndex] ?? 0) > 0, !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(1))
-                if let current = stepTimers[stepIndex] {
-                    stepTimers[stepIndex] = current - 1
-                }
-            }
-
-            guard !Task.isCancelled else { return }
-            stepTimers.removeValue(forKey: stepIndex)
+            let interval = endDate.timeIntervalSinceNow
+            guard interval > 0 else { return }
+            try? await Task.sleep(for: .seconds(interval))
+            guard !Task.isCancelled, !stepIsPaused.contains(stepIndex) else { return }
+            stepEndDates.removeValue(forKey: stepIndex)
+            stepPausedSeconds.removeValue(forKey: stepIndex)
             stepTimerTasks.removeValue(forKey: stepIndex)
-            await CookingTimerLiveActivityManager.shared.endTimer()
-
-            // Auto-advance only if we're still on this step
-            if currentStepIndex == stepIndex {
-                advanceStep()
-            }
+            await stepLiveActivities[stepIndex]?.end()
+            stepLiveActivities.removeValue(forKey: stepIndex)
+            if currentStepIndex == stepIndex { advanceStep() }
         }
     }
 
     private func stopTimer(for stepIndex: Int) {
         stepTimerTasks[stepIndex]?.cancel()
-        stepTimers.removeValue(forKey: stepIndex)
         stepTimerTasks.removeValue(forKey: stepIndex)
-        if stepTimers.isEmpty {
-            Task { await CookingTimerLiveActivityManager.shared.endTimer() }
+        stepEndDates.removeValue(forKey: stepIndex)
+        stepPausedSeconds.removeValue(forKey: stepIndex)
+        stepIsPaused.remove(stepIndex)
+        Task {
+            await stepLiveActivities[stepIndex]?.end()
+            stepLiveActivities.removeValue(forKey: stepIndex)
         }
     }
 
