@@ -122,6 +122,8 @@ enum MeasurementUnit: String, Codable, CaseIterable, Sendable {
     case ounce, pound, gram, kilogram
     // Count
     case piece, pinch, dash, bunch, clove, slice, whole
+    // Unquantified
+    case asNeeded
     // Temperature
     case fahrenheit, celsius
 
@@ -151,7 +153,7 @@ struct IngredientAmount: Codable, Hashable, Sendable {
     var unit: MeasurementUnit
 
     var displayString: String {
-        "\(Self.formatQuantity(quantity)) \(unit.rawValue)"
+        unit == .asNeeded ? "as needed" : "\(Self.formatQuantity(quantity)) \(unit.rawValue)"
     }
 
     static func formatQuantity(_ quantity: Double) -> String {

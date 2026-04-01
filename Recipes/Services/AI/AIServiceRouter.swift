@@ -18,12 +18,14 @@ enum AIServiceError: LocalizedError {
             return "The AI service returned an empty response."
         case .invalidResponse:
             return "Received an invalid response from the AI service."
-        case .httpError(let code, _):
-            return "AI service request failed with status code \(code)."
+        case .httpError(let code, let data):
+            let body = String(data: data, encoding: .utf8) ?? ""
+            return "AI service HTTP \(code): \(body)"
         case .onDeviceUnavailable:
             return "On-device AI is not available on this device."
-        case .allProvidersFailed:
-            return "All AI providers failed to process the request."
+        case .allProvidersFailed(let errors):
+            let detail = errors.map { $0.localizedDescription }.joined(separator: "; ")
+            return "All AI providers failed. \(detail)"
         }
     }
 }
@@ -123,12 +125,16 @@ final class AIServiceRouter {
         return response.content
     }
 
+    /// Task types where on-device inference is unsuitable due to large context requirements.
+    private static let largeContextTasks: Set<AITaskType> = [.recipeIngestion, .imageAnalysis]
+
     /// Try on-device first, fall back to cloud providers.
     private func hybridGeneration(prompt: String, taskType: AITaskType) async throws -> String {
         var errors: [Error] = []
 
-        // Try on-device first
-        if await foundationModelService.isAvailable {
+        // Skip on-device for large-context tasks — the prompt is too big for the local model
+        let useOnDeviceForTask = !Self.largeContextTasks.contains(taskType)
+        if useOnDeviceForTask, await foundationModelService.isAvailable {
             do {
                 return try await useOnDevice(prompt: prompt, taskType: taskType)
             } catch {

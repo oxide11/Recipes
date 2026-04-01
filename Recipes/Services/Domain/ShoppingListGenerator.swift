@@ -26,6 +26,7 @@ enum ShoppingListGenerator {
 
             for ingredient in recipe.ingredients where !ingredient.isOptional {
                 let key = ingredient.name.lowercased().trimmingCharacters(in: .whitespaces)
+                guard !assumedStaples.contains(key) else { continue }
                 let scaledQty = ingredient.amount.quantity * servingScale
 
                 if var existing = aggregated[key] {
@@ -96,6 +97,13 @@ enum ShoppingListGenerator {
     }
 
     // MARK: - Helpers
+
+    /// Ingredients that are assumed to be on hand and don't need to appear on a shopping list.
+    private static let assumedStaples: Set<String> = [
+        "water", "ice", "ice water", "cold water", "boiling water",
+        "salt", "kosher salt", "sea salt", "table salt",
+        "black pepper", "pepper", "ground black pepper",
+    ]
 
     private struct AggregatedIngredient {
         var name: String

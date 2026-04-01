@@ -76,7 +76,7 @@ struct RecipeDetailView: View {
             .animation(.snappy(duration: 0.25), value: isEditing)
         }
         .navigationTitle(recipe.title)
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.automatic, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
@@ -229,6 +229,11 @@ struct RecipeDetailView: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(2...5)
             } else {
+                Text(recipe.title)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .fixedSize(horizontal: false, vertical: true)
+
                 if let summary = recipe.summary {
                     Text(summary)
                         .font(.body)

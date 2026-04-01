@@ -24,6 +24,7 @@ struct RecipeImportView: View {
     @State private var ingestionService: RecipeIngestionService?
     @State private var result: RecipeIngestionResult?
     @State private var selectedDietaryTags: Set<DietaryRestriction> = []
+    @State private var linkIngredientsToSteps = true
     @State private var errorMessage: String?
     @State private var isProcessing = false
     @State private var showingPreview = false
@@ -281,6 +282,18 @@ struct RecipeImportView: View {
         }
 
         Section {
+            Toggle(isOn: $linkIngredientsToSteps) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Link ingredients to steps")
+                        .font(.subheadline)
+                    Text("Highlights ingredients mentioned in each direction. Usually accurate, but may occasionally miss or over-match.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+
+        Section {
             Button {
                 saveImportedRecipe(result)
             } label: {
@@ -296,6 +309,7 @@ struct RecipeImportView: View {
             Button("Start Over") {
                 self.result = nil
                 selectedDietaryTags = []
+                linkIngredientsToSteps = true
                 urlString = ""
                 pastedText = ""
                 photoData = nil
@@ -387,8 +401,14 @@ struct RecipeImportView: View {
 
     private func saveImportedRecipe(_ result: RecipeIngestionResult) {
         guard let service = ingestionService else { return }
-        let recipe = service.convertToRecipe(result)
+        Task {
+        let recipe = await service.convertToRecipe(result)
         recipe.dietaryRestrictions = Array(selectedDietaryTags)
+        if !linkIngredientsToSteps {
+            for i in recipe.directions.indices {
+                recipe.directions[i].ingredients = []
+            }
+        }
         for ingredient in recipe.ingredients {
             modelContext.insert(ingredient)
         }
@@ -399,5 +419,6 @@ struct RecipeImportView: View {
         } catch {
             errorMessage = "Couldn't save recipe: \(error.localizedDescription)"
         }
+        } // end Task
     }
 }

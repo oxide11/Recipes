@@ -22,7 +22,7 @@ final class ClaudeService {
 
     func sendMessage(
         messages: [ClaudeMessage],
-        model: String = "claude-sonnet-4-20250514",
+        model: String = "claude-sonnet-4-6",
         systemPrompt: String? = nil,
         maxTokens: Int = 4096,
         temperature: Double? = nil
@@ -100,7 +100,7 @@ final class ClaudeService {
         ]
 
         let body: [String: Any] = [
-            "model": "claude-sonnet-4-20250514",
+            "model": "claude-sonnet-4-6",
             "max_tokens": 4096,
             "messages": messages
         ]

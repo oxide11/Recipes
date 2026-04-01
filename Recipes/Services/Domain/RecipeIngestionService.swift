@@ -32,8 +32,11 @@ final class RecipeIngestionService {
         }
 
         // Try JSON-LD structured data first (many recipe sites use schema.org)
-        if let jsonLD = extractJSONLDRecipe(from: html) {
+        if var jsonLD = extractJSONLDRecipe(from: html) {
             progress = "Found structured recipe data..."
+            if jsonLD.imageURL == nil {
+                jsonLD.imageURL = extractOGImage(from: html)
+            }
             return jsonLD
         }
 
@@ -51,7 +54,7 @@ final class RecipeIngestionService {
           "cuisine": "italian",
           "prepTimeMinutes": 15,
           "cookTimeMinutes": 30,
-          "ingredients": [{"name": "flour", "amount": "2 cups", "preparation": "sifted"}],
+          "ingredients": [{"name": "All-purpose flour", "amount": "2 cups", "preparation": "sifted"}],
           "directions": ["Step 1 instruction", "Step 2 instruction"],
           "dietaryInfo": ["vegetarian", "gluten-free"],
           "nutritionPerServing": {"calories": 350, "proteinGrams": 12, "carbsGrams": 45, "fatGrams": 14}
@@ -66,7 +69,11 @@ final class RecipeIngestionService {
             taskType: .recipeIngestion
         )
 
-        return try parseIngestionResponse(response, source: url.absoluteString)
+        var result = try parseIngestionResponse(response, source: url.absoluteString)
+        if result.imageURL == nil {
+            result.imageURL = extractOGImage(from: html)
+        }
+        return result
     }
 
     // MARK: - Ingest from Text / Markdown
@@ -84,7 +91,7 @@ final class RecipeIngestionService {
           "cuisine": "italian",
           "prepTimeMinutes": 15,
           "cookTimeMinutes": 30,
-          "ingredients": [{"name": "flour", "amount": "2 cups", "preparation": "sifted"}],
+          "ingredients": [{"name": "All-purpose flour", "amount": "2 cups", "preparation": "sifted"}],
           "directions": ["Step 1", "Step 2"],
           "dietaryInfo": [],
           "nutritionPerServing": {"calories": 350, "proteinGrams": 12, "carbsGrams": 45, "fatGrams": 14}
@@ -169,16 +176,17 @@ final class RecipeIngestionService {
     // MARK: - Convert Result to Recipe Model
 
     /// Convert an ingestion result into a full Recipe model ready for SwiftData insertion.
-    func convertToRecipe(_ result: RecipeIngestionResult) -> Recipe {
+    func convertToRecipe(_ result: RecipeIngestionResult) async -> Recipe {
         let cuisine = Cuisine.allCases.first {
             $0.rawValue.lowercased() == result.cuisine?.lowercased()
         } ?? .other
 
         let ingredients = result.ingredients.map { parsed in
             let amount = parseAmount(parsed.amount)
-            let category = inferIngredientCategory(parsed.name)
+            let name = parsed.name.prefix(1).uppercased() + parsed.name.dropFirst()
+            let category = inferIngredientCategory(name)
             return Ingredient(
-                name: parsed.name,
+                name: name,
                 category: category,
                 amount: amount,
                 notes: parsed.preparation
@@ -186,7 +194,13 @@ final class RecipeIngestionService {
         }
 
         let directions = result.directions.enumerated().map { index, instruction in
-            RecipeDirection(stepNumber: index + 1, instruction: instruction)
+            let refs = ingredients.compactMap { ingredient -> DirectionIngredientRef? in
+                let lower = instruction.lowercased()
+                guard lower.contains(ingredient.name.lowercased()) else { return nil }
+                return DirectionIngredientRef(ingredientName: ingredient.name, amount: ingredient.amount)
+            }
+            let timer = parseTimerFromInstruction(instruction, stepNumber: index + 1)
+            return RecipeDirection(stepNumber: index + 1, instruction: instruction, timer: timer, ingredients: refs)
         }
 
         var nutritionalInfo: NutritionalInfo?
@@ -231,7 +245,7 @@ final class RecipeIngestionService {
             sourceName = nil
         }
 
-        return Recipe(
+        let recipe = Recipe(
             title: result.title,
             cuisine: cuisine,
             servings: result.servings ?? 4,
@@ -244,6 +258,17 @@ final class RecipeIngestionService {
             sourceURL: sourceURL,
             sourceName: sourceName
         )
+
+        // Fetch and attach the recipe image if one was found
+        if let imageURLString = result.imageURL,
+           let imageURL = URL(string: imageURLString),
+           let (imageData, _) = try? await URLSession.shared.data(from: imageURL),
+           !imageData.isEmpty {
+            let photo = RecipePhoto(imageData: imageData)
+            recipe.photos.append(photo)
+        }
+
+        return recipe
     }
 
     // MARK: - HTML Processing
@@ -296,7 +321,7 @@ final class RecipeIngestionService {
 
         let ingredients: [RecipeIngestionResult.ParsedIngredient]
         if let list = json["recipeIngredient"] as? [String] {
-            ingredients = list.map { .init(name: $0, amount: "", preparation: nil) }
+            ingredients = list.map { parseFullIngredientString(decodeHTMLEntities($0)) }
         } else {
             ingredients = []
         }
@@ -313,6 +338,20 @@ final class RecipeIngestionService {
 
         let cuisine = json["recipeCuisine"] as? String
 
+        // image can be a string, an array of strings, or an ImageObject dict
+        let imageURL: String?
+        if let str = json["image"] as? String {
+            imageURL = str
+        } else if let arr = json["image"] as? [String] {
+            imageURL = arr.first
+        } else if let obj = json["image"] as? [String: Any] {
+            imageURL = obj["url"] as? String
+        } else if let arr = json["image"] as? [[String: Any]] {
+            imageURL = arr.first?["url"] as? String
+        } else {
+            imageURL = nil
+        }
+
         return RecipeIngestionResult(
             title: title,
             servings: servings,
@@ -321,7 +360,127 @@ final class RecipeIngestionService {
             directions: directions,
             prepTimeMinutes: prepTime,
             cookTimeMinutes: cookTime,
-            source: "json-ld"
+            source: "json-ld",
+            imageURL: imageURL
+        )
+    }
+
+    /// Extract the og:image URL from HTML meta tags.
+    private func extractOGImage(from html: String) -> String? {
+        let pattern = #"<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive, .dotMatchesLineSeparators]),
+              let match = regex.firstMatch(in: html, range: NSRange(html.startIndex..., in: html)),
+              let range = Range(match.range(at: 1), in: html) else {
+            // Try reversed attribute order: content first, then property
+            let pattern2 = #"<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']"#
+            guard let regex2 = try? NSRegularExpression(pattern: pattern2, options: [.caseInsensitive, .dotMatchesLineSeparators]),
+                  let match2 = regex2.firstMatch(in: html, range: NSRange(html.startIndex..., in: html)),
+                  let range2 = Range(match2.range(at: 1), in: html) else { return nil }
+            return String(html[range2])
+        }
+        return String(html[range])
+    }
+
+    /// Extract a timer from a direction instruction, if one is clearly stated.
+    /// Handles patterns like "bake for 30 minutes", "simmer for 1 hour 15 minutes",
+    /// "cook for 2-3 minutes" (uses the lower bound), "rest for 30 seconds".
+    private func parseTimerFromInstruction(_ instruction: String, stepNumber: Int) -> TimerStep? {
+        let text = instruction.lowercased()
+
+        // Pattern: optional hours + optional minutes + optional seconds
+        // e.g. "1 hour 30 minutes", "45 minutes", "1 hour", "90 seconds"
+        let pattern = #"(?:for\s+|about\s+)?(\d+)(?:\s*[-–]\s*\d+)?\s*(?:to\s+\d+\s+)?(hours?|hrs?|minutes?|mins?|seconds?|secs?)(?:\s+(?:and\s+)?(\d+)\s+(minutes?|mins?|seconds?|secs?))?"#
+
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) else { return nil }
+        let ns = text as NSString
+        guard let match = regex.firstMatch(in: text, range: NSRange(location: 0, length: ns.length)) else { return nil }
+
+        func intCapture(_ group: Int) -> Int? {
+            guard group < match.numberOfRanges,
+                  let range = Range(match.range(at: group), in: text),
+                  let val = Int(text[range]) else { return nil }
+            return val
+        }
+        func strCapture(_ group: Int) -> String? {
+            guard group < match.numberOfRanges,
+                  let range = Range(match.range(at: group), in: text) else { return nil }
+            return String(text[range])
+        }
+
+        guard let value1 = intCapture(1), let unit1 = strCapture(2) else { return nil }
+
+        var totalSeconds = 0
+        if unit1.hasPrefix("hour") || unit1.hasPrefix("hr") {
+            totalSeconds += value1 * 3600
+        } else if unit1.hasPrefix("min") {
+            totalSeconds += value1 * 60
+        } else if unit1.hasPrefix("sec") {
+            totalSeconds += value1
+        }
+
+        // Optional second component (e.g. "1 hour 30 minutes")
+        if let value2 = intCapture(3), let unit2 = strCapture(4) {
+            if unit2.hasPrefix("min") { totalSeconds += value2 * 60 }
+            else if unit2.hasPrefix("sec") { totalSeconds += value2 }
+        }
+
+        // Ignore implausibly short or long timers (< 10 seconds or > 24 hours)
+        guard totalSeconds >= 10, totalSeconds <= 86400 else { return nil }
+
+        return TimerStep(durationSeconds: totalSeconds, label: "Step \(stepNumber)")
+    }
+
+    /// Decode common HTML entities including fractions.
+    private func decodeHTMLEntities(_ html: String) -> String {
+        html
+            .replacingOccurrences(of: "&amp;",   with: "&")
+            .replacingOccurrences(of: "&lt;",    with: "<")
+            .replacingOccurrences(of: "&gt;",    with: ">")
+            .replacingOccurrences(of: "&nbsp;",  with: " ")
+            .replacingOccurrences(of: "&#39;",   with: "'")
+            .replacingOccurrences(of: "&quot;",  with: "\"")
+            .replacingOccurrences(of: "&frac12;", with: "½")
+            .replacingOccurrences(of: "&frac14;", with: "¼")
+            .replacingOccurrences(of: "&frac34;", with: "¾")
+            .replacingOccurrences(of: "&frac13;", with: "⅓")
+            .replacingOccurrences(of: "&frac23;", with: "⅔")
+            .replacingOccurrences(of: "&frac18;", with: "⅛")
+            .replacingOccurrences(of: "&frac38;", with: "⅜")
+            .replacingOccurrences(of: "&frac58;", with: "⅝")
+            .replacingOccurrences(of: "&frac78;", with: "⅞")
+    }
+
+    /// Parse a full ingredient string (e.g. from JSON-LD) into name, amount, and preparation.
+    /// Handles strings like "4 cloves garlic, pressed or minced" or "½ teaspoon garlic powder".
+    private func parseFullIngredientString(_ str: String) -> RecipeIngestionResult.ParsedIngredient {
+        var s = str.trimmingCharacters(in: .whitespaces)
+
+        // Split preparation on first comma: "garlic, minced" → name="garlic", prep="minced"
+        var preparation: String? = nil
+        if let commaIdx = s.firstIndex(of: ",") {
+            let prepStr = String(s[s.index(after: commaIdx)...]).trimmingCharacters(in: .whitespaces)
+            if !prepStr.isEmpty { preparation = prepStr }
+            s = String(s[..<commaIdx]).trimmingCharacters(in: .whitespaces)
+        }
+
+        // Try to pull a leading quantity token (number or fraction)
+        var tokens = s.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+        var amountTokens: [String] = []
+
+        if let first = tokens.first, parseFraction(first) != nil {
+            amountTokens.append(tokens.removeFirst())
+            // Optional unit token right after the number
+            if let unit = tokens.first, matchUnit(unit.lowercased()) != nil {
+                amountTokens.append(tokens.removeFirst())
+            }
+        }
+
+        let name = tokens.joined(separator: " ")
+        let amount = amountTokens.joined(separator: " ")
+        return .init(
+            name: name.isEmpty ? s : name,
+            amount: amount,
+            preparation: preparation
         )
     }
 
@@ -348,12 +507,7 @@ final class RecipeIngestionService {
         }
 
         // Decode common HTML entities
-        text = text.replacingOccurrences(of: "&amp;", with: "&")
-        text = text.replacingOccurrences(of: "&lt;", with: "<")
-        text = text.replacingOccurrences(of: "&gt;", with: ">")
-        text = text.replacingOccurrences(of: "&nbsp;", with: " ")
-        text = text.replacingOccurrences(of: "&#39;", with: "'")
-        text = text.replacingOccurrences(of: "&quot;", with: "\"")
+        text = decodeHTMLEntities(text)
 
         // Collapse whitespace
         let components = text.components(separatedBy: .whitespacesAndNewlines)
@@ -401,8 +555,10 @@ final class RecipeIngestionService {
     private func parseAmount(_ amountString: String) -> IngredientAmount {
         let parts = amountString.trimmingCharacters(in: .whitespaces).components(separatedBy: .whitespaces)
 
-        guard !parts.isEmpty else {
-            return IngredientAmount(quantity: 1, unit: .piece)
+        let joined = parts.joined(separator: " ").lowercased()
+        guard !parts.isEmpty, parts[0] != "",
+              !["as needed", "to taste", "for greasing", "as required", "optional"].contains(joined) else {
+            return IngredientAmount(quantity: 1, unit: .asNeeded)
         }
 
         // Try to extract quantity
@@ -493,6 +649,7 @@ struct RecipeIngestionResult: Codable {
     var prepTimeMinutes: Int?
     var cookTimeMinutes: Int?
     var source: String?
+    var imageURL: String?
     var dietaryInfo: [String]?
     var nutritionPerServing: ParsedNutrition?
 

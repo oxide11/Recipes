@@ -80,7 +80,8 @@ enum MeasurementConversionService {
 
     /// Scale a recipe's ingredient amounts by a multiplier.
     static func scale(amount: IngredientAmount, by multiplier: Double) -> IngredientAmount {
-        IngredientAmount(
+        guard amount.unit != .asNeeded else { return amount }
+        return IngredientAmount(
             quantity: (amount.quantity * multiplier).rounded(toPlaces: 2),
             unit: amount.unit
         )
