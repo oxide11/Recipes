@@ -438,6 +438,13 @@ struct MealCard: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(Brand.cream)
 
+                if meal.isAISuggested {
+                    Image(systemName: "wand.and.stars")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.cyan)
+                        .help("AI-suggested recipe — saved to your library")
+                }
+
                 Spacer()
 
                 if let recipe = meal.recipe {
@@ -626,6 +633,7 @@ struct GenerateMealPlanSheet: View {
 
     @Query(sort: \Recipe.title) private var recipes: [Recipe]
     @Query private var pantryItems: [PantryItem]
+    @Query private var profiles: [UserProfile]
 
     let plan: MealPlan
 
@@ -635,7 +643,6 @@ struct GenerateMealPlanSheet: View {
     @State private var includeLunch = true
     @State private var includeDinner = true
     @State private var prioritisePantry = true
-    @State private var isGenerating = false
     @State private var errorMessage: String?
 
     init(plan: MealPlan) {
@@ -706,14 +713,10 @@ struct GenerateMealPlanSheet: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    if isGenerating {
-                        ProgressView().tint(Brand.warmTan)
-                    } else {
-                        Button("Generate") {
-                            Task { await generate() }
-                        }
-                        .disabled(selectedMealTypes.isEmpty)
+                    Button("Generate") {
+                        Task { await generate() }
                     }
+                    .disabled(selectedMealTypes.isEmpty)
                 }
             }
         }
@@ -722,18 +725,21 @@ struct GenerateMealPlanSheet: View {
     // MARK: - Generation
 
     private func generate() async {
-        isGenerating = true
         errorMessage = nil
-        defer { isGenerating = false }
 
+        // Capture everything we need before the view dismisses
         let prompt = buildPrompt()
+        let recipeSnapshot = Array(recipes)
+
+        // Dismiss immediately so the user isn't blocked on a long AI call
+        dismiss()
+
         do {
             let response = try await aiRouter.generateText(prompt: prompt, taskType: .mealPlanGeneration)
             let suggestions = try parseSuggestions(from: response)
-            applyMeals(suggestions)
-            dismiss()
+            await applyMeals(suggestions, recipeSnapshot: recipeSnapshot)
         } catch {
-            errorMessage = error.localizedDescription
+            // Generation failed after dismiss — user can retry via the Generate button
         }
     }
 
@@ -750,13 +756,27 @@ struct GenerateMealPlanSheet: View {
 
         let mealTypeList = selectedMealTypes.map(\.rawValue).joined(separator: ", ")
 
-        let recipeLines = recipes.map { r in
-            "\(r.title)\(r.isFavorite || r.isAutoFavorite ? " [favorite]" : "") — \(r.cuisine.rawValue), \(r.formattedDuration), cooked \(r.cookCount)×"
+        let allowedMealTypes = Set(selectedMealTypes)
+        let nonMealTypes: Set<MealType> = [.dessert, .snack, .appetizer, .side]
+        let filteredRecipes = recipes.filter { r in
+            guard let mt = r.mealType else { return true }  // no type set — include
+            if nonMealTypes.contains(mt) { return false }   // never a standalone meal
+            return allowedMealTypes.contains(mt)
+        }
+        let recipeLines = filteredRecipes.map { r in
+            let typeTag = r.mealType.map { " [\($0.rawValue)]" } ?? ""
+            return "\(r.title)\(r.isFavorite || r.isAutoFavorite ? " [favorite]" : "")\(typeTag) — \(r.cuisine.rawValue), \(r.formattedDuration), cooked \(r.cookCount)×"
         }.joined(separator: "\n- ")
 
         let pantrySection = prioritisePantry && !pantryItems.isEmpty
             ? "Pantry items available (prefer recipes that use these): \(pantryItems.map(\.name).joined(separator: ", "))."
             : ""
+
+        let totalSlots = dates.count * selectedMealTypes.count
+        let novelCount = filteredRecipes.count < totalSlots ? max(totalSlots - filteredRecipes.count, 2) : 2
+
+        let dietaryNote = (profiles.first?.dietaryRestrictions ?? []).isEmpty ? "" :
+            " Dietary needs: \((profiles.first!.dietaryRestrictions).map(\.displayName).joined(separator: ", "))."
 
         return """
         You are a meal planning assistant. Assign meals to the following dates.
@@ -765,17 +785,19 @@ struct GenerateMealPlanSheet: View {
         Meal types to fill per day: \(mealTypeList)
         \(pantrySection)
 
-        Available recipes:
-        - \(recipeLines)
+        Saved recipes (\(filteredRecipes.count) total):
+        - \(recipeLines.isEmpty ? "(none)" : recipeLines)
 
         Rules:
-        - Only use recipes from the list above. Use exact titles.
-        - Vary recipes across consecutive days — do not repeat the same recipe back-to-back.
+        - Prefer saved recipes. Use exact titles for saved recipes.
+        - Vary recipes — do not repeat the same recipe on consecutive days.
         - Prefer [favorite] recipes where appropriate.
-        - Match meal type to the recipe suitability (e.g. don't assign a heavy dinner to breakfast).
+        - Recipes tagged [breakfast], [lunch], or [dinner] must only be assigned to that meal type.
+        - Match meal type to recipe suitability (e.g. don't assign a heavy dinner to breakfast).
+        - Include exactly \(novelCount) novel meal suggestion\(novelCount == 1 ? "" : "s") not from the saved list, spread across the plan for variety and discovery.\(dietaryNote) For novel meals set "isNew": true and provide a one-sentence "description". For saved meals omit both fields.
 
         Return ONLY a JSON array with no markdown fences and no commentary:
-        [{"date":"YYYY-MM-DD","mealType":"breakfast|lunch|dinner","recipeTitle":"Exact Title From List"}]
+        [{"date":"YYYY-MM-DD","mealType":"breakfast|lunch|dinner","recipeTitle":"Title","isNew":false}]
         """
     }
 
@@ -783,40 +805,70 @@ struct GenerateMealPlanSheet: View {
         let date: String
         let mealType: String
         let recipeTitle: String
+        let isNew: Bool?
+        let description: String?
     }
 
     private func parseSuggestions(from raw: String) throws -> [MealSuggestion] {
         var cleaned = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Strip markdown fences if present
         if cleaned.hasPrefix("```") {
             let lines = cleaned.components(separatedBy: "\n")
             cleaned = lines.dropFirst().dropLast().joined(separator: "\n")
+        }
+        // Extract JSON array even when wrapped in explanatory prose
+        if let start = cleaned.firstIndex(of: "["),
+           let end   = cleaned.lastIndex(of: "]") {
+            cleaned = String(cleaned[start...end])
         }
         guard let data = cleaned.data(using: .utf8) else { throw AIServiceError.invalidResponse }
         return try JSONDecoder().decode([MealSuggestion].self, from: data)
     }
 
-    private func applyMeals(_ suggestions: [MealSuggestion]) {
+    private func applyMeals(_ suggestions: [MealSuggestion], recipeSnapshot: [Recipe]) async {
         let recipeMap = Dictionary(
-            uniqueKeysWithValues: recipes.map { ($0.title.lowercased(), $0) }
+            uniqueKeysWithValues: recipeSnapshot.map { ($0.title.lowercased(), $0) }
         )
         let isoFormatter = ISO8601DateFormatter()
         isoFormatter.formatOptions = [.withFullDate]
+        let ingestionService = RecipeIngestionService(aiRouter: aiRouter)
 
         for suggestion in suggestions {
             guard
                 let date = isoFormatter.date(from: suggestion.date),
-                let mealType = MealType(rawValue: suggestion.mealType.lowercased()),
-                let recipe = recipeMap[suggestion.recipeTitle.lowercased()]
+                let mealType = MealType(rawValue: suggestion.mealType.lowercased())
             else { continue }
 
             let normalised = Calendar.current.startOfDay(for: date)
-
             let alreadyExists = plan.meals.contains {
                 Calendar.current.isDate($0.date, inSameDayAs: normalised) && $0.mealType == mealType
             }
             guard !alreadyExists else { continue }
 
-            let meal = PlannedMeal(mealType: mealType, date: normalised, recipe: recipe)
+            // Find or generate the recipe
+            let recipe: Recipe?
+            if suggestion.isNew == true, let description = suggestion.description {
+                let prompt = "Generate a complete recipe for: \(description). Include title, ingredients with measurements, and step-by-step instructions."
+                do {
+                    let text = try await aiRouter.generateText(prompt: prompt, taskType: .recipeGeneration)
+                    let result = try await ingestionService.ingestFromText(text)
+                    let generated = await ingestionService.convertToRecipe(result)
+                    modelContext.insert(generated)
+                    recipe = generated
+                } catch {
+                    recipe = nil
+                }
+            } else {
+                recipe = recipeMap[suggestion.recipeTitle.lowercased()]
+            }
+
+            guard let recipe else { continue }
+            let meal = PlannedMeal(
+                mealType: mealType,
+                date: normalised,
+                recipe: recipe,
+                isAISuggested: suggestion.isNew == true
+            )
             modelContext.insert(meal)
             plan.meals.append(meal)
         }
@@ -1429,7 +1481,8 @@ struct MultiRecipeCookingView: View {
         stepIsPaused.insert(stepIndex)
         stepEndDates.removeValue(forKey: stepIndex)
         stepTimerTasks[stepIndex]?.cancel()
-        Task { await stepLiveActivities[stepIndex]?.pause() }
+        let remaining = stepPausedSeconds[stepIndex] ?? 0
+        Task { await stepLiveActivities[stepIndex]?.pause(remainingSeconds: remaining) }
     }
 
     private func resumeTimer(stepIndex: Int) {

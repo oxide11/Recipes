@@ -43,6 +43,7 @@ struct BulkPhotoAddView: View {
     @State private var isAnalyzing = false
     @State private var errorMessage: String?
     @State private var didAnalyze = false
+    @FocusState private var focusedField: UUID?
 
     var body: some View {
         NavigationStack {
@@ -134,6 +135,8 @@ struct BulkPhotoAddView: View {
 
                                 VStack(alignment: .leading, spacing: 2) {
                                     TextField("Name", text: $item.name)
+                                        .focused($focusedField, equals: item.id)
+                                        .textInputAutocapitalization(.words)
                                     HStack(spacing: 8) {
                                         TextField("Qty", value: $item.quantity, format: .number)
                                             .keyboardType(.decimalPad)
@@ -207,6 +210,9 @@ struct BulkPhotoAddView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
+                ToolbarItem(placement: .keyboard) {
+                    Button("Done") { focusedField = nil }
+                }
             }
             .onChange(of: selectedPhotoItem) {
                 Task { await loadPhoto() }
@@ -237,7 +243,7 @@ struct BulkPhotoAddView: View {
 
     private func analyze() async {
         guard let image = selectedImage,
-              let jpeg = image.jpegData(compressionQuality: 0.8) else { return }
+              let jpeg = RecipeIngestionService.compressedForAI(image) else { return }
 
         isAnalyzing = true
         errorMessage = nil
@@ -269,12 +275,15 @@ struct BulkPhotoAddView: View {
 
     private var foodPhotoPrompt: String {
         """
-        This is a photo of food items (fridge, freezer, counter, or grocery haul).
-        List every distinct food item you can identify.
+        This is a photo of food items (fridge, freezer, pantry, counter, or grocery haul).
+        Identify every distinct FOOD item visible. Exclude all non-food objects such as kitchen tools, appliances, containers, and packaging with no food inside.
+        Use generic names without brand names or size/fat qualifiers — e.g. use "Milk" not "Baxter 2% Milk", "Eggs" not "Free Range Large Eggs", "Pomegranate Juice" not "Old Home Pomegranate Juice 1.6L".
+        Capitalize names properly (title case).
+        Set "frozen": true only for items that are clearly in a freezer section or visibly frozen.
         Respond with ONLY a JSON array, no explanation:
-        [{"name": "chicken breast", "category": "protein", "quantity": 2, "frozen": true}]
+        [{"name": "Chicken Breast", "category": "protein", "quantity": 2, "frozen": false}]
         Valid categories: protein, vegetable, fruit, grain, dairy, spice, herb, condiment, oil, liquid, sweetener, nut, legume, other
-        Estimate quantity as a whole number. Use "frozen": true if the item appears frozen.
+        Estimate quantity as a whole number.
         """
     }
 
@@ -297,7 +306,8 @@ struct BulkPhotoAddView: View {
         guard let data = jsonString.data(using: .utf8),
               let array = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else { return [] }
         return array.compactMap { dict in
-            guard let name = dict["name"] as? String, !name.isEmpty else { return nil }
+            guard let rawName = dict["name"] as? String, !rawName.isEmpty else { return nil }
+            let name = rawName.capitalized
             let category = IngredientCategory(rawValue: dict["category"] as? String ?? "") ?? .other
             let quantity = (dict["quantity"] as? Double) ?? (dict["quantity"] as? Int).map(Double.init) ?? 1
             let isFrozen = dict["frozen"] as? Bool ?? false

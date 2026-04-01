@@ -64,6 +64,59 @@ enum ReceiptParserService {
 
         return ParsedReceipt(storeName: storeName, items: items, total: total)
     }
+
+    /// Strips brand names, size qualifiers, and percentage variants from a receipt item name,
+    /// leaving just the generic food name. e.g. "Baxter 2% Milk" → "Milk".
+    static func normalizeItemName(_ raw: String) -> String {
+        var name = raw
+
+        // Remove trailing size/volume/weight patterns: "1.6L", "500ml", "2%", "142g", etc.
+        let sizePattern = /\s+\d+\.?\d*\s*(ml|l|g|kg|oz|lb|fl\.?\s*oz|%)/
+        name = name.replacing(sizePattern, with: "")
+
+        // Remove percentage variants mid-name: "2%", "1%", "3.25%"
+        let percentPattern = /\s*\d+\.?\d*\s*%\s*/
+        name = name.replacing(percentPattern, with: " ")
+
+        // Strip leading brand tokens — title-cased proper noun words that precede a known food word.
+        // Strategy: tokenise, find where a known food-category word starts, drop preceding tokens.
+        let tokens = name.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+        if let foodStart = tokens.firstIndex(where: { isFoodWord($0) }), foodStart > 0 {
+            name = tokens[foodStart...].joined(separator: " ")
+        }
+
+        return name.trimmingCharacters(in: .whitespaces)
+            .capitalized
+            .trimmingCharacters(in: .whitespaces)
+    }
+
+    private static func isFoodWord(_ word: String) -> Bool {
+        let foodWords: Set<String> = [
+            // Dairy
+            "milk", "cream", "butter", "cheese", "yogurt", "yoghurt", "eggs", "egg",
+            // Produce
+            "apple", "apples", "banana", "bananas", "orange", "oranges", "lemon", "lemons",
+            "strawberry", "strawberries", "blueberry", "blueberries", "raspberry", "raspberries",
+            "grape", "grapes", "mango", "mangoes", "pineapple", "watermelon", "melon",
+            "tomato", "tomatoes", "potato", "potatoes", "onion", "onions", "garlic",
+            "carrot", "carrots", "broccoli", "spinach", "lettuce", "kale", "celery",
+            "pepper", "peppers", "cucumber", "zucchini", "mushroom", "mushrooms",
+            "avocado", "avocados", "corn", "beans", "peas",
+            // Meat & fish
+            "chicken", "beef", "pork", "salmon", "tuna", "shrimp", "turkey", "bacon",
+            "sausage", "steak", "lamb", "cod", "tilapia", "fish",
+            // Beverages
+            "juice", "water", "coffee", "tea", "soda", "pop", "drink", "beverage",
+            // Pantry
+            "bread", "pasta", "rice", "flour", "sugar", "salt", "oil", "vinegar",
+            "sauce", "soup", "broth", "stock", "cereal", "oats", "granola",
+            "chips", "crackers", "cookies", "chocolate", "honey", "jam", "butter",
+            "mayo", "mayonnaise", "mustard", "ketchup", "salsa",
+            // Frozen
+            "icecream", "ice", "frozen", "pizza",
+        ]
+        return foodWords.contains(word.lowercased())
+    }
 }
 
 // MARK: - Data Scanner Representable
@@ -526,7 +579,10 @@ struct ReceiptScannerView: View {
         parsedReceipt = parsed
         editedStoreName = parsed.storeName ?? ""
         editedTotal = parsed.total.map { String(format: "%.2f", $0) } ?? ""
-        editedItems = parsed.items.map { (name: $0.name, price: String(format: "%.2f", $0.price)) }
+        editedItems = parsed.items.map {
+            (name: ReceiptParserService.normalizeItemName($0.name),
+             price: String(format: "%.2f", $0.price))
+        }
     }
 
     // MARK: - Save

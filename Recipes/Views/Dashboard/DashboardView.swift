@@ -127,7 +127,7 @@ struct DashboardView: View {
                 ReceiptScannerView()
             }
             .sheet(isPresented: $showingRecipeGenerator) {
-                RecipeGeneratorView()
+                QuickGenerateView()
             }
             .sheet(isPresented: $showingAddPantry) {
                 PantryView(startWithAddSheet: true)
@@ -237,7 +237,7 @@ struct DashboardView: View {
                 quickActionButton(icon: "camera.fill", label: "Scan Receipt", color: Brand.warmTan) {
                     showingReceiptScanner = true
                 }
-                quickActionButton(icon: "wand.and.stars", label: "Generate Recipe", color: .cyan) {
+                quickActionButton(icon: "wand.and.stars", label: "Generate Recipe", color: Brand.warmTan) {
                     showingRecipeGenerator = true
                 }
                 quickActionButton(icon: "plus.circle.fill", label: "Add Pantry", color: DashboardStyle.produce) {
@@ -670,20 +670,33 @@ struct SeasonalRecipesView: View {
                         .padding(.horizontal, 40)
                         Spacer()
                     }
-                    .sheet(isPresented: $showingGenerator) {
-                        RecipeGeneratorView(initialIngredient: ingredient)
-                    }
                 } else {
-                    List(matchingRecipes) { recipe in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(recipe.title)
-                                .font(.miseBody.weight(.medium))
-                                .foregroundStyle(Brand.cream)
-                            Text(recipe.formattedDuration)
-                                .font(.miseMeta)
-                                .foregroundStyle(Brand.muted)
+                    List {
+                        Section {
+                            Button {
+                                showingGenerator = true
+                            } label: {
+                                Label("Generate a \(ingredient.capitalized) Recipe", systemImage: "sparkles")
+                                    .foregroundStyle(Brand.herbGreen)
+                            }
+                            .listRowBackground(Brand.herbGreen.opacity(0.1))
                         }
-                        .listRowBackground(Brand.surface)
+
+                        Section("Your Recipes") {
+                            ForEach(matchingRecipes) { recipe in
+                                NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(recipe.title)
+                                            .font(.miseBody.weight(.medium))
+                                            .foregroundStyle(Brand.cream)
+                                        Text(recipe.formattedDuration)
+                                            .font(.miseMeta)
+                                            .foregroundStyle(Brand.muted)
+                                    }
+                                }
+                                .listRowBackground(Brand.surface)
+                            }
+                        }
                     }
                     .scrollContentBackground(.hidden)
                 }
@@ -697,6 +710,9 @@ struct SeasonalRecipesView: View {
                         .foregroundStyle(Brand.warmTan)
                 }
             }
+            .sheet(isPresented: $showingGenerator) {
+                RecipeGeneratorView(initialIngredient: ingredient)
+            }
         }
     }
 }
@@ -706,12 +722,14 @@ struct SeasonalRecipesView: View {
 struct QuickMealsView: View {
     let recipes: [Recipe]
     @Environment(\.dismiss) private var dismiss
+    @State private var showingGenerator = false
 
     var body: some View {
         NavigationStack {
             Group {
                 if recipes.isEmpty {
-                    VStack(spacing: 16) {
+                    // Empty state — lead with generate
+                    VStack(spacing: 20) {
                         Spacer()
                         Image(systemName: "timer")
                             .font(.system(size: 48))
@@ -719,33 +737,65 @@ struct QuickMealsView: View {
                         Text("No Quick Recipes Yet")
                             .font(.miseHeading)
                             .foregroundStyle(Brand.cream)
-                        Text("Recipes under 30 minutes will appear here.")
+                        Text("Recipes under 30 minutes will appear here once you add some — or let AI suggest one now.")
                             .font(.miseBody)
                             .foregroundStyle(Brand.muted)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
+                        Button {
+                            showingGenerator = true
+                        } label: {
+                            Label("Generate a Quick Meal", systemImage: "wand.and.stars")
+                                .font(.headline)
+                                .foregroundStyle(Brand.midnight)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(Brand.warmTan, in: RoundedRectangle(cornerRadius: 14))
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 40)
                         Spacer()
                     }
                 } else {
-                    List(recipes) { recipe in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(recipe.title)
-                                    .font(.miseBody.weight(.medium))
-                                    .foregroundStyle(Brand.cream)
-                                Text(recipe.cuisine.rawValue.capitalized)
-                                    .font(.miseMeta)
-                                    .foregroundStyle(Brand.muted)
+                    List {
+                        // Generate button at the top of the list
+                        Section {
+                            Button {
+                                showingGenerator = true
+                            } label: {
+                                Label("Generate a Quick Meal", systemImage: "wand.and.stars")
+                                    .foregroundStyle(Brand.warmTan)
                             }
-                            Spacer()
-                            Text(recipe.formattedDuration)
-                                .font(.miseMeta)
-                                .foregroundStyle(Brand.warmTan)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(Brand.warmTan.opacity(0.15), in: Capsule())
+                            .listRowBackground(Brand.warmTan.opacity(0.1))
                         }
-                        .listRowBackground(Brand.surface)
+
+                        Section {
+                            ForEach(recipes) { recipe in
+                                NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(recipe.title)
+                                                .font(.miseBody.weight(.medium))
+                                                .foregroundStyle(Brand.cream)
+                                            Text(recipe.cuisine.rawValue.capitalized)
+                                                .font(.miseMeta)
+                                                .foregroundStyle(Brand.muted)
+                                        }
+                                        Spacer()
+                                        Text(recipe.formattedDuration)
+                                            .font(.miseMeta)
+                                            .foregroundStyle(Brand.warmTan)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 3)
+                                            .background(Brand.warmTan.opacity(0.15), in: Capsule())
+                                    }
+                                }
+                                .listRowBackground(Brand.surface)
+                            }
+                        } header: {
+                            Text("Your Quick Recipes")
+                                .foregroundStyle(Brand.muted)
+                        }
                     }
                     .scrollContentBackground(.hidden)
                 }
@@ -758,6 +808,9 @@ struct QuickMealsView: View {
                     Button("Done") { dismiss() }
                         .foregroundStyle(Brand.warmTan)
                 }
+            }
+            .sheet(isPresented: $showingGenerator) {
+                QuickGenerateView(quickMealMode: true)
             }
         }
     }

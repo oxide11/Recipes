@@ -22,7 +22,9 @@ struct RecipeDetailView: View {
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var showingAddPhoto = false
     @State private var isEditing = false
-    @State private var isReadyToShow = false
+    @State private var initialScrollID: UUID?
+    @State private var showingAIEdit = false
+    @State private var ingestionService: RecipeIngestionService?
 
     var scrollToStep: Int? = nil
 
@@ -30,6 +32,10 @@ struct RecipeDetailView: View {
         self.recipe = recipe
         self.scrollToStep = scrollToStep
         _selectedServings = State(initialValue: recipe.servings)
+        if let step = scrollToStep,
+           let dir = recipe.directions.first(where: { $0.stepNumber == step }) {
+            _initialScrollID = State(initialValue: dir.id)
+        }
     }
 
     private var servingMultiplier: Double {
@@ -57,7 +63,6 @@ struct RecipeDetailView: View {
 
     var body: some View {
         ScrollView {
-            ScrollViewReader { proxy in
             VStack(alignment: .leading, spacing: 20) {
                 headerSection
                 photoGallerySection
@@ -76,23 +81,25 @@ struct RecipeDetailView: View {
                 cookingLogSection
             }
             .padding()
-            .opacity(isReadyToShow ? 1 : 0)
-            .task(id: scrollToStep) {
-                if let step = scrollToStep,
-                   let dir = recipe.directions.first(where: { $0.stepNumber == step }) {
-                    try? await Task.sleep(for: .milliseconds(100))
-                    proxy.scrollTo(dir.id, anchor: .top)
-                }
-                withAnimation(.easeIn(duration: 0.15)) { isReadyToShow = true }
-            }
             .animation(.snappy(duration: 0.25), value: isEditing)
-            } // ScrollViewReader
         }
+        .scrollPosition(id: $initialScrollID, anchor: .top)
         .navigationTitle(recipe.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.automatic, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
+                if isEditing {
+                    // In edit mode: AI Edit wand sits alongside Done
+                    Button {
+                        showingAIEdit = true
+                    } label: {
+                        Image(systemName: "wand.and.stars")
+                            .foregroundStyle(Brand.warmTan)
+                    }
+                    .accessibilityLabel("AI Edit")
+                }
+
                 Button {
                     withAnimation(.snappy(duration: 0.25)) { isEditing.toggle() }
                 } label: {
@@ -137,6 +144,16 @@ struct RecipeDetailView: View {
                     }
                     .accessibilityLabel("More options")
                 }
+            }
+        }
+        .onAppear {
+            if ingestionService == nil {
+                ingestionService = RecipeIngestionService(aiRouter: aiRouter)
+            }
+        }
+        .sheet(isPresented: $showingAIEdit) {
+            AIRecipeEditView(recipe: recipe) { result in
+                Task { await applyAIEdit(result) }
             }
         }
         .sheet(isPresented: $showingLogEntry) {
@@ -815,6 +832,48 @@ struct RecipeDetailView: View {
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title): \(value)")
+    }
+
+    // MARK: - Apply AI Edit
+
+    /// Applies an AI-generated `RecipeIngestionResult` to the existing recipe in-place,
+    /// preserving photos, favourites, logs, and other user data.
+    @MainActor
+    private func applyAIEdit(_ result: RecipeIngestionResult) async {
+        guard let service = ingestionService else { return }
+
+        // Convert the AI result through the same parsing pipeline used for imports
+        // (handles amount parsing, category inference, ingredient-step linking, etc.)
+        let updated = await service.convertToRecipe(result)
+
+        // Scalar fields
+        recipe.title = updated.title
+        if let summary = updated.summary { recipe.summary = summary }
+        recipe.cuisine = updated.cuisine
+        recipe.servings = updated.servings
+        recipe.prepTimeMinutes = updated.prepTimeMinutes
+        recipe.cookTimeMinutes = updated.cookTimeMinutes
+        recipe.totalTimeMinutes = updated.prepTimeMinutes + updated.cookTimeMinutes
+        recipe.directions = updated.directions
+        if let nutrition = updated.nutritionalInfo {
+            recipe.nutritionalInfo = nutrition
+        }
+
+        // Replace relationship-managed ingredients
+        let oldIngredients = recipe.ingredients
+        recipe.ingredients = []
+        for old in oldIngredients { modelContext.delete(old) }
+        for new in updated.ingredients {
+            modelContext.insert(new)
+            recipe.ingredients.append(new)
+        }
+
+        // Update dietary restrictions if AI detected any
+        if !updated.dietaryRestrictions.isEmpty {
+            recipe.dietaryRestrictions = updated.dietaryRestrictions
+        }
+
+        try? modelContext.save()
     }
 
     private var recipeShareText: String {

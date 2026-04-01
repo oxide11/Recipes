@@ -62,6 +62,7 @@ final class PlannedMeal {
     var servings: Int
     var notes: String?
     var isCompleted: Bool
+    var isAISuggested: Bool
 
     init(
         mealType: MealType,
@@ -69,7 +70,8 @@ final class PlannedMeal {
         recipe: Recipe? = nil,
         variation: RecipeVariation? = nil,
         servings: Int = 1,
-        notes: String? = nil
+        notes: String? = nil,
+        isAISuggested: Bool = false
     ) {
         self.id = UUID()
         self.mealType = mealType
@@ -79,6 +81,7 @@ final class PlannedMeal {
         self.servings = servings
         self.notes = notes
         self.isCompleted = false
+        self.isAISuggested = isAISuggested
     }
 }
 

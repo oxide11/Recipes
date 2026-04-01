@@ -20,6 +20,8 @@ struct RecipeImportView: View {
     @State private var showingPhotoLibrary = false
     @State private var cameraImage: UIImage?
     @State private var showingBrowser = false
+    @State private var showingFullPhoto = false
+    @AppStorage("savedRecipeURLs") private var savedURLsData: Data = Data()
 
     @State private var ingestionService: RecipeIngestionService?
     @State private var result: RecipeIngestionResult?
@@ -113,30 +115,89 @@ struct RecipeImportView: View {
         }
     }
 
-    private var urlInputSection: some View {
-        Section("Recipe URL") {
-            TextField("https://example.com/recipe/...", text: $urlString)
-                .keyboardType(.URL)
-                .textContentType(.URL)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
+    private var savedURLs: [String] {
+        (try? JSONDecoder().decode([String].self, from: savedURLsData)) ?? []
+    }
 
-            Button {
-                showingBrowser = true
-            } label: {
-                Label("Browse for a Recipe", systemImage: "globe")
+    private func saveURL(_ url: String) {
+        guard !url.isEmpty, !savedURLs.contains(url) else { return }
+        var urls = savedURLs
+        urls.insert(url, at: 0)
+        savedURLsData = (try? JSONEncoder().encode(Array(urls.prefix(20)))) ?? Data()
+    }
+
+    private func deleteURL(_ url: String) {
+        var urls = savedURLs
+        urls.removeAll { $0 == url }
+        savedURLsData = (try? JSONEncoder().encode(urls)) ?? Data()
+    }
+
+    private var urlInputSection: some View {
+        Group {
+            Section {
+                HStack {
+                    TextField("https://", text: $urlString)
+                        .keyboardType(.URL)
+                        .textContentType(.URL)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                        .font(.subheadline)
+
+                    Button {
+                        saveURL(urlString)
+                    } label: {
+                        Image(systemName: savedURLs.contains(urlString) ? "bookmark.fill" : "bookmark")
+                            .foregroundStyle(urlString.isEmpty ? Color.secondary.opacity(0.4) : Brand.warmTan)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(urlString.isEmpty)
+                }
+
+                Button {
+                    showingBrowser = true
+                } label: {
+                    Label("Browse for a Recipe", systemImage: "globe")
+                }
+                .sheet(isPresented: $showingBrowser) {
+                    RecipeBrowserView { importedURL in
+                        urlString = importedURL
+                        selectedTab = .url
+                        Task { await performImport(urlOverride: importedURL) }
+                    }
+                }
+            } footer: {
+                Text("Paste a URL, browse the web, or tap a saved site below.")
+                    .font(.caption)
             }
-            .sheet(isPresented: $showingBrowser) {
-                RecipeBrowserView { importedURL in
-                    urlString = importedURL
-                    selectedTab = .url
-                    Task { await performImport(urlOverride: importedURL) }
+
+            if !savedURLs.isEmpty {
+                Section("Saved") {
+                    ForEach(savedURLs, id: \.self) { url in
+                        Button {
+                            urlString = url
+                            Task { await performImport(urlOverride: url) }
+                        } label: {
+                            HStack {
+                                Image(systemName: "bookmark.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(Brand.warmTan)
+                                Text(url)
+                                    .font(.caption)
+                                    .foregroundStyle(.primary)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                            }
+                        }
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                deleteURL(url)
+                            } label: {
+                                Label("Remove", systemImage: "trash")
+                            }
+                        }
+                    }
                 }
             }
-
-            Text("Paste a URL above, or browse the web to find one.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
     }
 
@@ -154,20 +215,47 @@ struct RecipeImportView: View {
     private var photoInputSection: some View {
         Section("Recipe Photo") {
             if let photoData, let image = UIImage(data: photoData) {
-                HStack {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 60, height: 60)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    Text("Photo ready to import")
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Button(role: .destructive) {
-                        self.photoData = nil
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.red)
+                Button {
+                    showingFullPhoto = true
+                } label: {
+                    HStack {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 60, height: 60)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .overlay(alignment: .bottomTrailing) {
+                                Image(systemName: "arrow.up.left.and.arrow.down.right")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .padding(3)
+                                    .background(.black.opacity(0.6), in: .rect(cornerRadius: 4))
+                                    .foregroundStyle(.white)
+                                    .padding(3)
+                            }
+                        Text("Tap to view full size")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button(role: .destructive) {
+                            self.photoData = nil
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.red)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+                .sheet(isPresented: $showingFullPhoto) {
+                    if let image = UIImage(data: photoData) {
+                        NavigationStack {
+                            ZoomableImageView(image: image)
+                                .navigationTitle("Recipe Photo")
+                                .navigationBarTitleDisplayMode(.inline)
+                                .toolbar {
+                                    ToolbarItem(placement: .confirmationAction) {
+                                        Button("Done") { showingFullPhoto = false }
+                                    }
+                                }
+                        }
                     }
                 }
             } else {

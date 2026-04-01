@@ -521,7 +521,8 @@ struct CookingModeView: View {
         stepIsPaused.insert(stepIndex)
         stepEndDates.removeValue(forKey: stepIndex)
         stepTimerTasks[stepIndex]?.cancel()
-        Task { await stepLiveActivities[stepIndex]?.pause() }
+        let remaining = stepPausedSeconds[stepIndex] ?? 0
+        Task { await stepLiveActivities[stepIndex]?.pause(remainingSeconds: remaining) }
     }
 
     private func resumeTimer(stepIndex: Int) {

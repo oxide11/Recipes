@@ -9,6 +9,8 @@ struct RecommendedStaplesView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
     @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
+    @Query(sort: \GroceryList.dateCreated, order: .reverse) private var groceryLists: [GroceryList]
+    @State private var addedStaples: Set<String> = []
 
     @State private var selectedTab = 0
 
@@ -124,21 +126,47 @@ struct RecommendedStaplesView: View {
             Spacer()
 
             Button {
-                addToPantry(staple)
+                addToShoppingList(staple)
             } label: {
-                Image(systemName: "plus.circle")
+                if addedStaples.contains(staple.name) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(Brand.herbGreen)
+                } else {
+                    Image(systemName: "cart.badge.plus")
+                        .foregroundStyle(Brand.warmTan)
+                }
             }
+            .disabled(addedStaples.contains(staple.name))
         }
     }
 
-    private func addToPantry(_ staple: RecommendedStaplesService.Staple) {
-        let item = PantryItem(
+    private func addToShoppingList(_ staple: RecommendedStaplesService.Staple) {
+        // Find or create an active grocery list
+        let list: GroceryList
+        if let existing = groceryLists.first {
+            list = existing
+        } else {
+            list = GroceryList(name: "Shopping List")
+            modelContext.insert(list)
+        }
+
+        // Avoid duplicates already on the list
+        guard !list.items.contains(where: { $0.name.lowercased() == staple.name.lowercased() }) else {
+            addedStaples.insert(staple.name)
+            return
+        }
+
+        let item = GroceryItem(
             name: staple.name,
-            category: staple.category,
             quantity: 1,
-            unit: .piece
+            unit: .piece,
+            storeSection: staple.category.storeSection,
+            isStaple: true
         )
+        item.notes = staple.reason
+        list.items.append(item)
         modelContext.insert(item)
+        addedStaples.insert(staple.name)
     }
 
     private func frequencyColor(_ freq: RecommendedStaplesService.StapleFrequency) -> Color {

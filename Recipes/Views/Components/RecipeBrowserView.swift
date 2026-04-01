@@ -13,6 +13,38 @@ struct RecipeBrowserView: View {
     @State private var webState = WebViewState()
     @State private var addressText = "https://"
     @State private var isEditingAddress = false
+    @AppStorage("savedRecipeURLs") private var savedURLsData: Data = Data()
+
+    // MARK: - Saved URL Helpers
+
+    private var savedURLs: [String] {
+        (try? JSONDecoder().decode([String].self, from: savedURLsData)) ?? []
+    }
+
+    /// Returns the root URL (scheme + host) of the current page, e.g. "https://www.allrecipes.com"
+    private var siteRootURL: String? {
+        guard let url = URL(string: webState.currentURL),
+              let scheme = url.scheme,
+              let host = url.host else { return nil }
+        return "\(scheme)://\(host)"
+    }
+
+    private var isSiteBookmarked: Bool {
+        guard let root = siteRootURL else { return false }
+        return savedURLs.contains(root)
+    }
+
+    private func toggleSiteBookmark() {
+        guard let root = siteRootURL else { return }
+        var urls = savedURLs
+        if let idx = urls.firstIndex(of: root) {
+            urls.remove(at: idx)
+        } else {
+            urls.insert(root, at: 0)
+            urls = Array(urls.prefix(20))
+        }
+        savedURLsData = (try? JSONEncoder().encode(urls)) ?? Data()
+    }
 
     var body: some View {
         NavigationStack {
@@ -95,6 +127,16 @@ struct RecipeBrowserView: View {
                     .disabled(webState.currentURL.isEmpty || webState.currentURL == "about:blank")
 
                     Spacer()
+
+                    // Bookmark site
+                    Button {
+                        toggleSiteBookmark()
+                    } label: {
+                        Image(systemName: isSiteBookmarked ? "bookmark.fill" : "bookmark")
+                            .frame(width: 44, height: 44)
+                            .foregroundStyle(isSiteBookmarked ? Brand.warmTan : .secondary)
+                    }
+                    .disabled(siteRootURL == nil)
 
                     // Reload
                     Button {

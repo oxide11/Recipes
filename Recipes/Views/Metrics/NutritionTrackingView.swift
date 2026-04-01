@@ -112,16 +112,34 @@ struct NutritionTrackingView: View {
 
     private var calorieChart: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Calories Over Time")
+            Text(selectedPeriod == .day ? "Today's Meals" : "Calories Over Time")
                 .font(.headline)
 
-            Chart(trackedDays) { day in
+            if selectedPeriod == .day {
+                todayMealChart
+            } else {
+                multiDayChart
+            }
+        }
+        .padding()
+        .glassCard()
+    }
+
+    @ViewBuilder
+    private var todayMealChart: some View {
+        let logs = todayMealLogs
+        if logs.isEmpty {
+            Text("No meals logged today")
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 40)
+        } else {
+            Chart(logs) { log in
                 BarMark(
-                    x: .value("Day", day.date, unit: .day),
-                    y: .value("Calories", day.calories)
+                    x: .value("Meal", log.recipeName),
+                    y: .value("Calories", log.calories)
                 )
                 .foregroundStyle(Brand.warmTan.gradient)
-
                 if let profile, let target = profile.dailyCalorieTarget {
                     RuleMark(y: .value("Target", target))
                         .foregroundStyle(Brand.spiceRed.opacity(0.5))
@@ -130,13 +148,59 @@ struct NutritionTrackingView: View {
             }
             .frame(height: 200)
             .chartXAxis {
+                AxisMarks { _ in
+                    AxisValueLabel()
+                }
+            }
+        }
+    }
+
+    private var multiDayChart: some View {
+        Chart(trackedDays) { day in
+            BarMark(
+                x: .value("Day", day.date, unit: .day),
+                y: .value("Calories", day.calories)
+            )
+            .foregroundStyle(Brand.warmTan.gradient)
+            if let profile, let target = profile.dailyCalorieTarget {
+                RuleMark(y: .value("Target", target))
+                    .foregroundStyle(Brand.spiceRed.opacity(0.5))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
+            }
+        }
+        .frame(height: 200)
+        .chartXAxis {
+            if selectedPeriod == .month {
+                AxisMarks(values: .stride(by: .day, count: 7)) { _ in
+                    AxisGridLine()
+                    AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                }
+            } else {
                 AxisMarks(values: .stride(by: .day)) { _ in
                     AxisValueLabel(format: .dateTime.weekday(.abbreviated))
                 }
             }
         }
-        .padding()
-        .glassCard()
+    }
+
+    private struct MealLog: Identifiable {
+        let id = UUID()
+        let recipeName: String
+        let calories: Double
+    }
+
+    private var todayMealLogs: [MealLog] {
+        let cal = Calendar.current
+        let dayStart = cal.startOfDay(for: referenceDate)
+        guard let dayEnd = cal.date(byAdding: .day, value: 1, to: dayStart) else { return [] }
+        return recipes.flatMap { recipe -> [MealLog] in
+            recipe.cookingLog
+                .filter { $0.date >= dayStart && $0.date < dayEnd }
+                .compactMap { _ in
+                    guard let cal = recipe.nutritionalInfo?.calories, cal > 0 else { return nil }
+                    return MealLog(recipeName: recipe.title, calories: cal)
+                }
+        }
     }
 
     // MARK: - Macro Breakdown

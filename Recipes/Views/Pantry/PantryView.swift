@@ -317,10 +317,12 @@ struct PantryItemRow: View {
                 }
             } else {
                 VStack(alignment: .trailing, spacing: 2) {
-                    if item.category == .protein && !item.isFrozen {
+                    let daysInPantry = Calendar.current.dateComponents([.day], from: item.dateAdded, to: Date()).day ?? 0
+                    if item.category == .protein && !item.isFrozen && daysInPantry >= 3 {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.caption2)
                             .foregroundStyle(Brand.spiceRed)
+                            .help("No expiration date set — consider adding one for fresh proteins")
                     }
                     Text(daysAgoLabel(for: item.dateAdded))
                         .font(.caption2)

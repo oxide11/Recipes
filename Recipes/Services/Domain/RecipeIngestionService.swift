@@ -117,6 +117,20 @@ final class RecipeIngestionService {
         return try parseIngestionResponse(response, source: "text")
     }
 
+    // MARK: - Image Compression
+
+    /// Compress image data to fit within the AI API's 5 MB limit.
+    /// Tries progressively lower JPEG quality until the encoded size is acceptable.
+    static func compressedForAI(_ image: UIImage, maxBytes: Int = 4_800_000) -> Data? {
+        let qualities: [CGFloat] = [0.8, 0.6, 0.4, 0.2, 0.1]
+        for quality in qualities {
+            if let data = image.jpegData(compressionQuality: quality), data.count <= maxBytes {
+                return data
+            }
+        }
+        return image.jpegData(compressionQuality: 0.1)
+    }
+
     // MARK: - Ingest from Image
 
     func ingestFromImage(_ imageData: Data) async throws -> RecipeIngestionResult {
@@ -185,6 +199,65 @@ final class RecipeIngestionService {
         )
     }
 
+    // MARK: - AI Recipe Edit
+
+    /// Re-run AI over an existing recipe with a natural-language modification request.
+    /// Returns an updated `RecipeIngestionResult` — the caller is responsible for applying
+    /// changes to the SwiftData model.
+    func editRecipe(_ recipe: Recipe, instruction: String) async throws -> RecipeIngestionResult {
+        isProcessing = true
+        progress = "Applying changes with AI…"
+        defer { isProcessing = false; progress = nil }
+
+        // Serialize recipe as plain text — easier than raw JSON escaping
+        let sortedDirs = recipe.directions.sorted { $0.stepNumber < $1.stepNumber }
+        var lines: [String] = [
+            "Title: \(recipe.title)",
+            "Servings: \(recipe.servings)",
+            "Cuisine: \(recipe.cuisine.rawValue)",
+            "Prep: \(recipe.prepTimeMinutes) min",
+            "Cook: \(recipe.cookTimeMinutes) min",
+            "",
+            "Ingredients:"
+        ]
+        for ing in recipe.ingredients {
+            let prep = ing.notes.map { ", \($0)" } ?? ""
+            lines.append("- \(ing.amount.displayString) \(ing.name)\(prep)")
+        }
+        lines.append("")
+        lines.append("Steps:")
+        for dir in sortedDirs {
+            lines.append("\(dir.stepNumber). \(dir.instruction)")
+        }
+        let recipeText = lines.joined(separator: "\n")
+
+        let prompt = """
+        Modify the following recipe based on the user's request. \
+        Make ONLY the changes needed to fulfil the request; keep everything else identical.
+
+        Recipe:
+        \(recipeText)
+
+        User request: \(instruction)
+
+        Return the complete updated recipe as valid JSON with this exact structure:
+        {
+          "title": "Recipe Name",
+          "servings": 4,
+          "cuisine": "type",
+          "prepTimeMinutes": 15,
+          "cookTimeMinutes": 30,
+          "ingredients": [{"name": "...", "amount": "...", "preparation": "..."}],
+          "directions": ["Step 1", "Step 2"],
+          "dietaryInfo": [],
+          "nutritionPerServing": null
+        }
+        """
+
+        let response = try await aiRouter.generateText(prompt: prompt, taskType: .recipeIngestion)
+        return try parseIngestionResponse(response, source: recipe.sourceURL ?? "ai-edit")
+    }
+
     // MARK: - Convert Result to Recipe Model
 
     /// Convert an ingestion result into a full Recipe model ready for SwiftData insertion.
@@ -205,11 +278,23 @@ final class RecipeIngestionService {
             )
         }
 
-        let directions = result.directions.enumerated().map { index, instruction in
+        var seenIngredients = Set<String>()
+        let directions = result.directions.enumerated().map { index, instruction -> RecipeDirection in
+            let lower = instruction.lowercased()
+            var seenInStep = Set<String>()   // per-step dedup — prevents duplicate chips when ingredient list itself has duplicates
             let refs = ingredients.compactMap { ingredient -> DirectionIngredientRef? in
-                let lower = instruction.lowercased()
-                guard lower.contains(ingredient.name.lowercased()) else { return nil }
-                return DirectionIngredientRef(ingredientName: ingredient.name, amount: ingredient.amount)
+                let ingredientLower = ingredient.name.lowercased()
+                guard lower.contains(ingredientLower) else { return nil }
+                guard !seenInStep.contains(ingredientLower) else { return nil }
+                guard !Self.isManipulation(instruction: lower, ingredientName: ingredientLower,
+                                           alreadySeen: seenIngredients.contains(ingredientLower)) else { return nil }
+                seenInStep.insert(ingredientLower)
+                seenIngredients.insert(ingredientLower)
+                let amount = Self.extractStepAmount(from: instruction, ingredientName: ingredient.name,
+                                                   parseAmount: parseAmount, matchUnit: matchUnit,
+                                                   parseFraction: parseFraction)
+                             ?? ingredient.amount
+                return DirectionIngredientRef(ingredientName: ingredient.name, amount: amount)
             }
             let timer = parseTimerFromInstruction(instruction, stepNumber: index + 1)
             return RecipeDirection(stepNumber: index + 1, instruction: instruction, timer: timer, ingredients: refs)
@@ -586,6 +671,70 @@ final class RecipeIngestionService {
 
     // MARK: - Ingredient Parsing Helpers
 
+    // MARK: - Step Ingredient Helpers
+
+    /// Returns true when the ingredient mention is manipulation of something already added
+    /// rather than a fresh addition, so no chip should be shown.
+    private static func isManipulation(
+        instruction lower: String,
+        ingredientName: String,
+        alreadySeen: Bool
+    ) -> Bool {
+        // "remaining X" and "reserved X" are real additions — always show a chip
+        if lower.contains("remaining \(ingredientName)") || lower.contains("reserved \(ingredientName)") {
+            return false
+        }
+        // Already introduced in a prior step — only show again if an adding verb is present
+        if alreadySeen {
+            let addingVerbs = ["add ", "stir in", "mix in", "pour", "place", "put ", "fold in",
+                               "incorporate", "sprinkle", "drizzle", "toss with", "coat with",
+                               "combine with", "whisk in", "blend in"]
+            return !addingVerbs.contains { lower.contains($0) }
+        }
+        return false
+    }
+
+    /// Tries to extract the quantity used in this specific step from the instruction text,
+    /// e.g. "2 teaspoons of olive oil" → IngredientAmount(2, .teaspoon).
+    /// Returns nil if no explicit amount is found in the text.
+    private static func extractStepAmount(
+        from instruction: String,
+        ingredientName: String,
+        parseAmount: (String) -> IngredientAmount,
+        matchUnit: (String) -> MeasurementUnit?,
+        parseFraction: (String) -> Double?
+    ) -> IngredientAmount? {
+        let lower = instruction.lowercased()
+        let ingredientLower = ingredientName.lowercased()
+
+        // "remaining X" or "reserved X" — show a "remaining" chip with no specific quantity
+        if lower.contains("remaining \(ingredientLower)") || lower.contains("reserved \(ingredientLower)") {
+            return .remaining
+        }
+        let escapedName = NSRegularExpression.escapedPattern(for: ingredientName.lowercased())
+        // Pattern: (number) (optional unit) (optional "of") ingredientName
+        let pattern = #"([\d½¼¾⅓⅔⅛][0-9 /½¼¾⅓⅔⅛.]*)\s+(teaspoons?|tablespoons?|tsps?|tbsps?|cups?|ounces?|oz|pounds?|lbs?|grams?|g|kilograms?|kg|milliliters?|ml|liters?|l|pinch(?:es)?|cloves?|bunche?s?|slices?|pieces?)\s+(?:of\s+)?"# + escapedName
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+              let match = regex.firstMatch(in: lower, range: NSRange(lower.startIndex..., in: lower)),
+              match.numberOfRanges >= 3 else { return nil }
+
+        let nsLower = lower as NSString
+        let quantityStr = nsLower.substring(with: match.range(at: 1)).trimmingCharacters(in: .whitespaces)
+        let unitStr     = nsLower.substring(with: match.range(at: 2)).trimmingCharacters(in: .whitespaces)
+
+        guard let quantity = parseFraction(quantityStr.components(separatedBy: .whitespaces).last ?? quantityStr),
+              let unit = matchUnit(unitStr) else { return nil }
+
+        // Handle mixed numbers like "1 1/2" → last token is fraction, sum with whole
+        let tokens = quantityStr.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+        var total = quantity
+        if tokens.count == 2, let whole = Double(tokens[0]), let frac = parseFraction(tokens[1]) {
+            total = whole + frac
+        }
+
+        return IngredientAmount(quantity: total, unit: unit)
+    }
+
     private func parseAmount(_ amountString: String) -> IngredientAmount {
         // Strip parenthetical qualifiers like "(14 ounce)" from strings such as "1 (14 ounce) can"
         let cleaned = amountString
@@ -679,18 +828,29 @@ final class RecipeIngestionService {
     // MARK: - JSON Parsing
 
     private func parseIngestionResponse(_ json: String, source: String) throws -> RecipeIngestionResult {
-        let cleaned = json
+        let stripped = json
             .replacingOccurrences(of: "```json", with: "")
             .replacingOccurrences(of: "```", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard let data = cleaned.data(using: .utf8) else {
+        // Extract the JSON object even if the model wraps it in prose or explanation
+        guard let start = stripped.firstIndex(of: "{"),
+              let end   = stripped.lastIndex(of: "}") else {
+            throw IngestionError.parsingFailed
+        }
+        let jsonString = String(stripped[start...end])
+
+        guard let data = jsonString.data(using: .utf8) else {
             throw IngestionError.parsingFailed
         }
 
-        var result = try JSONDecoder().decode(RecipeIngestionResult.self, from: data)
-        result.source = source
-        return result
+        do {
+            var result = try JSONDecoder().decode(RecipeIngestionResult.self, from: data)
+            result.source = source
+            return result
+        } catch {
+            throw IngestionError.parsingFailed
+        }
     }
 }
 

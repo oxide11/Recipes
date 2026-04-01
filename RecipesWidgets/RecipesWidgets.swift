@@ -203,6 +203,8 @@ struct CookingTimerAttributes: ActivityAttributes {
         /// Non-nil while the timer is counting down; nil when paused or ended.
         var endDate: Date?
         var isPaused: Bool
+        /// Seconds remaining at the moment of pause. Nil when running or ended.
+        var remainingSeconds: Int?
     }
 
     var recipeTitle: String
@@ -298,6 +300,7 @@ struct CookingTimerLiveActivity: Widget {
                                 .foregroundStyle(WidgetBrand.warmTan)
                         }
                     }
+                    .widgetURL(URL(string: "recipes://timer/\(context.attributes.recipeID)/\(context.state.stepNumber)"))
                 }
             } compactLeading: {
                 Image(systemName: context.state.isPaused ? "pause.circle" : "timer")

@@ -58,6 +58,25 @@ enum IngredientCategory: String, Codable, CaseIterable, Sendable {
         case .other:     return .gray
         }
     }
+
+    var storeSection: StoreSection {
+        switch self {
+        case .protein:   return .meat
+        case .vegetable: return .produce
+        case .fruit:     return .produce
+        case .grain:     return .dryGoods
+        case .dairy:     return .dairy
+        case .spice:     return .spices
+        case .oil:       return .condiments
+        case .condiment: return .condiments
+        case .liquid:    return .beverages
+        case .sweetener: return .dryGoods
+        case .nut:       return .snacks
+        case .legume:    return .canned
+        case .herb:      return .produce
+        case .other:     return .other
+        }
+    }
 }
 
 enum IngredientColor: String, Codable, Sendable {
@@ -153,8 +172,14 @@ struct IngredientAmount: Codable, Hashable, Sendable {
     var unit: MeasurementUnit
 
     var displayString: String {
-        unit == .asNeeded ? "as needed" : "\(Self.formatQuantity(quantity)) \(unit.rawValue)"
+        if unit == .asNeeded {
+            return quantity == 0 ? "remaining" : "as needed"
+        }
+        return "\(Self.formatQuantity(quantity)) \(unit.rawValue)"
     }
+
+    /// A sentinel amount for step chips where the instruction says "remaining X".
+    static let remaining = IngredientAmount(quantity: 0, unit: .asNeeded)
 
     static func formatQuantity(_ quantity: Double) -> String {
         let whole = Int(quantity)

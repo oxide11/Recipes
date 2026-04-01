@@ -40,6 +40,8 @@ struct CookingTimerAttributes: ActivityAttributes {
         /// Non-nil while the timer is counting down; nil when paused or ended.
         var endDate: Date?
         var isPaused: Bool
+        /// Seconds remaining at the moment of pause. Nil when running or ended.
+        var remainingSeconds: Int?
     }
 
     var recipeTitle: String
@@ -82,7 +84,7 @@ final class CookingTimerLiveActivityManager {
         do {
             currentActivity = try Activity.request(
                 attributes: attributes,
-                content: .init(state: state, staleDate: endDate.addingTimeInterval(10)),
+                content: .init(state: state, staleDate: nil),   // nil = never stale; avoids iOS auto-dismiss
                 pushType: nil
             )
             isActive = true
@@ -91,13 +93,23 @@ final class CookingTimerLiveActivityManager {
         }
     }
 
+    // MARK: - Reconnect
+
+    /// Re-attaches this manager to an already-running Live Activity (e.g. after
+    /// the view disappears and reappears due to navigation).
+    func reconnect(to activity: Activity<CookingTimerAttributes>) {
+        currentActivity = activity
+        isActive = true
+    }
+
     // MARK: - Pause
 
-    func pause() async {
+    func pause(remainingSeconds: Int) async {
         guard let activity = currentActivity else { return }
         var state = activity.content.state
         state.isPaused = true
         state.endDate = nil
+        state.remainingSeconds = remainingSeconds
         nonisolated(unsafe) let a = activity
         await a.update(.init(state: state, staleDate: nil))
     }
@@ -111,7 +123,7 @@ final class CookingTimerLiveActivityManager {
         state.isPaused = false
         state.endDate = newEnd
         nonisolated(unsafe) let a = activity
-        await a.update(.init(state: state, staleDate: newEnd.addingTimeInterval(10)))
+        await a.update(.init(state: state, staleDate: nil))
     }
 
     // MARK: - End

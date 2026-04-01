@@ -1,4 +1,5 @@
 import SwiftUI
+import ActivityKit
 
 // MARK: - Direction Step View
 
@@ -91,6 +92,7 @@ struct DirectionStepView: View {
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Step \(direction.stepNumber). \(direction.instruction)")
+        .onAppear { restoreTimerIfNeeded() }
         .popover(item: $selectedConversion) { ref in
             IngredientConversionPopover(ref: ref)
                 .presentationCompactAdaptation(.popover)
@@ -175,6 +177,47 @@ struct DirectionStepView: View {
         }
     }
 
+    // MARK: - Restore after navigation
+
+    /// Called on appear. If this step has an orphaned Live Activity (e.g. the user
+    /// navigated away and came back), reconnect to it and restore the in-app timer state.
+    private func restoreTimerIfNeeded() {
+        guard !timerActive, direction.timer != nil else { return }
+
+        let match = Activity<CookingTimerAttributes>.activities.first {
+            $0.attributes.recipeID == recipeID.uuidString &&
+            $0.content.state.stepNumber == direction.stepNumber
+        }
+        guard let activity = match else { return }
+
+        let state = activity.content.state
+        if let end = state.endDate, end > .now {
+            // Timer still running — reconnect
+            liveActivity.reconnect(to: activity)
+            endDate = end
+            timerActive = true
+            isPaused = false
+        } else if state.isPaused, let remaining = state.remainingSeconds, remaining > 0 {
+            // Timer was paused — restore paused state using stored remaining seconds
+            liveActivity.reconnect(to: activity)
+            pausedSeconds = remaining
+            timerActive = true
+            isPaused = true
+            endDate = nil
+        } else {
+            // Timer already finished but Live Activity wasn't ended — clean it up
+            Task {
+                var finalState = state
+                finalState.endDate = nil
+                nonisolated(unsafe) let a = activity
+                await a.end(
+                    .init(state: finalState, staleDate: nil),
+                    dismissalPolicy: .immediate
+                )
+            }
+        }
+    }
+
     private func startTimer(seconds: Int) {
         endDate = Date().addingTimeInterval(Double(seconds))
         timerActive = true
@@ -194,7 +237,7 @@ struct DirectionStepView: View {
         pausedSeconds = max(0, Int(end.timeIntervalSinceNow))
         isPaused = true
         endDate = nil
-        Task { await liveActivity.pause() }
+        Task { await liveActivity.pause(remainingSeconds: pausedSeconds) }
     }
 
     private func resumeTimer() {

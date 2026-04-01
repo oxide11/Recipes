@@ -15,6 +15,8 @@ struct RestaurantJournalView: View {
     @State private var entryToDelete: RestaurantJournalEntry?
     @State private var wantToTryToDelete: RestaurantWantToTry?
     @State private var showingMap = false
+    @State private var selectedEntry: RestaurantJournalEntry?
+    @State private var selectedWantToTry: RestaurantWantToTry?
 
     var body: some View {
         NavigationStack {
@@ -60,6 +62,12 @@ struct RestaurantJournalView: View {
             }
             .sheet(isPresented: $showingMap) {
                 RestaurantMapView(entries: entries, wantToTry: wantToTry)
+            }
+            .sheet(item: $selectedEntry) { entry in
+                RestaurantEntryDetailView(entry: entry)
+            }
+            .sheet(item: $selectedWantToTry) { restaurant in
+                WantToTryDetailView(restaurant: restaurant)
             }
         }
     }
@@ -121,6 +129,8 @@ struct RestaurantJournalView: View {
                         }
                     }
                     .padding(.vertical, 2)
+                    .contentShape(Rectangle())
+                    .onTapGesture { selectedEntry = entry }
                     .contextMenu {
                         ShareLink(
                             item: shareText(for: entry),
@@ -207,6 +217,8 @@ struct RestaurantJournalView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture { selectedWantToTry = restaurant }
                     .contextMenu {
                         ShareLink(
                             item: "Check out \(restaurant.restaurantName)\(restaurant.location.map { " in \($0)" } ?? "")!",
@@ -443,6 +455,259 @@ class LocationSearchService {
         @MainActor
         func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
             parent?.results = completer.results
+        }
+    }
+}
+
+// MARK: - Restaurant Entry Detail View
+
+struct RestaurantEntryDetailView: View {
+    @Bindable var entry: RestaurantJournalEntry
+    @Environment(\.dismiss) private var dismiss
+    @State private var isEditing = false
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    if let rating = entry.rating {
+                        StarRatingView(rating: rating, font: .title2)
+                    }
+                    if let cuisine = entry.cuisine {
+                        LabeledContent("Cuisine", value: cuisine.rawValue.capitalized)
+                    }
+                    if let price = entry.priceRange {
+                        LabeledContent("Price", value: price.displayString)
+                    }
+                    if let location = entry.location {
+                        LabeledContent("Location", value: location)
+                    }
+                    LabeledContent("Visited", value: entry.dateVisited.formatted(date: .long, time: .omitted))
+                }
+
+                if !entry.dishesOrdered.isEmpty {
+                    Section("Dishes Ordered") {
+                        ForEach(entry.dishesOrdered, id: \.name) { dish in
+                            DishEntryRow(dish: dish)
+                        }
+                    }
+                }
+
+                if let review = entry.review, !review.isEmpty {
+                    Section("Review") {
+                        Text(review)
+                            .font(.body)
+                    }
+                }
+            }
+            .navigationTitle(entry.restaurantName)
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Edit") { isEditing = true }
+                }
+            }
+            .sheet(isPresented: $isEditing) {
+                EditRestaurantEntryView(entry: entry)
+            }
+        }
+    }
+}
+
+// MARK: - Edit Restaurant Entry View
+
+struct EditRestaurantEntryView: View {
+    @Bindable var entry: RestaurantJournalEntry
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var name: String
+    @State private var location: String
+    @State private var cuisine: Cuisine
+    @State private var rating: Int
+    @State private var review: String
+    @State private var priceRange: PriceRange
+
+    init(entry: RestaurantJournalEntry) {
+        self.entry = entry
+        _name = State(initialValue: entry.restaurantName)
+        _location = State(initialValue: entry.location ?? "")
+        _cuisine = State(initialValue: entry.cuisine ?? .other)
+        _rating = State(initialValue: entry.rating ?? 3)
+        _review = State(initialValue: entry.review ?? "")
+        _priceRange = State(initialValue: entry.priceRange ?? .moderate)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Restaurant") {
+                    TextField("Name", text: $name)
+                    TextField("Location", text: $location)
+                }
+                Section("Details") {
+                    Picker("Cuisine", selection: $cuisine) {
+                        ForEach(Cuisine.allCases, id: \.self) { c in
+                            Text(c.rawValue.capitalized).tag(c)
+                        }
+                    }
+                    Picker("Price Range", selection: $priceRange) {
+                        ForEach(PriceRange.allCases, id: \.self) { p in
+                            Text(p.displayString).tag(p)
+                        }
+                    }
+                }
+                Section("Rating") {
+                    StarRatingView(rating: rating, font: .title2) { rating = $0 }
+                        .sensoryFeedback(.selection, trigger: rating)
+                }
+                Section("Review") {
+                    TextField("What did you think?", text: $review, axis: .vertical)
+                        .lineLimit(5)
+                }
+            }
+            .navigationTitle("Edit Entry")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        entry.restaurantName = name
+                        entry.location = location.isEmpty ? nil : location
+                        entry.cuisine = cuisine
+                        entry.rating = rating
+                        entry.review = review.isEmpty ? nil : review
+                        entry.priceRange = priceRange
+                        dismiss()
+                    }
+                    .disabled(name.isEmpty)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Want to Try Detail View
+
+struct WantToTryDetailView: View {
+    @Bindable var restaurant: RestaurantWantToTry
+    @Environment(\.dismiss) private var dismiss
+    @State private var isEditing = false
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    if let location = restaurant.location {
+                        LabeledContent("Location", value: location)
+                    }
+                    if let cuisine = restaurant.cuisine {
+                        LabeledContent("Cuisine", value: cuisine.rawValue.capitalized)
+                    }
+                    LabeledContent("Added", value: restaurant.dateAdded.formatted(date: .long, time: .omitted))
+                    if restaurant.hasVisited {
+                        Label("Marked as visited", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(Brand.herbGreen)
+                            .font(.subheadline)
+                    }
+                }
+                if let reason = restaurant.reason, !reason.isEmpty {
+                    Section("Why I Want to Try It") {
+                        Text(reason)
+                    }
+                }
+                if let urlString = restaurant.sourceURL, let url = URL(string: urlString) {
+                    Section {
+                        Link(destination: url) {
+                            Label("View Source", systemImage: "link")
+                        }
+                    }
+                }
+            }
+            .navigationTitle(restaurant.restaurantName)
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Edit") { isEditing = true }
+                }
+            }
+            .sheet(isPresented: $isEditing) {
+                EditWantToTryView(restaurant: restaurant)
+            }
+        }
+    }
+}
+
+// MARK: - Edit Want to Try View
+
+struct EditWantToTryView: View {
+    @Bindable var restaurant: RestaurantWantToTry
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var name: String
+    @State private var location: String
+    @State private var cuisine: Cuisine
+    @State private var reason: String
+    @State private var hasVisited: Bool
+
+    init(restaurant: RestaurantWantToTry) {
+        self.restaurant = restaurant
+        _name       = State(initialValue: restaurant.restaurantName)
+        _location   = State(initialValue: restaurant.location ?? "")
+        _cuisine    = State(initialValue: restaurant.cuisine ?? .other)
+        _reason     = State(initialValue: restaurant.reason ?? "")
+        _hasVisited = State(initialValue: restaurant.hasVisited)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Restaurant") {
+                    TextField("Name", text: $name)
+                    TextField("Location", text: $location)
+                }
+                Section("Details") {
+                    Picker("Cuisine", selection: $cuisine) {
+                        ForEach(Cuisine.allCases, id: \.self) { c in
+                            Text(c.rawValue.capitalized).tag(c)
+                        }
+                    }
+                }
+                Section("Notes") {
+                    TextField("Why do you want to try it?", text: $reason, axis: .vertical)
+                        .lineLimit(3...6)
+                }
+                Section {
+                    Toggle("Mark as Visited", isOn: $hasVisited)
+                } footer: {
+                    Text("Once visited, you can add a full journal entry from the Journal tab.")
+                }
+            }
+            .navigationTitle("Edit")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        restaurant.restaurantName = name
+                        restaurant.location   = location.isEmpty ? nil : location
+                        restaurant.cuisine    = cuisine
+                        restaurant.reason     = reason.isEmpty ? nil : reason
+                        restaurant.hasVisited = hasVisited
+                        dismiss()
+                    }
+                    .disabled(name.isEmpty)
+                }
+            }
         }
     }
 }

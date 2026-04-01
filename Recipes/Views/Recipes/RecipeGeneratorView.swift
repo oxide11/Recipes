@@ -37,6 +37,7 @@ struct RecipeGeneratorView: View {
     @State private var dietaryRestrictions: Set<DietaryRestriction> = []
     @State private var hasLoadedProfile = false
     @State private var isGenerating = false
+    @State private var isSaving = false
     @State private var generatedText: String?
     @State private var errorMessage: String?
 
@@ -149,6 +150,13 @@ struct RecipeGeneratorView: View {
                     Section("Generated Recipe") {
                         Text(result)
                             .font(.body)
+                        Button {
+                            Task { await saveGenerated(result) }
+                        } label: {
+                            Label("Save Recipe", systemImage: "square.and.arrow.down")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .disabled(isSaving)
                     }
                 }
             }
@@ -157,6 +165,11 @@ struct RecipeGeneratorView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }
+                }
+                if isSaving {
+                    ToolbarItem(placement: .primaryAction) {
+                        ProgressView()
+                    }
                 }
             }
             .onAppear {
@@ -253,6 +266,7 @@ struct RecipeGeneratorView: View {
         isGenerating = true
         errorMessage = nil
         generatedText = nil
+        defer { isGenerating = false }
 
         do {
             switch mode {
@@ -266,13 +280,11 @@ struct RecipeGeneratorView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
-
-        isGenerating = false
     }
 
     private func generateFromPhoto() async throws -> String {
         guard let image = selectedImage,
-              let jpegData = image.jpegData(compressionQuality: 0.8) else {
+              let jpegData = RecipeIngestionService.compressedForAI(image) else {
             throw AIServiceError.emptyResponse
         }
         let base64 = jpegData.base64EncodedString()
@@ -313,5 +325,212 @@ struct RecipeGeneratorView: View {
            let image = UIImage(data: data) {
             selectedImage = image
         }
+    }
+
+    func saveGenerated(_ text: String) async {
+        isSaving = true
+        defer { isSaving = false }
+        let service = RecipeIngestionService(aiRouter: aiRouter)
+        if let result = try? await service.ingestFromText(text) {
+            let recipe = await service.convertToRecipe(result)
+            modelContext.insert(recipe)
+            dismiss()
+        }
+    }
+}
+
+// MARK: - Quick Generate View (Dashboard shortcut)
+
+/// Auto-generates a recipe on appear — no form, just a spinner then a formatted result card.
+/// Pass `quickMealMode: true` to bias generation toward meals ready in ≤ 30 minutes.
+struct QuickGenerateView: View {
+    var quickMealMode: Bool = false
+
+    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+
+    @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
+    @Query private var profiles: [UserProfile]
+
+    @State private var isGenerating = true
+    @State private var isSaving = false
+    @State private var generatedResult: RecipeIngestionResult?
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if isGenerating {
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                        Text(quickMealMode ? "Finding something quick for you…" : "Generating a recipe for you…")
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if let error = errorMessage {
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.largeTitle)
+                            .foregroundStyle(.red)
+                        Text(error)
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.secondary)
+                        Button("Try Again") { Task { await generate() } }
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if let result = generatedResult {
+                    recipeCard(result)
+                }
+            }
+            .navigationTitle(quickMealMode ? "Quick Meal" : "Quick Generate")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Discard") { dismiss() }
+                }
+                if let result = generatedResult {
+                    ToolbarItem(placement: .confirmationAction) {
+                        if isSaving {
+                            ProgressView()
+                        } else {
+                            Button("Save") { Task { await save(result) } }
+                        }
+                    }
+                }
+            }
+        }
+        .task { await generate() }
+    }
+
+    // MARK: - Formatted Recipe Card
+
+    @ViewBuilder
+    private func recipeCard(_ result: RecipeIngestionResult) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+
+                // Title + metadata
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(result.title)
+                        .font(.title2.weight(.bold))
+
+                    HStack(spacing: 14) {
+                        if let prep = result.prepTimeMinutes {
+                            Label("\(prep) min prep", systemImage: "scissors")
+                        }
+                        if let cook = result.cookTimeMinutes {
+                            Label("\(cook) min cook", systemImage: "flame")
+                        }
+                        if let servings = result.servings {
+                            Label("\(servings) servings", systemImage: "person.2")
+                        }
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                    if let cuisine = result.cuisine {
+                        Text(cuisine.capitalized)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color.secondary.opacity(0.12), in: Capsule())
+                    }
+                }
+
+                Divider()
+
+                // Ingredients
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Ingredients")
+                        .font(.headline)
+
+                    ForEach(result.ingredients, id: \.name) { ing in
+                        HStack(alignment: .top, spacing: 10) {
+                            Circle()
+                                .fill(Color.secondary.opacity(0.4))
+                                .frame(width: 5, height: 5)
+                                .padding(.top, 8)
+                            Group {
+                                if let prep = ing.preparation, !prep.isEmpty {
+                                    Text("\(ing.amount) **\(ing.name)**, \(prep)")
+                                } else {
+                                    Text("\(ing.amount) **\(ing.name)**")
+                                }
+                            }
+                            .font(.body)
+                        }
+                    }
+                }
+
+                Divider()
+
+                // Directions
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Directions")
+                        .font(.headline)
+
+                    ForEach(Array(result.directions.enumerated()), id: \.offset) { i, step in
+                        HStack(alignment: .top, spacing: 12) {
+                            Text("\(i + 1)")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(.white)
+                                .frame(width: 22, height: 22)
+                                .background(Color.secondary.opacity(0.5), in: Circle())
+                                .padding(.top, 1)
+                            Text(step)
+                                .font(.body)
+                        }
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+
+    // MARK: - Generation
+
+    private func generate() async {
+        isGenerating = true
+        generatedResult = nil
+        errorMessage = nil
+        defer { isGenerating = false }
+
+        let service = RecipeIngestionService(aiRouter: aiRouter)
+        let profile = profiles.first
+
+        var description: String
+        if pantryItems.isEmpty {
+            description = quickMealMode
+                ? "Generate a quick, easy meal ready in 30 minutes or less."
+                : "Surprise me with a delicious recipe."
+        } else {
+            let names = pantryItems.prefix(20).map(\.name).joined(separator: ", ")
+            description = quickMealMode
+                ? "Generate a quick meal ready in 30 minutes or less using some or all of these pantry ingredients: \(names)."
+                : "Generate a recipe using some or all of these pantry ingredients: \(names)."
+        }
+        if let restrictions = profile?.dietaryRestrictions, !restrictions.isEmpty {
+            description += " Dietary needs: \(restrictions.map(\.displayName).joined(separator: ", "))."
+        }
+
+        do {
+            // ingestFromText structures the AI output as a RecipeIngestionResult in one call
+            generatedResult = try await service.ingestFromText(description)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func save(_ result: RecipeIngestionResult) async {
+        isSaving = true
+        defer { isSaving = false }
+        let service = RecipeIngestionService(aiRouter: aiRouter)
+        let recipe = await service.convertToRecipe(result)
+        modelContext.insert(recipe)
+        dismiss()
     }
 }
