@@ -262,7 +262,7 @@ struct PantryItemRow: View {
     let item: PantryItem
 
     var body: some View {
-        HStack {
+        HStack(spacing: 10) {
             // Color-coded category dot
             Circle()
                 .fill(categoryColor(item.category))
