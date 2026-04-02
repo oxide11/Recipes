@@ -16,12 +16,12 @@ struct ContentView: View {
                 DashboardView()
             }
 
-            Tab("Recipes", systemImage: "book.pages", value: .recipes) {
-                RecipeListView()
-            }
-
             Tab("Plan & Shop", systemImage: "cart", value: .planAndShop) {
                 PlanAndShopView()
+            }
+
+            Tab("Recipes", systemImage: "book.pages", value: .recipes) {
+                RecipeListView()
             }
 
             Tab("Activity", systemImage: "chart.bar", value: .activity) {
