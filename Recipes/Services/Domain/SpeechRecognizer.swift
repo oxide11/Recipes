@@ -95,10 +95,14 @@ final class SpeechRecognizer {
             }
         }
 
+        // Capture the request as a plain local so the tap closure never
+        // touches @MainActor-isolated state — the audio tap fires on a
+        // real-time thread and cannot safely access actor-isolated properties.
+        let capturedRequest = request
         let inputNode = audioEngine.inputNode
         let format = inputNode.outputFormat(forBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
-            self?.recognitionRequest?.append(buffer)
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
+            capturedRequest.append(buffer)
         }
 
         audioEngine.prepare()
