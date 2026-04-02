@@ -287,10 +287,13 @@ struct BulkPhotoAddView: View {
         This is a photo of a grocery receipt.
         Extract the store name and all food/grocery items with their prices and quantities.
         Ignore non-food items (cleaning supplies, paper goods, etc).
+        Use generic ingredient names — strip brand names and marketing qualifiers.
+        Examples: "Ace Bakery Bread" → "Bread", "PC Free Range Large Eggs" → "Eggs", "Tropicana OJ 1.75L" → "Orange Juice".
+        Normalize abbreviated names (e.g. "CHKN BRST" → "Chicken Breast").
         Respond with ONLY a JSON object, no explanation:
         {"store": "Store Name or null", "items": [{"name": "Chicken Breast", "category": "protein", "quantity": 1, "price": 8.99}]}
         Valid categories: protein, vegetable, fruit, grain, dairy, spice, herb, condiment, oil, liquid, sweetener, nut, legume, other
-        Normalize abbreviated names (e.g. "CHKN BRST" → "Chicken Breast"). Use null for price if not readable.
+        Use null for price if not readable.
         """
     }
 
