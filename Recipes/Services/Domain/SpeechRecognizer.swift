@@ -55,11 +55,9 @@ final class SpeechRecognizer {
         }
         guard speechStatus == .authorized else { return false }
 
-        let micStatus = AVAudioSession.sharedInstance().recordPermission
+        let micStatus = AVAudioApplication.shared.recordPermission
         if micStatus == .undetermined {
-            return await withCheckedContinuation { cont in
-                AVAudioSession.sharedInstance().requestRecordPermission { cont.resume(returning: $0) }
-            }
+            return await AVAudioApplication.requestRecordPermission()
         }
         return micStatus == .granted
     }
