@@ -20,31 +20,34 @@ struct VoicePantryEditView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 32) {
-                Spacer()
+            // Confirm phase needs a scrollable list with pinned buttons —
+            // all other phases are simple centered content.
+            if phase == .confirm {
+                confirmView
+                    .padding(.horizontal)
+            } else {
+                VStack(spacing: 32) {
+                    Spacer()
 
-                switch phase {
-                case .idle:
-                    idleView
-                case .listening:
-                    listeningView
-                case .parsing:
-                    parsingView
-                case .confirm:
-                    confirmView
+                    switch phase {
+                    case .idle:     idleView
+                    case .listening: listeningView
+                    case .parsing:  parsingView
+                    case .confirm:  EmptyView()
+                    }
+
+                    if let error = errorMessage {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(Brand.spiceRed)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+
+                    Spacer()
                 }
-
-                if let error = errorMessage {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundStyle(Brand.spiceRed)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-
-                Spacer()
+                .padding()
             }
-            .padding()
             .navigationTitle("Voice Edit")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -125,64 +128,74 @@ struct VoicePantryEditView: View {
     }
 
     private var confirmView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 0) {
             if parsedActions.isEmpty {
                 VStack(spacing: 12) {
+                    Spacer()
                     Image(systemName: "questionmark.circle")
                         .font(.system(size: 48))
                         .foregroundStyle(.secondary)
                     Text("Couldn't work out any changes from that.")
                         .foregroundStyle(.secondary)
                     retryButton
+                    Spacer()
                 }
             } else {
                 Text("Here's what I'll do:")
                     .font(.headline)
+                    .padding(.vertical, 16)
 
-                VStack(spacing: 0) {
-                    ForEach(parsedActions) { action in
-                        HStack(spacing: 12) {
-                            Image(systemName: action.type == .add ? "plus.circle.fill" : "minus.circle.fill")
-                                .foregroundStyle(action.type == .add ? Brand.herbGreen : Brand.spiceRed)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(action.name).fontWeight(.medium)
-                                if action.type == .add {
-                                    if pantryItems.contains(where: { $0.name.lowercased() == action.name.lowercased() }) {
-                                        Text("Already in pantry — will skip")
+                // Scrollable item list — expands to fill available space
+                ScrollView {
+                    VStack(spacing: 0) {
+                        ForEach(parsedActions) { action in
+                            HStack(spacing: 12) {
+                                Image(systemName: action.type == .add ? "plus.circle.fill" : "minus.circle.fill")
+                                    .foregroundStyle(action.type == .add ? Brand.herbGreen : Brand.spiceRed)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(action.name).fontWeight(.medium)
+                                    if action.type == .add {
+                                        if pantryItems.contains(where: { $0.name.lowercased() == action.name.lowercased() }) {
+                                            Text("Already in pantry — will skip")
+                                                .font(.caption)
+                                                .foregroundStyle(.orange)
+                                        } else if let cat = action.category {
+                                            Text(cat.rawValue.capitalized)
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                    if action.type == .remove && !pantryItems.contains(where: { $0.name.lowercased() == action.name.lowercased() }) {
+                                        Text("Not in pantry — will skip")
                                             .font(.caption)
                                             .foregroundStyle(.orange)
-                                    } else if let cat = action.category {
-                                        Text(cat.rawValue.capitalized)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
                                     }
                                 }
-                                if action.type == .remove && !pantryItems.contains(where: { $0.name.lowercased() == action.name.lowercased() }) {
-                                    Text("Not in pantry — will skip")
-                                        .font(.caption)
-                                        .foregroundStyle(.orange)
-                                }
+                                Spacer()
                             }
-                            Spacer()
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 16)
+                            Divider().padding(.leading, 52)
                         }
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 16)
-                        Divider().padding(.leading, 52)
                     }
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                .background(Color(.secondarySystemGroupedBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                Button {
-                    applyChanges()
-                } label: {
-                    Text("Apply")
-                        .frame(maxWidth: .infinity)
+                // Buttons pinned below the scroll area — always reachable
+                VStack(spacing: 12) {
+                    Button {
+                        applyChanges()
+                    } label: {
+                        Text("Apply")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Brand.herbGreen)
+
+                    retryButton
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(Brand.herbGreen)
-
-                retryButton
+                .padding(.vertical, 16)
             }
         }
     }
