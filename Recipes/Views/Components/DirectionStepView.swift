@@ -1,6 +1,5 @@
 import SwiftUI
 import ActivityKit
-import AudioToolbox
 import UserNotifications
 
 // MARK: - Direction Step View
@@ -124,8 +123,14 @@ struct DirectionStepView: View {
                         Text(formatTime(pausedSeconds))
                             .monospacedDigit()
                     } else if let end = endDate {
-                        Text(end, style: .timer)
-                            .monospacedDigit()
+                        // Clamp at 0:00 — Text(.timer) counts up past the end date
+                        if end.timeIntervalSinceNow > 0 {
+                            Text(end, style: .timer)
+                                .monospacedDigit()
+                        } else {
+                            Text("0:00")
+                                .monospacedDigit()
+                        }
                     }
                 }
                 .fontWeight(.semibold)
@@ -268,12 +273,10 @@ struct DirectionStepView: View {
         Task { await liveActivity.end() }
     }
 
-    /// Plays a sound and haptic when the timer finishes while the app is in the foreground.
-    /// (The local notification handles the backgrounded case.)
+    /// Called when the timer finishes. The scheduled notification handles both
+    /// foreground and background — fires banner + sound via AppNotificationDelegate.
+    /// Haptic gives immediate tactile feedback.
     private func timerDidFinish() {
-        // System sound 1005 = "Tock" alarm-style chime
-        AudioServicesPlaySystemSound(1005)
-        // Strong haptic so it's felt as well as heard
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.warning)
     }

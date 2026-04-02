@@ -2,6 +2,24 @@ import SwiftUI
 import SwiftData
 import UserNotifications
 
+// MARK: - Notification Delegate
+// Presents timer notifications (with sound) even when the app is in the foreground.
+
+class AppNotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        // Show banner and play sound even when app is open
+        completionHandler([.banner, .sound])
+    }
+}
+
+// Stored at file scope so the weak UNUserNotificationCenter.delegate reference
+// doesn't deallocate the object when the App struct is recreated.
+private let sharedNotificationDelegate = AppNotificationDelegate()
+
 // MARK: - App Entry Point
 
 @main
@@ -56,8 +74,9 @@ struct RecipesApp: App {
                 .preferredColorScheme(.dark)
                 .onOpenURL { timerDeepLink.handle($0) }
                 .task {
-                    _ = try? await UNUserNotificationCenter.current()
-                        .requestAuthorization(options: [.alert, .sound])
+                    let center = UNUserNotificationCenter.current()
+                    center.delegate = sharedNotificationDelegate
+                    _ = try? await center.requestAuthorization(options: [.alert, .sound])
                 }
         }
         .modelContainer(Self.container)
