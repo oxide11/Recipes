@@ -146,10 +146,16 @@ struct VoicePantryEditView: View {
                                 .foregroundStyle(action.type == .add ? Brand.herbGreen : Brand.spiceRed)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(action.name).fontWeight(.medium)
-                                if action.type == .add, let cat = action.category {
-                                    Text(cat.rawValue.capitalized)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
+                                if action.type == .add {
+                                    if pantryItems.contains(where: { $0.name.lowercased() == action.name.lowercased() }) {
+                                        Text("Already in pantry — will skip")
+                                            .font(.caption)
+                                            .foregroundStyle(.orange)
+                                    } else if let cat = action.category {
+                                        Text(cat.rawValue.capitalized)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
                                 }
                                 if action.type == .remove && !pantryItems.contains(where: { $0.name.lowercased() == action.name.lowercased() }) {
                                     Text("Not in pantry — will skip")
@@ -235,6 +241,8 @@ struct VoicePantryEditView: View {
         for action in parsedActions {
             switch action.type {
             case .add:
+                let key = action.name.lowercased()
+                guard !pantryItems.contains(where: { $0.name.lowercased() == key }) else { continue }
                 let item = PantryItem(
                     name: action.name,
                     category: action.category ?? .other,
