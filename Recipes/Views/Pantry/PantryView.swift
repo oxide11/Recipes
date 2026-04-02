@@ -344,11 +344,17 @@ struct PantryItemRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            // Color-coded category dot
-            Circle()
-                .fill(categoryColor(item.category))
-                .frame(width: 8, height: 8)
-                .accessibilityHidden(true)
+            // Star for staples, category dot otherwise
+            if item.isStaple {
+                Image(systemName: "star.fill")
+                    .font(.caption2)
+                    .foregroundStyle(Brand.warmTan)
+                    .frame(width: 8)
+            } else {
+                Circle()
+                    .fill(categoryColor(item.category))
+                    .frame(width: 8, height: 8)
+            }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.name)
@@ -356,11 +362,6 @@ struct PantryItemRow: View {
                     .foregroundStyle(item.isExpired ? .red : .primary)
 
                 HStack(spacing: 4) {
-                    if item.isStaple {
-                        Image(systemName: "star.fill")
-                            .font(.caption2)
-                            .foregroundStyle(Brand.warmTan)
-                    }
                     if item.barcode != nil {
                         Image(systemName: "barcode")
                             .font(.caption2)
