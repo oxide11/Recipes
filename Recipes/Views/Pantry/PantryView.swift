@@ -45,6 +45,7 @@ struct PantryView: View {
     @State private var showingScanner = false
     @State private var showingAddItem = false
     @State private var showingBulkPhoto = false
+    @State private var showingQuickAdd = false
     @State private var showingNoWasteResults = false
     @State private var searchText = ""
     @State private var editingItem: PantryItem?
@@ -208,6 +209,9 @@ struct PantryView: View {
                     }
                     .accessibilityLabel("Scan barcode")
                     Menu {
+                        Button("Quick Add", systemImage: "text.badge.plus") {
+                            showingQuickAdd = true
+                        }
                         Button("Add Item Manually", systemImage: "square.and.pencil") {
                             showingAddItem = true
                         }
@@ -221,6 +225,9 @@ struct PantryView: View {
             }
             .sheet(isPresented: $showingScanner) {
                 BarcodeScannerFullView()
+            }
+            .sheet(isPresented: $showingQuickAdd) {
+                QuickAddPantryView()
             }
             .sheet(isPresented: $showingAddItem) {
                 AddPantryItemView()
@@ -268,10 +275,6 @@ struct PantryItemRow: View {
                     .foregroundStyle(item.isExpired ? .red : .primary)
 
                 HStack(spacing: 4) {
-                    Text("\(item.quantity, specifier: "%.1f") \(item.unit.rawValue)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
                     if item.barcode != nil {
                         Image(systemName: "barcode")
                             .font(.caption2)
@@ -327,8 +330,6 @@ struct BarcodeScannerFullView: View {
     @Environment(AIServiceRouter.self) private var aiRouter
 
     @State private var scanner = BarcodeScannerService()
-    @State private var quantity: Double = 1
-    @State private var unit: MeasurementUnit = .piece
     @State private var hasExpiration = false
     @State private var expirationDate = Date().addingTimeInterval(7 * 86400)
     @State private var isFrozen = false
@@ -443,22 +444,10 @@ struct BarcodeScannerFullView: View {
                     LabeledContent("Barcode", value: product.barcode)
                 }
 
-                Section("Quantity") {
-                    HStack {
-                        TextField("Qty", value: $quantity, format: .number)
-                            .keyboardType(.decimalPad)
-                            .frame(width: 80)
-                        Picker("Unit", selection: $unit) {
-                            ForEach(MeasurementUnit.allCases, id: \.self) { u in
-                                Text(u.rawValue).tag(u)
-                            }
-                        }
-                    }
-
+                Section {
                     if let product = scanner.lookupResult, [.protein, .vegetable, .fruit].contains(product.category) {
                         Toggle("Frozen", isOn: $isFrozen)
                     }
-
                     Toggle("Has Expiration Date", isOn: $hasExpiration)
                     if hasExpiration {
                         DatePicker("Expires", selection: $expirationDate, displayedComponents: .date)
@@ -515,22 +504,10 @@ struct BarcodeScannerFullView: View {
                     }
                 }
 
-                Section("Quantity") {
-                    HStack {
-                        TextField("Qty", value: $quantity, format: .number)
-                            .keyboardType(.decimalPad)
-                            .frame(width: 80)
-                        Picker("Unit", selection: $unit) {
-                            ForEach(MeasurementUnit.allCases, id: \.self) { u in
-                                Text(u.rawValue).tag(u)
-                            }
-                        }
-                    }
-
+                Section {
                     if [.protein, .vegetable, .fruit].contains(manualCategory) {
                         Toggle("Frozen", isOn: $isFrozen)
                     }
-
                     Toggle("Has Expiration Date", isOn: $hasExpiration)
                     if hasExpiration {
                         DatePicker("Expires", selection: $expirationDate, displayedComponents: .date)
@@ -555,8 +532,6 @@ struct BarcodeScannerFullView: View {
 
     private func addProductToPantry() {
         if let item = scanner.createPantryItem(
-            quantity: quantity,
-            unit: unit,
             expirationDate: hasExpiration ? expirationDate : nil
         ) {
             item.isFrozen = isFrozen
@@ -570,8 +545,8 @@ struct BarcodeScannerFullView: View {
             name: manualName,
             category: manualCategory,
             barcode: scanner.scannedCode,
-            quantity: quantity,
-            unit: unit,
+            quantity: 1,
+            unit: .piece,
             expirationDate: hasExpiration ? expirationDate : nil
         )
         item.isFrozen = isFrozen
@@ -589,8 +564,6 @@ struct AddPantryItemView: View {
 
     @State private var name = ""
     @State private var category: IngredientCategory = .other
-    @State private var quantity: Double = 1
-    @State private var unit: MeasurementUnit = .piece
     @State private var hasExpiration = false
     @State private var expirationDate = Date().addingTimeInterval(7 * 86400)
     @State private var isFrozen = false
@@ -603,17 +576,6 @@ struct AddPantryItemView: View {
                 Picker("Category", selection: $category) {
                     ForEach(IngredientCategory.allCases, id: \.self) { c in
                         Text(c.rawValue.capitalized).tag(c)
-                    }
-                }
-
-                HStack {
-                    TextField("Qty", value: $quantity, format: .number)
-                        .keyboardType(.decimalPad)
-                        .frame(width: 80)
-                    Picker("Unit", selection: $unit) {
-                        ForEach(MeasurementUnit.allCases, id: \.self) { u in
-                            Text(u.rawValue).tag(u)
-                        }
                     }
                 }
 
@@ -637,8 +599,8 @@ struct AddPantryItemView: View {
                         let item = PantryItem(
                             name: name,
                             category: category,
-                            quantity: quantity,
-                            unit: unit,
+                            quantity: 1,
+                            unit: .piece,
                             expirationDate: hasExpiration ? expirationDate : nil
                         )
                         item.isFrozen = isFrozen
@@ -660,8 +622,6 @@ struct EditPantryItemView: View {
 
     @State private var name: String
     @State private var category: IngredientCategory
-    @State private var quantity: Double
-    @State private var unit: MeasurementUnit
     @State private var hasExpiration: Bool
     @State private var expirationDate: Date
     @State private var isFrozen: Bool
@@ -670,8 +630,6 @@ struct EditPantryItemView: View {
         self.item = item
         _name = State(initialValue: item.name)
         _category = State(initialValue: item.category)
-        _quantity = State(initialValue: item.quantity)
-        _unit = State(initialValue: item.unit)
         _hasExpiration = State(initialValue: item.expirationDate != nil)
         _expirationDate = State(initialValue: item.expirationDate ?? Date().addingTimeInterval(7 * 86400))
         _isFrozen = State(initialValue: item.isFrozen)
@@ -685,17 +643,6 @@ struct EditPantryItemView: View {
                 Picker("Category", selection: $category) {
                     ForEach(IngredientCategory.allCases, id: \.self) { c in
                         Text(c.rawValue.capitalized).tag(c)
-                    }
-                }
-
-                HStack {
-                    TextField("Qty", value: $quantity, format: .number)
-                        .keyboardType(.decimalPad)
-                        .frame(width: 80)
-                    Picker("Unit", selection: $unit) {
-                        ForEach(MeasurementUnit.allCases, id: \.self) { u in
-                            Text(u.rawValue).tag(u)
-                        }
                     }
                 }
 
@@ -718,8 +665,6 @@ struct EditPantryItemView: View {
                     Button("Save") {
                         item.name = name
                         item.category = category
-                        item.quantity = quantity
-                        item.unit = unit
                         item.expirationDate = hasExpiration ? expirationDate : nil
                         item.isFrozen = isFrozen
                         dismiss()
@@ -727,6 +672,124 @@ struct EditPantryItemView: View {
                     .disabled(name.isEmpty)
                 }
             }
+        }
+    }
+}
+
+// MARK: - Quick Add Pantry View
+
+/// Natural-language bulk add: type "eggs, butter, olive oil, chicken thighs"
+/// and the AI categorises each item automatically.
+struct QuickAddPantryView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @Environment(AIServiceRouter.self) private var aiRouter
+
+    @State private var inputText = ""
+    @State private var isAdding = false
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField(
+                        "e.g. eggs, butter, olive oil, chicken thighs",
+                        text: $inputText,
+                        axis: .vertical
+                    )
+                    .lineLimit(4...8)
+                    .autocorrectionDisabled()
+                } header: {
+                    Text("What do you have?")
+                } footer: {
+                    Text("Separate items with commas or new lines. The AI will categorise each one.")
+                        .font(.caption)
+                }
+
+                if let error = errorMessage {
+                    Section {
+                        Text(error).foregroundStyle(Brand.spiceRed).font(.caption)
+                    }
+                }
+            }
+            .navigationTitle("Quick Add")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    if isAdding {
+                        ProgressView()
+                    } else {
+                        Button("Add") {
+                            Task { await addItems() }
+                        }
+                        .disabled(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                }
+            }
+        }
+    }
+
+    private func addItems() async {
+        isAdding = true
+        errorMessage = nil
+        defer { isAdding = false }
+
+        // Parse raw tokens from input
+        let tokens = inputText
+            .components(separatedBy: CharacterSet(charactersIn: ",\n"))
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        guard !tokens.isEmpty else { return }
+
+        // Ask AI to categorise all tokens in one call
+        let list = tokens.enumerated().map { "\($0.offset + 1). \($0.element)" }.joined(separator: "\n")
+        let prompt = """
+        Categorise each grocery/pantry item into one of these categories: protein, dairy, vegetable, fruit, grain, spice, herb, condiment, oil, liquid, sweetener, nut, other.
+        Items:
+        \(list)
+        Respond with ONLY a JSON array, one object per item, in order:
+        [{"name":"item name","category":"category"}]
+        """
+
+        do {
+            let response = try await aiRouter.generateText(prompt: prompt, taskType: .classification)
+            let parsed = parseItems(from: response, fallback: tokens)
+            for entry in parsed {
+                let item = PantryItem(name: entry.name, category: entry.category, quantity: 1, unit: .piece)
+                modelContext.insert(item)
+            }
+            dismiss()
+        } catch {
+            // AI failed — add items with .other category as a fallback
+            for token in tokens {
+                let item = PantryItem(name: token, category: .other, quantity: 1, unit: .piece)
+                modelContext.insert(item)
+            }
+            dismiss()
+        }
+    }
+
+    private struct ParsedItem { let name: String; let category: IngredientCategory }
+
+    private func parseItems(from response: String, fallback tokens: [String]) -> [ParsedItem] {
+        guard let start = response.firstIndex(of: "["),
+              let end = response.lastIndex(of: "]") else {
+            return tokens.map { ParsedItem(name: $0, category: .other) }
+        }
+        let json = String(response[start...end])
+        guard let data = json.data(using: .utf8),
+              let array = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+            return tokens.map { ParsedItem(name: $0, category: .other) }
+        }
+        return array.compactMap { dict in
+            guard let name = dict["name"] as? String else { return nil }
+            let cat = IngredientCategory(rawValue: dict["category"] as? String ?? "") ?? .other
+            return ParsedItem(name: name, category: cat)
         }
     }
 }

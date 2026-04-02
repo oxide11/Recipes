@@ -138,11 +138,6 @@ struct BulkPhotoAddView: View {
                                         .focused($focusedField, equals: item.id)
                                         .textInputAutocapitalization(.words)
                                     HStack(spacing: 8) {
-                                        TextField("Qty", value: $item.quantity, format: .number)
-                                            .keyboardType(.decimalPad)
-                                            .frame(width: 40)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
                                         if [IngredientCategory.protein, .vegetable, .fruit].contains(item.category) {
                                             Toggle("Frozen", isOn: $item.isFrozen)
                                                 .font(.caption)
