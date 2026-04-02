@@ -5,8 +5,7 @@ import UserNotifications
 // MARK: - Notification Delegate
 // Presents timer notifications (with sound) even when the app is in the foreground.
 
-@MainActor
-final class AppNotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
+final class AppNotificationDelegate: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
