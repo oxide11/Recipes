@@ -504,20 +504,26 @@ struct QuickGenerateView: View {
 
         var description: String
         if quickMealMode {
-            // Quick meal: constrain to pantry so no shopping trip is needed
-            if pantryItems.isEmpty {
+            // Quick meal: use pantry + staples — no shopping trip needed
+            let staples = pantryItems.filter(\.isStaple).map(\.name)
+            let onHand  = pantryItems.filter { !$0.isStaple }.prefix(20).map(\.name)
+            if onHand.isEmpty && staples.isEmpty {
                 description = "Generate a quick, easy meal ready in 30 minutes or less."
             } else {
-                let names = pantryItems.prefix(20).map(\.name).joined(separator: ", ")
-                description = "Generate a quick meal ready in 30 minutes or less using some or all of these pantry ingredients: \(names)."
+                var parts: [String] = []
+                if !onHand.isEmpty  { parts.append("I currently have: \(onHand.joined(separator: ", "))") }
+                if !staples.isEmpty { parts.append("I almost always keep: \(staples.joined(separator: ", "))") }
+                description = "Generate a quick meal ready in 30 minutes or less. \(parts.joined(separator: ". ")). Use these ingredients where possible — no shopping trip."
             }
         } else {
             // General recipe: not pantry-constrained — shopping is fine
-            // Hint at ingredients they've used before as a soft preference, not a requirement
-            let usedNames = pantryItems.filter { $0.lastUsed != nil }.prefix(12).map(\.name)
-            let stapleHint = usedNames.isEmpty ? "" :
-                " Feel free to incorporate ingredients like \(usedNames.joined(separator: ", ")) if they fit naturally, but don't feel constrained to them."
-            description = "Surprise me with a delicious recipe.\(stapleHint)"
+            let staples = pantryItems.filter(\.isStaple).map(\.name)
+            let usedNames = pantryItems.filter { !$0.isStaple && $0.lastUsed != nil }.prefix(10).map(\.name)
+            var hints: [String] = []
+            if !staples.isEmpty  { hints.append("I almost always have: \(staples.joined(separator: ", "))") }
+            if !usedNames.isEmpty { hints.append("I often have: \(usedNames.joined(separator: ", "))") }
+            let hint = hints.isEmpty ? "" : " \(hints.joined(separator: ". ")). Feel free to use these but don't feel constrained."
+            description = "Surprise me with a delicious recipe.\(hint)"
         }
         if let restrictions = profile?.dietaryRestrictions, !restrictions.isEmpty {
             description += " Dietary needs: \(restrictions.map(\.displayName).joined(separator: ", "))."

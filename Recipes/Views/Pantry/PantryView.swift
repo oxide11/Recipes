@@ -65,12 +65,16 @@ struct PantryView: View {
 
     private var staleItems: [PantryItem] {
         items.filter { item in
-            // Don't double-flag items already in the expiring section
-            guard !item.isExpiringSoon else { return false }
+            guard !item.isExpiringSoon, !item.isStaple else { return false }
             let reference = item.lastUsed ?? item.dateAdded
             let days = Calendar.current.dateComponents([.day], from: reference, to: .now).day ?? 0
             return days > shelfLifeDays(for: item)
         }
+    }
+
+    private var stapleItems: [PantryItem] {
+        items.filter(\.isStaple)
+            .sorted { $0.name.localizedCompare($1.name) == .orderedAscending }
     }
 
     private func shelfLifeDays(for item: PantryItem) -> Int {
@@ -110,6 +114,14 @@ struct PantryView: View {
         PantryItemRow(item: item)
             .contentShape(Rectangle())
             .onTapGesture { editingItem = item }
+            .swipeActions(edge: .leading) {
+                Button {
+                    item.isStaple.toggle()
+                } label: {
+                    Label(item.isStaple ? "Unstar" : "Staple", systemImage: item.isStaple ? "star.slash" : "star")
+                }
+                .tint(Brand.warmTan)
+            }
             .swipeActions(edge: .trailing) {
                 Button(role: .destructive) {
                     modelContext.delete(item)
@@ -192,6 +204,20 @@ struct PantryView: View {
                         Label("Do you still have these?", systemImage: "questionmark.circle")
                     } footer: {
                         Text("These have been in your pantry a while. Tap Keep to confirm, or × to remove.")
+                            .font(.caption)
+                    }
+                }
+
+                // Staples section
+                if !stapleItems.isEmpty && searchText.isEmpty {
+                    Section {
+                        ForEach(stapleItems) { item in
+                            pantryItemRow(item)
+                        }
+                    } header: {
+                        Label("Staples", systemImage: "star.fill")
+                    } footer: {
+                        Text("Items you almost always have. Swipe right to remove the staple mark.")
                             .font(.caption)
                     }
                 }
@@ -358,6 +384,11 @@ struct PantryItemRow: View {
                     .foregroundStyle(item.isExpired ? .red : .primary)
 
                 HStack(spacing: 4) {
+                    if item.isStaple {
+                        Image(systemName: "star.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Brand.warmTan)
+                    }
                     if item.barcode != nil {
                         Image(systemName: "barcode")
                             .font(.caption2)
