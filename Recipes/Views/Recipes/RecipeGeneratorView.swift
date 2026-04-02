@@ -503,18 +503,27 @@ struct QuickGenerateView: View {
         let profile = profiles.first
 
         var description: String
-        if pantryItems.isEmpty {
-            description = quickMealMode
-                ? "Generate a quick, easy meal ready in 30 minutes or less."
-                : "Surprise me with a delicious recipe."
+        if quickMealMode {
+            // Quick meal: constrain to pantry so no shopping trip is needed
+            if pantryItems.isEmpty {
+                description = "Generate a quick, easy meal ready in 30 minutes or less."
+            } else {
+                let names = pantryItems.prefix(20).map(\.name).joined(separator: ", ")
+                description = "Generate a quick meal ready in 30 minutes or less using some or all of these pantry ingredients: \(names)."
+            }
         } else {
-            let names = pantryItems.prefix(20).map(\.name).joined(separator: ", ")
-            description = quickMealMode
-                ? "Generate a quick meal ready in 30 minutes or less using some or all of these pantry ingredients: \(names)."
-                : "Generate a recipe using some or all of these pantry ingredients: \(names)."
+            // General recipe: not pantry-constrained — shopping is fine
+            // Hint at ingredients they've used before as a soft preference, not a requirement
+            let usedNames = pantryItems.filter { $0.lastUsed != nil }.prefix(12).map(\.name)
+            let stapleHint = usedNames.isEmpty ? "" :
+                " Feel free to incorporate ingredients like \(usedNames.joined(separator: ", ")) if they fit naturally, but don't feel constrained to them."
+            description = "Surprise me with a delicious recipe.\(stapleHint)"
         }
         if let restrictions = profile?.dietaryRestrictions, !restrictions.isEmpty {
             description += " Dietary needs: \(restrictions.map(\.displayName).joined(separator: ", "))."
+        }
+        if let cuisines = profile?.preferredCuisines, !cuisines.isEmpty {
+            description += " Preferred cuisines: \(cuisines.map(\.rawValue).joined(separator: ", "))."
         }
 
         do {

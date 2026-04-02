@@ -18,6 +18,7 @@ struct ShoppingListView: View {
     private var currencyCode: String { profiles.first?.preferredCurrencyCode ?? "CAD" }
 
     var body: some View {
+        NavigationStack {
         List {
                 if let activeList = lists.first {
                     // Active list header
@@ -175,6 +176,7 @@ struct ShoppingListView: View {
             }
         .sheet(isPresented: $showingReceiptScanner) {
             ReceiptScannerView(groceryList: lists.first)
+        }
         }
     }
 }
