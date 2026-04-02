@@ -1084,6 +1084,15 @@ struct MultiRecipeCookingView: View {
                 }
             }
         }
+        .gesture(
+            DragGesture(minimumDistance: 40, coordinateSpace: .local)
+                .onEnded { value in
+                    guard !isLoading else { return }
+                    guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                    if value.translation.width < -40 { advanceStep() }
+                    else if value.translation.width > 40 { goBack() }
+                }
+        )
         .background(.black)
         .preferredColorScheme(.dark)
         .persistentSystemOverlays(.hidden)
@@ -1432,6 +1441,7 @@ struct MultiRecipeCookingView: View {
             } label: {
                 Image(systemName: isVoiceEnabled ? "speaker.wave.3.fill" : "speaker.slash.fill")
                     .font(.system(size: 32))
+                    .frame(width: 36, height: 36)
             }
             .accessibilityLabel(isVoiceEnabled ? "Disable voice" : "Enable voice")
 

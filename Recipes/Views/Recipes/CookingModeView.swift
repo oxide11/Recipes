@@ -40,14 +40,20 @@ struct CookingModeView: View {
         return map
     }
 
+    /// Directions sorted by stepNumber so they always appear in the correct order
+    /// regardless of how SwiftData returns them.
+    private var sortedDirections: [RecipeDirection] {
+        recipe.directions.sorted { $0.stepNumber < $1.stepNumber }
+    }
+
     private var currentStep: RecipeDirection? {
-        guard currentStepIndex < recipe.directions.count else { return nil }
-        return recipe.directions[currentStepIndex]
+        guard currentStepIndex < sortedDirections.count else { return nil }
+        return sortedDirections[currentStepIndex]
     }
 
     private var progress: Double {
-        guard !recipe.directions.isEmpty else { return 0 }
-        return Double(currentStepIndex + 1) / Double(recipe.directions.count)
+        guard !sortedDirections.isEmpty else { return 0 }
+        return Double(currentStepIndex + 1) / Double(sortedDirections.count)
     }
 
     var body: some View {
@@ -68,6 +74,14 @@ struct CookingModeView: View {
                 controlBar
             }
         }
+        .gesture(
+            DragGesture(minimumDistance: 40, coordinateSpace: .local)
+                .onEnded { value in
+                    guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                    if value.translation.width < -40 { advanceStep() }
+                    else if value.translation.width > 40 { goBack() }
+                }
+        )
         .background(.black)
         .preferredColorScheme(.dark)
         .persistentSystemOverlays(.hidden)
@@ -117,7 +131,7 @@ struct CookingModeView: View {
                     .fontWeight(.semibold)
                     .lineLimit(1)
                 Spacer()
-                Text("Step \(currentStepIndex + 1) of \(recipe.directions.count)")
+                Text("Step \(currentStepIndex + 1) of \(sortedDirections.count)")
                     .font(.caption)
             }
             .foregroundStyle(.white.opacity(0.7))
@@ -319,7 +333,7 @@ struct CookingModeView: View {
                     .fontWeight(.bold)
                     .foregroundStyle(.white)
 
-                Text("You've completed all \(recipe.directions.count) steps.")
+                Text("You've completed all \(sortedDirections.count) steps.")
                     .font(.title3)
                     .foregroundStyle(.white.opacity(0.7))
 
@@ -426,8 +440,8 @@ struct CookingModeView: View {
                 Image(systemName: "chevron.right.circle.fill")
                     .font(.system(size: 48))
             }
-            .disabled(currentStepIndex >= recipe.directions.count)
-            .opacity(currentStepIndex >= recipe.directions.count ? 0.3 : 1)
+            .disabled(currentStepIndex >= sortedDirections.count)
+            .opacity(currentStepIndex >= sortedDirections.count ? 0.3 : 1)
             .accessibilityLabel("Next step")
         }
         .foregroundStyle(.white)
@@ -440,13 +454,13 @@ struct CookingModeView: View {
     private func advanceStep() {
         synthesizer.stopSpeaking(at: .immediate)
 
-        if currentStepIndex < recipe.directions.count - 1 {
+        if currentStepIndex < sortedDirections.count - 1 {
             currentStepIndex += 1
             if isVoiceEnabled, let step = currentStep {
                 speakStep(step)
             }
         } else {
-            currentStepIndex = recipe.directions.count // show completion
+            currentStepIndex = sortedDirections.count // show completion
         }
     }
 
@@ -507,9 +521,9 @@ struct CookingModeView: View {
             recipeTitle: recipe.title,
             recipeID: recipe.id,
             stepNumber: stepIndex + 1,
-            stepInstruction: recipe.directions[stepIndex].instruction,
+            stepInstruction: sortedDirections[stepIndex].instruction,
             durationSeconds: seconds,
-            totalSteps: recipe.directions.count
+            totalSteps: sortedDirections.count
         )
 
         scheduleCompletion(stepIndex: stepIndex, endDate: endDate)
