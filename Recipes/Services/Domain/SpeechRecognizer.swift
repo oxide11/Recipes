@@ -95,20 +95,32 @@ final class SpeechRecognizer {
             }
         }
 
-        // Capture the request as a plain local so the tap closure never
-        // touches @MainActor-isolated state — the audio tap fires on a
-        // real-time thread and cannot safely access actor-isolated properties.
-        let capturedRequest = request
+        // The tap closure must be created in a nonisolated context so Swift's
+        // runtime actor isolation check doesn't mark it as @MainActor-bound.
+        // Closures inherit the isolation of their enclosing scope, so defining
+        // the block inside this @MainActor method (even with a plain local
+        // capture) still causes a dispatch_assert_queue crash on the
+        // RealtimeMessenger audio thread. makeTapBlock() is nonisolated, so
+        // the closure it returns has no actor requirement.
+        let tapBlock = Self.makeTapBlock(for: request)
         let inputNode = audioEngine.inputNode
         let format = inputNode.outputFormat(forBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
-            capturedRequest.append(buffer)
-        }
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format, block: tapBlock)
 
         audioEngine.prepare()
         try audioEngine.start()
         isListening = true
         resetSilenceTimer()
+    }
+
+    /// Returns a tap block with no actor isolation. Must be `nonisolated` and
+    /// `static` so the returned closure is not bound to any actor — the
+    /// AVAudioEngine tap fires on RealtimeMessenger.mServiceQueue and Swift's
+    /// runtime isolation checker will crash if the block carries @MainActor.
+    private nonisolated static func makeTapBlock(
+        for request: SFSpeechAudioBufferRecognitionRequest
+    ) -> AVAudioNodeTapBlock {
+        { buffer, _ in request.append(buffer) }
     }
 
     private func resetSilenceTimer() {
