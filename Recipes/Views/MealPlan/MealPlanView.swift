@@ -1084,7 +1084,7 @@ struct MultiRecipeCookingView: View {
                 }
             }
         }
-        .gesture(
+        .simultaneousGesture(
             DragGesture(minimumDistance: 40, coordinateSpace: .local)
                 .onEnded { value in
                     guard !isLoading else { return }

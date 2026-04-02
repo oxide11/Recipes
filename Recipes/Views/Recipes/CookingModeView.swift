@@ -74,7 +74,7 @@ struct CookingModeView: View {
                 controlBar
             }
         }
-        .gesture(
+        .simultaneousGesture(
             DragGesture(minimumDistance: 40, coordinateSpace: .local)
                 .onEnded { value in
                     guard abs(value.translation.width) > abs(value.translation.height) else { return }
