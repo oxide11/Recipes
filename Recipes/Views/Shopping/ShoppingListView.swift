@@ -14,6 +14,7 @@ struct ShoppingListView: View {
     @State private var showingGuidedShopping = false
     @State private var showingRemindersSetup = false
     @AppStorage("shoppingHideCompleted") private var hideCompleted = true
+    @AppStorage("hasPromptedRemindersSetup") private var hasPromptedSetup = false
 
     private var currencyCode: String { profiles.first?.preferredCurrencyCode ?? "CAD" }
 
@@ -50,8 +51,9 @@ struct ShoppingListView: View {
         .onAppear {
             ensureListExists()
             triggerSync()
-            // Prompt setup on first open if not yet linked
-            if !remindersSync.isLinked {
+            // Only auto-prompt once — after that the user reaches it via the toolbar icon
+            if !remindersSync.isLinked && !hasPromptedSetup {
+                hasPromptedSetup = true
                 showingRemindersSetup = true
             }
         }
@@ -152,7 +154,9 @@ struct ShoppingListView: View {
                             ShoppingItemRow(item: item, currencyCode: currencyCode)
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
-                                        remindersSync.deleteReminder(for: item)
+                                        if remindersSync.isLinked {
+                                            remindersSync.deleteReminder(for: item)
+                                        }
                                         modelContext.delete(item)
                                     } label: {
                                         Label("Delete", systemImage: "trash")
