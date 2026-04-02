@@ -23,6 +23,11 @@ final class RemindersSync {
 
     var isLinked: Bool { linkedCalendarIdentifier != nil }
 
+    var linkedCalendar: EKCalendar? {
+        guard let id = linkedCalendarIdentifier else { return nil }
+        return store.calendar(withIdentifier: id)
+    }
+
     // MARK: Private
 
     private let store = EKEventStore()

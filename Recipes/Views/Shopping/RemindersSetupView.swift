@@ -82,6 +82,29 @@ struct RemindersSetupView: View {
 
     private var pickerContent: some View {
         List {
+            // Currently linked list
+            if let linked = sync.linkedCalendar {
+                Section {
+                    HStack(spacing: 12) {
+                        Circle()
+                            .fill(Color(cgColor: linked.cgColor))
+                            .frame(width: 12, height: 12)
+                        Text(linked.title)
+                            .fontWeight(.medium)
+                        Spacer()
+                        Button("Unlink", role: .destructive) {
+                            sync.unlink()
+                            dismiss()
+                        }
+                        .font(.subheadline)
+                    }
+                } header: {
+                    Text("Currently synced to")
+                } footer: {
+                    Text("\"Hey Siri, add oat milk to my \(linked.title) list\" adds it here.")
+                }
+            }
+
             // Create new list
             Section {
                 HStack {
