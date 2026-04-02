@@ -453,23 +453,14 @@ struct MealCard: View {
         Set(pantryItems.map { $0.name.lowercased() })
     }
 
-    private var groceryNames: Set<String> {
-        Set(groceryLists.flatMap(\.items).map { $0.name.lowercased() })
-    }
-
-    private var coverage: (covered: Int, total: Int) {
-        guard let recipe = meal.recipe else { return (0, 0) }
-        let total = recipe.ingredients.count
-        let covered = recipe.ingredients.filter { pantryNames.contains($0.name.lowercased()) }.count
-        return (covered, total)
-    }
-
+    /// Ingredients this meal needs that aren't already covered by the pantry.
     private var missingIngredients: [Ingredient] {
         meal.recipe?.ingredients.filter { !pantryNames.contains($0.name.lowercased()) } ?? []
     }
 
-    private var trulyMissingIngredients: [Ingredient] {
-        missingIngredients.filter { !groceryNames.contains($0.name.lowercased()) }
+    private var allInPantry: Bool {
+        guard let recipe = meal.recipe, !recipe.ingredients.isEmpty else { return false }
+        return missingIngredients.isEmpty
     }
 
     var body: some View {
@@ -486,42 +477,40 @@ struct MealCard: View {
                 }
             }
 
-            if let _ = meal.recipe {
-                let (covered, total) = coverage
-                if total > 0 {
-                    if covered == total {
-                        HStack(spacing: 4) {
-                            Image(systemName: "checkmark.circle")
-                                .font(.system(size: 10))
-                            Text("All ingredients in pantry")
-                                .font(.miseMeta)
-                        }
-                        .foregroundStyle(Brand.herbGreen)
-                    } else if trulyMissingIngredients.isEmpty {
-                        HStack(spacing: 4) {
-                            Image(systemName: "cart")
-                                .font(.system(size: 10))
-                            Text("Ingredients on shopping list")
+            if let recipe = meal.recipe, !recipe.ingredients.isEmpty {
+                if allInPantry {
+                    // Everything is already in the pantry
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle")
+                            .font(.system(size: 10))
+                        Text("All ingredients in pantry")
+                            .font(.miseMeta)
+                    }
+                    .foregroundStyle(Brand.herbGreen)
+                } else if addedToCart {
+                    // User has added this meal's ingredients in this session
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 10))
+                        Text("Added for this meal")
+                            .font(.miseMeta)
+                    }
+                    .foregroundStyle(Brand.herbGreen)
+                } else {
+                    // Needs shopping — always show so quantities accumulate correctly
+                    Button {
+                        addMissingToShopping()
+                    } label: {
+                        HStack(spacing: 5) {
+                            Image(systemName: "cart.badge.plus")
+                                .font(.system(size: 11))
+                            Text("Add \(missingIngredients.count) ingredient\(missingIngredients.count == 1 ? "" : "s") to shopping list")
                                 .font(.miseMeta)
                         }
                         .foregroundStyle(Brand.warmTan)
-                    } else {
-                        Button {
-                            addMissingToShopping()
-                        } label: {
-                            HStack(spacing: 5) {
-                                Image(systemName: addedToCart ? "checkmark.circle.fill" : "cart.badge.plus")
-                                    .font(.system(size: 11))
-                                Text(addedToCart
-                                     ? "Added to shopping list"
-                                     : "Add \(trulyMissingIngredients.count) missing to shopping list")
-                                    .font(.miseMeta)
-                            }
-                            .foregroundStyle(addedToCart ? Brand.herbGreen : Brand.warmTan)
-                        }
-                        .buttonStyle(.plain)
-                        .sensoryFeedback(.success, trigger: addedToCart)
                     }
+                    .buttonStyle(.plain)
+                    .sensoryFeedback(.success, trigger: addedToCart)
                 }
             }
         }
@@ -537,7 +526,7 @@ struct MealCard: View {
     }
 
     private func addMissingToShopping() {
-        guard !trulyMissingIngredients.isEmpty else { return }
+        guard !missingIngredients.isEmpty else { return }
 
         let list: GroceryList
         if let existing = groceryLists.first {
@@ -547,7 +536,7 @@ struct MealCard: View {
             modelContext.insert(list)
         }
 
-        for ingredient in trulyMissingIngredients {
+        for ingredient in missingIngredients {
             let name = ingredient.name.lowercased()
             if let existing = list.items.first(where: { $0.name.lowercased() == name }) {
                 // Item already on the list — accumulate quantity when units match
