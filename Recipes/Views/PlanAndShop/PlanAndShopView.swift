@@ -17,26 +17,22 @@ struct PlanAndShopView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // Segmented picker — lives inside the stack so it disappears on drill-down
-                Picker("Section", selection: $segment) {
-                    ForEach(PlanAndShopSegment.allCases, id: \.self) { s in
-                        Text(s.rawValue).tag(s)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.top, 8)
-                .padding(.bottom, 4)
-
-                // Content
+            Group {
                 switch segment {
-                case .pantry:
-                    PantryView()
-                case .mealPlan:
-                    MealPlanView()
-                case .shopping:
-                    ShoppingListView()
+                case .pantry:   PantryView()
+                case .mealPlan: MealPlanView()
+                case .shopping: ShoppingListView()
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Picker("Section", selection: $segment) {
+                        ForEach(PlanAndShopSegment.allCases, id: \.self) { s in
+                            Text(s.rawValue).tag(s)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 260)
                 }
             }
         }
