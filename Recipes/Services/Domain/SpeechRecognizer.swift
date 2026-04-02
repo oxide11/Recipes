@@ -49,8 +49,11 @@ final class SpeechRecognizer {
 
     // MARK: - Private
 
-    private func requestPermissions() async -> Bool {
-        let speechStatus = await withCheckedContinuation { cont in
+    // nonisolated: SFSpeechRecognizer and AVAudioApplication callbacks fire on
+    // background threads. Keeping this off @MainActor avoids the isolation
+    // assertion that would crash when the continuation resumes off-main.
+    private nonisolated func requestPermissions() async -> Bool {
+        let speechStatus = await withCheckedContinuation { (cont: CheckedContinuation<SFSpeechRecognizerAuthorizationStatus, Never>) in
             SFSpeechRecognizer.requestAuthorization { cont.resume(returning: $0) }
         }
         guard speechStatus == .authorized else { return false }
@@ -78,13 +81,17 @@ final class SpeechRecognizer {
         request.shouldReportPartialResults = true
 
         recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, err in
-            guard let self else { return }
-            if let result {
-                self.transcript = result.bestTranscription.formattedString
-                self.resetSilenceTimer()
-            }
-            if err != nil || result?.isFinal == true {
-                self.stop()
+            // Callback fires on a background thread — hop to MainActor before
+            // touching any @Observable state or starting timers.
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                if let result {
+                    self.transcript = result.bestTranscription.formattedString
+                    self.resetSilenceTimer()
+                }
+                if err != nil || result?.isFinal == true {
+                    self.stop()
+                }
             }
         }
 
