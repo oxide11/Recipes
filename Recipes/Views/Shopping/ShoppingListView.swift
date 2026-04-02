@@ -13,7 +13,7 @@ struct ShoppingListView: View {
     @State private var showingAddItem = false
     @State private var showingGuidedShopping = false
     @State private var showingRemindersSetup = false
-    @State private var hideCompleted = false
+    @AppStorage("shoppingHideCompleted") private var hideCompleted = true
 
     private var currencyCode: String { profiles.first?.preferredCurrencyCode ?? "CAD" }
 
