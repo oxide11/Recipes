@@ -21,6 +21,7 @@ struct MealPlanView: View {
     @State private var viewMode: MealPlanViewMode = .day
     @State private var showingGenerate = false
     @State private var didInitViewMode = false
+    @State private var swipeForward = true
 
     private var calendar: Calendar { .current }
 
@@ -86,14 +87,31 @@ struct MealPlanView: View {
 
                 if let plan = activePlan {
                     if viewMode == .day {
-                        TabView(selection: $selectedDate) {
-                            ForEach(weekDays, id: \.self) { day in
-                                DayMealView(plan: plan, date: day, allMeals: allPlannedMeals)
-                                    .tag(day)
-                            }
+                        ZStack {
+                            DayMealView(plan: plan, date: selectedDate, allMeals: allPlannedMeals)
+                                .id(selectedDate)
+                                .transition(.asymmetric(
+                                    insertion: .move(edge: swipeForward ? .trailing : .leading),
+                                    removal:   .move(edge: swipeForward ? .leading  : .trailing)
+                                ))
                         }
-                        .tabViewStyle(.page(indexDisplayMode: .never))
-                        .animation(.easeInOut(duration: 0.25), value: selectedDate)
+                        .gesture(
+                            DragGesture(minimumDistance: 40, coordinateSpace: .local)
+                                .onEnded { value in
+                                    guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                                    if value.translation.width < -40 {
+                                        swipeForward = true
+                                        withAnimation(.easeInOut(duration: 0.25)) {
+                                            selectedDate = calendar.date(byAdding: .day, value: 1, to: selectedDate) ?? selectedDate
+                                        }
+                                    } else if value.translation.width > 40 {
+                                        swipeForward = false
+                                        withAnimation(.easeInOut(duration: 0.25)) {
+                                            selectedDate = calendar.date(byAdding: .day, value: -1, to: selectedDate) ?? selectedDate
+                                        }
+                                    }
+                                }
+                        )
                     } else {
                         WeekMealView(allMeals: allPlannedMeals, weekDays: weekDays)
                     }
