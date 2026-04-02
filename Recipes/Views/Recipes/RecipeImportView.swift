@@ -94,6 +94,13 @@ struct RecipeImportView: View {
             errorSection
             if let result { importPreviewSection(result) }
         }
+        .sheet(isPresented: $showingBrowser) {
+            RecipeBrowserView(startURL: browserStartURL) { importedURL in
+                urlString = importedURL
+                selectedTab = .url
+                Task { await performImport(urlOverride: importedURL) }
+            }
+        }
         .fullScreenCover(isPresented: $showingCamera) {
             CameraPicker(image: $cameraImage).ignoresSafeArea()
         }
@@ -198,13 +205,6 @@ struct RecipeImportView: View {
                     showingBrowser = true
                 } label: {
                     Label("Browse for a Recipe", systemImage: "globe")
-                }
-                .sheet(isPresented: $showingBrowser) {
-                    RecipeBrowserView(startURL: browserStartURL) { importedURL in
-                        urlString = importedURL
-                        selectedTab = .url
-                        Task { await performImport(urlOverride: importedURL) }
-                    }
                 }
             } footer: {
                 Text("Paste a URL, browse the web, or tap a saved site below.")
