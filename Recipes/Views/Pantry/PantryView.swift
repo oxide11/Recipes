@@ -63,6 +63,48 @@ struct PantryView: View {
         items.filter(\.isExpiringSoon)
     }
 
+    private var staleItems: [PantryItem] {
+        items.filter { item in
+            // Don't double-flag items already in the expiring section
+            guard !item.isExpiringSoon else { return false }
+            let reference = item.lastUsed ?? item.dateAdded
+            let days = Calendar.current.dateComponents([.day], from: reference, to: .now).day ?? 0
+            return days > shelfLifeDays(for: item)
+        }
+    }
+
+    private func shelfLifeDays(for item: PantryItem) -> Int {
+        let name = item.name.lowercased()
+        let shortKeywords  = ["lettuce","spinach","arugula","basil","cilantro","parsley","dill","mint",
+                               "strawberr","raspberr","blackberr","blueberr","mushroom","avocado",
+                               "broccoli","cauliflower","asparagus","bean sprout"]
+        let mediumKeywords = ["milk","cream","kefir","yogurt","tofu","cucumber","zucchini","mango",
+                               "peach","nectarine","fresh herb"]
+        let longKeywords   = ["egg","cheese","bread","lemon","lime","orange","apple","grape",
+                               "carrot","celery","onion","garlic","potato","cabbage","beet","ginger"]
+        let stableKeywords = ["soy sauce","hot sauce","vinegar","honey","maple","fish sauce",
+                               "worcestershire","ketchup","mustard","miso","tahini","coconut milk"]
+        if shortKeywords.contains(where:  { name.contains($0) }) { return 5 }
+        if mediumKeywords.contains(where: { name.contains($0) }) { return 10 }
+        if longKeywords.contains(where:   { name.contains($0) }) { return 21 }
+        if stableKeywords.contains(where: { name.contains($0) }) { return 180 }
+        switch item.category {
+        case .spice:      return 365
+        case .oil:        return 180
+        case .condiment:  return 90
+        case .grain:      return 180
+        case .nut:        return 90
+        case .sweetener:  return 365
+        case .protein:    return item.isFrozen ? 90 : 5
+        case .dairy:      return 14
+        case .vegetable:  return 10
+        case .fruit:      return 7
+        case .herb:       return 10
+        case .liquid:     return 14
+        default:          return 30
+        }
+    }
+
     @ViewBuilder
     private func pantryItemRow(_ item: PantryItem) -> some View {
         PantryItemRow(item: item)
@@ -110,6 +152,47 @@ struct PantryView: View {
                         .tint(Brand.spiceRed)
                     } header: {
                         Label("Expiring Soon", systemImage: "clock.badge.exclamationmark")
+                    }
+                }
+
+                // "Do you still have these?" section for likely-stale items
+                if !staleItems.isEmpty && searchText.isEmpty {
+                    Section {
+                        ForEach(staleItems) { item in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(item.name).fontWeight(.medium)
+                                    Text("Added \(item.dateAdded.formatted(.relative(presentation: .named)))")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Button {
+                                    item.lastUsed = .now   // resets staleness clock
+                                } label: {
+                                    Text("Keep")
+                                        .font(.caption)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 4)
+                                        .background(Color(.systemGray5))
+                                        .clipShape(Capsule())
+                                }
+                                .buttonStyle(.plain)
+
+                                Button {
+                                    modelContext.delete(item)
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(.secondary)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    } header: {
+                        Label("Do you still have these?", systemImage: "questionmark.circle")
+                    } footer: {
+                        Text("These have been in your pantry a while. Tap Keep to confirm, or × to remove.")
+                            .font(.caption)
                     }
                 }
 

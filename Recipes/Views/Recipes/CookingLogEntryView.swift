@@ -17,12 +17,10 @@ struct CookingLogEntryView: View {
     @State private var notes = ""
     @State private var substitutions: [String] = []
     @State private var newSubstitution = ""
-    @State private var deductFromPantry = true
     @State private var servingsCooked: Int
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var photoData: Data?
-    @State private var deductedItems: [PantryItem] = []
-    @State private var showingDeductionResult = false
+    @State private var showingPantryCleanup = false
     @State private var didSave = false
 
     private var actualTotalMinutes: Int? {
@@ -51,14 +49,6 @@ struct CookingLogEntryView: View {
                         .keyboardType(.numberPad)
                     TextField("Cook time (minutes)", text: $cookMinutes)
                         .keyboardType(.numberPad)
-                }
-
-                Section {
-                    Toggle("Deduct ingredients from pantry", isOn: $deductFromPantry)
-                } header: {
-                    Text("Pantry")
-                } footer: {
-                    Text("Automatically reduces pantry quantities for ingredients used in this recipe.")
                 }
 
                 Section("Photo") {
@@ -138,19 +128,10 @@ struct CookingLogEntryView: View {
                     photoData = data
                 }
             }
-            .onAppear {
-                if let profile = profiles.first {
-                    deductFromPantry = profile.autoDeductPantry
-                }
-            }
             .sensoryFeedback(.success, trigger: didSave)
-            .alert("Pantry Updated", isPresented: $showingDeductionResult) {
-                Button("OK") { dismiss() }
-            } message: {
-                if deductedItems.isEmpty {
-                    Text("Ingredients deducted from your pantry.")
-                } else {
-                    Text("\(deductedItems.count) item\(deductedItems.count == 1 ? "" : "s") fully used up and can be restocked.")
+            .sheet(isPresented: $showingPantryCleanup) {
+                PostCookPantrySheet(recipe: recipe, pantryItems: Array(pantryItems)) {
+                    dismiss()
                 }
             }
         }
@@ -183,16 +164,92 @@ struct CookingLogEntryView: View {
         recipe.cookingLog.append(entry)
         didSave = true
 
-        // Deduct from pantry
-        if deductFromPantry {
-            deductedItems = PantryDeductionService.deductAfterCooking(
-                recipe: recipe,
-                servingsCooked: servingsCooked,
-                pantryItems: pantryItems
-            )
-            showingDeductionResult = true
+        // Show pantry cleanup sheet if there are matching items, otherwise dismiss
+        let recipeIngredientNames = Set(recipe.ingredients.map { $0.name.lowercased() })
+        let hasMatches = pantryItems.contains { recipeIngredientNames.contains($0.name.lowercased()) }
+        if hasMatches {
+            showingPantryCleanup = true
         } else {
             dismiss()
+        }
+    }
+}
+
+// MARK: - Post-Cook Pantry Cleanup Sheet
+
+struct PostCookPantrySheet: View {
+    let recipe: Recipe
+    let pantryItems: [PantryItem]
+    let onDone: () -> Void
+
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+
+    // Pantry items whose name matches a recipe ingredient
+    private var matchedItems: [PantryItem] {
+        let names = Set(recipe.ingredients.map { $0.name.lowercased() })
+        return pantryItems.filter { names.contains($0.name.lowercased()) }
+    }
+
+    @State private var usedUp: Set<UUID> = []
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if matchedItems.isEmpty {
+                    ContentUnavailableView(
+                        "No pantry matches",
+                        systemImage: "refrigerator",
+                        description: Text("None of the ingredients in this recipe were found in your pantry.")
+                    )
+                } else {
+                    List {
+                        Section {
+                            ForEach(matchedItems) { item in
+                                Button {
+                                    if usedUp.contains(item.id) {
+                                        usedUp.remove(item.id)
+                                    } else {
+                                        usedUp.insert(item.id)
+                                    }
+                                } label: {
+                                    HStack {
+                                        Text(item.name)
+                                            .foregroundStyle(usedUp.contains(item.id) ? .secondary : .primary)
+                                            .strikethrough(usedUp.contains(item.id))
+                                        Spacer()
+                                        if usedUp.contains(item.id) {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundStyle(Brand.spiceRed)
+                                        } else {
+                                            Image(systemName: "circle")
+                                                .foregroundStyle(.tertiary)
+                                        }
+                                    }
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        } header: {
+                            Text("Tap anything you used up")
+                        } footer: {
+                            Text("Selected items will be removed from your pantry.")
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Update Pantry")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        for item in matchedItems where usedUp.contains(item.id) {
+                            modelContext.delete(item)
+                        }
+                        dismiss()
+                        onDone()
+                    }
+                }
+            }
         }
     }
 }
