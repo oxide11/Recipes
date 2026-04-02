@@ -246,7 +246,7 @@ struct PantryView: View {
                 // Spice Rack
                 if !spiceRackItems.isEmpty {
                     Section {
-                        ForEach(spiceRackItems.sorted { $0.isStaple && !$1.isStaple }) { item in
+                        ForEach(spiceRackItems) { item in
                             pantryItemRow(item)
                         }
                     } header: {
@@ -258,7 +258,7 @@ struct PantryView: View {
                 ForEach(IngredientCategory.allCases.filter({ $0 != .spice && $0 != .herb }), id: \.self) { category in
                     if let categoryItems = groupedItems[category], !categoryItems.isEmpty {
                         Section(category.rawValue.capitalized) {
-                            ForEach(categoryItems.sorted { $0.isStaple && !$1.isStaple }) { item in
+                            ForEach(categoryItems) { item in
                                 pantryItemRow(item)
                             }
                         }
