@@ -953,6 +953,7 @@ struct AddMealView: View {
     @State private var servings = 1
     @State private var showingGenerator = false
     @State private var lastRecipeCount = 0
+    @State private var searchText = ""
 
     init(plan: MealPlan, preselectMealType: MealType = .dinner, preselectDate: Date? = nil) {
         self.plan = plan
@@ -989,31 +990,49 @@ struct AddMealView: View {
                             .foregroundStyle(.secondary)
                             .font(.caption)
                     } else {
-                        ForEach(recipes) { recipe in
-                            Button {
-                                selectedRecipe = (selectedRecipe?.id == recipe.id) ? nil : recipe
-                            } label: {
-                                HStack {
-                                    Text(recipe.title)
-                                    Spacer()
-                                    if selectedRecipe?.id == recipe.id {
-                                        Image(systemName: "checkmark").foregroundStyle(.tint)
+                        let filtered = searchText.isEmpty
+                            ? recipes
+                            : recipes.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+                        if filtered.isEmpty {
+                            Text("No recipes match \"\(searchText)\"")
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                        } else {
+                            ForEach(filtered) { recipe in
+                                Button {
+                                    selectedRecipe = (selectedRecipe?.id == recipe.id) ? nil : recipe
+                                } label: {
+                                    HStack {
+                                        Text(recipe.title)
+                                        Spacer()
+                                        if selectedRecipe?.id == recipe.id {
+                                            Image(systemName: "checkmark").foregroundStyle(.tint)
+                                        }
                                     }
                                 }
+                                .foregroundStyle(.primary)
                             }
-                            .foregroundStyle(.primary)
                         }
                     }
                 }
             }
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search recipes")
             .sheet(isPresented: $showingGenerator) {
                 QuickGenerateView()
             }
             .onChange(of: recipes.count) { _, newCount in
-                // Auto-select the most recently created recipe (recipes is sorted by title, not date)
+                // Auto-add the generated recipe immediately — no need to tap "Add" separately
                 if newCount > lastRecipeCount,
                    let newest = recipes.max(by: { $0.dateCreated < $1.dateCreated }) {
-                    selectedRecipe = newest
+                    let meal = PlannedMeal(
+                        mealType: selectedMealType,
+                        date: Calendar.current.startOfDay(for: selectedDate),
+                        recipe: newest,
+                        servings: servings
+                    )
+                    modelContext.insert(meal)
+                    plan.meals.append(meal)
+                    dismiss()
                 }
             }
             .navigationTitle("Add Meal")
