@@ -141,6 +141,18 @@ final class RemindersSync {
         try? store.commit()
     }
 
+    /// Push the current isPurchased state to Reminders immediately when the user
+    /// taps the checkbox. Without this, the next sync pull sees the reminder still
+    /// incomplete and overwrites the local change back to false.
+    func pushCompletion(for item: GroceryItem) {
+        guard isLinked,
+              let rid = item.remindersIdentifier,
+              let reminder = store.calendarItem(withIdentifier: rid) as? EKReminder else { return }
+        reminder.isCompleted = item.isPurchased
+        if item.isPurchased { reminder.completionDate = .now } else { reminder.completionDate = nil }
+        try? store.save(reminder, commit: true)
+    }
+
     /// Remove a single item's corresponding reminder when deleted from the app.
     func deleteReminder(for item: GroceryItem) {
         guard let rid = item.remindersIdentifier,

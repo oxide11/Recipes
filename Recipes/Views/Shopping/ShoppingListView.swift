@@ -236,6 +236,7 @@ struct ShoppingListView: View {
 
 struct ShoppingItemRow: View {
     @Bindable var item: GroceryItem
+    @Environment(RemindersSync.self) private var remindersSync
     var currencyCode: String = "CAD"
 
     var body: some View {
@@ -243,6 +244,7 @@ struct ShoppingItemRow: View {
             Button {
                 withAnimation {
                     item.isPurchased.toggle()
+                    remindersSync.pushCompletion(for: item)
                 }
             } label: {
                 Image(systemName: item.isPurchased ? "checkmark.circle.fill" : "circle")
