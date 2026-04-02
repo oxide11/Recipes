@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 // MARK: - App Entry Point
 
@@ -54,6 +55,10 @@ struct RecipesApp: App {
                 .environment(timerDeepLink)
                 .preferredColorScheme(.dark)
                 .onOpenURL { timerDeepLink.handle($0) }
+                .task {
+                    _ = try? await UNUserNotificationCenter.current()
+                        .requestAuthorization(options: [.alert, .sound])
+                }
         }
         .modelContainer(Self.container)
     }

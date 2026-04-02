@@ -1,5 +1,7 @@
 import SwiftUI
 import ActivityKit
+import AudioToolbox
+import UserNotifications
 
 // MARK: - Direction Step View
 
@@ -166,6 +168,7 @@ struct DirectionStepView: View {
                 timerActive = false
                 endDate = nil
                 await liveActivity.end()
+                timerDidFinish()
                 return
             }
             try? await Task.sleep(for: .seconds(interval))
@@ -173,6 +176,7 @@ struct DirectionStepView: View {
                 timerActive = false
                 endDate = nil
                 await liveActivity.end()
+                timerDidFinish()
             }
         }
     }
@@ -218,8 +222,13 @@ struct DirectionStepView: View {
         }
     }
 
+    private var notificationID: String {
+        "timer-\(recipeID.uuidString)-step-\(direction.stepNumber)"
+    }
+
     private func startTimer(seconds: Int) {
-        endDate = Date().addingTimeInterval(Double(seconds))
+        let end = Date().addingTimeInterval(Double(seconds))
+        endDate = end
         timerActive = true
         isPaused = false
         liveActivity.start(
@@ -230,6 +239,7 @@ struct DirectionStepView: View {
             durationSeconds: seconds,
             totalSteps: totalSteps
         )
+        scheduleTimerNotification(fireAt: end)
     }
 
     private func pauseTimer() {
@@ -237,12 +247,15 @@ struct DirectionStepView: View {
         pausedSeconds = max(0, Int(end.timeIntervalSinceNow))
         isPaused = true
         endDate = nil
+        cancelTimerNotification()
         Task { await liveActivity.pause(remainingSeconds: pausedSeconds) }
     }
 
     private func resumeTimer() {
-        endDate = Date().addingTimeInterval(Double(pausedSeconds))
+        let end = Date().addingTimeInterval(Double(pausedSeconds))
+        endDate = end
         isPaused = false
+        scheduleTimerNotification(fireAt: end)
         Task { await liveActivity.resume(remainingSeconds: pausedSeconds) }
     }
 
@@ -251,7 +264,37 @@ struct DirectionStepView: View {
         isPaused = false
         endDate = nil
         pausedSeconds = 0
+        cancelTimerNotification()
         Task { await liveActivity.end() }
+    }
+
+    /// Plays a sound and haptic when the timer finishes while the app is in the foreground.
+    /// (The local notification handles the backgrounded case.)
+    private func timerDidFinish() {
+        // System sound 1005 = "Tock" alarm-style chime
+        AudioServicesPlaySystemSound(1005)
+        // Strong haptic so it's felt as well as heard
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.warning)
+    }
+
+    private func scheduleTimerNotification(fireAt date: Date) {
+        let content = UNMutableNotificationContent()
+        content.title = "Timer Done!"
+        content.body = "Step \(direction.stepNumber)\(recipeTitle.isEmpty ? "" : " — \(recipeTitle)"): \(direction.instruction.prefix(60))\(direction.instruction.count > 60 ? "…" : "")"
+        content.sound = .defaultCritical   // plays even in Focus / Silent mode
+        content.interruptionLevel = .timeSensitive
+
+        let trigger = UNTimeIntervalNotificationTrigger(
+            timeInterval: max(1, date.timeIntervalSinceNow),
+            repeats: false
+        )
+        let request = UNNotificationRequest(identifier: notificationID, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    private func cancelTimerNotification() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [notificationID])
     }
 
     private var attributedInstruction: AttributedString {
