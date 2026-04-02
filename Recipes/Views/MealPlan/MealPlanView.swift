@@ -408,6 +408,36 @@ struct MealCard: View {
 
     @State private var addedToCart = false
 
+    private var titleRow: some View {
+        HStack(spacing: 6) {
+            Text(meal.recipe?.title ?? "Unassigned")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(Brand.cream)
+
+            if meal.isAISuggested {
+                Image(systemName: "wand.and.stars")
+                    .font(.system(size: 10))
+                    .foregroundStyle(Brand.warmTan)
+                    .help("AI-suggested recipe — saved to your library")
+            }
+
+            Spacer()
+
+            if let recipe = meal.recipe {
+                HStack(spacing: 4) {
+                    Text(recipe.formattedDuration)
+                        .font(.miseMeta)
+                        .foregroundStyle(Brand.muted)
+                    if meal.recipe != nil {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(Brand.muted.opacity(0.5))
+                    }
+                }
+            }
+        }
+    }
+
     private var pantryNames: Set<String> {
         Set(pantryItems.map { $0.name.lowercased() })
     }
@@ -433,24 +463,15 @@ struct MealCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
-                Text(meal.recipe?.title ?? "Unassigned")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(Brand.cream)
-
-                if meal.isAISuggested {
-                    Image(systemName: "wand.and.stars")
-                        .font(.system(size: 10))
-                        .foregroundStyle(.cyan)
-                        .help("AI-suggested recipe — saved to your library")
-                }
-
-                Spacer()
-
+            // Title row — tappable when a recipe exists
+            Group {
                 if let recipe = meal.recipe {
-                    Text(recipe.formattedDuration)
-                        .font(.miseMeta)
-                        .foregroundStyle(Brand.muted)
+                    NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                        titleRow
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    titleRow
                 }
             }
 
