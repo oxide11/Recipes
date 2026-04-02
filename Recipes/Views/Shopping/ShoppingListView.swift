@@ -154,9 +154,7 @@ struct ShoppingListView: View {
                             ShoppingItemRow(item: item, currencyCode: currencyCode)
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
-                                        if remindersSync.isLinked {
-                                            remindersSync.deleteReminder(for: item)
-                                        }
+                                        remindersSync.completeReminder(for: item)
                                         modelContext.delete(item)
                                     } label: {
                                         Label("Delete", systemImage: "trash")
@@ -181,7 +179,10 @@ struct ShoppingListView: View {
                 Section {
                     Button(role: .destructive) {
                         withAnimation {
-                            purchased.forEach { modelContext.delete($0) }
+                            purchased.forEach {
+                                remindersSync.completeReminder(for: $0)
+                                modelContext.delete($0)
+                            }
                         }
                     } label: {
                         Label(

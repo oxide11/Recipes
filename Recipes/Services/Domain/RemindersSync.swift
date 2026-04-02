@@ -102,8 +102,11 @@ final class RemindersSync {
                 if reminder.isCompleted != item.isPurchased {
                     item.isPurchased = reminder.isCompleted
                 }
-            } else if !groceryList.items.contains(where: { $0.name.lowercased() == key }) {
-                // New reminder not yet in the app → add it
+            } else if !reminder.isCompleted,
+                      !groceryList.items.contains(where: { $0.name.lowercased() == key }) {
+                // New incomplete reminder not yet in the app → add it
+                // (skip completed reminders — they were either checked off elsewhere
+                // or marked done by Mise when the item was deleted, and should not return)
                 let item = GroceryItem(
                     name: title,
                     quantity: 1,
@@ -158,11 +161,16 @@ final class RemindersSync {
         try? store.save(reminder, commit: true)
     }
 
-    /// Remove a single item's corresponding reminder when deleted from the app.
-    func deleteReminder(for item: GroceryItem) {
-        guard let rid = item.remindersIdentifier,
+    /// When an item is removed from Mise, mark the corresponding reminder as completed
+    /// rather than deleting it — this preserves the user's Reminders data and prevents
+    /// the sync from re-adding the item on the next pass (sync skips completed reminders).
+    func completeReminder(for item: GroceryItem) {
+        guard isLinked,
+              let rid = item.remindersIdentifier,
               let reminder = store.calendarItem(withIdentifier: rid) as? EKReminder else { return }
-        try? store.remove(reminder, commit: true)
+        reminder.isCompleted = true
+        reminder.completionDate = .now
+        try? store.save(reminder, commit: true)
     }
 
     // MARK: - Helpers
