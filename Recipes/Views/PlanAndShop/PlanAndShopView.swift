@@ -14,10 +14,10 @@ private enum PlanAndShopSegment: String, CaseIterable {
 /// Each segment renders the existing standalone view unchanged.
 struct PlanAndShopView: View {
     @State private var segment: PlanAndShopSegment = .mealPlan
-    @State private var isInRecipeDetail = false
 
     var body: some View {
         VStack(spacing: 0) {
+            // Segmented picker
             Picker("Section", selection: $segment) {
                 ForEach(PlanAndShopSegment.allCases, id: \.self) { s in
                     Text(s.rawValue).tag(s)
@@ -27,17 +27,13 @@ struct PlanAndShopView: View {
             .padding(.horizontal)
             .padding(.top, 8)
             .padding(.bottom, 4)
-            .frame(height: isInRecipeDetail ? 0 : nil)
-            .opacity(isInRecipeDetail ? 0 : 1)
-            .clipped()
-            .animation(.easeInOut(duration: 0.22), value: isInRecipeDetail)
 
             // Content
             switch segment {
             case .pantry:
                 PantryView()
             case .mealPlan:
-                MealPlanView(isInDetail: $isInRecipeDetail)
+                MealPlanView()
             case .shopping:
                 ShoppingListView()
             }

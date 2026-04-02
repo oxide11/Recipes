@@ -22,9 +22,6 @@ struct MealPlanView: View {
     @State private var showingGenerate = false
     @State private var didInitViewMode = false
     @State private var swipeForward = true
-    @State private var navPath = NavigationPath()
-
-    var isInDetail: Binding<Bool>? = nil
 
     private var calendar: Calendar { .current }
 
@@ -68,9 +65,9 @@ struct MealPlanView: View {
     }
 
     var body: some View {
-        NavigationStack(path: $navPath) {
-            VStack(spacing: 0) {
-                WeekStripView(
+        NavigationStack {
+        VStack(spacing: 0) {
+            WeekStripView(
                     selectedDate: $selectedDate,
                     weekDays: weekDays,
                     mealsPerDay: mealsPerDay
@@ -151,15 +148,7 @@ struct MealPlanView: View {
                     didInitViewMode = true
                 }
             }
-            .navigationDestination(for: Recipe.self) { recipe in
-                RecipeDetailView(recipe: recipe)
-            }
             .onChange(of: selectedDate) { ensurePlan() }
-            .onChange(of: navPath.count) { _, count in
-                withAnimation(.easeInOut(duration: 0.22)) {
-                    isInDetail?.wrappedValue = count > 0
-                }
-            }
         }
     }
 }
@@ -488,7 +477,7 @@ struct MealCard: View {
             // Title row — tappable when a recipe exists
             Group {
                 if let recipe = meal.recipe {
-                    NavigationLink(value: recipe) {
+                    NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
                         titleRow
                     }
                     .buttonStyle(.plain)
@@ -510,9 +499,9 @@ struct MealCard: View {
                         .foregroundStyle(Brand.herbGreen)
                     } else if trulyMissingIngredients.isEmpty {
                         HStack(spacing: 4) {
-                            Image(systemName: "cart.badge.checkmark")
+                            Image(systemName: "cart")
                                 .font(.system(size: 10))
-                            Text("All on shopping list")
+                            Text("Ingredients on shopping list")
                                 .font(.miseMeta)
                         }
                         .foregroundStyle(Brand.warmTan)
@@ -558,17 +547,25 @@ struct MealCard: View {
             modelContext.insert(list)
         }
 
-        let existingNames = Set(list.items.map { $0.name.lowercased() })
         for ingredient in trulyMissingIngredients {
-            guard !existingNames.contains(ingredient.name.lowercased()) else { continue }
-            let item = GroceryItem(
-                name: ingredient.name,
-                quantity: ingredient.amount.quantity,
-                unit: ingredient.amount.unit,
-                storeSection: storeSection(for: ingredient.category)
-            )
-            modelContext.insert(item)
-            list.items.append(item)
+            let name = ingredient.name.lowercased()
+            if let existing = list.items.first(where: { $0.name.lowercased() == name }) {
+                // Item already on the list — accumulate quantity when units match
+                // so duplicate meal plan entries don't get silently ignored
+                if existing.unit == ingredient.amount.unit {
+                    existing.quantity += ingredient.amount.quantity
+                }
+                // Units differ — leave as-is; can't merge without unit conversion
+            } else {
+                let item = GroceryItem(
+                    name: ingredient.name,
+                    quantity: ingredient.amount.quantity,
+                    unit: ingredient.amount.unit,
+                    storeSection: storeSection(for: ingredient.category)
+                )
+                modelContext.insert(item)
+                list.items.append(item)
+            }
         }
 
         withAnimation { addedToCart = true }
