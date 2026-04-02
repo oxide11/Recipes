@@ -161,21 +161,34 @@ final class RemindersSync {
     private func fetchAllReminders(in calendar: EKCalendar) async -> [EKReminder] {
         let snapshots: [ReminderSnapshot] = await withCheckedContinuation { cont in
             let predicate = store.predicateForReminders(in: [calendar])
-            store.fetchReminders(matching: predicate) { reminders in
-                let snaps = (reminders ?? []).map {
-                    ReminderSnapshot(
-                        calendarItemIdentifier: $0.calendarItemIdentifier,
-                        title: $0.title ?? "",
-                        isCompleted: $0.isCompleted
-                    )
-                }
-                cont.resume(returning: snaps)
-            }
+            // The completion fires on com.apple.eventkit.reminders.search — a background
+            // queue. A closure defined inside a @MainActor method is @MainActor-bound,
+            // which causes a dispatch_assert_queue crash. Extract via a nonisolated static
+            // factory so the block carries no actor requirement (same fix as installTap).
+            store.fetchReminders(matching: predicate, completion: Self.makeSnapshotBlock(continuation: cont))
         }
-        // Re-fetch the live EKReminder objects by identifier now that we're back
-        // on the MainActor so EventKit operations are safe.
+        // Re-fetch live EKReminder objects by identifier now that we're back on the
+        // MainActor so EventKit property access is safe.
         return snapshots.compactMap {
             store.calendarItem(withIdentifier: $0.calendarItemIdentifier) as? EKReminder
+        }
+    }
+
+    /// Returns a completion block with no actor isolation. Must be nonisolated and
+    /// static so the returned closure is not @MainActor-bound — EventKit fires the
+    /// completion on its own serial queue.
+    private nonisolated static func makeSnapshotBlock(
+        continuation: CheckedContinuation<[ReminderSnapshot], Never>
+    ) -> (([EKReminder]?) -> Void) {
+        { reminders in
+            let snaps = (reminders ?? []).map {
+                ReminderSnapshot(
+                    calendarItemIdentifier: $0.calendarItemIdentifier,
+                    title: $0.title ?? "",
+                    isCompleted: $0.isCompleted
+                )
+            }
+            continuation.resume(returning: snaps)
         }
     }
 
