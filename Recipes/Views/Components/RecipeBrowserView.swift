@@ -7,11 +7,12 @@ import WebKit
 /// Shows a WKWebView with a bottom toolbar containing an "Import This Recipe" button.
 /// When the user taps Import, the current page URL is returned via the onImport callback.
 struct RecipeBrowserView: View {
+    var startURL: String? = nil
     let onImport: (String) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var webState = WebViewState()
-    @State private var addressText = "https://"
+    @State private var addressText = ""
     @State private var isEditingAddress = false
     @AppStorage("savedRecipeURLs") private var savedURLsData: Data = Data()
 
@@ -85,7 +86,7 @@ struct RecipeBrowserView: View {
                 Divider()
 
                 // Web view
-                WebView(state: webState)
+                WebView(state: webState, initialURL: startURL)
                     .ignoresSafeArea(edges: .bottom)
 
                 Divider()
@@ -211,14 +212,16 @@ final class WebViewState {
 
 struct WebView: UIViewRepresentable {
     let state: WebViewState
+    var initialURL: String? = nil
 
     func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
         webView.navigationDelegate = context.coordinator
         state.webView = webView
 
-        // Load a recipe-search-friendly default page
-        if let url = URL(string: "https://www.google.com/search?q=recipes") {
+        // Load the requested start URL, or fall back to a recipe search page
+        let startString = initialURL ?? "https://www.google.com/search?q=recipes"
+        if let url = URL(string: startString) {
             webView.load(URLRequest(url: url))
         }
 

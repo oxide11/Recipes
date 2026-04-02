@@ -20,6 +20,7 @@ struct RecipeImportView: View {
     @State private var showingPhotoLibrary = false
     @State private var cameraImage: UIImage?
     @State private var showingBrowser = false
+    @State private var browserStartURL: String? = nil
     @State private var showingFullPhoto = false
     @AppStorage("savedRecipeURLs") private var savedURLsData: Data = Data()
 
@@ -193,12 +194,13 @@ struct RecipeImportView: View {
                 }
 
                 Button {
+                    browserStartURL = nil
                     showingBrowser = true
                 } label: {
                     Label("Browse for a Recipe", systemImage: "globe")
                 }
                 .sheet(isPresented: $showingBrowser) {
-                    RecipeBrowserView { importedURL in
+                    RecipeBrowserView(startURL: browserStartURL) { importedURL in
                         urlString = importedURL
                         selectedTab = .url
                         Task { await performImport(urlOverride: importedURL) }
@@ -213,8 +215,8 @@ struct RecipeImportView: View {
                 Section("Saved") {
                     ForEach(savedURLs, id: \.self) { url in
                         Button {
-                            urlString = url
-                            Task { await performImport(urlOverride: url) }
+                            browserStartURL = url
+                            showingBrowser = true
                         } label: {
                             HStack {
                                 Image(systemName: "bookmark.fill")
