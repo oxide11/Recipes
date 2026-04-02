@@ -282,7 +282,7 @@ struct DirectionStepView: View {
         let content = UNMutableNotificationContent()
         content.title = "Timer Done!"
         content.body = "Step \(direction.stepNumber)\(recipeTitle.isEmpty ? "" : " — \(recipeTitle)"): \(direction.instruction.prefix(60))\(direction.instruction.count > 60 ? "…" : "")"
-        content.sound = .defaultCritical   // plays even in Focus / Silent mode
+        content.sound = .default
         content.interruptionLevel = .timeSensitive
 
         let trigger = UNTimeIntervalNotificationTrigger(
