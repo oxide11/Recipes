@@ -20,6 +20,8 @@
 	<string></string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSRemindersUsageDescription</key>
+	<string>Mise syncs your shopping list with Reminders so you can add items via Siri and check things off on your Apple Watch.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Recipes needs camera access to scan barcodes for pantry management and to take photos of your dishes.</string>
 	<key>NSMicrophoneUsageDescription</key>

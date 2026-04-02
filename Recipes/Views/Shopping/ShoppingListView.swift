@@ -6,11 +6,13 @@ import SwiftData
 struct ShoppingListView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(RemindersSync.self) private var remindersSync
     @Query(sort: \GroceryList.dateCreated, order: .reverse) private var lists: [GroceryList]
     @Query private var profiles: [UserProfile]
 
     @State private var showingAddItem = false
     @State private var showingGuidedShopping = false
+    @State private var showingRemindersSetup = false
     @State private var hideCompleted = false
 
     private var currencyCode: String { profiles.first?.preferredCurrencyCode ?? "CAD" }
@@ -41,8 +43,26 @@ struct ShoppingListView: View {
             .fullScreenCover(isPresented: $showingGuidedShopping) {
                 if let list { GuidedShoppingView(list: list) }
             }
+            .sheet(isPresented: $showingRemindersSetup) {
+                RemindersSetupView(sync: remindersSync)
+            }
         }
-        .onAppear(perform: ensureListExists)
+        .onAppear {
+            ensureListExists()
+            triggerSync()
+            // Prompt setup on first open if not yet linked
+            if !remindersSync.isLinked {
+                showingRemindersSetup = true
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            triggerSync()
+        }
+    }
+
+    private func triggerSync() {
+        guard let list else { return }
+        Task { await remindersSync.sync(groceryList: list, context: modelContext) }
     }
 
     // MARK: - Empty State
@@ -132,6 +152,7 @@ struct ShoppingListView: View {
                             ShoppingItemRow(item: item, currencyCode: currencyCode)
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
+                                        remindersSync.deleteReminder(for: item)
                                         modelContext.delete(item)
                                     } label: {
                                         Label("Delete", systemImage: "trash")
@@ -176,6 +197,18 @@ struct ShoppingListView: View {
     private var toolbar: some ToolbarContent {
         ToolbarItemGroup(placement: .primaryAction) {
             Button {
+                showingRemindersSetup = true
+            } label: {
+                if remindersSync.isSyncing {
+                    ProgressView().scaleEffect(0.8)
+                } else {
+                    Image(systemName: remindersSync.isLinked ? "checklist" : "checklist.unchecked")
+                        .foregroundStyle(remindersSync.isLinked ? Brand.herbGreen : .secondary)
+                }
+            }
+            .accessibilityLabel(remindersSync.isLinked ? "Reminders synced" : "Set up Reminders sync")
+
+            Button {
                 hideCompleted.toggle()
             } label: {
                 Image(systemName: hideCompleted ? "eye.slash" : "eye")
@@ -189,7 +222,6 @@ struct ShoppingListView: View {
                 Image(systemName: "plus")
             }
         }
-
     }
 
     // MARK: - Helpers

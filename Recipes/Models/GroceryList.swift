@@ -56,6 +56,8 @@ final class GroceryItem {
     var substituteFor: String?
     var notes: String?
     var isStaple: Bool = false
+    /// EKReminder.calendarItemIdentifier for the linked Reminders item, if any.
+    var remindersIdentifier: String? = nil
 
     init(
         name: String,

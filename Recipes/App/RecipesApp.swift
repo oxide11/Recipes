@@ -26,6 +26,7 @@ private let sharedNotificationDelegate = AppNotificationDelegate()
 struct RecipesApp: App {
     @State private var aiRouter = AIServiceRouter()
     @State private var timerDeepLink = TimerDeepLink()
+    @State private var remindersSync = RemindersSync()
 
     private static let schema = Schema([
         Recipe.self,
@@ -71,6 +72,7 @@ struct RecipesApp: App {
             ContentView()
                 .environment(aiRouter)
                 .environment(timerDeepLink)
+                .environment(remindersSync)
                 .preferredColorScheme(.dark)
                 .onOpenURL { timerDeepLink.handle($0) }
                 .task {

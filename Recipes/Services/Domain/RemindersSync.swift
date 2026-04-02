@@ -1,0 +1,214 @@
+import EventKit
+import SwiftData
+import SwiftUI
+
+// MARK: - Reminders Sync
+
+/// Bidirectional sync between the app's single GroceryList and a chosen
+/// Reminders calendar. No AI credits used — pure EventKit.
+@Observable
+@MainActor
+final class RemindersSync {
+
+    // MARK: State
+
+    var authorizationStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .reminder)
+    var isSyncing = false
+
+    /// The calendarIdentifier of the linked Reminders list, persisted across launches.
+    var linkedCalendarIdentifier: String? {
+        get { UserDefaults.standard.string(forKey: "remindersCalendarIdentifier") }
+        set { UserDefaults.standard.set(newValue, forKey: "remindersCalendarIdentifier") }
+    }
+
+    var isLinked: Bool { linkedCalendarIdentifier != nil }
+
+    // MARK: Private
+
+    private let store = EKEventStore()
+
+    // MARK: - Access
+
+    func requestAccess() async -> Bool {
+        do {
+            let granted = try await store.requestFullAccessToReminders()
+            authorizationStatus = EKEventStore.authorizationStatus(for: .reminder)
+            return granted
+        } catch {
+            return false
+        }
+    }
+
+    func availableCalendars() -> [EKCalendar] {
+        store.calendars(for: .reminder).sorted { $0.title < $1.title }
+    }
+
+    func createAndLink(named name: String) throws {
+        let calendar = EKCalendar(for: .reminder, eventStore: store)
+        calendar.title = name
+        calendar.source = store.defaultCalendarForNewReminders()?.source
+        try store.saveCalendar(calendar, commit: true)
+        linkedCalendarIdentifier = calendar.calendarIdentifier
+    }
+
+    func link(to calendar: EKCalendar) {
+        linkedCalendarIdentifier = calendar.calendarIdentifier
+    }
+
+    func unlink() {
+        linkedCalendarIdentifier = nil
+    }
+
+    // MARK: - Sync
+
+    /// Pull from Reminders → app, push app → Reminders. Safe to call on every foreground.
+    func sync(groceryList: GroceryList, context: ModelContext) async {
+        guard let identifier = linkedCalendarIdentifier,
+              let calendar = store.calendar(withIdentifier: identifier) else { return }
+        guard authorizationStatus == .fullAccess else { return }
+
+        isSyncing = true
+        defer { isSyncing = false }
+
+        // Fetch all reminders (completed + incomplete) from the linked calendar
+        let reminders = await fetchAllReminders(in: calendar)
+
+        let remindersByID    = Dictionary(uniqueKeysWithValues: reminders.map { ($0.calendarItemIdentifier, $0) })
+        let remindersByTitle = Dictionary(grouping: reminders) {
+            ($0.title ?? "").lowercased().trimmingCharacters(in: .whitespaces)
+        }
+
+        // Build a map of GroceryItems that already have a Reminders link
+        var itemsByReminderID: [String: GroceryItem] = [:]
+        for item in groceryList.items {
+            if let rid = item.remindersIdentifier {
+                itemsByReminderID[rid] = item
+            }
+        }
+
+        // ── Pull: Reminders → GroceryList ───────────────────────────────────
+        for reminder in reminders {
+            guard let title = reminder.title, !title.isEmpty else { continue }
+            let key = title.lowercased().trimmingCharacters(in: .whitespaces)
+            let rid = reminder.calendarItemIdentifier
+
+            if let item = itemsByReminderID[rid] {
+                // Already linked — sync completion state both ways (Reminders wins for pulls)
+                if reminder.isCompleted != item.isPurchased {
+                    item.isPurchased = reminder.isCompleted
+                }
+            } else if !groceryList.items.contains(where: { $0.name.lowercased() == key }) {
+                // New reminder not yet in the app → add it
+                let item = GroceryItem(
+                    name: title,
+                    quantity: 1,
+                    unit: .piece,
+                    storeSection: guessSection(for: title)
+                )
+                item.remindersIdentifier = rid
+                item.isPurchased = reminder.isCompleted
+                context.insert(item)
+                groceryList.items.append(item)
+                itemsByReminderID[rid] = item
+            }
+        }
+
+        // ── Push: GroceryList → Reminders ───────────────────────────────────
+        for item in groceryList.items {
+            if let rid = item.remindersIdentifier, let reminder = remindersByID[rid] {
+                // Already linked — push completion state if app is ahead
+                if item.isPurchased != reminder.isCompleted {
+                    reminder.isCompleted = item.isPurchased
+                    if item.isPurchased { reminder.completionDate = .now }
+                    try? store.save(reminder, commit: false)
+                }
+            } else {
+                // Not linked yet — match by name or create new reminder
+                let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
+                if let existing = remindersByTitle[key]?.first {
+                    item.remindersIdentifier = existing.calendarItemIdentifier
+                } else {
+                    let reminder = EKReminder(eventStore: store)
+                    reminder.title = item.name
+                    reminder.calendar = calendar
+                    reminder.isCompleted = item.isPurchased
+                    try? store.save(reminder, commit: false)
+                    item.remindersIdentifier = reminder.calendarItemIdentifier
+                }
+            }
+        }
+
+        try? store.commit()
+    }
+
+    /// Remove a single item's corresponding reminder when deleted from the app.
+    func deleteReminder(for item: GroceryItem) {
+        guard let rid = item.remindersIdentifier,
+              let reminder = store.calendarItem(withIdentifier: rid) as? EKReminder else { return }
+        try? store.remove(reminder, commit: true)
+    }
+
+    // MARK: - Helpers
+
+    /// EKReminder isn't Sendable, so we fetch on the EventKit callback queue
+    /// and immediately convert to a plain struct before crossing the concurrency boundary.
+    private struct ReminderSnapshot: Sendable {
+        var calendarItemIdentifier: String
+        var title: String
+        var isCompleted: Bool
+    }
+
+    private func fetchAllReminders(in calendar: EKCalendar) async -> [EKReminder] {
+        let snapshots: [ReminderSnapshot] = await withCheckedContinuation { cont in
+            let predicate = store.predicateForReminders(in: [calendar])
+            store.fetchReminders(matching: predicate) { reminders in
+                let snaps = (reminders ?? []).map {
+                    ReminderSnapshot(
+                        calendarItemIdentifier: $0.calendarItemIdentifier,
+                        title: $0.title ?? "",
+                        isCompleted: $0.isCompleted
+                    )
+                }
+                cont.resume(returning: snaps)
+            }
+        }
+        // Re-fetch the live EKReminder objects by identifier now that we're back
+        // on the MainActor so EventKit operations are safe.
+        return snapshots.compactMap {
+            store.calendarItem(withIdentifier: $0.calendarItemIdentifier) as? EKReminder
+        }
+    }
+
+    /// Keyword-based section guess for items arriving from Reminders/Siri.
+    private func guessSection(for name: String) -> StoreSection {
+        let n = name.lowercased()
+        let map: [(StoreSection, [String])] = [
+            (.produce,    ["apple","banana","berry","berries","spinach","lettuce","tomato","onion","garlic",
+                           "pepper","carrot","broccoli","cucumber","lemon","lime","avocado","mushroom",
+                           "basil","cilantro","parsley","kale","zucchini","potato","celery","corn",
+                           "mango","pineapple","grape","peach","pear","plum","strawberry","blueberry",
+                           "raspberry","arugula","beet","radish","leek","fennel","asparagus","squash"]),
+            (.dairy,      ["milk","cheese","yogurt","butter","cream","kefir","egg","eggs","sour cream",
+                           "cottage cheese","ricotta","mozzarella","cheddar","parmesan","feta","brie"]),
+            (.meat,       ["chicken","beef","pork","turkey","lamb","steak","ground beef","bacon",
+                           "sausage","ham","salmon","tuna","shrimp","fish","cod","tilapia","scallop"]),
+            (.bakery,     ["bread","bagel","muffin","croissant","bun","roll","tortilla","pita","wrap"]),
+            (.frozen,     ["frozen","ice cream","popsicle"]),
+            (.spices,     ["salt","pepper","cumin","cinnamon","paprika","oregano","thyme","rosemary",
+                           "turmeric","ginger","spice","seasoning","chili flake","bay leaf","clove"]),
+            (.condiments, ["sauce","ketchup","mustard","mayo","mayonnaise","vinegar","oil","dressing",
+                           "salsa","hummus","pesto","soy sauce","hot sauce","sriracha","tahini"]),
+            (.dryGoods,   ["pasta","rice","flour","sugar","oat","cereal","quinoa","lentil","bean",
+                           "chickpea","noodle","breadcrumb","cracker","granola","barley","couscous"]),
+            (.beverages,  ["juice","water","soda","coffee","tea","wine","beer","kombucha","sparkling",
+                           "almond milk","oat milk","coconut water"]),
+            (.snacks,     ["chip","nuts","nut","almond","cashew","walnut","peanut","popcorn","pretzel",
+                           "chocolate","candy","cookie","granola bar"]),
+            (.canned,     ["can","canned","tomato paste","coconut milk","broth","stock","soup"]),
+        ]
+        for (section, keywords) in map {
+            if keywords.contains(where: { n.contains($0) }) { return section }
+        }
+        return .other
+    }
+}
