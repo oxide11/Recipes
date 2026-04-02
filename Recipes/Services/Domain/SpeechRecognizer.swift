@@ -18,7 +18,7 @@ final class SpeechRecognizer {
     private let audioEngine = AVAudioEngine()
     private let speechRecognizer = SFSpeechRecognizer(locale: .current)
     private var silenceTimer: Timer?
-    private let silenceTimeout: TimeInterval = 2.0
+    private let silenceTimeout: TimeInterval = 3.5
 
     // MARK: - Public API
 
