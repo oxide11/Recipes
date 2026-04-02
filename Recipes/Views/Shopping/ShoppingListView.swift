@@ -11,7 +11,6 @@ struct ShoppingListView: View {
 
     @State private var showingAddItem = false
     @State private var showingGuidedShopping = false
-    @State private var showingReceiptScanner = false
     @State private var hideCompleted = false
 
     private var currencyCode: String { profiles.first?.preferredCurrencyCode ?? "CAD" }
@@ -41,9 +40,6 @@ struct ShoppingListView: View {
             }
             .fullScreenCover(isPresented: $showingGuidedShopping) {
                 if let list { GuidedShoppingView(list: list) }
-            }
-            .sheet(isPresented: $showingReceiptScanner) {
-                ReceiptScannerView(groceryList: list)
             }
         }
         .onAppear(perform: ensureListExists)
@@ -194,13 +190,6 @@ struct ShoppingListView: View {
             }
         }
 
-        ToolbarItem(placement: .secondaryAction) {
-            Button {
-                showingReceiptScanner = true
-            } label: {
-                Label("Scan Receipt", systemImage: "doc.text.viewfinder")
-            }
-        }
     }
 
     // MARK: - Helpers
