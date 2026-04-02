@@ -72,7 +72,7 @@ struct RecipeImportView: View {
                         Image(systemName: "globe")
                             .foregroundStyle(.secondary)
                             .font(.footnote)
-                        Text(urlString)
+                        Text(displayHost(for: urlString))
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
@@ -81,7 +81,7 @@ struct RecipeImportView: View {
                         Button {
                             saveURL(urlString)
                         } label: {
-                            Image(systemName: savedURLs.contains(urlString) ? "bookmark.fill" : "bookmark")
+                            Image(systemName: savedURLs.contains(rootURL(for: urlString)) ? "bookmark.fill" : "bookmark")
                                 .foregroundStyle(Brand.warmTan)
                         }
                         .buttonStyle(.plain)
@@ -143,10 +143,25 @@ struct RecipeImportView: View {
         (try? JSONDecoder().decode([String].self, from: savedURLsData)) ?? []
     }
 
+    /// Strips a full URL down to its root site (scheme + host), e.g.
+    /// "https://loveandlemons.com/mushroom-risotto/" → "https://loveandlemons.com"
+    private func rootURL(for urlString: String) -> String {
+        guard let url = URL(string: urlString),
+              let scheme = url.scheme,
+              let host = url.host else { return urlString }
+        return "\(scheme)://\(host)"
+    }
+
+    /// Just the host name for display, e.g. "loveandlemons.com"
+    private func displayHost(for urlString: String) -> String {
+        URL(string: urlString)?.host ?? urlString
+    }
+
     private func saveURL(_ url: String) {
-        guard !url.isEmpty, !savedURLs.contains(url) else { return }
+        let root = rootURL(for: url)
+        guard !root.isEmpty, !savedURLs.contains(root) else { return }
         var urls = savedURLs
-        urls.insert(url, at: 0)
+        urls.insert(root, at: 0)
         savedURLsData = (try? JSONEncoder().encode(Array(urls.prefix(20)))) ?? Data()
     }
 
@@ -170,7 +185,7 @@ struct RecipeImportView: View {
                     Button {
                         saveURL(urlString)
                     } label: {
-                        Image(systemName: savedURLs.contains(urlString) ? "bookmark.fill" : "bookmark")
+                        Image(systemName: savedURLs.contains(rootURL(for: urlString)) ? "bookmark.fill" : "bookmark")
                             .foregroundStyle(urlString.isEmpty ? Color.secondary.opacity(0.4) : Brand.warmTan)
                     }
                     .buttonStyle(.plain)
@@ -205,7 +220,7 @@ struct RecipeImportView: View {
                                 Image(systemName: "bookmark.fill")
                                     .font(.caption)
                                     .foregroundStyle(Brand.warmTan)
-                                Text(url)
+                                Text(displayHost(for: url))
                                     .font(.caption)
                                     .foregroundStyle(.primary)
                                     .lineLimit(1)
