@@ -178,22 +178,20 @@ struct ShoppingListView: View {
 
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
-        ToolbarItem(placement: .primaryAction) {
-            Button {
-                ensureListExists()
-                showingAddItem = true
-            } label: {
-                Image(systemName: "plus")
-            }
-        }
-
-        ToolbarItem(placement: .primaryAction) {
+        ToolbarItemGroup(placement: .primaryAction) {
             Button {
                 hideCompleted.toggle()
             } label: {
                 Image(systemName: hideCompleted ? "eye.slash" : "eye")
             }
             .accessibilityLabel(hideCompleted ? "Show completed items" : "Hide completed items")
+
+            Button {
+                ensureListExists()
+                showingAddItem = true
+            } label: {
+                Image(systemName: "plus")
+            }
         }
 
         ToolbarItem(placement: .secondaryAction) {
