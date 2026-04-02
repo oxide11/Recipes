@@ -86,7 +86,14 @@ struct MealPlanView: View {
 
                 if let plan = activePlan {
                     if viewMode == .day {
-                        DayMealView(plan: plan, date: selectedDate, allMeals: allPlannedMeals)
+                        TabView(selection: $selectedDate) {
+                            ForEach(weekDays, id: \.self) { day in
+                                DayMealView(plan: plan, date: day, allMeals: allPlannedMeals)
+                                    .tag(day)
+                            }
+                        }
+                        .tabViewStyle(.page(indexDisplayMode: .never))
+                        .animation(.easeInOut(duration: 0.25), value: selectedDate)
                     } else {
                         WeekMealView(allMeals: allPlannedMeals, weekDays: weekDays)
                     }
