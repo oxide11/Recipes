@@ -9,175 +9,207 @@ struct ShoppingListView: View {
     @Query(sort: \GroceryList.dateCreated, order: .reverse) private var lists: [GroceryList]
     @Query private var profiles: [UserProfile]
 
-    @State private var showingCreateList = false
+    @State private var showingAddItem = false
     @State private var showingGuidedShopping = false
     @State private var showingReceiptScanner = false
-    @State private var selectedList: GroceryList?
-    @State private var listToDelete: GroceryList?
+    @State private var hideCompleted = false
 
     private var currencyCode: String { profiles.first?.preferredCurrencyCode ?? "CAD" }
 
+    /// Always the single persistent list. Created on appear if absent.
+    private var list: GroceryList? { lists.first }
+
     var body: some View {
         NavigationStack {
+            Group {
+                if let list {
+                    if list.items.isEmpty {
+                        emptyState
+                    } else {
+                        listContent(list)
+                    }
+                } else {
+                    emptyState
+                }
+            }
+            .navigationTitle("Shopping")
+            .toolbar { toolbar }
+            .sheet(isPresented: $showingAddItem) {
+                if let list {
+                    AddShoppingItemView(list: list)
+                }
+            }
+            .fullScreenCover(isPresented: $showingGuidedShopping) {
+                if let list { GuidedShoppingView(list: list) }
+            }
+            .sheet(isPresented: $showingReceiptScanner) {
+                ReceiptScannerView(groceryList: list)
+            }
+        }
+        .onAppear(perform: ensureListExists)
+    }
+
+    // MARK: - Empty State
+
+    private var emptyState: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "cart")
+                .font(.system(size: 56))
+                .foregroundStyle(.quaternary)
+            Text("Your list is empty")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+            Text("Tap + to add items, or generate a list from your meal plan.")
+                .font(.subheadline)
+                .foregroundStyle(.tertiary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+            Button {
+                ensureListExists()
+                showingAddItem = true
+            } label: {
+                Label("Add Item", systemImage: "plus.circle.fill")
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(Brand.herbGreen)
+            .padding(.top, 8)
+        }
+    }
+
+    // MARK: - List Content
+
+    @ViewBuilder
+    private func listContent(_ list: GroceryList) -> some View {
+        let allItems    = list.items
+        let purchased   = allItems.filter(\.isPurchased)
+        let remaining   = allItems.filter { !$0.isPurchased }
+        let visibleItems = hideCompleted ? remaining : allItems
+
         List {
-                if let activeList = lists.first {
-                    // Active list header
-                    Section {
-                        ProgressView(value: activeList.progress) {
-                            HStack {
-                                Text("\(Int(activeList.progress * 100))% complete")
-                                Spacer()
-                                Text("\(activeList.items.filter(\.isPurchased).count)/\(activeList.items.count) items")
-                            }
-                        }
-                        .tint(Brand.herbGreen)
-
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text("Estimated")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                Text(activeList.totalEstimatedCost, format: .currency(code: currencyCode))
-                                    .fontWeight(.medium)
-                            }
+            // Progress header
+            Section {
+                ProgressView(value: list.progress) {
+                    HStack {
+                        if hideCompleted && !purchased.isEmpty {
+                            Text("\(remaining.count) remaining")
                             Spacer()
-                            VStack(alignment: .trailing) {
-                                Text("Actual")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                Text(activeList.totalActualCost, format: .currency(code: currencyCode))
+                            Text("\(purchased.count) hidden")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text("\(Int(list.progress * 100))% complete")
+                            Spacer()
+                            Text("\(purchased.count)/\(allItems.count) items")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .font(.caption)
+                }
+                .tint(Brand.herbGreen)
+
+                if !remaining.isEmpty {
+                    Button {
+                        showingGuidedShopping = true
+                    } label: {
+                        Label {
+                            VStack(alignment: .leading) {
+                                Text("Start Guided Shopping")
                                     .fontWeight(.medium)
+                                Text("Voice-guided, section by section")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
-                        }
-                        .font(.subheadline)
-
-                        // Guided shopping button
-                        Button {
-                            selectedList = activeList
-                            showingGuidedShopping = true
-                        } label: {
-                            Label {
-                                VStack(alignment: .leading) {
-                                    Text("Start Guided Shopping")
-                                        .fontWeight(.medium)
-                                    Text("Voice-guided, section by section")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            } icon: {
-                                Image(systemName: "waveform.circle.fill")
-                                    .font(.title2)
-                                    .foregroundStyle(Brand.herbGreen)
-                            }
-                        }
-                        .disabled(activeList.items.isEmpty || activeList.items.allSatisfy(\.isPurchased))
-                    } header: {
-                        Text(activeList.name)
-                    }
-
-                    // Items grouped by store section
-                    ForEach(StoreSection.allCases, id: \.self) { section in
-                        let sectionItems = activeList.items.filter { $0.storeSection == section }
-                        if !sectionItems.isEmpty {
-                            Section {
-                                ForEach(sectionItems) { item in
-                                    ShoppingItemRow(item: item, currencyCode: currencyCode)
-                                }
-                            } header: {
-                                HStack {
-                                    Text(section.displayName)
-                                    Spacer()
-                                    let purchased = sectionItems.filter(\.isPurchased).count
-                                    Text("\(purchased)/\(sectionItems.count)")
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
+                        } icon: {
+                            Image(systemName: "waveform.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(Brand.herbGreen)
                         }
                     }
+                }
+            }
 
-                    // Other lists
-                    if lists.count > 1 {
-                        Section("Previous Lists") {
-                            ForEach(lists.dropFirst()) { list in
-                                HStack {
-                                    VStack(alignment: .leading) {
-                                        Text(list.name)
-                                            .fontWeight(.medium)
-                                        Text(list.dateCreated, style: .date)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    Spacer()
-                                    Text("\(Int(list.progress * 100))%")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
+            // Items grouped by store section
+            ForEach(StoreSection.allCases, id: \.self) { section in
+                let sectionItems = visibleItems.filter { $0.storeSection == section }
+                if !sectionItems.isEmpty {
+                    Section {
+                        ForEach(sectionItems) { item in
+                            ShoppingItemRow(item: item, currencyCode: currencyCode)
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
-                                        listToDelete = list
+                                        modelContext.delete(item)
                                     } label: {
                                         Label("Delete", systemImage: "trash")
                                     }
                                 }
-                            }
+                        }
+                    } header: {
+                        HStack {
+                            Text(section.displayName)
+                            Spacer()
+                            let done = sectionItems.filter(\.isPurchased).count
+                            Text("\(done)/\(sectionItems.count)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
-
-                if lists.isEmpty {
-                    ContentUnavailableView(
-                        "No Shopping Lists",
-                        systemImage: "cart",
-                        description: Text("Generate a list from your meal plan or create one manually.")
-                    )
-                }
             }
-            .navigationTitle("Shopping")
-            .toolbarBackground(.automatic, for: .navigationBar)
-            .toolbar {
-                ToolbarItemGroup(placement: .primaryAction) {
-                    Button {
-                        showingReceiptScanner = true
+
+            // Clear completed — only visible when there are checked items
+            if !purchased.isEmpty {
+                Section {
+                    Button(role: .destructive) {
+                        withAnimation {
+                            purchased.forEach { modelContext.delete($0) }
+                        }
                     } label: {
-                        Image(systemName: "doc.text.viewfinder")
+                        Label(
+                            "Clear \(purchased.count) Completed \(purchased.count == 1 ? "Item" : "Items")",
+                            systemImage: "trash"
+                        )
+                        .frame(maxWidth: .infinity, alignment: .center)
                     }
-                    .accessibilityLabel("Scan Receipt")
+                }
+            }
+        }
+    }
 
-                    Button("New List", systemImage: "plus") {
-                        showingCreateList = true
-                    }
-                }
+    // MARK: - Toolbar
+
+    @ToolbarContentBuilder
+    private var toolbar: some ToolbarContent {
+        ToolbarItem(placement: .primaryAction) {
+            Button {
+                ensureListExists()
+                showingAddItem = true
+            } label: {
+                Image(systemName: "plus")
             }
-            .confirmationDialog(
-                "Delete List",
-                isPresented: .init(
-                    get: { listToDelete != nil },
-                    set: { if !$0 { listToDelete = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("Delete", role: .destructive) {
-                    if let list = listToDelete {
-                        modelContext.delete(list)
-                        listToDelete = nil
-                    }
-                }
-            } message: {
-                Text("Delete \"\(listToDelete?.name ?? "")\"? This cannot be undone.")
-            }
-            .sheet(isPresented: $showingCreateList) {
-                CreateShoppingListView()
-            }
-            .fullScreenCover(isPresented: $showingGuidedShopping) {
-                if let list = selectedList {
-                    GuidedShoppingView(list: list)
-                }
-            }
-        .sheet(isPresented: $showingReceiptScanner) {
-            ReceiptScannerView(groceryList: lists.first)
         }
+
+        ToolbarItem(placement: .primaryAction) {
+            Button {
+                hideCompleted.toggle()
+            } label: {
+                Image(systemName: hideCompleted ? "eye.slash" : "eye")
+            }
+            .accessibilityLabel(hideCompleted ? "Show completed items" : "Hide completed items")
         }
+
+        ToolbarItem(placement: .secondaryAction) {
+            Button {
+                showingReceiptScanner = true
+            } label: {
+                Label("Scan Receipt", systemImage: "doc.text.viewfinder")
+            }
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func ensureListExists() {
+        guard lists.isEmpty else { return }
+        modelContext.insert(GroceryList(name: "Shopping List"))
     }
 }
 
@@ -217,10 +249,6 @@ struct ShoppingItemRow: View {
                     }
                 }
 
-                Text("\(item.quantity, specifier: "%.1f") \(item.unit.rawValue)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
                 if let sub = item.substituteFor {
                     Label("Substituting: \(sub)", systemImage: "arrow.triangle.2.circlepath")
                         .font(.caption2)
@@ -257,100 +285,88 @@ struct ShoppingItemRow: View {
             Button {
                 withAnimation { item.isStaple.toggle() }
             } label: {
-                Label(item.isStaple ? "Remove Staple" : "Mark Staple", systemImage: item.isStaple ? "star.slash" : "star.fill")
+                Label(
+                    item.isStaple ? "Remove Staple" : "Mark Staple",
+                    systemImage: item.isStaple ? "star.slash" : "star.fill"
+                )
             }
             .tint(Brand.warmTan)
         }
     }
 }
 
-// MARK: - Create Shopping List View
+// MARK: - Add Shopping Item View
 
-struct CreateShoppingListView: View {
+struct AddShoppingItemView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Query private var existingLists: [GroceryList]
+    var list: GroceryList
 
     @State private var name = ""
-    @State private var includeStaples = true
-
-    /// Collects unique staple items from all existing lists.
-    private var stapleItems: [GroceryItem] {
-        var seen = Set<String>()
-        var result: [GroceryItem] = []
-        for list in existingLists {
-            for item in list.items where item.isStaple {
-                let key = item.name.lowercased()
-                if !seen.contains(key) {
-                    seen.insert(key)
-                    result.append(item)
-                }
-            }
-        }
-        return result
-    }
+    @State private var section: StoreSection = .other
+    @State private var recentlyAdded: [String] = []
+    @FocusState private var nameFocused: Bool
 
     var body: some View {
         NavigationStack {
             Form {
-                TextField("List Name", text: $name)
+                Section {
+                    TextField("Item name", text: $name)
+                        .focused($nameFocused)
+                        .submitLabel(.done)
+                        .onSubmit { addItem() }
 
-                if !stapleItems.isEmpty {
-                    Section {
-                        Toggle("Include Staple Items", isOn: $includeStaples)
-
-                        if includeStaples {
-                            ForEach(stapleItems) { item in
-                                HStack {
-                                    Image(systemName: "star.fill")
-                                        .font(.caption2)
-                                        .foregroundStyle(Brand.warmTan)
-                                    Text(item.name)
-                                        .font(.subheadline)
-                                    Spacer()
-                                    Text("\(item.quantity, specifier: "%.1f") \(item.unit.rawValue)")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
+                    Picker("Section", selection: $section) {
+                        ForEach(StoreSection.allCases, id: \.self) { s in
+                            Text(s.displayName).tag(s)
                         }
-                    } header: {
-                        Text("Staples")
-                    } footer: {
-                        Text("Items you always buy will be added automatically.")
+                    }
+                } footer: {
+                    Text("Press return or tap Add to add another item.")
+                }
+
+                if !recentlyAdded.isEmpty {
+                    Section("Added") {
+                        ForEach(recentlyAdded, id: \.self) { itemName in
+                            Label(itemName, systemImage: "checkmark.circle.fill")
+                                .foregroundStyle(.secondary)
+                                .font(.subheadline)
+                        }
                     }
                 }
             }
-            .navigationTitle("New Shopping List")
+            .navigationTitle("Add Items")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Done") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Create") {
-                        let list = GroceryList(name: name.isEmpty ? "Shopping List" : name)
-                        modelContext.insert(list)
-
-                        if includeStaples {
-                            for staple in stapleItems {
-                                let newItem = GroceryItem(
-                                    name: staple.name,
-                                    quantity: staple.quantity,
-                                    unit: staple.unit,
-                                    storeSection: staple.storeSection,
-                                    estimatedPrice: staple.estimatedPrice,
-                                    isStaple: true
-                                )
-                                modelContext.insert(newItem)
-                                list.items.append(newItem)
-                            }
-                        }
-
-                        dismiss()
-                    }
+                    Button("Add", action: addItem)
+                        .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
+            .onAppear { nameFocused = true }
         }
+    }
+
+    private func addItem() {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+
+        // Skip duplicates
+        let key = trimmed.lowercased()
+        guard !list.items.contains(where: { $0.name.lowercased() == key }) else {
+            name = ""
+            return
+        }
+
+        let item = GroceryItem(name: trimmed, quantity: 1, unit: .piece, storeSection: section)
+        modelContext.insert(item)
+        list.items.append(item)
+
+        recentlyAdded.insert(trimmed, at: 0)
+        name = ""
+        nameFocused = true
     }
 }
