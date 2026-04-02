@@ -83,7 +83,8 @@ struct PantryView: View {
     }
 
     var body: some View {
-        List {
+        NavigationStack {
+            List {
                 // "Use It Up" section for expiring items
                 if !expiringItems.isEmpty {
                     Section {
@@ -261,6 +262,7 @@ struct PantryView: View {
                         }
                     }
                 }
+            }
         }
     }
 }
