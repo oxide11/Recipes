@@ -18,18 +18,19 @@ struct PlanAndShopView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Hide picker when drilled into a recipe so it doesn't float over the detail view
-            if !isInRecipeDetail {
-                Picker("Section", selection: $segment) {
-                    ForEach(PlanAndShopSegment.allCases, id: \.self) { s in
-                        Text(s.rawValue).tag(s)
-                    }
+            Picker("Section", selection: $segment) {
+                ForEach(PlanAndShopSegment.allCases, id: \.self) { s in
+                    Text(s.rawValue).tag(s)
                 }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.top, 8)
-                .padding(.bottom, 4)
             }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+            .padding(.top, 8)
+            .padding(.bottom, 4)
+            .frame(height: isInRecipeDetail ? 0 : nil)
+            .opacity(isInRecipeDetail ? 0 : 1)
+            .clipped()
+            .animation(.easeInOut(duration: 0.22), value: isInRecipeDetail)
 
             // Content
             switch segment {

@@ -156,7 +156,9 @@ struct MealPlanView: View {
             }
             .onChange(of: selectedDate) { ensurePlan() }
             .onChange(of: navPath.count) { _, count in
-                isInDetail?.wrappedValue = count > 0
+                withAnimation(.easeInOut(duration: 0.22)) {
+                    isInDetail?.wrappedValue = count > 0
+                }
             }
         }
     }
