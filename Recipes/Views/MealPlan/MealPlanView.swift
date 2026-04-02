@@ -934,6 +934,8 @@ struct AddMealView: View {
     @State private var selectedDate: Date
     @State private var selectedRecipe: Recipe? = nil
     @State private var servings = 1
+    @State private var showingGenerator = false
+    @State private var lastRecipeCount = 0
 
     init(plan: MealPlan, preselectMealType: MealType = .dinner, preselectDate: Date? = nil) {
         self.plan = plan
@@ -957,9 +959,18 @@ struct AddMealView: View {
                 }
 
                 Section("Recipe") {
+                    Button {
+                        lastRecipeCount = recipes.count
+                        showingGenerator = true
+                    } label: {
+                        Label("Generate a Recipe", systemImage: "sparkles")
+                            .foregroundStyle(Brand.warmTan)
+                    }
+
                     if recipes.isEmpty {
-                        Text("No recipes yet — add some in the Recipes tab.")
+                        Text("No recipes yet — generate one above or add some in the Recipes tab.")
                             .foregroundStyle(.secondary)
+                            .font(.caption)
                     } else {
                         ForEach(recipes) { recipe in
                             Button {
@@ -976,6 +987,15 @@ struct AddMealView: View {
                             .foregroundStyle(.primary)
                         }
                     }
+                }
+            }
+            .sheet(isPresented: $showingGenerator) {
+                QuickGenerateView()
+            }
+            .onChange(of: recipes.count) { _, newCount in
+                // Auto-select the recipe that was just generated
+                if newCount > lastRecipeCount, let newest = recipes.last {
+                    selectedRecipe = newest
                 }
             }
             .navigationTitle("Add Meal")
