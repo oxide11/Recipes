@@ -1037,6 +1037,7 @@ struct AddMealView: View {
                         plan.meals.append(meal)
                         dismiss()
                     }
+                    .disabled(selectedRecipe == nil)
                 }
             }
         }
