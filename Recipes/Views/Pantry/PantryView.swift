@@ -72,11 +72,6 @@ struct PantryView: View {
         }
     }
 
-    private var stapleItems: [PantryItem] {
-        items.filter(\.isStaple)
-            .sorted { $0.name.localizedCompare($1.name) == .orderedAscending }
-    }
-
     private func shelfLifeDays(for item: PantryItem) -> Int {
         let name = item.name.lowercased()
         let shortKeywords  = ["lettuce","spinach","arugula","basil","cilantro","parsley","dill","mint",
@@ -208,20 +203,6 @@ struct PantryView: View {
                     }
                 }
 
-                // Staples section
-                if !stapleItems.isEmpty && searchText.isEmpty {
-                    Section {
-                        ForEach(stapleItems) { item in
-                            pantryItemRow(item)
-                        }
-                    } header: {
-                        Label("Staples", systemImage: "star.fill")
-                    } footer: {
-                        Text("Items you almost always have. Swipe right to remove the staple mark.")
-                            .font(.caption)
-                    }
-                }
-
                 // Quick actions
                 if !items.isEmpty {
                     Section {
@@ -265,17 +246,8 @@ struct PantryView: View {
                 // Spice Rack
                 if !spiceRackItems.isEmpty {
                     Section {
-                        ForEach(spiceRackItems) { item in
-                            PantryItemRow(item: item)
-                                .contentShape(Rectangle())
-                                .onTapGesture { editingItem = item }
-                                .swipeActions(edge: .trailing) {
-                                    Button(role: .destructive) {
-                                        modelContext.delete(item)
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }
-                                }
+                        ForEach(spiceRackItems.sorted { $0.isStaple && !$1.isStaple }) { item in
+                            pantryItemRow(item)
                         }
                     } header: {
                         Label("Spice Rack", systemImage: "sparkles")
@@ -286,7 +258,7 @@ struct PantryView: View {
                 ForEach(IngredientCategory.allCases.filter({ $0 != .spice && $0 != .herb }), id: \.self) { category in
                     if let categoryItems = groupedItems[category], !categoryItems.isEmpty {
                         Section(category.rawValue.capitalized) {
-                            ForEach(categoryItems) { item in
+                            ForEach(categoryItems.sorted { $0.isStaple && !$1.isStaple }) { item in
                                 pantryItemRow(item)
                             }
                         }
