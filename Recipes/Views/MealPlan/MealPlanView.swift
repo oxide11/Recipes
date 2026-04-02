@@ -985,6 +985,14 @@ struct AddMealView: View {
                             .foregroundStyle(Brand.warmTan)
                     }
 
+                    if !recipes.isEmpty {
+                        HStack {
+                            Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                            TextField("Search recipes", text: $searchText)
+                                .autocorrectionDisabled()
+                        }
+                    }
+
                     if recipes.isEmpty {
                         Text("No recipes yet — generate one above or add some in the Recipes tab.")
                             .foregroundStyle(.secondary)
@@ -1016,7 +1024,6 @@ struct AddMealView: View {
                     }
                 }
             }
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search recipes")
             .sheet(isPresented: $showingGenerator) {
                 QuickGenerateView()
             }
