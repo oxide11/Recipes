@@ -281,16 +281,20 @@ final class RecipeIngestionService {
         var seenIngredients = Set<String>()
         let directions = result.directions.enumerated().map { index, instruction -> RecipeDirection in
             let lower = instruction.lowercased()
-            var seenInStep = Set<String>()   // per-step dedup — prevents duplicate chips when ingredient list itself has duplicates
+            var seenInStep = Set<String>()   // per-step dedup
             let refs = ingredients.compactMap { ingredient -> DirectionIngredientRef? in
                 let ingredientLower = ingredient.name.lowercased()
-                guard lower.contains(ingredientLower) else { return nil }
+                // Find how this ingredient is actually referred to in the step text
+                // (handles multi-word names, plurals, abbreviations)
+                guard let term = Self.matchedTerm(for: ingredientLower, in: lower) else { return nil }
                 guard !seenInStep.contains(ingredientLower) else { return nil }
                 guard !Self.isManipulation(instruction: lower, ingredientName: ingredientLower,
+                                           matchedTerm: term,
                                            alreadySeen: seenIngredients.contains(ingredientLower)) else { return nil }
                 seenInStep.insert(ingredientLower)
                 seenIngredients.insert(ingredientLower)
                 let amount = Self.extractStepAmount(from: instruction, ingredientName: ingredient.name,
+                                                   matchedTerm: term,
                                                    parseAmount: parseAmount, matchUnit: matchUnit,
                                                    parseFraction: parseFraction)
                              ?? ingredient.amount
@@ -673,45 +677,107 @@ final class RecipeIngestionService {
 
     // MARK: - Step Ingredient Helpers
 
+    /// Returns the term by which `ingredientName` is referred to in `instruction`,
+    /// or nil if the ingredient doesn't appear.
+    /// Handles multi-word names ("black pepper" → "pepper"),
+    /// and basic plural/singular variants ("potato" ↔ "potatoes").
+    private static func matchedTerm(for ingredientName: String, in instruction: String) -> String? {
+        // 1. Exact match
+        if wordBoundaryContains(instruction, ingredientName) { return ingredientName }
+
+        let words = ingredientName.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+
+        // 2. Single word — try plural/singular
+        if words.count == 1 {
+            for v in pluralVariants(of: ingredientName) where wordBoundaryContains(instruction, v) { return v }
+            return nil
+        }
+
+        // 3. Multi-word — try each significant word (and its plural/singular)
+        // Descriptor words that are too generic to match on their own
+        let descriptors: Set<String> = [
+            "fresh", "dried", "large", "small", "medium", "whole", "ground",
+            "minced", "sliced", "chopped", "diced", "finely", "coarsely",
+            "thinly", "thick", "unsalted", "salted", "extra", "virgin",
+            "heavy", "light", "low", "high", "raw", "cooked", "shredded",
+            "grated", "peeled", "boneless", "skinless", "lean"
+        ]
+        // Prefer later words (usually the noun) then earlier words
+        for word in words.reversed() where !descriptors.contains(word) && word.count >= 3 {
+            if wordBoundaryContains(instruction, word) { return word }
+            for v in pluralVariants(of: word) where wordBoundaryContains(instruction, v) { return v }
+        }
+        return nil
+    }
+
+    /// Case-insensitive substring check that requires word boundaries on both sides.
+    private static func wordBoundaryContains(_ text: String, _ word: String) -> Bool {
+        guard !word.isEmpty else { return false }
+        var searchRange = text.startIndex..<text.endIndex
+        while let range = text.range(of: word, options: .caseInsensitive, range: searchRange) {
+            let beforeOK = range.lowerBound == text.startIndex
+                        || !text[text.index(before: range.lowerBound)].isLetter
+            let afterOK  = range.upperBound == text.endIndex
+                        || !text[range.upperBound].isLetter
+            if beforeOK && afterOK { return true }
+            searchRange = range.upperBound..<text.endIndex
+        }
+        return false
+    }
+
+    /// Returns simple plural/singular variants for a word.
+    private static func pluralVariants(of word: String) -> [String] {
+        if word.hasSuffix("ies") { return [String(word.dropLast(3)) + "y"] }
+        if word.hasSuffix("ves") { return [String(word.dropLast(3)) + "f", String(word.dropLast(3)) + "fe"] }
+        if word.hasSuffix("es")  { return [String(word.dropLast(2)), String(word.dropLast(1))] }
+        if word.hasSuffix("s")   { return [String(word.dropLast())] }
+        // Singular — produce plural
+        if word.hasSuffix("y")   { return [String(word.dropLast()) + "ies"] }
+        if word.hasSuffix("f")   { return [String(word.dropLast()) + "ves"] }
+        if ["o","ch","sh","x","z","s"].contains(where: { word.hasSuffix($0) }) { return [word + "es"] }
+        return [word + "s"]
+    }
+
+    /// Returns true when "remaining" or "reserved" appears within 40 chars before `term`.
+    private static func remainingAppearsNear(term: String, in lower: String) -> Bool {
+        guard let termRange = lower.range(of: term, options: .caseInsensitive) else { return false }
+        let dist = lower.distance(from: lower.startIndex, to: termRange.lowerBound)
+        let lookbackStart = lower.index(termRange.lowerBound, offsetBy: -min(40, dist))
+        let window = String(lower[lookbackStart..<termRange.lowerBound])
+        return window.contains("remaining") || window.contains("reserved")
+    }
+
     /// Returns true when the ingredient mention is manipulation of something already added
     /// rather than a fresh addition, so no chip should be shown.
     private static func isManipulation(
         instruction lower: String,
         ingredientName: String,
+        matchedTerm: String,
         alreadySeen: Bool
     ) -> Bool {
-        // "remaining X" and "reserved X" are real additions — always show a chip
-        if lower.contains("remaining \(ingredientName)") || lower.contains("reserved \(ingredientName)") {
-            return false
-        }
+        // "remaining/reserved" near the matched term — always a real addition
+        if remainingAppearsNear(term: matchedTerm, in: lower) { return false }
 
-        // Already introduced in a prior step — only show again if an adding verb appears
-        // *close before* the ingredient name (within 50 chars). This prevents false positives
-        // like "Add garlic to the mushrooms" from re-showing mushrooms just because "add" is
-        // somewhere in the sentence.
         if alreadySeen {
             let addingVerbs = ["add ", "stir in", "mix in", "pour", "place ", "put ",
-                               "fold in", "incorporate", "sprinkle", "drizzle",
-                               "toss with", "coat with", "combine with", "whisk in", "blend in"]
+                               "fold in", "incorporate", "sprinkle", "drizzle", "layer",
+                               "toss with", "coat with", "combine with", "whisk in", "blend in",
+                               "top with", "season with", "scatter", "dot with", "finish with",
+                               "arrange", "distribute", "spread", "nestle"]
 
-            // Prepositional patterns that indicate the ingredient is already in the pan —
-            // suppress regardless of whether an adding verb exists elsewhere in the sentence.
-            let referencePrepositions = ["to the \(ingredientName)", "over the \(ingredientName)",
-                                         "with the \(ingredientName)", "on the \(ingredientName)",
-                                         "from the \(ingredientName)", "into the \(ingredientName)",
-                                         "through the \(ingredientName)", "of the \(ingredientName)",
-                                         "around the \(ingredientName)", "among the \(ingredientName)"]
-            if referencePrepositions.contains(where: { lower.contains($0) }) {
-                return true  // it's a reference, not an addition
-            }
+            // Prepositional patterns that indicate the ingredient is already in the pan
+            let referencePrepositions = ["to the \(matchedTerm)", "over the \(matchedTerm)",
+                                         "with the \(matchedTerm)", "on the \(matchedTerm)",
+                                         "from the \(matchedTerm)", "into the \(matchedTerm)",
+                                         "through the \(matchedTerm)", "of the \(matchedTerm)",
+                                         "around the \(matchedTerm)", "among the \(matchedTerm)"]
+            if referencePrepositions.contains(where: { lower.contains($0) }) { return true }
 
-            // Check if an adding verb appears within 50 characters before the ingredient name
-            guard let ingredientRange = lower.range(of: ingredientName) else { return true }
-            let ingredientStart = ingredientRange.lowerBound
-            let lookbackStart = lower.index(ingredientStart,
-                                            offsetBy: -min(50, lower.distance(from: lower.startIndex,
-                                                                               to: ingredientStart)))
-            let window = String(lower[lookbackStart..<ingredientStart])
+            // Check if an adding verb appears within 80 chars before the matched term
+            guard let termRange = lower.range(of: matchedTerm, options: .caseInsensitive) else { return true }
+            let dist = lower.distance(from: lower.startIndex, to: termRange.lowerBound)
+            let lookbackStart = lower.index(termRange.lowerBound, offsetBy: -min(80, dist))
+            let window = String(lower[lookbackStart..<termRange.lowerBound])
             return !addingVerbs.contains { window.contains($0) }
         }
         return false
@@ -723,19 +789,18 @@ final class RecipeIngestionService {
     private static func extractStepAmount(
         from instruction: String,
         ingredientName: String,
+        matchedTerm: String,
         parseAmount: (String) -> IngredientAmount,
         matchUnit: (String) -> MeasurementUnit?,
         parseFraction: (String) -> Double?
     ) -> IngredientAmount? {
         let lower = instruction.lowercased()
-        let ingredientLower = ingredientName.lowercased()
 
-        // "remaining X" or "reserved X" — show a "remaining" chip with no specific quantity
-        if lower.contains("remaining \(ingredientLower)") || lower.contains("reserved \(ingredientLower)") {
-            return .remaining
-        }
-        let escapedName = NSRegularExpression.escapedPattern(for: ingredientName.lowercased())
-        // Pattern: (number) (optional unit) (optional "of") ingredientName
+        // "remaining/reserved" near matched term — show a remaining chip
+        if remainingAppearsNear(term: matchedTerm, in: lower) { return .remaining }
+
+        let escapedName = NSRegularExpression.escapedPattern(for: matchedTerm)
+        // Pattern: (number) (optional unit) (optional "of") matchedTerm
         let pattern = #"([\d½¼¾⅓⅔⅛][0-9 /½¼¾⅓⅔⅛.]*)\s+(teaspoons?|tablespoons?|tsps?|tbsps?|cups?|ounces?|oz|pounds?|lbs?|grams?|g|kilograms?|kg|milliliters?|ml|liters?|l|pinch(?:es)?|cloves?|bunche?s?|slices?|pieces?)\s+(?:of\s+)?"# + escapedName
         guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
               let match = regex.firstMatch(in: lower, range: NSRange(lower.startIndex..., in: lower)),
