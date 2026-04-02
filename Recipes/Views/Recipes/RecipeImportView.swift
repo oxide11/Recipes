@@ -65,6 +65,30 @@ struct RecipeImportView: View {
             if result == nil {
                 sourceInputSection
                 Section { importButton }
+            } else if selectedTab == .url, !urlString.isEmpty {
+                // Keep a compact bookmark row visible after preview so the site can still be saved
+                Section {
+                    HStack(spacing: 10) {
+                        Image(systemName: "globe")
+                            .foregroundStyle(.secondary)
+                            .font(.footnote)
+                        Text(urlString)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        Spacer()
+                        Button {
+                            saveURL(urlString)
+                        } label: {
+                            Image(systemName: savedURLs.contains(urlString) ? "bookmark.fill" : "bookmark")
+                                .foregroundStyle(Brand.warmTan)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } header: {
+                    Text("Source")
+                }
             }
             errorSection
             if let result { importPreviewSection(result) }

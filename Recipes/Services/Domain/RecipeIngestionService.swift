@@ -41,7 +41,7 @@ final class RecipeIngestionService {
         }
 
         // Fall back to AI-powered extraction
-        progress = "Analyzing page with AI..."
+        progress = "Importing recipe..."
         let stripped = stripHTML(html)
         let truncated = String(stripped.prefix(12000))
 
@@ -135,7 +135,7 @@ final class RecipeIngestionService {
 
     func ingestFromImage(_ imageData: Data) async throws -> RecipeIngestionResult {
         isProcessing = true
-        progress = "Analyzing recipe image..."
+        progress = "Importing recipe..."
         defer { isProcessing = false; progress = nil }
 
         let base64 = imageData.base64EncodedString()
