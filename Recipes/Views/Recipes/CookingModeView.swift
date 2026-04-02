@@ -57,22 +57,18 @@ struct CookingModeView: View {
     }
 
     var body: some View {
-        GeometryReader { geo in
-            VStack(spacing: 0) {
-                // Progress bar
-                progressBar
+        VStack(spacing: 0) {
+            // Progress bar
+            progressBar
 
-                if let step = currentStep {
-                    stepContent(step, height: geo.size.height * 0.7)
-                } else {
-                    completionView
-                }
-
-                Spacer(minLength: 0)
-
-                // Controls
-                controlBar
+            if let step = currentStep {
+                stepContent(step)
+            } else {
+                completionView
             }
+
+            // Controls
+            controlBar
         }
         .simultaneousGesture(
             DragGesture(minimumDistance: 40, coordinateSpace: .local)
@@ -182,7 +178,7 @@ struct CookingModeView: View {
 
     // MARK: - Step Content
 
-    private func stepContent(_ step: RecipeDirection, height: CGFloat) -> some View {
+    private func stepContent(_ step: RecipeDirection) -> some View {
         ScrollView {
             VStack(spacing: 24) {
                 // Instruction — large text with color-coded ingredients
@@ -254,7 +250,6 @@ struct CookingModeView: View {
             }
             .padding(.vertical, 32)
         }
-        .frame(maxHeight: height)
     }
 
     // MARK: - Timer

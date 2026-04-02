@@ -2,6 +2,11 @@ import SwiftUI
 import PhotosUI
 import UIKit
 
+struct BrowserDestination: Identifiable {
+    let id = UUID()
+    let url: String?
+}
+
 // MARK: - Recipe Import View
 
 /// Unified recipe import interface supporting URL, text, photo, and Recipe-as-Code.
@@ -19,8 +24,7 @@ struct RecipeImportView: View {
     @State private var showingCamera = false
     @State private var showingPhotoLibrary = false
     @State private var cameraImage: UIImage?
-    @State private var showingBrowser = false
-    @State private var browserStartURL: String? = nil
+    @State private var browserURL: BrowserDestination? = nil
     @State private var showingFullPhoto = false
     @AppStorage("savedRecipeURLs") private var savedURLsData: Data = Data()
 
@@ -94,8 +98,8 @@ struct RecipeImportView: View {
             errorSection
             if let result { importPreviewSection(result) }
         }
-        .sheet(isPresented: $showingBrowser) {
-            RecipeBrowserView(startURL: browserStartURL) { importedURL in
+        .sheet(item: $browserURL) { dest in
+            RecipeBrowserView(startURL: dest.url) { importedURL in
                 urlString = importedURL
                 selectedTab = .url
                 Task { await performImport(urlOverride: importedURL) }
@@ -201,8 +205,7 @@ struct RecipeImportView: View {
                 }
 
                 Button {
-                    browserStartURL = nil
-                    showingBrowser = true
+                    browserURL = BrowserDestination(url: nil)
                 } label: {
                     Label("Browse for a Recipe", systemImage: "globe")
                 }
@@ -215,8 +218,7 @@ struct RecipeImportView: View {
                 Section("Saved") {
                     ForEach(savedURLs, id: \.self) { url in
                         Button {
-                            browserStartURL = url
-                            showingBrowser = true
+                            browserURL = BrowserDestination(url: url)
                         } label: {
                             HStack {
                                 Image(systemName: "bookmark.fill")

@@ -60,62 +60,32 @@ enum MultiRecipeCookingService {
         }
 
         let recipeTitles = recipes.map(\.title)
+
+        // Keep each recipe's steps in their original order, then interleave
+        // round-robin across recipes so within-recipe order is never broken.
+        let recipeSteps: [[RecipeDirection]] = recipes.map {
+            $0.directions.sorted { $0.stepNumber < $1.stepNumber }
+        }
+        let maxLen = recipeSteps.map(\.count).max() ?? 0
         var allSteps: [MultiCookingStep] = []
 
-        // Phase 1: All prep steps first (steps that involve cutting, dicing, etc.)
-        let prepVerbs = ["dice", "mince", "chop", "slice", "peel", "wash", "rinse",
-                         "measure", "mix", "whisk", "combine", "season", "marinate",
-                         "prepare", "trim", "grate", "julienne", "zest"]
-
-        var cookingSteps: [(Int, RecipeDirection)] = [] // (recipeIndex, direction)
-
-        for (recipeIdx, recipe) in recipes.enumerated() {
-            for direction in recipe.directions {
-                let lower = direction.instruction.lowercased()
-                let isPrep = prepVerbs.contains { lower.contains($0) } && direction.timer == nil
-                if isPrep {
-                    allSteps.append(MultiCookingStep(
-                        recipeTitle: recipe.title,
-                        recipeIndex: recipeIdx,
-                        originalStepNumber: direction.stepNumber,
-                        instruction: direction.instruction,
-                        timer: direction.timer,
-                        ingredients: direction.ingredients,
-                        safeTemperature: direction.safeTemperature,
-                        parallelNote: nil,
-                        isPassive: false
-                    ))
-                } else {
-                    cookingSteps.append((recipeIdx, direction))
-                }
+        for i in 0..<maxLen {
+            for (recipeIdx, steps) in recipeSteps.enumerated() {
+                guard i < steps.count else { continue }
+                let direction = steps[i]
+                let recipe = recipes[recipeIdx]
+                allSteps.append(MultiCookingStep(
+                    recipeTitle: recipe.title,
+                    recipeIndex: recipeIdx,
+                    originalStepNumber: direction.stepNumber,
+                    instruction: direction.instruction,
+                    timer: direction.timer,
+                    ingredients: direction.ingredients,
+                    safeTemperature: direction.safeTemperature,
+                    parallelNote: nil,
+                    isPassive: direction.timer != nil
+                ))
             }
-        }
-
-        // Phase 2: Cooking steps — longest passive tasks first
-        let sorted = cookingSteps.sorted { a, b in
-            let aTime = a.1.timer?.durationSeconds ?? 0
-            let bTime = b.1.timer?.durationSeconds ?? 0
-            return aTime > bTime
-        }
-
-        for (recipeIdx, direction) in sorted {
-            let recipe = recipes[recipeIdx]
-            let hasTimer = direction.timer != nil
-            let parallelNote: String? = hasTimer && !allSteps.isEmpty
-                ? "While \(allSteps.last?.recipeTitle ?? "previous step") continues..."
-                : nil
-
-            allSteps.append(MultiCookingStep(
-                recipeTitle: recipe.title,
-                recipeIndex: recipeIdx,
-                originalStepNumber: direction.stepNumber,
-                instruction: direction.instruction,
-                timer: direction.timer,
-                ingredients: direction.ingredients,
-                safeTemperature: direction.safeTemperature,
-                parallelNote: parallelNote,
-                isPassive: hasTimer
-            ))
         }
 
         let sequentialMinutes = recipes.map(\.estimatedTotalMinutes).reduce(0, +)
@@ -137,7 +107,7 @@ enum MultiRecipeCookingService {
     // MARK: - Private Helpers
 
     private static func singleRecipePlan(_ recipe: Recipe) -> MultiRecipeCookingPlan {
-        let steps = recipe.directions.map { direction in
+        let steps = recipe.directions.sorted(by: { $0.stepNumber < $1.stepNumber }).map { direction in
             MultiCookingStep(
                 recipeTitle: recipe.title,
                 recipeIndex: 0,
@@ -176,7 +146,7 @@ enum MultiRecipeCookingService {
         for (idx, recipe) in recipes.enumerated() {
             prompt += "Recipe \(idx): \(recipe.title)\n"
             prompt += "  Estimated: \(recipe.prepTimeMinutes) min prep + \(recipe.cookTimeMinutes) min cook\n"
-            for direction in recipe.directions {
+            for direction in recipe.directions.sorted(by: { $0.stepNumber < $1.stepNumber }) {
                 prompt += "  Step \(direction.stepNumber): \(direction.instruction)"
                 if let timer = direction.timer {
                     prompt += " [TIMER: \(timer.displayDuration)]"
@@ -255,7 +225,7 @@ enum MultiRecipeCookingService {
     private static func fallbackPlan(recipes: [Recipe], recipeTitles: [String]) -> MultiRecipeCookingPlan {
         var steps: [MultiCookingStep] = []
         for (idx, recipe) in recipes.enumerated() {
-            for direction in recipe.directions {
+            for direction in recipe.directions.sorted(by: { $0.stepNumber < $1.stepNumber }) {
                 steps.append(MultiCookingStep(
                     recipeTitle: recipe.title,
                     recipeIndex: idx,

@@ -113,7 +113,17 @@ struct MealPlanView: View {
                                 }
                         )
                     } else {
-                        WeekMealView(allMeals: allPlannedMeals, weekDays: weekDays)
+                        WeekMealView(allMeals: allPlannedMeals, weekDays: weekDays) { forward in
+                            swipeForward = forward
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                selectedDate = calendar.date(byAdding: .weekOfYear, value: forward ? 1 : -1, to: selectedDate) ?? selectedDate
+                            }
+                        }
+                        .id(weekStart)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: swipeForward ? .trailing : .leading),
+                            removal:   .move(edge: swipeForward ? .leading  : .trailing)
+                        ))
                     }
                 }
             }
@@ -183,6 +193,14 @@ struct WeekStripView: View {
                     .frame(width: 32)
             }
         }
+        .gesture(
+            DragGesture(minimumDistance: 30)
+                .onEnded { value in
+                    guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                    if value.translation.width < -30 { advance(by: 1) }
+                    else if value.translation.width > 30 { advance(by: -1) }
+                }
+        )
         .padding(.horizontal, 4)
         .padding(.top, 8)
     }
@@ -293,40 +311,7 @@ struct DayMealView: View {
                     }
                 }
 
-                // Meal Prep & Cook All buttons — visible when 2+ meals have recipes
-                if mealsWithRecipes.count >= 2 {
-                    HStack(spacing: 10) {
-                        Button {
-                            showingMealPrep = true
-                        } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: "frying.pan.fill")
-                                    .font(.system(size: 13))
-                                Text("Meal Prep")
-                                    .font(.system(size: 13, weight: .medium))
-                            }
-                            .foregroundStyle(Brand.midnight)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(Brand.warmTan, in: RoundedRectangle(cornerRadius: 10))
-                        }
-
-                        Button {
-                            showingMultiCook = true
-                        } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: "flame.fill")
-                                    .font(.system(size: 13))
-                                Text("Cook All")
-                                    .font(.system(size: 13, weight: .medium))
-                            }
-                            .foregroundStyle(Brand.midnight)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(Brand.herbGreen, in: RoundedRectangle(cornerRadius: 10))
-                        }
-                    }
-                }
+                // Meal Prep & Cook All — hidden for now
 
                 ForEach(primaryMealTypes, id: \.self) { mealType in
                     MealSlotSection(
@@ -345,6 +330,7 @@ struct DayMealView: View {
             .padding(.horizontal)
             .padding(.vertical, 12)
         }
+        .scrollBounceBehavior(.basedOnSize)
         .sheet(isPresented: $showingAddMeal) {
             AddMealView(plan: plan, preselectMealType: preselectMealType, preselectDate: date)
         }
@@ -541,6 +527,13 @@ struct MealCard: View {
         }
         .padding(10)
         .background(Brand.muted.opacity(0.07), in: RoundedRectangle(cornerRadius: 10))
+        .contextMenu {
+            Button(role: .destructive) {
+                modelContext.delete(meal)
+            } label: {
+                Label("Remove from Plan", systemImage: "trash")
+            }
+        }
     }
 
     private func addMissingToShopping() {
@@ -589,6 +582,7 @@ struct MealCard: View {
 struct WeekMealView: View {
     let allMeals: [PlannedMeal]
     let weekDays: [Date]
+    let onWeekSwipe: (Bool) -> Void  // true = forward, false = back
 
     @State private var showingPrepList = false
 
@@ -607,39 +601,54 @@ struct WeekMealView: View {
     }
 
     var body: some View {
-        List {
-            ForEach(weekDays, id: \.self) { day in
-                let dayMeals = meals(for: day)
-                Section {
-                    if dayMeals.isEmpty {
-                        Text("No meals planned")
-                            .font(.miseMeta)
-                            .foregroundStyle(Brand.muted)
-                    } else {
-                        ForEach(dayMeals) { meal in
-                            HStack(spacing: 10) {
-                                Image(systemName: meal.mealType.systemImageName)
-                                    .font(.caption)
-                                    .foregroundStyle(Brand.warmTan)
-                                    .frame(width: 16)
-                                Text(meal.recipe?.title ?? "Unassigned")
-                                    .font(.system(size: 13))
-                                    .foregroundStyle(Brand.cream)
-                                Spacer()
-                                if meal.isCompleted {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundStyle(Brand.herbGreen)
+        ScrollView(.vertical) {
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(weekDays, id: \.self) { day in
+                    let dayMeals = meals(for: day)
+
+                    Text(day, format: .dateTime.weekday(.wide).month().day())
+                        .miseSectionHeader()
+                        .padding(.horizontal, 16)
+                        .padding(.top, 16)
+                        .padding(.bottom, 4)
+
+                    VStack(spacing: 0) {
+                        if dayMeals.isEmpty {
+                            Text("No meals planned")
+                                .font(.miseMeta)
+                                .foregroundStyle(Brand.muted)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                        } else {
+                            ForEach(dayMeals) { meal in
+                                HStack(spacing: 10) {
+                                    Image(systemName: meal.mealType.systemImageName)
                                         .font(.caption)
+                                        .foregroundStyle(Brand.warmTan)
+                                        .frame(width: 16)
+                                    Text(meal.recipe?.title ?? "Unassigned")
+                                        .font(.system(size: 13))
+                                        .foregroundStyle(Brand.cream)
+                                    Spacer()
+                                    if meal.isCompleted {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundStyle(Brand.herbGreen)
+                                            .font(.caption)
+                                    }
                                 }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
                             }
                         }
                     }
-                } header: {
-                    Text(day, format: .dateTime.weekday(.wide).month().day())
-                        .miseSectionHeader()
+                    .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal, 16)
                 }
             }
+            .padding(.bottom, 16)
         }
+        .scrollBounceBehavior(.basedOnSize)
         .safeAreaInset(edge: .bottom) {
             if !weekMealsWithRecipes.isEmpty {
                 Button {
@@ -657,9 +666,20 @@ struct WeekMealView: View {
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 8)
-                .background(.ultraThinMaterial)
             }
         }
+        .scrollBounceBehavior(.basedOnSize)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 30, coordinateSpace: .local)
+                .onEnded { value in
+                    guard abs(value.translation.width) > abs(value.translation.height) * 1.5 else { return }
+                    if value.translation.width < -30 {
+                        onWeekSwipe(true)
+                    } else if value.translation.width > 30 {
+                        onWeekSwipe(false)
+                    }
+                }
+        )
         .sheet(isPresented: $showingPrepList) {
             MealPrepView(
                 meals: weekMealsWithRecipes,
@@ -993,8 +1013,9 @@ struct AddMealView: View {
                 QuickGenerateView()
             }
             .onChange(of: recipes.count) { _, newCount in
-                // Auto-select the recipe that was just generated
-                if newCount > lastRecipeCount, let newest = recipes.last {
+                // Auto-select the most recently created recipe (recipes is sorted by title, not date)
+                if newCount > lastRecipeCount,
+                   let newest = recipes.max(by: { $0.dateCreated < $1.dateCreated }) {
                     selectedRecipe = newest
                 }
             }
@@ -1070,18 +1091,15 @@ struct MultiRecipeCookingView: View {
     // MARK: - Body
 
     var body: some View {
-        GeometryReader { geo in
-            VStack(spacing: 0) {
-                if isLoading {
-                    loadingView
-                } else if let step = currentStep {
-                    progressBar
-                    stepContent(step, height: geo.size.height * 0.65)
-                    Spacer(minLength: 0)
-                    controlBar
-                } else {
-                    completionView
-                }
+        VStack(spacing: 0) {
+            if isLoading {
+                loadingView
+            } else if let step = currentStep {
+                progressBar
+                stepContent(step)
+                controlBar
+            } else {
+                completionView
             }
         }
         .simultaneousGesture(
@@ -1221,7 +1239,7 @@ struct MultiRecipeCookingView: View {
 
     // MARK: - Step Content
 
-    private func stepContent(_ step: MultiCookingStep, height: CGFloat) -> some View {
+    private func stepContent(_ step: MultiCookingStep) -> some View {
         ScrollView {
             VStack(spacing: 20) {
                 // Recipe badge
@@ -1311,7 +1329,6 @@ struct MultiRecipeCookingView: View {
             }
             .padding(.vertical, 28)
         }
-        .frame(maxHeight: height)
     }
 
     // MARK: - Timer

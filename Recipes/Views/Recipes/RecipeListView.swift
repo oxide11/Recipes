@@ -286,7 +286,10 @@ struct RecipeListView: View {
                 ScrollView(.horizontal) {
                     LazyHStack(alignment: .top, spacing: 12) {
                         ForEach(seasonal.prefix(8)) { recipe in
-                            RecipeCardCompact(recipe: recipe)
+                            NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                                RecipeCardCompact(recipe: recipe)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal)
