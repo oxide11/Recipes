@@ -47,7 +47,6 @@ struct PantryView: View {
     @State private var showingBulkPhoto = false
     @State private var showingNoWasteResults = false
     @State private var searchText = ""
-    @State private var itemToDelete: PantryItem?
     @State private var editingItem: PantryItem?
 
     private var filteredItems: [PantryItem] {
@@ -70,7 +69,7 @@ struct PantryView: View {
             .onTapGesture { editingItem = item }
             .swipeActions(edge: .trailing) {
                 Button(role: .destructive) {
-                    itemToDelete = item
+                    modelContext.delete(item)
                 } label: {
                     Label("Delete", systemImage: "trash")
                 }
@@ -162,7 +161,7 @@ struct PantryView: View {
                                 .onTapGesture { editingItem = item }
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
-                                        itemToDelete = item
+                                        modelContext.delete(item)
                                     } label: {
                                         Label("Delete", systemImage: "trash")
                                     }
@@ -228,23 +227,6 @@ struct PantryView: View {
             }
             .sheet(isPresented: $showingBulkPhoto) {
                 BulkPhotoAddView()
-            }
-            .confirmationDialog(
-                "Delete Item",
-                isPresented: .init(
-                    get: { itemToDelete != nil },
-                    set: { if !$0 { itemToDelete = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("Delete", role: .destructive) {
-                    if let item = itemToDelete {
-                        modelContext.delete(item)
-                        itemToDelete = nil
-                    }
-                }
-            } message: {
-                Text("Remove \"\(itemToDelete?.name ?? "")\" from your pantry?")
             }
             .sheet(item: $editingItem) { item in
                 EditPantryItemView(item: item)
