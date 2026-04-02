@@ -19,6 +19,7 @@ struct StarRatingView: View {
                     } label: {
                         starImage(for: star)
                     }
+                    .buttonStyle(.plain)
                     .accessibilityLabel("\(star) star\(star == 1 ? "" : "s")")
                 } else {
                     starImage(for: star)

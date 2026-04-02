@@ -218,7 +218,7 @@ struct RecipeImportView: View {
                 Section("Saved") {
                     ForEach(savedURLs, id: \.self) { url in
                         Button {
-                            browserURL = BrowserDestination(url: url)
+                            browserURL = BrowserDestination(url: rootURL(for: url))
                         } label: {
                             HStack {
                                 Image(systemName: "bookmark.fill")
