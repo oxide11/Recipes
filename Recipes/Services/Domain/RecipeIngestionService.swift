@@ -684,12 +684,35 @@ final class RecipeIngestionService {
         if lower.contains("remaining \(ingredientName)") || lower.contains("reserved \(ingredientName)") {
             return false
         }
-        // Already introduced in a prior step — only show again if an adding verb is present
+
+        // Already introduced in a prior step — only show again if an adding verb appears
+        // *close before* the ingredient name (within 50 chars). This prevents false positives
+        // like "Add garlic to the mushrooms" from re-showing mushrooms just because "add" is
+        // somewhere in the sentence.
         if alreadySeen {
-            let addingVerbs = ["add ", "stir in", "mix in", "pour", "place", "put ", "fold in",
-                               "incorporate", "sprinkle", "drizzle", "toss with", "coat with",
-                               "combine with", "whisk in", "blend in"]
-            return !addingVerbs.contains { lower.contains($0) }
+            let addingVerbs = ["add ", "stir in", "mix in", "pour", "place ", "put ",
+                               "fold in", "incorporate", "sprinkle", "drizzle",
+                               "toss with", "coat with", "combine with", "whisk in", "blend in"]
+
+            // Prepositional patterns that indicate the ingredient is already in the pan —
+            // suppress regardless of whether an adding verb exists elsewhere in the sentence.
+            let referencePrepositions = ["to the \(ingredientName)", "over the \(ingredientName)",
+                                         "with the \(ingredientName)", "on the \(ingredientName)",
+                                         "from the \(ingredientName)", "into the \(ingredientName)",
+                                         "through the \(ingredientName)", "of the \(ingredientName)",
+                                         "around the \(ingredientName)", "among the \(ingredientName)"]
+            if referencePrepositions.contains(where: { lower.contains($0) }) {
+                return true  // it's a reference, not an addition
+            }
+
+            // Check if an adding verb appears within 50 characters before the ingredient name
+            guard let ingredientRange = lower.range(of: ingredientName) else { return true }
+            let ingredientStart = ingredientRange.lowerBound
+            let lookbackStart = lower.index(ingredientStart,
+                                            offsetBy: -min(50, lower.distance(from: lower.startIndex,
+                                                                               to: ingredientStart)))
+            let window = String(lower[lookbackStart..<ingredientStart])
+            return !addingVerbs.contains { window.contains($0) }
         }
         return false
     }
