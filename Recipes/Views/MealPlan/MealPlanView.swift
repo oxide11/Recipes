@@ -1516,9 +1516,6 @@ struct MultiRecipeCookingView: View {
         var text = recipeChanged
             ? "\(step.recipeTitle). Step \(stepPosition). \(step.instruction)"
             : "Step \(stepPosition). \(step.instruction)"
-        if let note = step.parallelNote {
-            text = "\(note) \(text)"
-        }
         if let timer = step.timer {
             text += ". Timer: \(timer.displayDuration)."
         }
