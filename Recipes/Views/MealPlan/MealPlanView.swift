@@ -151,6 +151,9 @@ struct MealPlanView: View {
                     didInitViewMode = true
                 }
             }
+            .navigationDestination(for: Recipe.self) { recipe in
+                RecipeDetailView(recipe: recipe)
+            }
             .onChange(of: selectedDate) { ensurePlan() }
             .onChange(of: navPath.count) { _, count in
                 isInDetail?.wrappedValue = count > 0
@@ -483,7 +486,7 @@ struct MealCard: View {
             // Title row — tappable when a recipe exists
             Group {
                 if let recipe = meal.recipe {
-                    NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                    NavigationLink(value: recipe) {
                         titleRow
                     }
                     .buttonStyle(.plain)
