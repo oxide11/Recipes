@@ -27,9 +27,9 @@ struct DashboardView: View {
     @Query private var profiles: [UserProfile]
 
     @State private var showingReceiptScanner = false
-    @State private var showingRecipeGenerator = false
-    @State private var showingAddPantry = false
     @State private var showingQuickMeals = false
+    @State private var showingShoppingList = false
+    @State private var showingWantToTry = false
     @State private var selectedSeasonalIngredient: IngredientFilter? = nil
 
     // MARK: - Computed Data
@@ -126,14 +126,14 @@ struct DashboardView: View {
             .sheet(isPresented: $showingReceiptScanner) {
                 ReceiptScannerView()
             }
-            .sheet(isPresented: $showingRecipeGenerator) {
-                QuickGenerateView()
-            }
-            .sheet(isPresented: $showingAddPantry) {
-                PantryView(startWithAddSheet: true)
-            }
             .sheet(isPresented: $showingQuickMeals) {
                 QuickMealsView(recipes: quickRecipes)
+            }
+            .sheet(isPresented: $showingShoppingList) {
+                ShoppingListView()
+            }
+            .sheet(isPresented: $showingWantToTry) {
+                RestaurantJournalView(initialTab: .wantToTry)
             }
             .sheet(item: $selectedSeasonalIngredient) { filter in
                 SeasonalRecipesView(ingredient: filter.name, recipes: recipes)
@@ -232,20 +232,18 @@ struct DashboardView: View {
     // MARK: - Quick Actions
 
     private var quickActionsRow: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 12) {
-                quickActionButton(icon: "camera.fill", label: "Scan Receipt", color: Brand.warmTan) {
-                    showingReceiptScanner = true
-                }
-                quickActionButton(icon: "wand.and.stars", label: "Generate Recipe", color: Brand.warmTan) {
-                    showingRecipeGenerator = true
-                }
-                quickActionButton(icon: "plus.circle.fill", label: "Add Pantry", color: DashboardStyle.produce) {
-                    showingAddPantry = true
-                }
-                quickActionButton(icon: "timer", label: "Quick Meal", color: DashboardStyle.grains) {
-                    showingQuickMeals = true
-                }
+        HStack(spacing: 12) {
+            quickActionButton(icon: "timer", label: "Quick Meal", color: DashboardStyle.grains) {
+                showingQuickMeals = true
+            }
+            quickActionButton(icon: "camera.fill", label: "Scan Receipt", color: Brand.warmTan) {
+                showingReceiptScanner = true
+            }
+            quickActionButton(icon: "cart", label: "Shopping List", color: DashboardStyle.produce) {
+                showingShoppingList = true
+            }
+            quickActionButton(icon: "fork.knife.circle", label: "Want to Try", color: Brand.spiceRed) {
+                showingWantToTry = true
             }
         }
     }

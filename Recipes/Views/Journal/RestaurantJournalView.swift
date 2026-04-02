@@ -5,6 +5,10 @@ import MapKit
 // MARK: - Restaurant Journal View
 
 struct RestaurantJournalView: View {
+    enum InitialTab { case journal, wantToTry }
+
+    var initialTab: InitialTab = .journal
+
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \RestaurantJournalEntry.dateVisited, order: .reverse) private var entries: [RestaurantJournalEntry]
     @Query(sort: \RestaurantWantToTry.dateAdded, order: .reverse) private var wantToTry: [RestaurantWantToTry]
@@ -36,6 +40,7 @@ struct RestaurantJournalView: View {
             }
             .navigationTitle("Restaurant Journal")
             .toolbarBackground(.automatic, for: .navigationBar)
+            .onAppear { selectedSegment = initialTab == .wantToTry ? 1 : 0 }
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
                     Button {
