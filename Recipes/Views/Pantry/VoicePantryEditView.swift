@@ -20,33 +20,35 @@ struct VoicePantryEditView: View {
 
     var body: some View {
         NavigationStack {
-            // Confirm phase needs a scrollable list with pinned buttons —
-            // all other phases are simple centered content.
-            if phase == .confirm {
-                confirmView
-                    .padding(.horizontal)
-            } else {
-                VStack(spacing: 32) {
-                    Spacer()
+            Group {
+                // Confirm phase needs a scrollable list with pinned buttons —
+                // all other phases are simple centered content.
+                if phase == .confirm {
+                    confirmView
+                        .padding(.horizontal)
+                } else {
+                    VStack(spacing: 32) {
+                        Spacer()
 
-                    switch phase {
-                    case .idle:     idleView
-                    case .listening: listeningView
-                    case .parsing:  parsingView
-                    case .confirm:  EmptyView()
+                        switch phase {
+                        case .idle:      idleView
+                        case .listening: listeningView
+                        case .parsing:   parsingView
+                        case .confirm:   EmptyView()
+                        }
+
+                        if let error = errorMessage {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(Brand.spiceRed)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
+
+                        Spacer()
                     }
-
-                    if let error = errorMessage {
-                        Text(error)
-                            .font(.caption)
-                            .foregroundStyle(Brand.spiceRed)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    }
-
-                    Spacer()
+                    .padding()
                 }
-                .padding()
             }
             .navigationTitle("Voice Edit")
             .navigationBarTitleDisplayMode(.inline)
