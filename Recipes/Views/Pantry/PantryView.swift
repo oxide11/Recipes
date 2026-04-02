@@ -46,6 +46,7 @@ struct PantryView: View {
     @State private var showingAddItem = false
     @State private var showingBulkPhoto = false
     @State private var showingQuickAdd = false
+    @State private var showingVoiceEdit = false
     @State private var showingNoWasteResults = false
     @State private var searchText = ""
     @State private var editingItem: PantryItem?
@@ -285,6 +286,10 @@ struct PantryView: View {
             .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
+                    Button("Voice", systemImage: "mic.fill") {
+                        showingVoiceEdit = true
+                    }
+                    .accessibilityLabel("Voice edit pantry")
                     Button("Scan", systemImage: "barcode.viewfinder") {
                         showingScanner = true
                     }
@@ -306,6 +311,9 @@ struct PantryView: View {
             }
             .sheet(isPresented: $showingScanner) {
                 BarcodeScannerFullView()
+            }
+            .sheet(isPresented: $showingVoiceEdit) {
+                VoicePantryEditView()
             }
             .sheet(isPresented: $showingQuickAdd) {
                 QuickAddPantryView()
