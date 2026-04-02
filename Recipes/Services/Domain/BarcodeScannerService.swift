@@ -79,9 +79,14 @@ final class BarcodeScannerService: NSObject {
     }
 
     func stopScanning() {
-        captureSession?.stopRunning()
+        let session = captureSession
         captureSession = nil
         isScanning = false
+        // stopRunning() blocks until the hardware stops — run off main thread
+        // so the UI stays responsive while the camera winds down
+        DispatchQueue.global(qos: .userInitiated).async {
+            session?.stopRunning()
+        }
     }
 
     func resetForNextScan() {
