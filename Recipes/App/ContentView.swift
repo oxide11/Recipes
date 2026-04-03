@@ -49,7 +49,7 @@ struct MiseTabBar: View {
         VStack(spacing: 0) {
             // Hairline separator
             Rectangle()
-                .fill(Color.white.opacity(0.1))
+                .fill(Color.white.opacity(0.15))
                 .frame(height: 0.5)
 
             HStack(spacing: 0) {
@@ -57,22 +57,24 @@ struct MiseTabBar: View {
                     Button {
                         selectedTab = tab
                     } label: {
-                        VStack(spacing: 3) {
+                        VStack(spacing: 4) {
                             Image(systemName: tab.icon)
                                 .font(.system(size: 22))
                             Text(tab.label)
                                 .font(.system(size: 10, weight: .medium))
                         }
-                        .foregroundStyle(selectedTab == tab ? Brand.warmTan : Brand.muted)
+                        .foregroundStyle(selectedTab == tab ? Brand.warmTan : Color(uiColor: .secondaryLabel))
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
+                        .padding(.top, 10)
+                        .padding(.bottom, 4)
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.bottom, 20)  // home indicator clearance
+            // Respect the home indicator safe area
+            .padding(.bottom, 20)
         }
-        .background(Brand.midnight)
+        .background(.bar)  // matches system tab bar — adapts to light/dark, blurs content behind
     }
 }
 
