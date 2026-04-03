@@ -33,8 +33,8 @@ struct RecipeListView: View {
     @State private var searchDebounceTask: Task<Void, Never>?
     @State private var noWasteTask: Task<Void, Never>?
     @State private var recipeToDelete: Recipe?
+    @State private var selectedRecipe: Recipe?
     @Environment(TimerDeepLink.self) private var timerDeepLink
-    @State private var isShowingDeepLinkedRecipe = false
     @State private var deepLinkedRecipe: Recipe? = nil
     @State private var deepLinkedStep: Int? = nil
 
@@ -95,7 +95,7 @@ struct RecipeListView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationSplitView {
             List {
                 if !recipes.isEmpty {
                     // Recommendations teaser
@@ -131,17 +131,12 @@ struct RecipeListView: View {
             }
             .navigationTitle("Recipes")
             .searchable(text: $searchText, prompt: "Search recipes...")
-            .navigationDestination(isPresented: $isShowingDeepLinkedRecipe) {
-                if let recipe = deepLinkedRecipe {
-                    RecipeDetailView(recipe: recipe, scrollToStep: deepLinkedStep)
-                }
-            }
             .onChange(of: timerDeepLink.pendingRecipeID) { _, id in
                 guard let id else { return }
                 deepLinkedRecipe = recipes.first { $0.id == id }
                 if deepLinkedRecipe != nil {
                     deepLinkedStep = timerDeepLink.pendingStep
-                    isShowingDeepLinkedRecipe = true
+                    selectedRecipe = deepLinkedRecipe
                     timerDeepLink.clear()
                 }
             }
@@ -235,6 +230,14 @@ struct RecipeListView: View {
                     debouncedSearch = newValue
                 }
             }
+        } detail: {
+            NavigationStack {
+                if let recipe = selectedRecipe {
+                    RecipeDetailView(recipe: recipe)
+                } else {
+                    ContentUnavailableView("Select a Recipe", systemImage: "book.pages", description: Text("Choose a recipe from the list."))
+                }
+            }
         }
     }
 
@@ -274,8 +277,8 @@ struct RecipeListView: View {
         if !topMatches.isEmpty {
             Section {
                 ForEach(topMatches) { match in
-                    NavigationLink {
-                        RecipeDetailView(recipe: match.recipe)
+                    Button {
+                        selectedRecipe = match.recipe
                     } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
@@ -298,6 +301,7 @@ struct RecipeListView: View {
                                 .foregroundStyle(Brand.muted)
                         }
                     }
+                    .buttonStyle(.plain)
                 }
 
                 NavigationLink {
@@ -327,7 +331,9 @@ struct RecipeListView: View {
                 ScrollView(.horizontal) {
                     LazyHStack(alignment: .top, spacing: 12) {
                         ForEach(seasonal.prefix(8)) { recipe in
-                            NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                            Button {
+                                selectedRecipe = recipe
+                            } label: {
                                 RecipeCardCompact(recipe: recipe)
                             }
                             .buttonStyle(.plain)
@@ -366,11 +372,12 @@ struct RecipeListView: View {
                 )
             } else {
                 ForEach(filteredRecipes) { recipe in
-                    NavigationLink {
-                        RecipeDetailView(recipe: recipe)
+                    Button {
+                        selectedRecipe = recipe
                     } label: {
                         RecipeRow(recipe: recipe)
                     }
+                    .buttonStyle(.plain)
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
                             recipeToDelete = recipe
