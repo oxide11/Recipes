@@ -543,7 +543,8 @@ struct CookingModeView: View {
             recipeTitle: recipe.title,
             recipeID: recipe.id,
             stepNumber: stepIndex + 1,
-            stepInstruction: sortedDirections[stepIndex].instruction,
+            stepInstruction: sortedDirections.indices.contains(stepIndex)
+                ? sortedDirections[stepIndex].instruction : "",
             durationSeconds: seconds,
             totalSteps: sortedDirections.count
         )
