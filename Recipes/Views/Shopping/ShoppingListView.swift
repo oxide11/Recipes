@@ -11,7 +11,6 @@ struct ShoppingListView: View {
     @Query private var profiles: [UserProfile]
     @Query private var pantryItems: [PantryItem]
 
-    @State private var pantryAddedThisSession: Set<String> = []
     @State private var showingAddItem = false
     @State private var showingGuidedShopping = false
     @State private var showingRemindersSetup = false
@@ -262,10 +261,8 @@ struct ShoppingListView: View {
 
     private func addToPantryIfNeeded(_ item: GroceryItem) {
         guard let category = item.storeSection.pantryCategory else { return }
-        let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
-        guard !pantryItems.contains(where: {
-            $0.name.lowercased().trimmingCharacters(in: .whitespaces) == key
-        }) else { return }
+        // Don't add if already linked to a pantry item from a previous check-off.
+        guard item.linkedPantryItemID == nil else { return }
         let pantryItem = PantryItem(
             name: item.name,
             category: category,
@@ -273,17 +270,15 @@ struct ShoppingListView: View {
             unit: item.unit
         )
         modelContext.insert(pantryItem)
-        pantryAddedThisSession.insert(key)
+        item.linkedPantryItemID = pantryItem.id
     }
 
     private func removeFromPantryIfPresent(_ item: GroceryItem) {
-        let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
-        if let pantryItem = pantryItems.first(where: {
-            $0.name.lowercased().trimmingCharacters(in: .whitespaces) == key
-        }) {
+        guard let linkedID = item.linkedPantryItemID else { return }
+        if let pantryItem = pantryItems.first(where: { $0.id == linkedID }) {
             modelContext.delete(pantryItem)
-            pantryAddedThisSession.remove(key)
         }
+        item.linkedPantryItemID = nil
     }
 
     private func ensureListExists() {

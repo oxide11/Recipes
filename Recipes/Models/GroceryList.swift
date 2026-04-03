@@ -158,6 +158,9 @@ final class GroceryItem {
     var isStaple: Bool = false
     /// EKReminder.calendarItemIdentifier for the linked Reminders item, if any.
     var remindersIdentifier: String? = nil
+    /// ID of the PantryItem created when this item was checked off, so unchecking
+    /// removes exactly that item rather than any pantry item with the same name.
+    var linkedPantryItemID: UUID? = nil
 
     /// Returns a formatted amount string, or nil when the quantity/unit is
     /// the default sentinel (1 piece) meaning no amount was specified.
