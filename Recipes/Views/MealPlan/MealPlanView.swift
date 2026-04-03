@@ -776,7 +776,7 @@ struct WeekMealView: View {
             MealPrepView(
                 meals: weekMealsWithRecipes,
                 date: weekDays.first ?? .now,
-                weekEndDate: weekDays.last
+                weekEndDate: weekDays.last ?? .now
             )
         }
         .onAppear { Task { rebuildWeekMeals() } }
