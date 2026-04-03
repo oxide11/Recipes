@@ -231,8 +231,14 @@ final class RemindersSync {
     /// rather than deleting it — this preserves the user's Reminders data and prevents
     /// the sync from re-adding the item on the next pass (sync skips completed reminders).
     func completeReminder(for item: GroceryItem) {
+        completeReminderByID(item.remindersIdentifier)
+    }
+
+    /// ID-based variant — call this after the GroceryItem has already been deleted
+    /// from SwiftData so the UI update isn't blocked by the EventKit write.
+    func completeReminderByID(_ identifier: String?) {
         guard isLinked,
-              let rid = item.remindersIdentifier,
+              let rid = identifier,
               let reminder = store.calendarItem(withIdentifier: rid) as? EKReminder else { return }
         reminder.isCompleted = true
         reminder.completionDate = .now

@@ -154,8 +154,9 @@ struct ShoppingListView: View {
                             ShoppingItemRow(item: item, currencyCode: currencyCode)
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
-                                        remindersSync.completeReminder(for: item)
+                                        let rid = item.remindersIdentifier
                                         modelContext.delete(item)
+                                        Task { remindersSync.completeReminderByID(rid) }
                                     } label: {
                                         Label("Delete", systemImage: "trash")
                                     }
@@ -178,12 +179,11 @@ struct ShoppingListView: View {
             if !purchased.isEmpty {
                 Section {
                     Button(role: .destructive) {
+                        let rids = purchased.map(\.remindersIdentifier)
                         withAnimation {
-                            purchased.forEach {
-                                remindersSync.completeReminder(for: $0)
-                                modelContext.delete($0)
-                            }
+                            purchased.forEach { modelContext.delete($0) }
                         }
+                        Task { rids.forEach { remindersSync.completeReminderByID($0) } }
                     } label: {
                         Label(
                             "Clear \(purchased.count) Completed \(purchased.count == 1 ? "Item" : "Items")",
