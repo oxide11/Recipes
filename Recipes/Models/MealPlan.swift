@@ -61,8 +61,16 @@ final class PlannedMeal {
 
     var servings: Int
     var notes: String?
-    var isCompleted: Bool
     var isAISuggested: Bool
+
+    /// True when the recipe has a cooking log entry on this meal's date.
+    /// Derived — not persisted by SwiftData.
+    var isCompleted: Bool {
+        guard let recipe else { return false }
+        return recipe.cookingLog.contains {
+            Calendar.current.isDate($0.date, inSameDayAs: date)
+        }
+    }
 
     init(
         mealType: MealType,
@@ -80,7 +88,6 @@ final class PlannedMeal {
         self.variation = variation
         self.servings = servings
         self.notes = notes
-        self.isCompleted = false
         self.isAISuggested = isAISuggested
     }
 }

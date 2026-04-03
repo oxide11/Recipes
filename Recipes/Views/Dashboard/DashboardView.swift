@@ -358,10 +358,10 @@ struct DashboardView: View {
                     .font(.miseHeading)
                     .foregroundStyle(Brand.cream)
                 Spacer()
-                if !todaysMeals.isEmpty {
-                    Text("\(completedTodayCount)/\(todaysMeals.count) done")
+                if completedTodayCount > 0 {
+                    Text("\(completedTodayCount)/\(todaysMeals.count) cooked")
                         .font(.miseMeta)
-                        .foregroundStyle(Brand.muted)
+                        .foregroundStyle(Brand.herbGreen)
                 }
             }
 
@@ -385,7 +385,9 @@ struct DashboardView: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(todaysMeals.isEmpty
             ? "Today's meals: none planned"
-            : "Today's meals: \(completedTodayCount) of \(todaysMeals.count) done")
+            : completedTodayCount > 0
+                ? "Today's meals: \(completedTodayCount) of \(todaysMeals.count) cooked"
+                : "Today's meals: \(todaysMeals.count) planned")
     }
 
     private func mealRow(_ meal: PlannedMeal) -> some View {

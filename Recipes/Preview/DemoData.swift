@@ -105,7 +105,6 @@ enum DemoData {
             PlannedMeal(mealType: .dinner, date: daysFromNow(5), recipe: bibimbap,  servings: 2),
             PlannedMeal(mealType: .breakfast, date: daysFromNow(6), recipe: croissants, servings: 4),
         ]
-        if let first = plannedMeals.first { first.isCompleted = true }
         plannedMeals.forEach {
             context.insert($0)
             week.meals.append($0)
