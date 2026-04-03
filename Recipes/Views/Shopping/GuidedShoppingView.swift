@@ -337,6 +337,8 @@ struct GuidedShoppingView: View {
 
     private func startGuidedShopping() {
         guard hasUnpurchasedItems else { return }
+        // Cancel any existing session before starting a new one
+        shoppingTask?.cancel()
         isActive = true
         shoppingTask = Task {
             await voiceService.guideShopping(list: list)

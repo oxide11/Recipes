@@ -105,23 +105,19 @@ final class ShoppingVoiceService: NSObject {
         let result = await withCheckedContinuation { (continuation: CheckedContinuation<ShoppingResponse, Never>) in
             var hasResumed = false
             recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
-                guard !hasResumed else { return }
-
-                guard let result else {
-                    if error != nil {
+                Task { @MainActor [weak self] in
+                    guard let self, !hasResumed else { return }
+                    if let result {
+                        self.lastHeardText = result.bestTranscription.formattedString.lowercased()
+                        if result.isFinal {
+                            hasResumed = true
+                            let response = Self.parseResponse(self.lastHeardText ?? "")
+                            continuation.resume(returning: response)
+                        }
+                    } else if error != nil {
                         hasResumed = true
                         continuation.resume(returning: .error)
                     }
-                    return
-                }
-
-                let text = result.bestTranscription.formattedString.lowercased()
-                Task { @MainActor in self?.lastHeardText = text }
-
-                if result.isFinal {
-                    hasResumed = true
-                    let response = Self.parseResponse(text)
-                    continuation.resume(returning: response)
                 }
             }
         }
@@ -137,6 +133,7 @@ final class ShoppingVoiceService: NSObject {
         recognitionTask?.cancel()
         recognitionTask = nil
         isListening = false
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 
     // MARK: - Guided Shopping Flow
@@ -147,12 +144,14 @@ final class ShoppingVoiceService: NSObject {
         await speak("Let's start shopping. You have \(list.items.count) items across \(sections.count) sections.")
 
         for (section, items) in sections {
+            guard !Task.isCancelled else { break }
             let unpurchased = items.filter { !$0.isPurchased }
             guard !unpurchased.isEmpty else { continue }
 
             await speak("Moving to \(section.displayName). You need \(unpurchased.count) items here.")
 
             for item in unpurchased {
+                guard !Task.isCancelled else { break }
                 currentItemName = item.name
                 let amount = "\(item.quantity) \(item.unit.rawValue)"
                 await speak("\(amount) of \(item.name). Did you find it?")
@@ -178,7 +177,12 @@ final class ShoppingVoiceService: NSObject {
             }
         }
 
-        await speak("Shopping complete! All sections covered.")
+        if Task.isCancelled {
+            stopSpeaking()
+            stopListening()
+        } else {
+            await speak("Shopping complete! All sections covered.")
+        }
     }
 
     // MARK: - Audio Tap
