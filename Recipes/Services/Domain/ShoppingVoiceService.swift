@@ -86,9 +86,12 @@ final class ShoppingVoiceService: NSObject {
         let inputNode = audioEngine.inputNode
         inputNode.removeTap(onBus: 0)
         let format = inputNode.outputFormat(forBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
-            request.append(buffer)
-        }
+        // The tap block must be nonisolated — AVAudioEngine fires it on
+        // RealtimeMessenger.mServiceQueue, not the main actor. A closure
+        // created inside a @MainActor method inherits that isolation and
+        // causes a dispatch_assert_queue crash at runtime.
+        let tapBlock = Self.makeTapBlock(for: request)
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format, block: tapBlock)
 
         audioEngine.prepare()
         do {
@@ -176,6 +179,18 @@ final class ShoppingVoiceService: NSObject {
         }
 
         await speak("Shopping complete! All sections covered.")
+    }
+
+    // MARK: - Audio Tap
+
+    /// Returns a tap block with no actor isolation. Must be `nonisolated` and
+    /// `static` so the returned closure is not bound to @MainActor — the
+    /// AVAudioEngine tap fires on RealtimeMessenger.mServiceQueue and Swift's
+    /// runtime isolation checker will crash if the block carries @MainActor.
+    private nonisolated static func makeTapBlock(
+        for request: SFSpeechAudioBufferRecognitionRequest
+    ) -> AVAudioNodeTapBlock {
+        { buffer, _ in request.append(buffer) }
     }
 
     // MARK: - Parse Response
