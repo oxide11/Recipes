@@ -242,6 +242,11 @@ final class Recipe {
     @Relationship(deleteRule: .cascade)
     var cookingLog: [CookingLogEntry]
 
+    /// Cascade-deletes PlannedMeal records when this recipe is deleted,
+    /// preventing orphaned meal plan slots with a nil recipe.
+    @Relationship(deleteRule: .cascade, inverse: \PlannedMeal.recipe)
+    var plannedMeals: [PlannedMeal]
+
     var nutritionalInfo: NutritionalInfo?
     var safeTemperatures: [SafeTemperature]
     var mealType: MealType?
@@ -324,6 +329,7 @@ final class Recipe {
         self.variations = []
         self.photos = []
         self.cookingLog = []
+        self.plannedMeals = []
         self.nutritionalInfo = nutritionalInfo
         self.safeTemperatures = safeTemperatures
         self.mealType = mealType
