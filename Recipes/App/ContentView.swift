@@ -12,15 +12,23 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            DashboardView().tag(AppTab.mise)
-            PlanAndShopView().tag(AppTab.planAndShop)
-            RecipeListView().tag(AppTab.recipes)
-            ActivityView().tag(AppTab.activity)
-            SettingsView().tag(AppTab.settings)
+            Tab("Mise", systemImage: "sparkles", value: AppTab.mise) {
+                DashboardView()
+            }
+            Tab("Plan & Shop", systemImage: "cart", value: AppTab.planAndShop) {
+                PlanAndShopView()
+            }
+            Tab("Recipes", systemImage: "book.pages", value: AppTab.recipes) {
+                RecipeListView()
+            }
+            Tab("Activity", systemImage: "chart.bar", value: AppTab.activity) {
+                ActivityView()
+            }
+            Tab("Settings", systemImage: "gear", value: AppTab.settings) {
+                SettingsView()
+            }
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            MiseTabBar(selectedTab: $selectedTab)
-        }
+        .tabViewStyle(.sidebarAdaptable)
         .onChange(of: timerDeepLink.pendingRecipeID) { _, newID in
             if newID != nil { selectedTab = .recipes }
         }
@@ -33,77 +41,12 @@ struct ContentView: View {
             OnboardingView()
         }
     }
-
-    init() {
-        // Hide the system tab bar so our custom one is the only one shown
-        UITabBar.appearance().isHidden = true
-    }
-}
-
-// MARK: - Custom Tab Bar
-
-struct MiseTabBar: View {
-    @Binding var selectedTab: AppTab
-
-    var body: some View {
-        VStack(spacing: 0) {
-            // Hairline separator
-            Rectangle()
-                .fill(Color.white.opacity(0.15))
-                .frame(height: 0.5)
-
-            HStack(spacing: 0) {
-                ForEach(AppTab.allCases) { tab in
-                    Button {
-                        selectedTab = tab
-                    } label: {
-                        VStack(spacing: 4) {
-                            Image(systemName: tab.icon)
-                                .font(.system(size: 22))
-                            Text(tab.label)
-                                .font(.system(size: 10, weight: .medium))
-                        }
-                        .foregroundStyle(selectedTab == tab ? Brand.warmTan : Color(uiColor: .secondaryLabel))
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 10)
-                        .padding(.bottom, 4)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            // Respect the home indicator safe area
-            .padding(.bottom, 20)
-        }
-        .background(.bar)  // matches system tab bar — adapts to light/dark, blurs content behind
-    }
 }
 
 // MARK: - App Tab
 
-enum AppTab: String, Hashable, CaseIterable, Identifiable {
-    case mise, planAndShop, recipes, activity, settings
-
-    var id: String { rawValue }
-
-    var label: String {
-        switch self {
-        case .mise:        return "Mise"
-        case .planAndShop: return "Plan & Shop"
-        case .recipes:     return "Recipes"
-        case .activity:    return "Activity"
-        case .settings:    return "Settings"
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .mise:        return "sparkles"
-        case .planAndShop: return "cart"
-        case .recipes:     return "book.pages"
-        case .activity:    return "chart.bar"
-        case .settings:    return "gear"
-        }
-    }
+enum AppTab: String, Hashable {
+    case mise, recipes, planAndShop, activity, settings
 }
 
 #Preview("Empty") {
