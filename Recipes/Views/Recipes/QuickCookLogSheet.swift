@@ -19,7 +19,7 @@ struct QuickCookLogSheet: View {
 
                 // Header
                 VStack(spacing: 10) {
-                    Image(systemName: "flame.fill")
+                    Image(systemName: "frying.pan")
                         .font(.system(size: 48))
                         .foregroundStyle(Brand.spiceRed)
                         .accessibilityHidden(true)

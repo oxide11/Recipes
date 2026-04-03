@@ -125,7 +125,7 @@ struct RecipeDetailView: View {
                     Button {
                         showingQuickLog = true
                     } label: {
-                        Image(systemName: "flame")
+                        Image(systemName: "frying.pan")
                     }
                     .accessibilityLabel("Log a cook")
 

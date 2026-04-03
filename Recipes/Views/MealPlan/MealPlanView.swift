@@ -570,7 +570,7 @@ struct MealCard: View {
                 Button {
                     showingQuickLog = true
                 } label: {
-                    Label("Cooked it!", systemImage: "flame.fill")
+                    Label("Cooked it!", systemImage: "frying.pan")
                         .font(.caption.weight(.medium))
                         .foregroundStyle(Brand.spiceRed)
                         .padding(.horizontal, 10)
