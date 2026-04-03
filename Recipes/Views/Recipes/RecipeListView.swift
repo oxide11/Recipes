@@ -753,9 +753,9 @@ struct RecipeFilterSheet: View {
                 Section("Minimum Rating") {
                     Picker("Rating", selection: $minRatingFilter) {
                         Text("Any").tag(Int?.none)
-                        Text("★★★ 3+").tag(Int?.some(3))
-                        Text("★★★★ 4+").tag(Int?.some(4))
-                        Text("★★★★★ 5 only").tag(Int?.some(5))
+                        Text("★★★").tag(Int?.some(3))
+                        Text("★★★★").tag(Int?.some(4))
+                        Text("★★★★★").tag(Int?.some(5))
                     }
                     .pickerStyle(.menu)
                 }
