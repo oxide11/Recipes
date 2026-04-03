@@ -9,7 +9,9 @@ struct ShoppingListView: View {
     @Environment(RemindersSync.self) private var remindersSync
     @Query(sort: \GroceryList.dateCreated, order: .reverse) private var lists: [GroceryList]
     @Query private var profiles: [UserProfile]
+    @Query private var pantryItems: [PantryItem]
 
+    @State private var pantryAddedThisSession: Set<String> = []
     @State private var showingAddItem = false
     @State private var showingGuidedShopping = false
     @State private var showingRemindersSetup = false
@@ -248,6 +250,34 @@ struct ShoppingListView: View {
 
     // MARK: - Helpers
 
+    private func removeFromPantryIfPresent(_ item: GroceryItem) {
+        let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
+        // Only remove if we added it this session — don't wipe pre-existing pantry entries
+        guard pantryAddedThisSession.contains(key) else { return }
+        if let pantryItem = pantryItems.first(where: {
+            $0.name.lowercased().trimmingCharacters(in: .whitespaces) == key
+        }) {
+            modelContext.delete(pantryItem)
+            pantryAddedThisSession.remove(key)
+        }
+    }
+
+    private func addToPantryIfNeeded(_ item: GroceryItem) {
+        guard let category = item.storeSection.pantryCategory else { return }
+        let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
+        guard !pantryItems.contains(where: {
+            $0.name.lowercased().trimmingCharacters(in: .whitespaces) == key
+        }) else { return }
+        let pantryItem = PantryItem(
+            name: item.name,
+            category: category,
+            quantity: item.quantity,
+            unit: item.unit
+        )
+        modelContext.insert(pantryItem)
+        pantryAddedThisSession.insert(key)
+    }
+
     private func ensureListExists() {
         guard lists.isEmpty else { return }
         modelContext.insert(GroceryList(name: "Shopping List"))
@@ -265,6 +295,11 @@ struct ShoppingItemRow: View {
         HStack {
             Button {
                 withAnimation {
+                    if !item.isPurchased {
+                        addToPantryIfNeeded(item)
+                    } else {
+                        removeFromPantryIfPresent(item)
+                    }
                     item.isPurchased.toggle()
                     remindersSync.pushCompletion(for: item)
                 }

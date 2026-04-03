@@ -1645,7 +1645,10 @@ struct MultiRecipeCookingView: View {
             recipeTitle: plan?.recipeTitles.first ?? "Cooking",
             recipeID: meals.first?.recipe?.id ?? UUID(),
             stepNumber: stepIndex + 1,
-            stepInstruction: plan?.steps[stepIndex].instruction ?? "",
+            stepInstruction: {
+                guard let steps = plan?.steps, steps.indices.contains(stepIndex) else { return "" }
+                return steps[stepIndex].instruction
+            }(),
             durationSeconds: seconds,
             totalSteps: plan?.steps.count ?? 1
         )

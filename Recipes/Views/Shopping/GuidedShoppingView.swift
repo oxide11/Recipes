@@ -18,6 +18,7 @@ struct GuidedShoppingView: View {
     @State private var voiceService = ShoppingVoiceService()
     @State private var showingSubstitution = false
     @State private var substitutionItem: GroceryItem?
+    @State private var pantryAddedThisSession: Set<String> = []
 
     private var hasUnpurchasedItems: Bool {
         list.items.contains { !$0.isPurchased }
@@ -174,6 +175,11 @@ struct GuidedShoppingView: View {
                 List {
                     ForEach(sectionItems) { item in
                         Button {
+                            if !item.isPurchased {
+                                addToPantryIfNeeded(item)
+                            } else {
+                                removeFromPantryIfPresent(item)
+                            }
                             item.isPurchased.toggle()
                         } label: {
                             HStack {
@@ -198,6 +204,7 @@ struct GuidedShoppingView: View {
                         indexSet.forEach { i in
                             let item = sectionItems[i]
                             list.items.removeAll { $0.id == item.id }
+                            modelContext.delete(item)
                         }
                     }
                 }
@@ -345,6 +352,18 @@ struct GuidedShoppingView: View {
         voiceService.skip()
     }
 
+    private func removeFromPantryIfPresent(_ item: GroceryItem) {
+        let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
+        // Only remove if we added it this session — don't wipe pre-existing pantry entries
+        guard pantryAddedThisSession.contains(key) else { return }
+        if let pantryItem = pantryItems.first(where: {
+            $0.name.lowercased().trimmingCharacters(in: .whitespaces) == key
+        }) {
+            modelContext.delete(pantryItem)
+            pantryAddedThisSession.remove(key)
+        }
+    }
+
     private func addToPantryIfNeeded(_ item: GroceryItem) {
         guard let category = item.storeSection.pantryCategory else { return }
         let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
@@ -358,6 +377,7 @@ struct GuidedShoppingView: View {
             unit: item.unit
         )
         modelContext.insert(pantryItem)
+        pantryAddedThisSession.insert(key)
     }
 
     private func sectionIcon(_ section: StoreSection) -> String {

@@ -46,8 +46,10 @@ final class ShoppingVoiceService: NSObject {
     var currentItem: GroceryItem? {
         guard currentSectionIndex < sortedSections.count else { return nil }
         let unpurchased = sortedSections[currentSectionIndex].1.filter { !$0.isPurchased }
-        guard currentItemIndex < unpurchased.count else { return nil }
-        return unpurchased[currentItemIndex]
+        guard !unpurchased.isEmpty else { return nil }
+        // Clamp the index in case items were purchased externally, shifting the array shorter.
+        let safeIndex = min(currentItemIndex, unpurchased.count - 1)
+        return unpurchased[safeIndex]
     }
 
     var currentSection: StoreSection? {
@@ -353,8 +355,20 @@ extension ShoppingVoiceService: AVSpeechSynthesizerDelegate {
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
         Task { @MainActor in
             isSpeaking = false
+            // Signal the waiting speak() call that speech is done.
             speechFinishedContinuation?.yield()
             speechFinishedContinuation?.finish()
+        }
+    }
+
+    /// Fired when stopSpeaking(at:) cancels an in-flight utterance.
+    /// We must NOT yield here — speak() already called stopSpeaking() which
+    /// finished the old continuation. Yielding again would unblock the *new*
+    /// speak() call's continuation prematurely.
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        Task { @MainActor in
+            isSpeaking = false
+            // Do not yield/finish — stopSpeaking() already closed the old stream.
         }
     }
 }
