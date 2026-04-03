@@ -40,13 +40,13 @@ enum Brand {
 // MARK: - Typography Helpers
 
 extension Font {
-    /// Body text — weight 400, default size.
-    static let miseBody     = Font.system(size: 14, weight: .regular)
-    /// Section headers — weight 500, slight negative tracking.
-    static let miseHeading  = Font.system(size: 18, weight: .medium)
-    /// Small metadata labels.
-    static let miseMeta     = Font.system(size: 12, weight: .regular)
-    /// Display / hero text.
+    /// Body text — scales with Dynamic Type (base ~15pt).
+    static let miseBody     = Font.subheadline.weight(.regular)
+    /// Section headers — scales with Dynamic Type (base ~17pt).
+    static let miseHeading  = Font.headline.weight(.medium)
+    /// Small metadata labels — scales with Dynamic Type (base 12pt).
+    static let miseMeta     = Font.caption
+    /// Display / hero text — fixed for now; will be revisited in dashboard redesign.
     static let miseDisplay  = Font.system(size: 26, weight: .medium)
 }
 
@@ -54,7 +54,7 @@ extension View {
     /// Standard section header style: weight 500, muted, sentence case, negative tracking.
     func miseSectionHeader() -> some View {
         self
-            .font(.system(size: 12, weight: .medium))
+            .font(.caption.weight(.medium))
             .tracking(-0.2)
             .foregroundStyle(Brand.muted)
             .textCase(nil)
