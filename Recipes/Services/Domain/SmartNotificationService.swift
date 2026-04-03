@@ -70,7 +70,7 @@ actor SmartNotificationService {
 
             guard daysUntilExpiry >= 0, daysUntilExpiry <= 3 else { continue }
 
-            // 3-day warning — schedule only if still 2-3 days away.
+            // 3-day warning — fires at 9 am today to give the user time to plan.
             if daysUntilExpiry >= 2 {
                 let threeDayContent = UNMutableNotificationContent()
                 threeDayContent.title = "Expiring Soon"
@@ -78,22 +78,20 @@ actor SmartNotificationService {
                 threeDayContent.sound = .default
                 threeDayContent.categoryIdentifier = Category.pantryExpiry
 
-                if let triggerDate = calendar.date(byAdding: .day, value: -(daysUntilExpiry - 3), to: expirationDate) {
-                    var components = calendar.dateComponents([.year, .month, .day], from: triggerDate)
-                    components.hour = 9
-                    components.minute = 0
+                var components = calendar.dateComponents([.year, .month, .day], from: now)
+                components.hour = 9
+                components.minute = 0
 
-                    let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-                    let request = UNNotificationRequest(
-                        identifier: "\(Category.pantryExpiry)_3d_\(item.name)",
-                        content: threeDayContent,
-                        trigger: trigger
-                    )
-                    center.add(request)
-                }
+                let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+                let request = UNNotificationRequest(
+                    identifier: "\(Category.pantryExpiry)_3d_\(item.name)",
+                    content: threeDayContent,
+                    trigger: trigger
+                )
+                center.add(request)
             }
 
-            // 1-day warning — schedule if expiring tomorrow or today.
+            // 1-day warning — fires at 8 am the day before expiration.
             if daysUntilExpiry <= 1 {
                 let oneDayContent = UNMutableNotificationContent()
                 oneDayContent.title = "Expires Tomorrow!"
@@ -102,15 +100,10 @@ actor SmartNotificationService {
                 oneDayContent.categoryIdentifier = Category.pantryExpiry
                 oneDayContent.interruptionLevel = .timeSensitive
 
-                var components = calendar.dateComponents([.year, .month, .day], from: expirationDate)
+                guard let dayBefore = calendar.date(byAdding: .day, value: -1, to: expirationDate) else { continue }
+                var components = calendar.dateComponents([.year, .month, .day], from: dayBefore)
                 components.hour = 8
                 components.minute = 0
-                // Fire the day before expiration.
-                if let dayBefore = calendar.date(byAdding: .day, value: -1, to: expirationDate) {
-                    components = calendar.dateComponents([.year, .month, .day], from: dayBefore)
-                    components.hour = 8
-                    components.minute = 0
-                }
 
                 let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
                 let request = UNNotificationRequest(

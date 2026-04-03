@@ -106,17 +106,19 @@ final class AIServiceRouter {
                     """
             )
         }
-        // Wrap non-streaming providers in a single-chunk stream
+        // Wrap non-streaming providers in a single-chunk stream.
+        // Store the Task so it's cancelled if the stream consumer disposes early.
         return AsyncThrowingStream { continuation in
-            Task {
+            let task = Task { @MainActor in
                 do {
-                    let result = try await generateText(prompt: prompt, taskType: taskType)
+                    let result = try await self.generateText(prompt: prompt, taskType: taskType)
                     continuation.yield(result)
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
                 }
             }
+            continuation.onTermination = { _ in task.cancel() }
         }
     }
 
