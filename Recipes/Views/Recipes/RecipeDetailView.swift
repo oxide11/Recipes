@@ -11,7 +11,6 @@ struct RecipeDetailView: View {
     @Environment(AIServiceRouter.self) private var aiRouter
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showingVariations = false
-    @State private var showingLogEntry = false
     @State private var showingQuickLog = false
     @State private var showingCookingMode = false
     @State private var showingBlinkHelp = false
@@ -133,9 +132,6 @@ struct RecipeDetailView: View {
                     .accessibilityLabel("Log a cook")
 
                     Menu {
-                        Button("Full Cooking Log", systemImage: "flame") {
-                            showingLogEntry = true
-                        }
                         Button("Hands-Free Setup", systemImage: "accessibility") {
                             showingBlinkHelp = true
                         }
@@ -167,9 +163,6 @@ struct RecipeDetailView: View {
         }
         .sheet(isPresented: $showingQuickLog) {
             QuickCookLogSheet(recipe: recipe)
-        }
-        .sheet(isPresented: $showingLogEntry) {
-            CookingLogEntryView(recipe: recipe)
         }
         .fullScreenCover(isPresented: $showingCookingMode) {
             CookingModeView(recipe: recipe)
