@@ -1140,6 +1140,13 @@ struct MultiRecipeCookingView: View {
     @State private var lastSpokenRecipeIndex: Int? = nil
     private let synthesizer = AVSpeechSynthesizer()
 
+    // MARK: - Dynamic Type Scaling
+
+    /// Instruction text — scales with Dynamic Type, capped so it stays readable.
+    @ScaledMetric(relativeTo: .title) private var instructionFontSize: CGFloat = 26
+    /// Timer countdown — scales with Dynamic Type, capped to avoid overflow.
+    @ScaledMetric(relativeTo: .largeTitle) private var timerFontSize: CGFloat = 64
+
     /// Accent colors for distinguishing recipes — up to 5.
     private let recipeColors: [Color] = [
         Brand.warmTan,
@@ -1323,17 +1330,17 @@ struct MultiRecipeCookingView: View {
                         .fill(colorForRecipe(step.recipeIndex))
                         .frame(width: 12, height: 12)
                     Text(step.recipeTitle)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.subheadline.weight(.semibold))
                         .foregroundStyle(colorForRecipe(step.recipeIndex))
                     Text("· Step \(step.originalStepNumber)")
-                        .font(.system(size: 14))
+                        .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.5))
                 }
 
                 // Parallel note
                 if let note = step.parallelNote {
                     Text(note)
-                        .font(.system(size: 15, weight: .medium))
+                        .font(.subheadline.weight(.medium))
                         .foregroundStyle(.orange)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
@@ -1341,7 +1348,7 @@ struct MultiRecipeCookingView: View {
 
                 // Instruction — large text
                 Text(step.instruction)
-                    .font(.system(size: 26, weight: .medium))
+                    .font(.system(size: min(instructionFontSize, 40), weight: .medium))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
@@ -1423,7 +1430,7 @@ struct MultiRecipeCookingView: View {
                         Text(end, style: .timer)
                     }
                 }
-                .font(.system(size: 64, weight: .bold, design: .rounded))
+                .font(.system(size: min(timerFontSize, 96), weight: .bold, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(isPaused ? Color.secondary : accentColor)
 
@@ -1472,6 +1479,7 @@ struct MultiRecipeCookingView: View {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 80))
                 .foregroundStyle(Brand.herbGreen)
+                .accessibilityHidden(true)
 
             Text("All Done!")
                 .font(.largeTitle)
