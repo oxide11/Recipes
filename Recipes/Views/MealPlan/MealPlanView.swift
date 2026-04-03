@@ -256,8 +256,7 @@ struct DayMealView: View {
     let date: Date
     let allMeals: [PlannedMeal]
 
-    @State private var preselectMealType: MealType = .breakfast
-    @State private var showingAddMeal = false
+    @State private var addMealType: MealType? = nil
     @State private var showingMealPrep = false
     @State private var showingMultiCook = false
 
@@ -324,8 +323,7 @@ struct DayMealView: View {
                         plan: plan,
                         date: date,
                         onAdd: {
-                            preselectMealType = mealType
-                            showingAddMeal = true
+                            addMealType = mealType
                         }
                     )
                 }
@@ -334,8 +332,8 @@ struct DayMealView: View {
             .padding(.vertical, 12)
         }
         .scrollBounceBehavior(.basedOnSize)
-        .sheet(isPresented: $showingAddMeal) {
-            AddMealView(plan: plan, preselectMealType: preselectMealType, preselectDate: date)
+        .sheet(item: $addMealType) { mealType in
+            AddMealView(plan: plan, preselectMealType: mealType, preselectDate: date)
         }
         .sheet(isPresented: $showingMealPrep) {
             MealPrepView(meals: mealsWithRecipes, date: date)

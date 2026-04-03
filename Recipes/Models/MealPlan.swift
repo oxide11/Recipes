@@ -3,7 +3,8 @@ import SwiftData
 
 // MARK: - Meal Type
 
-enum MealType: String, Codable, CaseIterable, Sendable {
+enum MealType: String, Codable, CaseIterable, Sendable, Identifiable {
+    var id: String { rawValue }
     case breakfast, lunch, dinner, snack, dessert, appetizer, side
 
     var displayName: String {
