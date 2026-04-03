@@ -318,7 +318,7 @@ struct GuidedShoppingView: View {
             } else if voiceService.isListening {
                 Image(systemName: "mic.fill")
                     .foregroundStyle(Brand.spiceRed)
-                    .symbolEffect(.pulse, isActive: !reduceMotion)
+                    .symbolEffect(.pulse)
                 Text("Listening...")
             }
 

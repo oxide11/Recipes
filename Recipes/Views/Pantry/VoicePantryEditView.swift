@@ -89,14 +89,8 @@ struct VoicePantryEditView: View {
                     .multilineTextAlignment(.center)
             }
 
-            Button {
-                Task { await startListening() }
-            } label: {
-                Label("Start Talking", systemImage: "mic.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(Brand.herbGreen)
+            ProgressView()
+                .tint(Brand.herbGreen)
         }
     }
 
