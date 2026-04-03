@@ -16,7 +16,7 @@ struct GuidedShoppingView: View {
     @State private var substitutionItem: GroceryItem?
 
     private var hasUnpurchasedItems: Bool {
-        !voiceService.sortedSections.isEmpty
+        list.items.contains { !$0.isPurchased }
     }
 
     var body: some View {
