@@ -732,9 +732,7 @@ struct QuickMealsView: View {
     @State private var showingGenerator = false
 
     private var pantryIsEmpty: Bool {
-        let nonStaples = pantryItems.filter { !$0.isStaple }
-        let staples    = pantryItems.filter(\.isStaple)
-        return nonStaples.count < 10 && staples.count < 10
+        pantryItems.count < 10
     }
 
     var body: some View {
