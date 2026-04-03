@@ -316,7 +316,17 @@ struct RecipeGeneratorView: View {
         if !dietaryRestrictions.isEmpty {
             suffix += " Dietary needs: \(dietaryRestrictions.map(\.displayName).joined(separator: ", "))."
         }
+        suffix += skillConstraint(for: profile?.skillLevel ?? .intermediate)
+        suffix += ingredientDeduplicationInstruction
         return suffix
+    }
+
+    private func skillConstraint(for skill: RecipeDifficulty) -> String {
+        recipeSkillConstraint(for: skill)
+    }
+
+    private var ingredientDeduplicationInstruction: String {
+        " Important: if an ingredient is used in different amounts at different stages, list it ONCE in the ingredients list with the total amount needed. Mention the split in the directions (e.g. 'divide the oil: use 2 tbsp now and reserve 1 tbsp for finishing')."
     }
 
     private func loadSelectedPhoto() async {
@@ -531,6 +541,9 @@ struct QuickGenerateView: View {
         if let cuisines = profile?.preferredCuisines, !cuisines.isEmpty {
             description += " Preferred cuisines: \(cuisines.map(\.rawValue).joined(separator: ", "))."
         }
+        let skill = profile?.skillLevel ?? .intermediate
+        description += recipeSkillConstraint(for: skill)
+        description += " If an ingredient is used in different amounts at different stages, list it ONCE with the total and split amounts in the directions."
 
         do {
             // ingestFromText structures the AI output as a RecipeIngestionResult in one call
@@ -547,5 +560,20 @@ struct QuickGenerateView: View {
         let recipe = await service.convertToRecipe(result)
         modelContext.insert(recipe)
         dismiss()
+    }
+}
+
+// MARK: - Shared helpers
+
+private func recipeSkillConstraint(for skill: RecipeDifficulty) -> String {
+    switch skill {
+    case .beginner:
+        return " Keep it simple: max 8 ingredients, no more than 6 steps, basic techniques only (sauté, roast, boil). No mise en place or multi-component sauces."
+    case .intermediate:
+        return " Keep it approachable: max 12 ingredients, no more than 10 steps, standard home-cook techniques. No professional equipment required."
+    case .advanced:
+        return " This cook enjoys a challenge: up to 16 ingredients and more involved techniques are fine."
+    case .expert:
+        return " This is an experienced cook comfortable with complex techniques, long processes, and professional-level recipes."
     }
 }
