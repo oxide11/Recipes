@@ -32,7 +32,6 @@ struct ContentView: View {
                 SettingsView()
             }
         }
-        .tabViewStyle(.tabBar)
         .onChange(of: timerDeepLink.pendingRecipeID) { _, newID in
             if newID != nil { selectedTab = .recipes }
         }
