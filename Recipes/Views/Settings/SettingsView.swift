@@ -108,6 +108,7 @@ struct SettingsView: View {
                     } label: {
                         Image(systemName: showOpenAIKey ? "eye.slash" : "eye")
                     }
+                    .accessibilityLabel(showOpenAIKey ? "Hide OpenAI API key" : "Show OpenAI API key")
                 }
             }
 
@@ -133,6 +134,7 @@ struct SettingsView: View {
                     } label: {
                         Image(systemName: showClaudeKey ? "eye.slash" : "eye")
                     }
+                    .accessibilityLabel(showClaudeKey ? "Hide Claude API key" : "Show Claude API key")
                 }
             }
 

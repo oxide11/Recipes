@@ -63,6 +63,7 @@ struct RemindersSetupView: View {
             Image(systemName: "checklist")
                 .font(.system(size: 56))
                 .foregroundStyle(Brand.herbGreen)
+                .accessibilityHidden(true)
 
             VStack(spacing: 8) {
                 Text("Keep your list in sync")

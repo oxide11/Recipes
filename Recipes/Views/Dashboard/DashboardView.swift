@@ -532,6 +532,7 @@ struct DashboardView: View {
                     }
                 }
                 .frame(height: 6)
+                .accessibilityHidden(true) // text label below conveys the same info
 
                 Text(fraction >= 1.0
                     ? "Budget reached"
@@ -654,6 +655,7 @@ struct SeasonalRecipesView: View {
                         Image(systemName: "leaf")
                             .font(.system(size: 48))
                             .foregroundStyle(Brand.herbGreen)
+                            .accessibilityHidden(true)
                         Text("No recipes with \(ingredient.capitalized)")
                             .font(.miseHeading)
                             .foregroundStyle(Brand.cream)
@@ -745,6 +747,7 @@ struct QuickMealsView: View {
                         Image(systemName: "timer")
                             .font(.system(size: 48))
                             .foregroundStyle(Brand.warmTan)
+                            .accessibilityHidden(true)
                         Text("No Quick Recipes Yet")
                             .font(.miseHeading)
                             .foregroundStyle(Brand.cream)

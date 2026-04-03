@@ -86,6 +86,7 @@ struct ShoppingListView: View {
             Image(systemName: "cart")
                 .font(.system(size: 56))
                 .foregroundStyle(.quaternary)
+                .accessibilityHidden(true)
             Text("Your list is empty")
                 .font(.headline)
                 .foregroundStyle(.secondary)

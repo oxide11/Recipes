@@ -67,6 +67,7 @@ struct CookingModeView: View {
                     Image(systemName: "exclamationmark.triangle")
                         .font(.system(size: 48))
                         .foregroundStyle(.orange)
+                        .accessibilityHidden(true)
                     Text("No Steps Found")
                         .font(.title2.weight(.bold))
                         .foregroundStyle(.white)
@@ -161,6 +162,7 @@ struct CookingModeView: View {
             ForEach(activeSteps, id: \.self) { stepIdx in
                 HStack(spacing: 8) {
                     Image(systemName: stepIsPaused.contains(stepIdx) ? "pause.circle" : "timer")
+                        .accessibilityHidden(true)
                     Text("Step \(stepIdx + 1):")
                     if stepIsPaused.contains(stepIdx), let secs = stepPausedSeconds[stepIdx] {
                         Text(formatTime(secs))
@@ -341,6 +343,7 @@ struct CookingModeView: View {
                 Image(systemName: "checkmark.seal.fill")
                     .font(.system(size: 72))
                     .foregroundStyle(.green)
+                    .accessibilityHidden(true)
 
                 Text("All Done!")
                     .font(.largeTitle)

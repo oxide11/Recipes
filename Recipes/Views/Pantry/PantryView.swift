@@ -142,6 +142,7 @@ struct PantryView: View {
                             HStack {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundStyle(Brand.spiceRed)
+                                    .accessibilityHidden(true)
                                 Text(item.name)
                                 Spacer()
                                 if let date = item.expirationDate {
