@@ -489,7 +489,7 @@ struct DashboardView: View {
         .padding()
         .glassCard(cornerRadius: 16)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Cooking activity: \(thisWeekCookCount) this week, \(cookingStreak > 0 ? "\(cookingStreak) day streak" : "no streak"), \(recipes.count) recipes, \(favoriteRecipes.count) favourites")
+        .accessibilityLabel("Cooking activity: \(thisWeekCookCount) this week, \(cookingStreak > 0 ? "\(cookingStreak) day streak" : "no streak"), \(recipes.count) recipes, \(highlyRatedRecipes.count) top rated")
     }
 
     private func activityStat(value: String, label: String, icon: String) -> some View {
