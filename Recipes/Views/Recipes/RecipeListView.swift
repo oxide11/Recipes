@@ -15,7 +15,6 @@ struct RecipeListView: View {
     @State private var selectedCuisine: Cuisine?
     @State private var selectedDifficulty: RecipeDifficulty?
     @State private var maxTimeFilter: Int?
-    @State private var showFavoritesOnly = false
     @State private var selectedDietaryRestrictions: Set<DietaryRestriction> = []
     @State private var selectedTags: Set<String> = []
     @State private var selectedMealType: MealType?
@@ -44,7 +43,6 @@ struct RecipeListView: View {
         if selectedCuisine != nil { count += 1 }
         if selectedDifficulty != nil { count += 1 }
         if maxTimeFilter != nil { count += 1 }
-        if showFavoritesOnly { count += 1 }
         if !selectedDietaryRestrictions.isEmpty { count += 1 }
         if !selectedTags.isEmpty { count += 1 }
         if selectedMealType != nil { count += 1 }
@@ -72,9 +70,6 @@ struct RecipeListView: View {
         if let maxTime = maxTimeFilter {
             result = result.filter { $0.estimatedTotalMinutes <= maxTime }
         }
-        if showFavoritesOnly {
-            result = result.filter { $0.isFavorite || $0.isAutoFavorite }
-        }
         if !selectedDietaryRestrictions.isEmpty {
             result = result.filter { recipe in
                 selectedDietaryRestrictions.isSubset(of: Set(recipe.dietaryRestrictions))
@@ -90,11 +85,6 @@ struct RecipeListView: View {
         }
         if let minRating = minRatingFilter {
             result = result.filter { ($0.averageRating ?? 0) >= Double(minRating) }
-        }
-        if !showFavoritesOnly {
-            let favs = result.filter { $0.isFavorite || $0.isAutoFavorite }
-            let rest = result.filter { !$0.isFavorite && !$0.isAutoFavorite }
-            result = favs + rest
         }
         cachedFilteredRecipes = result
     }
@@ -198,7 +188,6 @@ struct RecipeListView: View {
                     selectedCuisine: $selectedCuisine,
                     selectedDifficulty: $selectedDifficulty,
                     maxTimeFilter: $maxTimeFilter,
-                    showFavoritesOnly: $showFavoritesOnly,
                     selectedMealType: $selectedMealType,
                     selectedDietaryRestrictions: $selectedDietaryRestrictions,
                     selectedTags: $selectedTags,
@@ -224,7 +213,6 @@ struct RecipeListView: View {
             .onChange(of: selectedCuisine) { rebuildFilteredRecipes() }
             .onChange(of: selectedDifficulty) { rebuildFilteredRecipes() }
             .onChange(of: maxTimeFilter) { rebuildFilteredRecipes() }
-            .onChange(of: showFavoritesOnly) { rebuildFilteredRecipes() }
             .onChange(of: selectedDietaryRestrictions) { rebuildFilteredRecipes() }
             .onChange(of: selectedTags) { rebuildFilteredRecipes() }
             .onChange(of: selectedMealType) { rebuildFilteredRecipes() }
@@ -626,11 +614,6 @@ struct RecipeRow: View {
 
             Spacer()
 
-            if recipe.isFavorite || recipe.isAutoFavorite {
-                Image(systemName: "heart.fill")
-                    .foregroundStyle(Brand.spiceRed)
-                    .font(.caption)
-            }
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
@@ -695,7 +678,6 @@ struct RecipeFilterSheet: View {
     @Binding var selectedCuisine: Cuisine?
     @Binding var selectedDifficulty: RecipeDifficulty?
     @Binding var maxTimeFilter: Int?
-    @Binding var showFavoritesOnly: Bool
     @Binding var selectedMealType: MealType?
     @Binding var selectedDietaryRestrictions: Set<DietaryRestriction>
     @Binding var selectedTags: Set<String>
@@ -716,10 +698,6 @@ struct RecipeFilterSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    Toggle("Favorites Only", isOn: $showFavoritesOnly)
-                }
-
                 Section("Meal Type") {
                     Picker("Meal Type", selection: $selectedMealType) {
                         Text("Any").tag(MealType?.none)
@@ -795,7 +773,6 @@ struct RecipeFilterSheet: View {
                         selectedCuisine = nil
                         selectedDifficulty = nil
                         maxTimeFilter = nil
-                        showFavoritesOnly = false
                         selectedMealType = nil
                         selectedDietaryRestrictions = []
                         selectedTags = []

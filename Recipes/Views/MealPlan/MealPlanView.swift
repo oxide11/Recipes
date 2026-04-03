@@ -909,7 +909,8 @@ struct GenerateMealPlanSheet: View {
         }
         let recipeLines = filteredRecipes.map { r in
             let typeTag = r.mealType.map { " [\($0.rawValue)]" } ?? ""
-            return "\(r.title)\(r.isFavorite || r.isAutoFavorite ? " [favorite]" : "")\(typeTag) — \(r.cuisine.rawValue), \(r.formattedDuration), cooked \(r.cookCount)×"
+            let ratingTag = r.averageRating.map { String(format: " [rated %.1f★]", $0) } ?? ""
+            return "\(r.title)\(ratingTag)\(typeTag) — \(r.cuisine.rawValue), \(r.formattedDuration), cooked \(r.cookCount)×"
         }.joined(separator: "\n- ")
 
         let pantrySection = prioritisePantry && !pantryItems.isEmpty

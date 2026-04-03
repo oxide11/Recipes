@@ -84,8 +84,8 @@ struct DashboardView: View {
         profile?.weeklyGroceryBudget
     }
 
-    private var favoriteRecipes: [Recipe] {
-        recipes.filter { $0.isFavorite || $0.isAutoFavorite }
+    private var highlyRatedRecipes: [Recipe] {
+        recipes.filter { ($0.averageRating ?? 0) >= 4 }
     }
 
     private var quickRecipes: [Recipe] { cachedQuickRecipes }
@@ -462,9 +462,9 @@ struct DashboardView: View {
                 )
 
                 activityStat(
-                    value: "\(favoriteRecipes.count)",
-                    label: "Favorites",
-                    icon: "heart.fill"
+                    value: "\(highlyRatedRecipes.count)",
+                    label: "Top Rated",
+                    icon: "star.fill"
                 )
             }
 

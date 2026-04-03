@@ -109,14 +109,6 @@ struct RecipeDetailView: View {
                 } else {
                     // Normal mode: cooking actions + management menu
                     Button {
-                        recipe.isFavorite.toggle()
-                    } label: {
-                        Image(systemName: recipe.isFavorite ? "heart.fill" : "heart")
-                    }
-                    .sensoryFeedback(.impact(flexibility: .soft), trigger: recipe.isFavorite)
-                    .accessibilityLabel(recipe.isFavorite ? "Remove from favourites" : "Add to favourites")
-
-                    Button {
                         showingCookingMode = true
                     } label: {
                         Image(systemName: "play.circle")
