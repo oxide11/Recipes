@@ -17,7 +17,7 @@ enum Brand {
     /// Primary text — adapts for readability on both light and dark backgrounds.
     static let cream     = Color(light: "1a1a1a", dark: "f0ede6")
     /// Secondary text, metadata, captions.
-    static let muted     = Color(light: "666666", dark: "888888")
+    static let muted     = Color(light: "666666", dark: "959595")
 
     // MARK: - Accent
     /// Primary accent — warm tan. Deeper in light mode for contrast.
