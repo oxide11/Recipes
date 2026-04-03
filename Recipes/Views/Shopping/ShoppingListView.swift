@@ -278,7 +278,6 @@ struct ShoppingListView: View {
 
     private func removeFromPantryIfPresent(_ item: GroceryItem) {
         let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
-        guard pantryAddedThisSession.contains(key) else { return }
         if let pantryItem = pantryItems.first(where: {
             $0.name.lowercased().trimmingCharacters(in: .whitespaces) == key
         }) {
