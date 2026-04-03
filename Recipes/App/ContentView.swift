@@ -18,6 +18,7 @@ struct ContentView: View {
             ActivityView().tag(AppTab.activity)
             SettingsView().tag(AppTab.settings)
         }
+        .animation(.none, value: selectedTab)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             MiseTabBar(selectedTab: $selectedTab)
         }
