@@ -32,7 +32,7 @@ struct ContentView: View {
                 SettingsView()
             }
         }
-        .tabViewStyle(sizeClass == .regular ? .sidebarAdaptable : .automatic)
+        .adaptiveTabViewStyle(sizeClass: sizeClass)
         .onChange(of: timerDeepLink.pendingRecipeID) { _, newID in
             if newID != nil { selectedTab = .recipes }
         }
@@ -51,6 +51,21 @@ struct ContentView: View {
 
 enum AppTab: String, Hashable {
     case mise, recipes, planAndShop, activity, settings
+}
+
+// MARK: - Adaptive Tab View Style
+
+private extension View {
+    /// Uses `.sidebarAdaptable` on iPad (regular width) for the collapsible sidebar,
+    /// and `.automatic` on iPhone to avoid the zoom pill animation.
+    @ViewBuilder
+    func adaptiveTabViewStyle(sizeClass: UserInterfaceSizeClass?) -> some View {
+        if sizeClass == .regular {
+            self.tabViewStyle(.sidebarAdaptable)
+        } else {
+            self.tabViewStyle(.automatic)
+        }
+    }
 }
 
 #Preview("Empty") {
