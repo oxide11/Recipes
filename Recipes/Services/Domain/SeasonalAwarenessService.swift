@@ -14,51 +14,91 @@ enum SeasonalAwarenessService {
 
     /// Seasonal produce database (North America-focused, extensible).
     private static let seasonalData: [SeasonalIngredient] = [
-        // Spring
-        SeasonalIngredient(name: "asparagus", category: .vegetable, peakSeasons: [.spring], availableAllYear: false),
-        SeasonalIngredient(name: "artichoke", category: .vegetable, peakSeasons: [.spring], availableAllYear: false),
-        SeasonalIngredient(name: "peas", category: .vegetable, peakSeasons: [.spring], availableAllYear: true),
-        SeasonalIngredient(name: "radish", category: .vegetable, peakSeasons: [.spring], availableAllYear: true),
-        SeasonalIngredient(name: "strawberry", category: .fruit, peakSeasons: [.spring, .summer], availableAllYear: true),
-        SeasonalIngredient(name: "rhubarb", category: .fruit, peakSeasons: [.spring], availableAllYear: false),
+        // SPRING
+        SeasonalIngredient(name: "asparagus",      category: .vegetable, peakSeasons: [.spring],          availableAllYear: false),
+        SeasonalIngredient(name: "artichoke",      category: .vegetable, peakSeasons: [.spring],          availableAllYear: false),
+        SeasonalIngredient(name: "rhubarb",        category: .fruit,     peakSeasons: [.spring],          availableAllYear: false),
+        SeasonalIngredient(name: "peas",           category: .vegetable, peakSeasons: [.spring],          availableAllYear: false),
+        SeasonalIngredient(name: "snap peas",      category: .vegetable, peakSeasons: [.spring],          availableAllYear: false),
+        SeasonalIngredient(name: "radish",         category: .vegetable, peakSeasons: [.spring],          availableAllYear: false),
+        SeasonalIngredient(name: "spinach",        category: .vegetable, peakSeasons: [.spring],          availableAllYear: false),
+        SeasonalIngredient(name: "arugula",        category: .vegetable, peakSeasons: [.spring],          availableAllYear: false),
+        SeasonalIngredient(name: "fava beans",     category: .vegetable, peakSeasons: [.spring],          availableAllYear: false),
+        SeasonalIngredient(name: "mint",           category: .herb,      peakSeasons: [.spring, .summer], availableAllYear: false),
+        SeasonalIngredient(name: "watercress",     category: .vegetable, peakSeasons: [.spring],          availableAllYear: false),
+        SeasonalIngredient(name: "fennel",         category: .vegetable, peakSeasons: [.spring, .autumn], availableAllYear: false),
+        SeasonalIngredient(name: "strawberry",     category: .fruit,     peakSeasons: [.spring, .summer], availableAllYear: false),
+        SeasonalIngredient(name: "leek",           category: .vegetable, peakSeasons: [.winter, .spring], availableAllYear: false),
 
-        // Summer
-        SeasonalIngredient(name: "tomato", category: .vegetable, peakSeasons: [.summer], availableAllYear: true),
-        SeasonalIngredient(name: "corn", category: .vegetable, peakSeasons: [.summer], availableAllYear: true),
-        SeasonalIngredient(name: "zucchini", category: .vegetable, peakSeasons: [.summer], availableAllYear: true),
-        SeasonalIngredient(name: "bell pepper", category: .vegetable, peakSeasons: [.summer], availableAllYear: true),
-        SeasonalIngredient(name: "peach", category: .fruit, peakSeasons: [.summer], availableAllYear: false),
-        SeasonalIngredient(name: "watermelon", category: .fruit, peakSeasons: [.summer], availableAllYear: false),
-        SeasonalIngredient(name: "blueberry", category: .fruit, peakSeasons: [.summer], availableAllYear: true),
-        SeasonalIngredient(name: "basil", category: .herb, peakSeasons: [.summer], availableAllYear: true),
-        SeasonalIngredient(name: "eggplant", category: .vegetable, peakSeasons: [.summer], availableAllYear: true),
+        // SUMMER
+        SeasonalIngredient(name: "tomato",         category: .vegetable, peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "cherry tomato",  category: .vegetable, peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "corn",           category: .vegetable, peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "zucchini",       category: .vegetable, peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "yellow squash",  category: .vegetable, peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "bell pepper",    category: .vegetable, peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "jalapeño",       category: .vegetable, peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "shishito pepper",category: .vegetable, peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "eggplant",       category: .vegetable, peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "cucumber",       category: .vegetable, peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "green bean",     category: .vegetable, peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "okra",           category: .vegetable, peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "tomatillo",      category: .vegetable, peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "basil",          category: .herb,      peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "lemongrass",     category: .herb,      peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "peach",          category: .fruit,     peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "nectarine",      category: .fruit,     peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "watermelon",     category: .fruit,     peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "cantaloupe",     category: .fruit,     peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "blueberry",      category: .fruit,     peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "blackberry",     category: .fruit,     peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "raspberry",      category: .fruit,     peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "plum",           category: .fruit,     peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "fig",            category: .fruit,     peakSeasons: [.summer, .autumn], availableAllYear: false),
+        SeasonalIngredient(name: "mango",          category: .fruit,     peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "lime",           category: .fruit,     peakSeasons: [.summer],          availableAllYear: false),
+        SeasonalIngredient(name: "passion fruit",  category: .fruit,     peakSeasons: [.summer],          availableAllYear: false),
 
-        // Autumn
-        SeasonalIngredient(name: "pumpkin", category: .vegetable, peakSeasons: [.autumn], availableAllYear: false),
-        SeasonalIngredient(name: "sweet potato", category: .vegetable, peakSeasons: [.autumn, .winter], availableAllYear: true),
-        SeasonalIngredient(name: "apple", category: .fruit, peakSeasons: [.autumn], availableAllYear: true),
-        SeasonalIngredient(name: "pear", category: .fruit, peakSeasons: [.autumn], availableAllYear: true),
-        SeasonalIngredient(name: "cranberry", category: .fruit, peakSeasons: [.autumn], availableAllYear: false),
-        SeasonalIngredient(name: "butternut squash", category: .vegetable, peakSeasons: [.autumn, .winter], availableAllYear: false),
-        SeasonalIngredient(name: "brussels sprout", category: .vegetable, peakSeasons: [.autumn, .winter], availableAllYear: true),
-        SeasonalIngredient(name: "fig", category: .fruit, peakSeasons: [.autumn], availableAllYear: false),
+        // AUTUMN
+        SeasonalIngredient(name: "pumpkin",        category: .vegetable, peakSeasons: [.autumn],          availableAllYear: false),
+        SeasonalIngredient(name: "sweet potato",   category: .vegetable, peakSeasons: [.autumn, .winter], availableAllYear: false),
+        SeasonalIngredient(name: "butternut squash",category: .vegetable,peakSeasons: [.autumn, .winter], availableAllYear: false),
+        SeasonalIngredient(name: "acorn squash",   category: .vegetable, peakSeasons: [.autumn],          availableAllYear: false),
+        SeasonalIngredient(name: "delicata squash",category: .vegetable, peakSeasons: [.autumn],          availableAllYear: false),
+        SeasonalIngredient(name: "brussels sprout",category: .vegetable, peakSeasons: [.autumn, .winter], availableAllYear: false),
+        SeasonalIngredient(name: "kale",           category: .vegetable, peakSeasons: [.autumn, .winter], availableAllYear: false),
+        SeasonalIngredient(name: "beet",           category: .vegetable, peakSeasons: [.autumn],          availableAllYear: false),
+        SeasonalIngredient(name: "parsnip",        category: .vegetable, peakSeasons: [.autumn, .winter], availableAllYear: false),
+        SeasonalIngredient(name: "turnip",         category: .vegetable, peakSeasons: [.autumn, .winter], availableAllYear: false),
+        SeasonalIngredient(name: "chestnut",       category: .other,     peakSeasons: [.autumn, .winter], availableAllYear: false),
+        SeasonalIngredient(name: "persimmon",      category: .fruit,     peakSeasons: [.autumn],          availableAllYear: false),
+        SeasonalIngredient(name: "apple",          category: .fruit,     peakSeasons: [.autumn],          availableAllYear: false),
+        SeasonalIngredient(name: "pear",           category: .fruit,     peakSeasons: [.autumn],          availableAllYear: false),
+        SeasonalIngredient(name: "cranberry",      category: .fruit,     peakSeasons: [.autumn],          availableAllYear: false),
+        SeasonalIngredient(name: "grape",          category: .fruit,     peakSeasons: [.autumn],          availableAllYear: false),
+        SeasonalIngredient(name: "quince",         category: .fruit,     peakSeasons: [.autumn],          availableAllYear: false),
+        SeasonalIngredient(name: "pomegranate",    category: .fruit,     peakSeasons: [.autumn, .winter], availableAllYear: false),
 
-        // Winter
-        SeasonalIngredient(name: "citrus", category: .fruit, peakSeasons: [.winter], availableAllYear: true),
-        SeasonalIngredient(name: "kale", category: .vegetable, peakSeasons: [.winter, .autumn], availableAllYear: true),
-        SeasonalIngredient(name: "cauliflower", category: .vegetable, peakSeasons: [.winter], availableAllYear: true),
-        SeasonalIngredient(name: "parsnip", category: .vegetable, peakSeasons: [.winter], availableAllYear: false),
-        SeasonalIngredient(name: "turnip", category: .vegetable, peakSeasons: [.winter], availableAllYear: true),
-        SeasonalIngredient(name: "pomegranate", category: .fruit, peakSeasons: [.winter], availableAllYear: false),
-        SeasonalIngredient(name: "leek", category: .vegetable, peakSeasons: [.winter, .spring], availableAllYear: true),
+        // WINTER
+        SeasonalIngredient(name: "cauliflower",    category: .vegetable, peakSeasons: [.winter],          availableAllYear: false),
+        SeasonalIngredient(name: "celery root",    category: .vegetable, peakSeasons: [.winter],          availableAllYear: false),
+        SeasonalIngredient(name: "sunchoke",       category: .vegetable, peakSeasons: [.winter],          availableAllYear: false),
+        SeasonalIngredient(name: "rutabaga",       category: .vegetable, peakSeasons: [.winter],          availableAllYear: false),
+        SeasonalIngredient(name: "radicchio",      category: .vegetable, peakSeasons: [.winter],          availableAllYear: false),
+        SeasonalIngredient(name: "endive",         category: .vegetable, peakSeasons: [.winter],          availableAllYear: false),
+        SeasonalIngredient(name: "meyer lemon",    category: .fruit,     peakSeasons: [.winter],          availableAllYear: false),
+        SeasonalIngredient(name: "blood orange",   category: .fruit,     peakSeasons: [.winter],          availableAllYear: false),
+        SeasonalIngredient(name: "grapefruit",     category: .fruit,     peakSeasons: [.winter],          availableAllYear: false),
+        SeasonalIngredient(name: "navel orange",   category: .fruit,     peakSeasons: [.winter],          availableAllYear: false),
+        SeasonalIngredient(name: "clementine",     category: .fruit,     peakSeasons: [.winter],          availableAllYear: false),
 
-        // Year-round staples
-        SeasonalIngredient(name: "onion", category: .vegetable, peakSeasons: Season.allCases, availableAllYear: true),
-        SeasonalIngredient(name: "garlic", category: .vegetable, peakSeasons: Season.allCases, availableAllYear: true),
-        SeasonalIngredient(name: "potato", category: .vegetable, peakSeasons: Season.allCases, availableAllYear: true),
-        SeasonalIngredient(name: "carrot", category: .vegetable, peakSeasons: Season.allCases, availableAllYear: true),
-        SeasonalIngredient(name: "lemon", category: .fruit, peakSeasons: [.winter, .spring], availableAllYear: true),
-        SeasonalIngredient(name: "banana", category: .fruit, peakSeasons: Season.allCases, availableAllYear: true),
+        // YEAR-ROUND STAPLES — kept for scoring only, badge suppressed by availableAllYear: true
+        SeasonalIngredient(name: "onion",          category: .vegetable, peakSeasons: Season.allCases, availableAllYear: true),
+        SeasonalIngredient(name: "garlic",         category: .vegetable, peakSeasons: Season.allCases, availableAllYear: true),
+        SeasonalIngredient(name: "potato",         category: .vegetable, peakSeasons: Season.allCases, availableAllYear: true),
+        SeasonalIngredient(name: "carrot",         category: .vegetable, peakSeasons: Season.allCases, availableAllYear: true),
+        SeasonalIngredient(name: "lemon",          category: .fruit,     peakSeasons: Season.allCases, availableAllYear: true),
+        SeasonalIngredient(name: "banana",         category: .fruit,     peakSeasons: Season.allCases, availableAllYear: true),
     ]
 
     /// Get ingredients that are currently in season.
@@ -76,8 +116,8 @@ enum SeasonalAwarenessService {
     static func isInSeason(_ ingredientName: String) -> Bool {
         let current = Season.current
         let name = ingredientName.lowercased()
-        guard let ingredient = seasonalLookup[name] else {
-            return true // Unknown ingredients assumed available
+        guard let ingredient = seasonalLookup[name], !ingredient.availableAllYear else {
+            return false // Unknown ingredients and year-round staples don't get the badge
         }
         return ingredient.peakSeasons.contains(current)
     }

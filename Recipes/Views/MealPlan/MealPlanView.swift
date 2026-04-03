@@ -1050,7 +1050,6 @@ struct AddMealView: View {
     @State private var selectedMealType: MealType
     @State private var selectedDate: Date
     @State private var selectedRecipe: Recipe? = nil
-    @State private var servings = 1
     @State private var showingGenerator = false
     @State private var lastRecipeCount = 0
     @State private var searchText = ""
@@ -1064,18 +1063,6 @@ struct AddMealView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Meal") {
-                    Picker("Type", selection: $selectedMealType) {
-                        ForEach(MealType.allCases, id: \.self) { type in
-                            Text(type.rawValue.capitalized).tag(type)
-                        }
-                    }
-                    DatePicker("Date", selection: $selectedDate,
-                               in: plan.startDate...plan.endDate,
-                               displayedComponents: .date)
-                    Stepper("Servings: \(servings)", value: $servings, in: 1...20)
-                }
-
                 Section("Recipe") {
                     Button {
                         lastRecipeCount = recipes.count
@@ -1125,7 +1112,7 @@ struct AddMealView: View {
                 }
             }
             .sheet(isPresented: $showingGenerator) {
-                QuickGenerateView()
+                QuickGenerateView(mealType: selectedMealType)
             }
             .onChange(of: recipes.count) { _, newCount in
                 // Auto-add the generated recipe immediately — no need to tap "Add" separately
@@ -1135,14 +1122,14 @@ struct AddMealView: View {
                         mealType: selectedMealType,
                         date: Calendar.current.startOfDay(for: selectedDate),
                         recipe: newest,
-                        servings: servings
+                        servings: newest.servings
                     )
                     modelContext.insert(meal)
                     plan.meals.append(meal)
                     dismiss()
                 }
             }
-            .navigationTitle("Add Meal")
+            .navigationTitle("Add \(selectedMealType.displayName)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -1154,7 +1141,7 @@ struct AddMealView: View {
                             mealType: selectedMealType,
                             date: Calendar.current.startOfDay(for: selectedDate),
                             recipe: selectedRecipe,
-                            servings: servings
+                            servings: selectedRecipe?.servings ?? 1
                         )
                         modelContext.insert(meal)
                         plan.meals.append(meal)

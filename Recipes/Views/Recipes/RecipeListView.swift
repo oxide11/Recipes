@@ -28,6 +28,9 @@ struct RecipeListView: View {
     @State private var showingTagManagement = false
     @State private var cachedNoWasteMatches: [NoWasteMatchingEngine.MatchResult] = []
     @State private var cachedSeasonalRecipes: [Recipe] = []
+    @State private var cachedSeasonalIngredients: [String] = []
+    @State private var selectedSeasonalIngredient: String? = nil
+    @State private var showingSeasonalGenerator = false
     @State private var cachedFilteredRecipes: [Recipe] = []
     @State private var debouncedSearch = ""
     @State private var searchDebounceTask: Task<Void, Never>?
@@ -196,6 +199,9 @@ struct RecipeListView: View {
                 )
                 .presentationDetents([.medium])
             }
+            .sheet(isPresented: $showingSeasonalGenerator) {
+                RecipeGeneratorView(initialIngredient: selectedSeasonalIngredient ?? "")
+            }
             .task {
                 updateNoWasteMatches()
                 updateSeasonalCache()
@@ -259,6 +265,13 @@ struct RecipeListView: View {
 
     private func updateSeasonalCache() {
         Task {
+            let hemisphere = profiles.first?.hemisphere ?? .northern
+            let inSeason = SeasonalAwarenessService.currentlyInSeason(hemisphere: hemisphere)
+                .filter { !$0.availableAllYear }
+                .prefix(8)
+                .map(\.name)
+            cachedSeasonalIngredients = Array(inSeason)
+
             let seasonal = recipes.filter { recipe in
                 SeasonalAwarenessService.seasonalityScore(ingredientNames: recipe.ingredients.map(\.name)) > 0.5
             }
@@ -320,32 +333,87 @@ struct RecipeListView: View {
         }
     }
 
+    private var seasonalFilteredRecipes: [Recipe] {
+        guard let ing = selectedSeasonalIngredient else { return cachedSeasonalRecipes }
+        return cachedSeasonalRecipes.filter { recipe in
+            recipe.ingredients.contains { $0.name.localizedCaseInsensitiveContains(ing) }
+        }
+    }
+
     @ViewBuilder
     private var seasonalSection: some View {
-        let seasonal = cachedSeasonalRecipes
-
-        if !seasonal.isEmpty {
+        if !cachedSeasonalIngredients.isEmpty {
             Section {
-                ScrollView(.horizontal) {
-                    LazyHStack(alignment: .top, spacing: 12) {
-                        ForEach(seasonal.prefix(8)) { recipe in
+                // Chips row: sticky Generate button + ingredient filter chips
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        // Sticky generate button
+                        Button {
+                            showingSeasonalGenerator = true
+                        } label: {
+                            Label(selectedSeasonalIngredient.map { "Generate with \($0.capitalized)" } ?? "Generate",
+                                  systemImage: "sparkles")
+                                .font(.miseMeta.weight(.medium))
+                                .foregroundStyle(Brand.midnight)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 7)
+                                .background(Brand.herbGreen, in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(selectedSeasonalIngredient.map { "Generate recipe with \($0)" } ?? "Generate seasonal recipe")
+
+                        ForEach(cachedSeasonalIngredients, id: \.self) { ingredient in
+                            let isSelected = selectedSeasonalIngredient == ingredient
                             Button {
-                                selectedRecipe = recipe
+                                withAnimation(.easeInOut(duration: 0.15)) {
+                                    selectedSeasonalIngredient = isSelected ? nil : ingredient
+                                }
                             } label: {
-                                RecipeCardCompact(recipe: recipe)
+                                Text(ingredient.capitalized)
+                                    .font(.miseMeta.weight(.medium))
+                                    .foregroundStyle(isSelected ? Brand.midnight : Brand.cream)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 7)
+                                    .background(isSelected ? Brand.herbGreen : Brand.herbGreen.opacity(0.2), in: Capsule())
+                                    .overlay(Capsule().stroke(Brand.herbGreen.opacity(0.4), lineWidth: isSelected ? 0 : 1))
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel("\(ingredient.capitalized)\(isSelected ? ", selected" : "")")
+                            .accessibilityHint(isSelected ? "Tap to clear filter" : "Tap to filter recipes")
                         }
                     }
                     .padding(.horizontal)
                 }
-                .contentMargins(.vertical, 12, for: .scrollContent)
                 .listRowInsets(EdgeInsets())
+                .contentMargins(.vertical, 8, for: .scrollContent)
+
+                // Recipes — filtered when a chip is selected, all seasonal otherwise
+                if seasonalFilteredRecipes.isEmpty {
+                    Text(selectedSeasonalIngredient.map { "No recipes with \($0.capitalized) — tap Generate to make one" }
+                         ?? "No seasonal recipes yet")
+                        .font(.miseMeta)
+                        .foregroundStyle(Brand.muted)
+                        .listRowBackground(Color.clear)
+                } else {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        LazyHStack(alignment: .top, spacing: 12) {
+                            ForEach(seasonalFilteredRecipes.prefix(8)) { recipe in
+                                Button { selectedRecipe = recipe } label: {
+                                    RecipeCardCompact(recipe: recipe)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                    .contentMargins(.vertical, 12, for: .scrollContent)
+                    .listRowInsets(EdgeInsets())
+                }
             } header: {
                 HStack(spacing: 4) {
                     Image(systemName: "leaf")
                         .foregroundStyle(Brand.herbGreen)
-                    Text("In season")
+                    Text("In Season")
                 }
                 .miseSectionHeader()
             }

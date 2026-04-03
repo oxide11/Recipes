@@ -377,10 +377,10 @@ struct PantryItemRow: View {
                             .foregroundStyle(.tertiary)
                     }
 
-                    if !SeasonalAwarenessService.isInSeason(item.name) {
-                        Label("Off season", systemImage: "leaf.arrow.triangle.circlepath")
+                    if SeasonalAwarenessService.isInSeason(item.name) {
+                        Label("In season", systemImage: "leaf.fill")
                             .font(.caption2)
-                            .foregroundStyle(Brand.muted)
+                            .foregroundStyle(Brand.herbGreen)
                     }
                 }
             }

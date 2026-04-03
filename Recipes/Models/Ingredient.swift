@@ -273,7 +273,9 @@ final class PantryItem {
 
     var isExpired: Bool {
         guard let expiration = expirationDate else { return false }
-        return expiration < .now
+        // Expired only after the end of the expiration day, not during it.
+        let endOfDay = Calendar.current.startOfDay(for: Calendar.current.date(byAdding: .day, value: 1, to: expiration) ?? expiration)
+        return .now >= endOfDay
     }
 
     var isExpiringSoon: Bool {

@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import MapKit
+import PhotosUI
 
 // MARK: - Restaurant Journal View
 
@@ -492,7 +493,7 @@ struct RestaurantEntryDetailView: View {
 
                 if !entry.dishesOrdered.isEmpty {
                     Section("Dishes Ordered") {
-                        ForEach(entry.dishesOrdered, id: \.name) { dish in
+                        ForEach(entry.dishesOrdered) { dish in
                             DishEntryRow(dish: dish)
                         }
                     }
@@ -534,6 +535,9 @@ struct EditRestaurantEntryView: View {
     @State private var rating: Int
     @State private var review: String
     @State private var priceRange: PriceRange
+    @State private var dishes: [DishEntry]
+    @State private var showingAddDish = false
+    @State private var editingDish: DishEntry? = nil
 
     init(entry: RestaurantJournalEntry) {
         self.entry = entry
@@ -543,6 +547,7 @@ struct EditRestaurantEntryView: View {
         _rating = State(initialValue: entry.rating ?? 3)
         _review = State(initialValue: entry.review ?? "")
         _priceRange = State(initialValue: entry.priceRange ?? .moderate)
+        _dishes = State(initialValue: entry.dishesOrdered)
     }
 
     var body: some View {
@@ -572,6 +577,22 @@ struct EditRestaurantEntryView: View {
                     TextField("What did you think?", text: $review, axis: .vertical)
                         .lineLimit(5)
                 }
+
+                Section("Dishes") {
+                    ForEach(dishes) { dish in
+                        Button { editingDish = dish } label: {
+                            DishEntryRow(dish: dish)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .onDelete { indices in dishes.remove(atOffsets: indices) }
+
+                    Button {
+                        showingAddDish = true
+                    } label: {
+                        Label("Add Dish", systemImage: "plus.circle")
+                    }
+                }
             }
             .navigationTitle("Edit Entry")
             .navigationBarTitleDisplayMode(.inline)
@@ -587,9 +608,20 @@ struct EditRestaurantEntryView: View {
                         entry.rating = rating
                         entry.review = review.isEmpty ? nil : review
                         entry.priceRange = priceRange
+                        entry.dishesOrdered = dishes
                         dismiss()
                     }
                     .disabled(name.isEmpty)
+                }
+            }
+            .sheet(isPresented: $showingAddDish) {
+                AddDishView { dish in dishes.append(dish) }
+            }
+            .sheet(item: $editingDish) { dish in
+                AddDishView(editing: dish) { updated in
+                    if let idx = dishes.firstIndex(where: { $0.id == updated.id }) {
+                        dishes[idx] = updated
+                    }
                 }
             }
         }
@@ -818,7 +850,7 @@ struct AddRestaurantEntryView: View {
 
                 // Dishes Ordered
                 Section("Dishes Ordered") {
-                    ForEach(dishes, id: \.name) { dish in
+                    ForEach(dishes) { dish in
                         DishEntryRow(dish: dish)
                     }
                     .onDelete { indices in
@@ -1018,34 +1050,32 @@ struct AddWantToTryView: View {
 struct DishEntryRow: View {
     let dish: DishEntry
 
+    @State private var thumbnail: UIImage? = nil
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text(dish.name)
+        HStack(spacing: 12) {
+            if let img = thumbnail {
+                Image(uiImage: img)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 52, height: 52)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .accessibilityHidden(true)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(dish.displayName)
                     .fontWeight(.medium)
-                Spacer()
-                if let rating = dish.rating {
-                    StarRatingView(rating: rating)
-                }
-            }
-
-            if let notes = dish.notes, !notes.isEmpty {
-                Text(notes)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            HStack(spacing: 8) {
-                if dish.wouldOrderAgain {
-                    Label("Would order again", systemImage: "hand.thumbsup.fill")
-                        .font(.caption2)
-                        .foregroundStyle(Brand.herbGreen)
-                }
                 if dish.wantToRecreate {
                     Label("Want to recreate", systemImage: "frying.pan")
                         .font(.caption2)
                         .foregroundStyle(Brand.warmTan)
                 }
+            }
+        }
+        .task {
+            if let filename = dish.photoFilename {
+                thumbnail = await PhotoStorageService.loadImage(filename: filename)
             }
         }
     }
@@ -1056,53 +1086,145 @@ struct DishEntryRow: View {
 struct AddDishView: View {
     @Environment(\.dismiss) private var dismiss
 
-    @State private var name = ""
-    @State private var description = ""
-    @State private var rating = 3
-    @State private var notes = ""
-    @State private var wouldOrderAgain = true
-    @State private var wantToRecreate = false
-
+    var editing: DishEntry? = nil
     let onSave: (DishEntry) -> Void
+
+    @State private var name: String
+    @State private var wantToRecreate: Bool
+    @State private var existingPhotoFilename: String?
+    @State private var photoData: Data?
+    @State private var selectedItem: PhotosPickerItem?
+    @State private var cameraImage: UIImage?
+    @State private var showingPhotoDialog = false
+    @State private var showingCamera = false
+    @State private var showingLibrary = false
+
+    init(editing: DishEntry? = nil, onSave: @escaping (DishEntry) -> Void) {
+        self.editing = editing
+        self.onSave = onSave
+        _name = State(initialValue: editing?.name ?? "")
+        _wantToRecreate = State(initialValue: editing?.wantToRecreate ?? false)
+        _existingPhotoFilename = State(initialValue: editing?.photoFilename)
+    }
+
+    private var hasPhoto: Bool { photoData != nil || existingPhotoFilename != nil }
+    private var canSave: Bool { hasPhoto || !name.trimmingCharacters(in: .whitespaces).isEmpty }
+    private var isEditing: Bool { editing != nil }
 
     var body: some View {
         NavigationStack {
-            Form {
-                TextField("Dish Name", text: $name)
-                TextField("Description", text: $description, axis: .vertical)
-                    .lineLimit(3)
-
-                Section("Rating") {
-                    StarRatingView(rating: rating, font: .title2) { rating = $0 }
-                        .sensoryFeedback(.selection, trigger: rating)
+            VStack(spacing: 16) {
+                // Photo tap area
+                Button { showingPhotoDialog = true } label: {
+                    ZStack {
+                        if let data = photoData, let uiImage = UIImage(data: data) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .scaledToFill()
+                        } else if existingPhotoFilename != nil {
+                            // Placeholder while existing photo loads
+                            ProgressView()
+                                .frame(maxWidth: .infinity)
+                                .background(Brand.surface)
+                        } else {
+                            VStack(spacing: 10) {
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 36))
+                                    .foregroundStyle(Brand.muted)
+                                Text("Add Photo")
+                                    .font(.miseMeta)
+                                    .foregroundStyle(Brand.muted)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .background(Brand.surface)
+                        }
+                    }
+                    .frame(height: 220)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(hasPhoto ? "Change photo" : "Add photo")
+                .task {
+                    if let filename = existingPhotoFilename, photoData == nil {
+                        if let img = await PhotoStorageService.loadImage(filename: filename) {
+                            photoData = img.jpegData(compressionQuality: 0.9)
+                        }
+                    }
                 }
 
-                TextField("Notes", text: $notes, axis: .vertical)
-                    .lineLimit(3)
-                Toggle("Would Order Again", isOn: $wouldOrderAgain)
-                Toggle("Want to Recreate at Home", isOn: $wantToRecreate)
+                TextField("Dish name (optional)", text: $name)
+                    .font(.system(.body, design: .rounded))
+                    .padding()
+                    .background(Brand.surface, in: RoundedRectangle(cornerRadius: 12))
+
+                Toggle(isOn: $wantToRecreate) {
+                    Label("Want to recreate at home", systemImage: "frying.pan")
+                        .font(.miseMeta)
+                        .foregroundStyle(Brand.cream)
+                }
+                .tint(Brand.warmTan)
+                .padding()
+                .background(Brand.surface, in: RoundedRectangle(cornerRadius: 12))
+
+                Spacer()
             }
-            .navigationTitle("Add Dish")
+            .padding()
+            .background(Brand.midnight)
+            .navigationTitle(isEditing ? "Edit Dish" : "Add Dish")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .foregroundStyle(Brand.warmTan)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
-                        let dish = DishEntry(
-                            name: name,
-                            description: description.isEmpty ? nil : description,
-                            rating: rating,
-                            notes: notes.isEmpty ? nil : notes,
-                            wouldOrderAgain: wouldOrderAgain,
-                            wantToRecreate: wantToRecreate
-                        )
+                    Button(isEditing ? "Save" : "Add") {
+                        var filename: String? = existingPhotoFilename
+                        if let data = photoData {
+                            let photoID = UUID()
+                            if let saved = try? PhotoStorageService.save(data, id: photoID) {
+                                // Delete old file if replacing
+                                if let old = existingPhotoFilename, old != saved {
+                                    PhotoStorageService.delete(filename: old)
+                                }
+                                filename = saved
+                            }
+                        }
+                        var dish = editing ?? DishEntry(name: name, wouldOrderAgain: false, wantToRecreate: wantToRecreate)
+                        dish.name = name
+                        dish.wantToRecreate = wantToRecreate
+                        dish.photoFilename = filename
                         onSave(dish)
                         dismiss()
                     }
-                    .disabled(name.isEmpty)
+                    .disabled(!canSave)
                 }
+            }
+            .confirmationDialog("Add Photo", isPresented: $showingPhotoDialog) {
+                Button("Take Photo") { showingCamera = true }
+                Button("Choose from Library") { showingLibrary = true }
+                if hasPhoto {
+                    Button("Remove Photo", role: .destructive) {
+                        if let old = existingPhotoFilename { PhotoStorageService.delete(filename: old) }
+                        existingPhotoFilename = nil
+                        photoData = nil
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            }
+            .fullScreenCover(isPresented: $showingCamera) {
+                CameraPicker(image: $cameraImage)
+                    .ignoresSafeArea()
+            }
+            .photosPicker(isPresented: $showingLibrary, selection: $selectedItem, matching: .images)
+            .onChange(of: cameraImage) { _, img in
+                if let img {
+                    photoData = img.jpegData(compressionQuality: 0.8)
+                    cameraImage = nil
+                }
+            }
+            .onChange(of: selectedItem) { _, item in
+                Task { photoData = try? await item?.loadTransferable(type: Data.self) }
             }
         }
     }

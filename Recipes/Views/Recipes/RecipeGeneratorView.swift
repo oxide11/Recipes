@@ -401,14 +401,19 @@ struct RecipeGeneratorView: View {
 /// Pass `quickMealMode: true` to bias generation toward meals ready in ≤ 30 minutes.
 struct QuickGenerateView: View {
     var quickMealMode: Bool = false
+    /// When set, constrains generation to a specific meal type (breakfast, lunch, dinner, etc.).
+    var mealType: MealType? = nil
     /// When set, auto-generates a recipe for this specific cuisine (used by "Expand Your Horizons").
     var cuisineHint: String? = nil
+    /// When set, overrides the generated description entirely (used for dish recreations, etc.).
+    var initialDescription: String? = nil
 
     @Environment(AIServiceRouter.self) private var aiRouter
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
+    @Query(sort: \Recipe.title) private var existingRecipes: [Recipe]
     @Query private var profiles: [UserProfile]
 
     @State private var isGenerating = true
@@ -471,7 +476,9 @@ struct QuickGenerateView: View {
         let profile = profiles.first
 
         var description: String
-        if let cuisine = cuisineHint {
+        if let override = initialDescription {
+            description = override
+        } else if let cuisine = cuisineHint {
             // Cuisine-specific auto-generate: pick a well-known dish from that cuisine
             let staples = pantryItems.filter(\.isStaple).map(\.name)
             let onHand  = pantryItems.filter { !$0.isStaple }.prefix(15).map(\.name)
@@ -502,11 +509,18 @@ struct QuickGenerateView: View {
             let hint = hints.isEmpty ? "" : " \(hints.joined(separator: ". ")). Feel free to use these but don't feel constrained."
             description = "Surprise me with a delicious recipe.\(hint)"
         }
+        if let mt = mealType {
+            description += " This recipe must be appropriate for \(mt.displayName.lowercased()) — use typical \(mt.displayName.lowercased()) ingredients and portion sizes."
+        }
         if let restrictions = profile?.dietaryRestrictions, !restrictions.isEmpty {
             description += " Dietary needs: \(restrictions.map(\.displayName).joined(separator: ", "))."
         }
         if cuisineHint == nil, let cuisines = profile?.preferredCuisines, !cuisines.isEmpty {
             description += " Preferred cuisines: \(cuisines.map(\.rawValue).joined(separator: ", "))."
+        }
+        if !existingRecipes.isEmpty {
+            let titles = existingRecipes.map(\.title).joined(separator: ", ")
+            description += " I already have these recipes in my library — please suggest something genuinely different: \(titles)."
         }
         let skill = profile?.skillLevel ?? .intermediate
         description += recipeSkillConstraint(for: skill)

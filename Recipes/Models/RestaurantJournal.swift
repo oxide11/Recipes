@@ -69,13 +69,25 @@ final class RestaurantJournalEntry {
 
 // MARK: - Dish Entry
 
-struct DishEntry: Codable, Hashable, Sendable {
-    var name: String
+struct DishEntry: Codable, Hashable, Sendable, Identifiable {
+    /// Not persisted — generated fresh on each decode for ForEach stability within a session.
+    var id: UUID = UUID()
+    var name: String          // empty string = unnamed
     var description: String?
-    var rating: Int?  // 1-5
+    var rating: Int?          // 1-5
     var notes: String?
     var wouldOrderAgain: Bool
     var wantToRecreate: Bool
+    var photoFilename: String?
+
+    var displayName: String {
+        name.trimmingCharacters(in: .whitespaces).isEmpty ? "Unnamed dish" : name
+    }
+
+    // Exclude `id` from Codable so existing stored JSON (which has no "id" key) decodes cleanly.
+    enum CodingKeys: String, CodingKey {
+        case name, description, rating, notes, wouldOrderAgain, wantToRecreate, photoFilename
+    }
 }
 
 // MARK: - Price Range
