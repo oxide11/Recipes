@@ -442,7 +442,7 @@ struct CookingModeView: View {
             } label: {
                 Image(systemName: isVoiceEnabled ? "speaker.wave.3.fill" : "speaker.slash.fill")
                     .font(.system(size: controlButtonSize))
-                    .frame(width: 36, height: 36)
+                    .frame(width: 44, height: 44)
             }
             .accessibilityLabel(isVoiceEnabled ? "Disable voice" : "Enable voice")
 

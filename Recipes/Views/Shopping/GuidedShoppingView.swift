@@ -8,6 +8,7 @@ struct GuidedShoppingView: View {
     @Bindable var list: GroceryList
     @Environment(\.dismiss) private var dismiss
     @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var voiceService = ShoppingVoiceService()
     @State private var currentSectionIndex = 0
@@ -121,7 +122,7 @@ struct GuidedShoppingView: View {
                 Image(systemName: "waveform.circle.fill")
                     .font(.system(size: 80))
                     .foregroundStyle(Brand.herbGreen)
-                    .symbolEffect(.pulse)
+                    .symbolEffect(.pulse, isActive: !reduceMotion)
                     .accessibilityHidden(true)
 
                 Text("Ready to Shop")
@@ -317,7 +318,7 @@ struct GuidedShoppingView: View {
             } else if voiceService.isListening {
                 Image(systemName: "mic.fill")
                     .foregroundStyle(Brand.spiceRed)
-                    .symbolEffect(.pulse)
+                    .symbolEffect(.pulse, isActive: !reduceMotion)
                 Text("Listening...")
             }
 

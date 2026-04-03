@@ -17,6 +17,8 @@ struct MealPlanView: View {
     @Query private var allPlannedMeals: [PlannedMeal]
     @Query private var profiles: [UserProfile]
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     @State private var selectedDate = Calendar.current.startOfDay(for: Date())
     @State private var viewMode: MealPlanViewMode = .day
     @State private var showingGenerate = false
@@ -90,7 +92,7 @@ struct MealPlanView: View {
                         ZStack {
                             DayMealView(plan: plan, date: selectedDate, allMeals: allPlannedMeals)
                                 .id(selectedDate)
-                                .transition(.asymmetric(
+                                .transition(reduceMotion ? .opacity : .asymmetric(
                                     insertion: .move(edge: swipeForward ? .trailing : .leading),
                                     removal:   .move(edge: swipeForward ? .leading  : .trailing)
                                 ))
@@ -101,12 +103,12 @@ struct MealPlanView: View {
                                     guard abs(value.translation.width) > abs(value.translation.height) else { return }
                                     if value.translation.width < -40 {
                                         swipeForward = true
-                                        withAnimation(.easeInOut(duration: 0.25)) {
+                                        withAnimation(reduceMotion ? .none : .easeInOut(duration: 0.25)) {
                                             selectedDate = calendar.date(byAdding: .day, value: 1, to: selectedDate) ?? selectedDate
                                         }
                                     } else if value.translation.width > 40 {
                                         swipeForward = false
-                                        withAnimation(.easeInOut(duration: 0.25)) {
+                                        withAnimation(reduceMotion ? .none : .easeInOut(duration: 0.25)) {
                                             selectedDate = calendar.date(byAdding: .day, value: -1, to: selectedDate) ?? selectedDate
                                         }
                                     }
@@ -115,12 +117,12 @@ struct MealPlanView: View {
                     } else {
                         WeekMealView(allMeals: allPlannedMeals, weekDays: weekDays) { forward in
                             swipeForward = forward
-                            withAnimation(.easeInOut(duration: 0.25)) {
+                            withAnimation(reduceMotion ? .none : .easeInOut(duration: 0.25)) {
                                 selectedDate = calendar.date(byAdding: .weekOfYear, value: forward ? 1 : -1, to: selectedDate) ?? selectedDate
                             }
                         }
                         .id(weekStart)
-                        .transition(.asymmetric(
+                        .transition(reduceMotion ? .opacity : .asymmetric(
                             insertion: .move(edge: swipeForward ? .trailing : .leading),
                             removal:   .move(edge: swipeForward ? .leading  : .trailing)
                         ))
@@ -172,7 +174,7 @@ struct WeekStripView: View {
                 Image(systemName: "chevron.left")
                     .font(.caption)
                     .foregroundStyle(Brand.muted)
-                    .frame(width: 32)
+                    .frame(width: 44, height: 44)
             }
 
             HStack(spacing: 2) {
@@ -190,7 +192,7 @@ struct WeekStripView: View {
                 Image(systemName: "chevron.right")
                     .font(.caption)
                     .foregroundStyle(Brand.muted)
-                    .frame(width: 32)
+                    .frame(width: 44, height: 44)
             }
         }
         .gesture(
@@ -239,6 +241,7 @@ struct DayChip: View {
                 .fill(mealCount > 0 ? Brand.herbGreen : Color.clear)
                 .frame(width: 4, height: 4)
         }
+        .contentShape(Rectangle())
         .frame(maxWidth: .infinity)
     }
 }
@@ -1541,7 +1544,7 @@ struct MultiRecipeCookingView: View {
             } label: {
                 Image(systemName: isVoiceEnabled ? "speaker.wave.3.fill" : "speaker.slash.fill")
                     .font(.system(size: 32))
-                    .frame(width: 36, height: 36)
+                    .frame(width: 44, height: 44)
             }
             .accessibilityLabel(isVoiceEnabled ? "Disable voice" : "Enable voice")
 

@@ -9,6 +9,7 @@ struct RecipeDetailView: View {
     @Environment(\.modelContext) private var modelContext
 
     @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showingVariations = false
     @State private var showingLogEntry = false
     @State private var showingCookingMode = false
@@ -81,7 +82,7 @@ struct RecipeDetailView: View {
                 cookingLogSection
             }
             .padding()
-            .animation(.snappy(duration: 0.25), value: isEditing)
+            .animation(reduceMotion ? .none : .snappy(duration: 0.25), value: isEditing)
         }
         .scrollPosition(id: $initialScrollID, anchor: .top)
         .navigationTitle(recipe.title)

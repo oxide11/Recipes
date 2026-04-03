@@ -320,6 +320,16 @@ struct DashboardView: View {
         }
         .padding()
         .glassCard(cornerRadius: 16)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel({
+            if !expiredItems.isEmpty {
+                return "Pantry: \(pantryItems.count) items, \(expiredItems.count) expired"
+            } else if !expiringItems.isEmpty {
+                return "Pantry: \(pantryItems.count) items, \(expiringItems.count) expiring soon"
+            } else {
+                return "Pantry: \(pantryItems.count) items, all fresh"
+            }
+        }())
     }
 
     private func pantryAlertRow(icon: String, color: Color, text: String, isUrgent: Bool) -> some View {
@@ -372,6 +382,10 @@ struct DashboardView: View {
         }
         .padding()
         .glassCard(cornerRadius: 16)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(todaysMeals.isEmpty
+            ? "Today's meals: none planned"
+            : "Today's meals: \(completedTodayCount) of \(todaysMeals.count) done")
     }
 
     private func mealRow(_ meal: PlannedMeal) -> some View {
@@ -472,6 +486,8 @@ struct DashboardView: View {
         }
         .padding()
         .glassCard(cornerRadius: 16)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Cooking activity: \(thisWeekCookCount) this week, \(cookingStreak > 0 ? "\(cookingStreak) day streak" : "no streak"), \(recipes.count) recipes, \(favoriteRecipes.count) favourites")
     }
 
     private func activityStat(value: String, label: String, icon: String) -> some View {
@@ -543,6 +559,17 @@ struct DashboardView: View {
         }
         .padding()
         .glassCard(cornerRadius: 16)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel({
+            if let budget = weeklyBudget, budget > 0 {
+                let fraction = min(weeklySpend / budget, 1.0)
+                return fraction >= 1.0
+                    ? "Weekly budget: $\(Int(weeklySpend)) spent, budget reached"
+                    : "Weekly budget: $\(Int(weeklySpend)) spent, $\(Int(budget - weeklySpend)) remaining"
+            } else {
+                return "Weekly budget: $\(Int(weeklySpend)) spent in past 7 days"
+            }
+        }())
     }
 
     // MARK: - Seasonal Spotlight

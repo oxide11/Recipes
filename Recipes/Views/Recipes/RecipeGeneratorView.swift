@@ -10,6 +10,7 @@ struct RecipeGeneratorView: View {
     @Environment(AIServiceRouter.self) private var aiRouter
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
     @Query private var profiles: [UserProfile]
@@ -266,7 +267,7 @@ struct RecipeGeneratorView: View {
                 HStack(spacing: 10) {
                     Image(systemName: "mic.fill")
                         .foregroundStyle(Brand.herbGreen)
-                        .symbolEffect(.pulse)
+                        .symbolEffect(.pulse, isActive: !reduceMotion)
                     Text(descriptionRecognizer.transcript.isEmpty ? "Listening…" : descriptionRecognizer.transcript)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -592,6 +593,8 @@ struct StreamingRecipePreview: View {
     var quickMealMode: Bool = false
     var pantryIsEmpty: Bool = false
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private var title: String? {
         guard let keyEnd = json.range(of: "\"title\"")?.upperBound else { return nil }
         let after = json[keyEnd...].drop(while: { ": \"".contains($0) })
@@ -610,7 +613,7 @@ struct StreamingRecipePreview: View {
             Image(systemName: "sparkles")
                 .font(.system(size: 40))
                 .foregroundStyle(Brand.herbGreen)
-                .symbolEffect(.pulse)
+                .symbolEffect(.pulse, isActive: !reduceMotion)
                 .accessibilityHidden(true)
 
             // Title fades in as soon as it's extracted
@@ -619,7 +622,7 @@ struct StreamingRecipePreview: View {
                     Text(title)
                         .font(.title2.weight(.bold))
                         .multilineTextAlignment(.center)
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                        .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))
                 } else {
                     Text(cuisineHint.map { "Finding a great \($0) recipe…" }
                          ?? (quickMealMode
@@ -650,7 +653,7 @@ struct StreamingRecipePreview: View {
             if done {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(Brand.herbGreen)
-                    .transition(.scale.combined(with: .opacity))
+                    .transition(reduceMotion ? .opacity : .scale.combined(with: .opacity))
             } else {
                 ProgressView()
                     .scaleEffect(0.75)

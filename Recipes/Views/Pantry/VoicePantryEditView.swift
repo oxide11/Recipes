@@ -316,6 +316,7 @@ struct VoicePantryEditView: View {
 private struct PulsingMicView: View {
     var isActive: Bool = true
     @State private var scale = 1.0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
@@ -323,12 +324,12 @@ private struct PulsingMicView: View {
                 .fill(isActive ? Brand.herbGreen.opacity(0.15) : Color.secondary.opacity(0.1))
                 .frame(width: 100, height: 100)
                 .scaleEffect(isActive ? scale : 1.0)
-                .animation(.easeInOut(duration: 0.3), value: isActive)
+                .animation(reduceMotion ? .none : .easeInOut(duration: 0.3), value: isActive)
 
             Image(systemName: isActive ? "mic.fill" : "mic.slash.fill")
                 .font(.system(size: 40))
                 .foregroundStyle(isActive ? Brand.herbGreen : .secondary)
-                .animation(.easeInOut(duration: 0.2), value: isActive)
+                .animation(reduceMotion ? .none : .easeInOut(duration: 0.2), value: isActive)
                 .accessibilityLabel(isActive ? "Microphone active" : "Microphone inactive")
         }
         .onAppear {
