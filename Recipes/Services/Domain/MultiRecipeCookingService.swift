@@ -28,6 +28,10 @@ struct MultiRecipeCookingPlan: Sendable {
 
 // MARK: - Multi-Recipe Cooking Service
 
+enum CookingPlanError: Error {
+    case noRecipes
+}
+
 enum MultiRecipeCookingService {
 
     /// Generate an optimized cooking plan from multiple planned meals using AI.
@@ -38,7 +42,10 @@ enum MultiRecipeCookingService {
     ) async throws -> MultiRecipeCookingPlan {
         let recipes = meals.compactMap(\.recipe)
         guard recipes.count >= 2 else {
-            return singleRecipePlan(recipes.first!)
+            guard let recipe = recipes.first else {
+                throw CookingPlanError.noRecipes
+            }
+            return singleRecipePlan(recipe)
         }
 
         let prompt = buildOptimizationPrompt(recipes: recipes)

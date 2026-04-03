@@ -16,16 +16,19 @@ final class NoWasteMatchingEngine {
         var recipe: Recipe
         var score: Double
         var matchedIngredients: [MatchedIngredient]
+        var substitutableIngredients: [SubstitutableIngredient]
         var missingIngredients: [String]
         var expiringIngredientsUsed: [String]
         var pantryUtilizationPercent: Double
 
-        /// Percentage of recipe ingredients covered by pantry.
+        /// Percentage of recipe ingredients covered by pantry (substitutes count as covered).
         var coveragePercent: Double {
-            guard !matchedIngredients.isEmpty || !missingIngredients.isEmpty else { return 0 }
-            let total = matchedIngredients.count + missingIngredients.count
-            return Double(matchedIngredients.count) / Double(total) * 100
+            let total = matchedIngredients.count + substitutableIngredients.count + missingIngredients.count
+            guard total > 0 else { return 0 }
+            return Double(matchedIngredients.count + substitutableIngredients.count) / Double(total) * 100
         }
+
+        var isFullyCoverable: Bool { missingIngredients.isEmpty }
     }
 
     struct MatchedIngredient: Sendable {
@@ -33,6 +36,13 @@ final class NoWasteMatchingEngine {
         var pantryName: String
         var isExpiringSoon: Bool
         var isExpired: Bool
+    }
+
+    struct SubstitutableIngredient: Sendable {
+        /// What the recipe calls for.
+        var recipeName: String
+        /// What you have that can substitute.
+        var substituteName: String
     }
 
     // MARK: - Match Recipes Against Pantry
@@ -91,13 +101,14 @@ final class NoWasteMatchingEngine {
         prioritizeExpiring: Bool
     ) -> MatchResult? {
         var matched: [MatchedIngredient] = []
+        var substitutable: [SubstitutableIngredient] = []
         var missing: [String] = []
         var expiringUsed: [String] = []
 
         for ingredient in recipe.ingredients {
             if ingredient.isOptional { continue }
 
-            let name = IngredientNormalizer.normalize(ingredient.name)
+            let name = IngredientNormalizer.canonicalize(ingredient.name)
 
             if let pantryMatches = findPantryMatch(for: name, in: pantryIndex) {
                 let isExpiring = pantryMatches.contains { $0.isExpiringSoon }
@@ -113,22 +124,27 @@ final class NoWasteMatchingEngine {
                 if isExpiring || isExpired {
                     expiringUsed.append(ingredient.name)
                 }
+            } else if let sub = findSubstitution(for: name, in: pantryIndex) {
+                substitutable.append(SubstitutableIngredient(
+                    recipeName: ingredient.name,
+                    substituteName: sub
+                ))
             } else {
                 missing.append(ingredient.name)
             }
         }
 
-        // Skip recipes with too many missing ingredients
+        // Skip recipes with too many truly missing ingredients (substitutes don't count)
         guard missing.count <= maxMissing else { return nil }
 
         // Calculate score
         let requiredIngredients = recipe.ingredients.filter { !$0.isOptional }
         let totalRequired = max(requiredIngredients.count, 1)
 
-        // Base score: percentage of ingredients matched (0-50 points)
-        var score = Double(matched.count) / Double(totalRequired) * 50.0
+        // Base score: matched + substitutable at 70% value (0–50 points)
+        var score = (Double(matched.count) + Double(substitutable.count) * 0.7) / Double(totalRequired) * 50.0
 
-        // Expiring bonus: recipes using expiring items get a big boost (0-30 points)
+        // Expiring bonus: recipes using expiring items get a big boost (0–30 points)
         if prioritizeExpiring && !expiringUsed.isEmpty {
             score += Double(expiringUsed.count) * 10.0
             score = min(score, 80.0)
@@ -138,7 +154,7 @@ final class NoWasteMatchingEngine {
         let expiredCount = matched.filter(\.isExpired).count
         score -= Double(expiredCount) * 5.0
 
-        // Missing penalty: each missing ingredient reduces score (0-20 points)
+        // Missing penalty: each missing ingredient reduces score (0–20 points)
         score -= Double(missing.count) * 5.0
 
         // Time bonus: quicker recipes get a small boost
@@ -160,6 +176,7 @@ final class NoWasteMatchingEngine {
             recipe: recipe,
             score: max(score, 0),
             matchedIngredients: matched,
+            substitutableIngredients: substitutable,
             missingIngredients: missing,
             expiringIngredientsUsed: expiringUsed,
             pantryUtilizationPercent: utilization
@@ -174,16 +191,24 @@ final class NoWasteMatchingEngine {
         var index: [String: [PantryItem]] = [:]
 
         for item in items {
+            // Index by canonical name so "extra-virgin olive oil" in a recipe
+            // matches "olive oil" in the pantry and vice versa.
+            let canonical = IngredientNormalizer.canonicalize(item.name)
+            index[canonical, default: []].append(item)
+
+            // Also index the raw normalized name in case it differs from canonical
             let name = IngredientNormalizer.normalize(item.name)
-            index[name, default: []].append(item)
+            if name != canonical {
+                index[name, default: []].append(item)
+            }
 
             // Add singular/plural variants
-            for variant in IngredientNormalizer.variants(of: name) where variant != name {
+            for variant in IngredientNormalizer.variants(of: canonical) where variant != canonical {
                 index[variant, default: []].append(item)
             }
 
             // Common aliases
-            for alias in ingredientAliases(for: name) {
+            for alias in ingredientAliases(for: canonical) {
                 index[alias, default: []].append(item)
             }
         }
@@ -196,14 +221,15 @@ final class NoWasteMatchingEngine {
         for ingredientName: String,
         in index: [String: [PantryItem]]
     ) -> [PantryItem]? {
-        let name = IngredientNormalizer.normalize(ingredientName)
+        // ingredientName is already canonicalized by callers
+        let name = ingredientName
 
-        // O(1) exact match
+        // O(1) exact/canonical match
         if let items = index[name], !items.isEmpty {
             return items
         }
 
-        // Word-level matching first (O(words)): "chicken breast" matches "chicken"
+        // Word-level matching (O(words)): "chicken breast" matches "chicken"
         let words = name.components(separatedBy: CharacterSet.whitespaces)
         for word in words where word.count > 3 {
             if let items = index[word], !items.isEmpty {
@@ -211,7 +237,7 @@ final class NoWasteMatchingEngine {
             }
         }
 
-        // Substring fallback only for short ingredient lists (capped to avoid O(n²))
+        // Substring fallback only for short pantries (capped to avoid O(n²))
         if index.count <= 200 {
             for (key, items) in index {
                 if key.contains(name) || name.contains(key) {
@@ -220,6 +246,22 @@ final class NoWasteMatchingEngine {
             }
         }
 
+        return nil
+    }
+
+    /// Look for a substitutable pantry item when no direct match exists.
+    /// Returns the pantry item name that can stand in, or nil.
+    private static func findSubstitution(
+        for canonicalName: String,
+        in index: [String: [PantryItem]]
+    ) -> String? {
+        guard let group = IngredientNormalizer.substitutionGroups.first(where: { $0.contains(canonicalName) }) else { return nil }
+
+        for substitute in group where substitute != canonicalName {
+            if let items = findPantryMatch(for: substitute, in: index), let item = items.first {
+                return item.name
+            }
+        }
         return nil
     }
 

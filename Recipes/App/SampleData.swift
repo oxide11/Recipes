@@ -445,6 +445,7 @@ enum SampleData {
         context.insert(plan)
 
         // Spread recipes across the week — Day 3 has 3 meals for meal-prep demo
+        guard recipes.count >= 6 else { return }
         let day3 = calendar.date(byAdding: .day, value: 3, to: startOfWeek)!
         let meals = [
             PlannedMeal(mealType: .dinner, date: startOfWeek, recipe: recipes[0], servings: 2, notes: "Pasta night"),

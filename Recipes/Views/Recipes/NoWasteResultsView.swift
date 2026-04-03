@@ -58,7 +58,7 @@ struct NoWasteResultsView: View {
         }
 
         if showFullCoverageOnly {
-            results = results.filter { $0.missingIngredients.isEmpty }
+            results = results.filter { $0.isFullyCoverable }
         }
 
         return results
@@ -75,7 +75,7 @@ struct NoWasteResultsView: View {
                 }
                 .pickerStyle(.segmented)
 
-                Toggle("Have all ingredients", isOn: $showFullCoverageOnly)
+                Toggle("No missing ingredients", isOn: $showFullCoverageOnly)
             }
             .padding(.horizontal)
             .padding(.vertical, 8)
@@ -136,14 +136,26 @@ struct NoWasteRecipeRow: View {
             .font(.caption)
             .foregroundStyle(.secondary)
 
-            // Missing ingredients
+            // Substitutable ingredients
+            if !match.substitutableIngredients.isEmpty {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .font(.caption2)
+                    Text("Sub: \(match.substitutableIngredients.map { "\($0.substituteName) for \($0.recipeName)" }.joined(separator: ", "))")
+                        .font(.caption)
+                        .lineLimit(2)
+                }
+                .foregroundStyle(Brand.warmTan)
+            }
+
+            // Missing ingredients (truly need to buy)
             if !match.missingIngredients.isEmpty {
                 HStack(spacing: 4) {
                     Image(systemName: "cart.badge.plus")
                         .font(.caption2)
                     Text("Need: \(match.missingIngredients.joined(separator: ", "))")
                         .font(.caption)
-                        .lineLimit(1)
+                        .lineLimit(2)
                 }
                 .foregroundStyle(.red.opacity(0.8))
             }
@@ -157,7 +169,7 @@ struct NoWasteRecipeRow: View {
                         .foregroundStyle(Brand.herbGreen)
                     Text("Have: \(matchedNames.joined(separator: ", "))")
                         .font(.caption)
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .foregroundStyle(.secondary)
                 }
             }

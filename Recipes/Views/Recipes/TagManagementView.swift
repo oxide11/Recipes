@@ -10,25 +10,33 @@ struct TagManagementView: View {
     @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
 
     @State private var newTagName = ""
-    @State private var selectedTag: String?
-    @State private var showingBatchTag = false
+    @State private var selectedTag: TagSelection?
     @State private var tagToDelete: String?
+    @State private var cachedAllTags: [TagInfo] = []
 
-    private var allTags: [TagInfo] {
+    private struct TagSelection: Identifiable {
+        let id = UUID()
+        let name: String
+    }
+
+    private var allTags: [TagInfo] { cachedAllTags }
+
+    private func rebuildAllTags() {
         var tagCounts: [String: Int] = [:]
         for recipe in recipes {
-            for tag in recipe.tags {
+            let normalized = Set(recipe.tags.map { $0.lowercased().trimmingCharacters(in: .whitespaces) })
+            for tag in normalized where !tag.isEmpty {
                 tagCounts[tag, default: 0] += 1
             }
         }
-        return tagCounts
+        cachedAllTags = tagCounts
             .map { TagInfo(name: $0.key, count: $0.value) }
             .sorted { $0.count > $1.count }
     }
 
     private var recipesForSelectedTag: [Recipe] {
         guard let tag = selectedTag else { return [] }
-        return recipes.filter { $0.tags.contains(tag) }
+        return recipes.filter { $0.tags.contains(tag.name) }
     }
 
     var body: some View {
@@ -78,8 +86,7 @@ struct TagManagementView: View {
                             }
 
                             Button {
-                                selectedTag = tag.name
-                                showingBatchTag = true
+                                selectedTag = TagSelection(name: tag.name)
                             } label: {
                                 Label("Add to...", systemImage: "plus")
                             }
@@ -90,27 +97,39 @@ struct TagManagementView: View {
             }
 
             // Suggested tags
-            Section("Suggested Tags") {
+            Section {
                 let suggestions = suggestedTags
                 if suggestions.isEmpty {
-                    Text("Add more recipes to get tag suggestions.")
+                    Text("You've used all the suggested tags.")
                         .foregroundStyle(.secondary)
                 } else {
-                    WrappingLayout(itemSpacing: 8, rowSpacing: 8) {
-                        ForEach(suggestions, id: \.self) { tag in
-                            Button {
-                                selectedTag = tag
-                                showingBatchTag = true
-                            } label: {
-                                Text(tag)
-                                    .font(.caption)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(suggestions, id: \.self) { tag in
+                                Button {
+                                    selectedTag = TagSelection(name: tag)
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "plus")
+                                            .font(.system(size: 10, weight: .semibold))
+                                        Text(tag)
+                                            .font(.caption)
+                                    }
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 6)
                                     .background(.tint.opacity(0.1), in: .capsule)
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
+                        .padding(.vertical, 4)
                     }
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
                 }
+            } header: {
+                Text("Suggested Tags")
+            } footer: {
+                Text("Tap a suggestion to choose which of your recipes it applies to.")
             }
         }
         .navigationTitle("Tags")
@@ -132,20 +151,19 @@ struct TagManagementView: View {
         } message: {
             Text("Remove the tag \"\(tagToDelete ?? "")\" from all recipes?")
         }
-        .sheet(isPresented: $showingBatchTag) {
-            if let tag = selectedTag {
-                BatchTagView(tagName: tag, recipes: recipes)
-            }
+        .sheet(item: $selectedTag) { selection in
+            BatchTagView(tagName: selection.name, recipes: recipes)
         }
+        .onAppear { Task { rebuildAllTags() } }
+        .onChange(of: recipes.count) { rebuildAllTags() }
     }
 
     private func createTag() {
         let tag = newTagName.trimmingCharacters(in: .whitespaces).lowercased()
         guard !tag.isEmpty else { return }
         // Tags live on recipes — open batch tagger so user can apply it immediately
-        selectedTag = tag
+        selectedTag = TagSelection(name: tag)
         newTagName = ""
-        showingBatchTag = true
     }
 
     private func removeTagFromAll(_ tag: String) {
@@ -242,7 +260,7 @@ struct BatchTagView: View {
                     .disabled(isTagged)
                 }
             }
-            .navigationTitle("Add #\(tagName)")
+            .navigationTitle("Tag as \"\(tagName)\"")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -274,25 +292,26 @@ struct RecipeTagEditorView: View {
     @Bindable var recipe: Recipe
     @Query(sort: \Recipe.dateModified, order: .reverse) private var allRecipes: [Recipe]
     @State private var newTag = ""
+    @State private var cachedExistingTags: [String] = []
     @FocusState private var fieldFocused: Bool
-
-    /// All unique tags across all recipes, excluding ones already on this recipe.
-    private var existingTags: [String] {
-        var seen = Set<String>()
-        var result: [String] = []
-        for r in allRecipes {
-            for tag in r.tags where !recipe.tags.contains(tag) && seen.insert(tag).inserted {
-                result.append(tag)
-            }
-        }
-        return result.sorted()
-    }
 
     /// Filtered suggestions — existing tags that match what's being typed.
     private var suggestions: [String] {
-        guard !newTag.isEmpty else { return existingTags }
+        guard !newTag.isEmpty else { return cachedExistingTags }
         let q = newTag.lowercased()
-        return existingTags.filter { $0.contains(q) }
+        return cachedExistingTags.filter { $0.contains(q) }
+    }
+
+    private func rebuildExistingTags() {
+        let recipeTags = Set(recipe.tags)
+        var seen = Set<String>()
+        var result: [String] = []
+        for r in allRecipes {
+            for tag in r.tags where !recipeTags.contains(tag) && seen.insert(tag).inserted {
+                result.append(tag)
+            }
+        }
+        cachedExistingTags = result.sorted()
     }
 
     var body: some View {
@@ -337,7 +356,7 @@ struct RecipeTagEditorView: View {
                     .submitLabel(.done)
                     .onSubmit { addTag() }
                 if !newTag.isEmpty {
-                    Button { addTag() } label: {
+                    Button(action: addTag) {
                         Image(systemName: "return")
                             .font(.caption)
                             .foregroundStyle(Brand.herbGreen)
@@ -351,8 +370,9 @@ struct RecipeTagEditorView: View {
             // Suggestions — existing tags from your library, or new one to create
             if !suggestions.isEmpty || !newTag.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    if !newTag.isEmpty && !existingTags.contains(newTag.lowercased().trimmingCharacters(in: .whitespaces)) {
-                        suggestionButton(label: "Create \"\(newTag.lowercased().trimmingCharacters(in: .whitespaces))\"", isNew: true) {
+                    let trimmed = newTag.lowercased().trimmingCharacters(in: .whitespaces)
+                    if !newTag.isEmpty && !cachedExistingTags.contains(trimmed) {
+                        suggestionButton(label: "Create \"\(trimmed)\"", isNew: true) {
                             addTag()
                         }
                     }
@@ -366,6 +386,9 @@ struct RecipeTagEditorView: View {
             }
         }
         .sensoryFeedback(.selection, trigger: recipe.tags.count)
+        .onAppear { Task { rebuildExistingTags() } }
+        .onChange(of: allRecipes.count) { rebuildExistingTags() }
+        .onChange(of: recipe.tags.count) { rebuildExistingTags() }
     }
 
     @ViewBuilder

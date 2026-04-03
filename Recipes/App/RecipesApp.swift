@@ -1,6 +1,9 @@
 import SwiftUI
 import SwiftData
 import UserNotifications
+import OSLog
+
+private let logger = Logger(subsystem: "com.recipes", category: "App")
 
 // MARK: - Notification Delegate
 // Presents timer notifications (with sound) even when the app is in the foreground.
@@ -52,7 +55,7 @@ struct RecipesApp: App {
         } catch {
             // Schema migration failed — wipe store and start fresh.
             // This is safe during development; production apps should migrate.
-            print("[RecipesApp] Schema migration failed, resetting store: \(error)")
+            logger.error("Schema migration failed, resetting store: \(error)")
             let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
             do {
                 let storeURL = URL.applicationSupportDirectory

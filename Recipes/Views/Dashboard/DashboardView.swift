@@ -31,20 +31,18 @@ struct DashboardView: View {
     @State private var showingShoppingList = false
     @State private var showingWantToTry = false
     @State private var selectedSeasonalIngredient: IngredientFilter? = nil
+    @State private var cachedRecentLogs: [CookingLogEntry] = []
+    @State private var cachedTodaysMeals: [PlannedMeal] = []
+    @State private var cachedQuickRecipes: [Recipe] = []
 
     // MARK: - Computed Data
 
     private var profile: UserProfile? { profiles.first }
 
-    private var todaysMeals: [PlannedMeal] {
-        let today = Calendar.current.startOfDay(for: Date())
-        return plannedMeals.filter {
-            Calendar.current.isDate($0.date, inSameDayAs: today)
-        }.sorted { $0.mealType.sortOrder < $1.mealType.sortOrder }
-    }
+    private var todaysMeals: [PlannedMeal] { cachedTodaysMeals }
 
     private var completedTodayCount: Int {
-        todaysMeals.filter(\.isCompleted).count
+        cachedTodaysMeals.filter(\.isCompleted).count
     }
 
     private var expiringItems: [PantryItem] {
@@ -55,11 +53,7 @@ struct DashboardView: View {
         pantryItems.filter(\.isExpired)
     }
 
-    private var recentCookingLogs: [CookingLogEntry] {
-        recipes
-            .flatMap(\.cookingLog)
-            .sorted { $0.date > $1.date }
-    }
+    private var recentCookingLogs: [CookingLogEntry] { cachedRecentLogs }
 
     private var thisWeekCookCount: Int {
         let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: .now) ?? .now
@@ -94,10 +88,7 @@ struct DashboardView: View {
         recipes.filter { $0.isFavorite || $0.isAutoFavorite }
     }
 
-    private var quickRecipes: [Recipe] {
-        recipes.filter { $0.estimatedTotalMinutes <= 30 }
-            .sorted { $0.cookCount > $1.cookCount }
-    }
+    private var quickRecipes: [Recipe] { cachedQuickRecipes }
 
     private var hemisphere: Hemisphere {
         profile?.hemisphere ?? .northern
@@ -138,7 +129,24 @@ struct DashboardView: View {
             .sheet(item: $selectedSeasonalIngredient) { filter in
                 SeasonalRecipesView(ingredient: filter.name, recipes: recipes)
             }
+            .onAppear { rebuildCaches() }
+            .onChange(of: recipes.count) { rebuildCaches() }
+            .onChange(of: plannedMeals.count) { rebuildTodaysMeals() }
         }
+    }
+
+    private func rebuildCaches() {
+        rebuildTodaysMeals()
+        cachedRecentLogs = recipes.flatMap(\.cookingLog).sorted { $0.date > $1.date }
+        cachedQuickRecipes = recipes.filter { $0.estimatedTotalMinutes <= 30 }
+            .sorted { $0.cookCount > $1.cookCount }
+    }
+
+    private func rebuildTodaysMeals() {
+        let today = Calendar.current.startOfDay(for: Date())
+        cachedTodaysMeals = plannedMeals.filter {
+            Calendar.current.isDate($0.date, inSameDayAs: today)
+        }.sorted { $0.mealType.sortOrder < $1.mealType.sortOrder }
     }
 
     // MARK: - iPhone Layout
@@ -743,7 +751,7 @@ struct QuickMealsView: View {
                         Button {
                             showingGenerator = true
                         } label: {
-                            Label("Generate a Quick Meal", systemImage: "wand.and.stars")
+                            Label("Generate a Quick Meal", systemImage: "sparkles")
                                 .font(.headline)
                                 .foregroundStyle(Brand.midnight)
                                 .frame(maxWidth: .infinity)
@@ -761,7 +769,7 @@ struct QuickMealsView: View {
                             Button {
                                 showingGenerator = true
                             } label: {
-                                Label("Generate a Quick Meal", systemImage: "wand.and.stars")
+                                Label("Generate a Quick Meal", systemImage: "sparkles")
                                     .foregroundStyle(Brand.warmTan)
                             }
                             .listRowBackground(Brand.warmTan.opacity(0.1))

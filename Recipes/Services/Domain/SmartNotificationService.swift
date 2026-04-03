@@ -1,6 +1,9 @@
 import Foundation
 import UserNotifications
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "com.recipes", category: "Notifications")
 
 // MARK: - Smart Notification Service
 
@@ -37,7 +40,7 @@ actor SmartNotificationService {
             let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
             return granted
         } catch {
-            print("[SmartNotificationService] Permission request failed: \(error)")
+            logger.error("Notification permission request failed: \(error)")
             return false
         }
     }

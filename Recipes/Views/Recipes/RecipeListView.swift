@@ -27,6 +27,10 @@ struct RecipeListView: View {
     @State private var showingFilters = false
     @State private var showingTagManagement = false
     @State private var cachedNoWasteMatches: [NoWasteMatchingEngine.MatchResult] = []
+    @State private var cachedSeasonalRecipes: [Recipe] = []
+    @State private var debouncedSearch = ""
+    @State private var searchDebounceTask: Task<Void, Never>?
+    @State private var noWasteTask: Task<Void, Never>?
     @State private var recipeToDelete: Recipe?
     @Environment(TimerDeepLink.self) private var timerDeepLink
     @State private var isShowingDeepLinkedRecipe = false
@@ -47,11 +51,11 @@ struct RecipeListView: View {
 
     private var filteredRecipes: [Recipe] {
         var result = recipes
-        if !searchText.isEmpty {
+        if !debouncedSearch.isEmpty {
             result = result.filter {
-                $0.title.localizedCaseInsensitiveContains(searchText) ||
-                $0.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) }) ||
-                $0.ingredients.contains(where: { $0.name.localizedCaseInsensitiveContains(searchText) })
+                $0.title.localizedCaseInsensitiveContains(debouncedSearch) ||
+                $0.tags.contains(where: { $0.localizedCaseInsensitiveContains(debouncedSearch) }) ||
+                $0.ingredients.contains(where: { $0.name.localizedCaseInsensitiveContains(debouncedSearch) })
             }
         }
         if let cuisine = selectedCuisine {
@@ -201,10 +205,22 @@ struct RecipeListView: View {
             }
             .task {
                 updateNoWasteMatches()
+                updateSeasonalCache()
                 hasLoadedProfile = true
             }
-            .onChange(of: recipes.count) { updateNoWasteMatches() }
+            .onChange(of: recipes.count) {
+                updateNoWasteMatches()
+                updateSeasonalCache()
+            }
             .onChange(of: pantryItems.count) { updateNoWasteMatches() }
+            .onChange(of: searchText) { _, newValue in
+                searchDebounceTask?.cancel()
+                searchDebounceTask = Task {
+                    try? await Task.sleep(for: .milliseconds(300))
+                    guard !Task.isCancelled else { return }
+                    debouncedSearch = newValue
+                }
+            }
         }
     }
 
@@ -214,11 +230,25 @@ struct RecipeListView: View {
     }
 
     private func updateNoWasteMatches() {
-        cachedNoWasteMatches = NoWasteMatchingEngine.matchRecipes(
-            recipes: recipes,
-            pantryItems: pantryItems,
-            maxMissing: 2
-        )
+        noWasteTask?.cancel()
+        noWasteTask = Task {
+            try? await Task.sleep(for: .milliseconds(500))
+            guard !Task.isCancelled else { return }
+            cachedNoWasteMatches = NoWasteMatchingEngine.matchRecipes(
+                recipes: recipes,
+                pantryItems: pantryItems,
+                maxMissing: 2
+            )
+        }
+    }
+
+    private func updateSeasonalCache() {
+        Task {
+            let seasonal = recipes.filter { recipe in
+                SeasonalAwarenessService.seasonalityScore(ingredientNames: recipe.ingredients.map(\.name)) > 0.5
+            }
+            cachedSeasonalRecipes = seasonal
+        }
     }
 
     // MARK: - Sections
@@ -276,10 +306,7 @@ struct RecipeListView: View {
 
     @ViewBuilder
     private var seasonalSection: some View {
-        let seasonal = filteredRecipes.filter { recipe in
-            let ingredientNames = recipe.ingredients.map(\.name)
-            return SeasonalAwarenessService.seasonalityScore(ingredientNames: ingredientNames) > 0.5
-        }
+        let seasonal = cachedSeasonalRecipes
 
         if !seasonal.isEmpty {
             Section {

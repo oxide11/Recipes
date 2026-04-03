@@ -61,25 +61,62 @@ final class AIServiceRouter {
     var preferredProvider: AIProvider = .hybrid
 
     /// Route a text generation request to the best available provider.
+    /// Pass `preferFast: true` for structured/mechanical tasks where speed matters more than quality.
     func generateText(
         prompt: String,
         taskType: AITaskType,
-        provider: AIProvider? = nil
+        provider: AIProvider? = nil,
+        preferFast: Bool = false
     ) async throws -> String {
         let target = provider ?? preferredProvider
+        let claudeModel = preferFast ? "claude-haiku-4-5-20251001" : "claude-sonnet-4-6"
 
         switch target {
         case .onDevice:
             return try await useOnDevice(prompt: prompt, taskType: taskType)
 
         case .claude:
-            return try await claudeService.generateRecipe(prompt: prompt)
+            return try await claudeService.sendMessage(
+                messages: [ClaudeMessage(role: .user, content: prompt)],
+                model: claudeModel
+            )
 
         case .openAI:
             return try await openAIService.generateRecipe(prompt: prompt)
 
         case .hybrid:
-            return try await hybridGeneration(prompt: prompt, taskType: taskType)
+            return try await hybridGeneration(prompt: prompt, taskType: taskType, preferFast: preferFast)
+        }
+    }
+
+    /// Streaming variant — yields text chunks as Claude generates them.
+    /// Falls back to a single-chunk stream for other providers.
+    func generateTextStreaming(
+        prompt: String,
+        taskType: AITaskType
+    ) -> AsyncThrowingStream<String, Error> {
+        if claudeService.isConfigured {
+            return claudeService.sendMessageStreaming(
+                messages: [ClaudeMessage(role: .user, content: prompt)],
+                systemPrompt: """
+                    You are a professional chef and recipe developer with deep knowledge of \
+                    global cuisines, dietary restrictions, and nutritional science. Generate \
+                    detailed, accurate recipes with precise measurements and clear step-by-step \
+                    instructions. Always respond with valid JSON.
+                    """
+            )
+        }
+        // Wrap non-streaming providers in a single-chunk stream
+        return AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    let result = try await generateText(prompt: prompt, taskType: taskType)
+                    continuation.yield(result)
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
         }
     }
 
@@ -129,8 +166,9 @@ final class AIServiceRouter {
     private static let largeContextTasks: Set<AITaskType> = [.recipeIngestion, .imageAnalysis]
 
     /// Try on-device first, fall back to cloud providers.
-    private func hybridGeneration(prompt: String, taskType: AITaskType) async throws -> String {
+    private func hybridGeneration(prompt: String, taskType: AITaskType, preferFast: Bool = false) async throws -> String {
         var errors: [Error] = []
+        let claudeModel = preferFast ? "claude-haiku-4-5-20251001" : "claude-sonnet-4-6"
 
         // Skip on-device for large-context tasks — the prompt is too big for the local model
         let useOnDeviceForTask = !Self.largeContextTasks.contains(taskType)
@@ -145,7 +183,10 @@ final class AIServiceRouter {
         // Try Claude
         if claudeService.isConfigured {
             do {
-                return try await claudeService.generateRecipe(prompt: prompt)
+                return try await claudeService.sendMessage(
+                    messages: [ClaudeMessage(role: .user, content: prompt)],
+                    model: claudeModel
+                )
             } catch {
                 errors.append(error)
             }

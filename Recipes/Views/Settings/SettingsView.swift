@@ -422,11 +422,13 @@ struct SettingsView: View {
     }
 
     private func saveAPIKeys() {
-        if !openAIKey.isEmpty {
-            _ = KeychainService.store(key: .openAIAPIKey, value: openAIKey)
+        let trimmedOpenAI = openAIKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedClaude = claudeKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedOpenAI.isEmpty {
+            _ = KeychainService.store(key: .openAIAPIKey, value: trimmedOpenAI)
         }
-        if !claudeKey.isEmpty {
-            _ = KeychainService.store(key: .claudeAPIKey, value: claudeKey)
+        if !trimmedClaude.isEmpty {
+            _ = KeychainService.store(key: .claudeAPIKey, value: trimmedClaude)
         }
         showingSavedAlert = true
     }

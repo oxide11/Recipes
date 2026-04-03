@@ -418,6 +418,9 @@ struct MealCard: View {
     let pantryItems: [PantryItem]
 
     @State private var addedToCart = false
+    @State private var cachedPantryCanonicals: Set<String> = []
+    @State private var cachedTrulyMissing: [Ingredient] = []
+    @State private var cachedSubstitutable: [(recipeName: String, substituteName: String)] = []
 
     private var titleRow: some View {
         HStack(spacing: 6) {
@@ -426,7 +429,7 @@ struct MealCard: View {
                 .foregroundStyle(Brand.cream)
 
             if meal.isAISuggested {
-                Image(systemName: "wand.and.stars")
+                Image(systemName: "sparkles")
                     .font(.system(size: 10))
                     .foregroundStyle(Brand.warmTan)
                     .help("AI-suggested recipe — saved to your library")
@@ -449,18 +452,34 @@ struct MealCard: View {
         }
     }
 
-    private var pantryNames: Set<String> {
-        Set(pantryItems.map { $0.name.lowercased() })
-    }
-
-    /// Ingredients this meal needs that aren't already covered by the pantry.
-    private var missingIngredients: [Ingredient] {
-        meal.recipe?.ingredients.filter { !pantryNames.contains($0.name.lowercased()) } ?? []
-    }
+    private var trulyMissingIngredients: [Ingredient] { cachedTrulyMissing }
+    private var substitutableIngredients: [(recipeName: String, substituteName: String)] { cachedSubstitutable }
 
     private var allInPantry: Bool {
         guard let recipe = meal.recipe, !recipe.ingredients.isEmpty else { return false }
-        return missingIngredients.isEmpty
+        return cachedTrulyMissing.isEmpty && cachedSubstitutable.isEmpty
+    }
+
+    private func rebuildIngredientCaches() {
+        cachedPantryCanonicals = Set(pantryItems.map { IngredientNormalizer.canonicalize($0.name) })
+        guard let recipe = meal.recipe else {
+            cachedTrulyMissing = []
+            cachedSubstitutable = []
+            return
+        }
+        var missing: [Ingredient] = []
+        var substitutable: [(recipeName: String, substituteName: String)] = []
+        for ingredient in recipe.ingredients where !ingredient.isOptional {
+            let canonical = IngredientNormalizer.canonicalize(ingredient.name)
+            if cachedPantryCanonicals.contains(canonical) { continue }
+            if let sub = IngredientNormalizer.findSubstitute(for: canonical, inPantryCanonicals: cachedPantryCanonicals) {
+                substitutable.append((recipeName: ingredient.name, substituteName: sub))
+            } else {
+                missing.append(ingredient)
+            }
+        }
+        cachedTrulyMissing = missing
+        cachedSubstitutable = substitutable
     }
 
     var body: some View {
@@ -489,28 +508,47 @@ struct MealCard: View {
                     .foregroundStyle(Brand.herbGreen)
                 } else if addedToCart {
                     // User has added this meal's ingredients in this session
-                    HStack(spacing: 4) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 10))
-                        Text("Added for this meal")
-                            .font(.miseMeta)
-                    }
-                    .foregroundStyle(Brand.herbGreen)
-                } else {
-                    // Needs shopping — always show so quantities accumulate correctly
-                    Button {
-                        addMissingToShopping()
-                    } label: {
-                        HStack(spacing: 5) {
-                            Image(systemName: "cart.badge.plus")
-                                .font(.system(size: 11))
-                            Text("Add \(missingIngredients.count) ingredient\(missingIngredients.count == 1 ? "" : "s") to shopping list")
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 10))
+                            Text("Added for this meal")
                                 .font(.miseMeta)
                         }
-                        .foregroundStyle(Brand.warmTan)
+                        .foregroundStyle(Brand.herbGreen)
+                        if !substitutableIngredients.isEmpty {
+                            Text(substitutableIngredients.map { "~\($0.substituteName) for \($0.recipeName)" }.joined(separator: ", "))
+                                .font(.system(size: 10))
+                                .foregroundStyle(Brand.warmTan)
+                                .lineLimit(2)
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .sensoryFeedback(.success, trigger: addedToCart)
+                } else {
+                    // Needs shopping — show what to buy and what can be substituted
+                    VStack(alignment: .leading, spacing: 2) {
+                        Button {
+                            addMissingToShopping()
+                        } label: {
+                            HStack(spacing: 5) {
+                                Image(systemName: trulyMissingIngredients.isEmpty ? "checkmark.circle" : "cart.badge.plus")
+                                    .font(.system(size: 11))
+                                Text(trulyMissingIngredients.isEmpty
+                                     ? "Ready to cook (substitutions available)"
+                                     : "Add \(trulyMissingIngredients.count) ingredient\(trulyMissingIngredients.count == 1 ? "" : "s") to shopping list")
+                                    .font(.miseMeta)
+                            }
+                            .foregroundStyle(Brand.warmTan)
+                        }
+                        .buttonStyle(.plain)
+                        .sensoryFeedback(.success, trigger: addedToCart)
+
+                        if !substitutableIngredients.isEmpty {
+                            Text(substitutableIngredients.map { "~\($0.substituteName) for \($0.recipeName)" }.joined(separator: ", "))
+                                .font(.system(size: 10))
+                                .foregroundStyle(Brand.warmTan.opacity(0.8))
+                                .lineLimit(2)
+                        }
+                    }
                 }
             }
         }
@@ -523,11 +561,11 @@ struct MealCard: View {
                 Label("Remove from Plan", systemImage: "trash")
             }
         }
+        .onAppear { Task { rebuildIngredientCaches() } }
+        .onChange(of: pantryItems.count) { rebuildIngredientCaches() }
     }
 
     private func addMissingToShopping() {
-        guard !missingIngredients.isEmpty else { return }
-
         let list: GroceryList
         if let existing = groceryLists.first {
             list = existing
@@ -536,7 +574,13 @@ struct MealCard: View {
             modelContext.insert(list)
         }
 
-        for ingredient in missingIngredients {
+        // If nothing to buy (all covered by pantry + substitutions), just mark done
+        guard !trulyMissingIngredients.isEmpty else {
+            withAnimation { addedToCart = true }
+            return
+        }
+
+        for ingredient in trulyMissingIngredients {
             let name = ingredient.name.lowercased()
             if let existing = list.items.first(where: { $0.name.lowercased() == name }) {
                 // Item already on the list — accumulate quantity when units match
@@ -838,8 +882,9 @@ struct GenerateMealPlanSheet: View {
         let totalSlots = dates.count * selectedMealTypes.count
         let novelCount = filteredRecipes.count < totalSlots ? max(totalSlots - filteredRecipes.count, 2) : 2
 
-        let dietaryNote = (profiles.first?.dietaryRestrictions ?? []).isEmpty ? "" :
-            " Dietary needs: \((profiles.first!.dietaryRestrictions).map(\.displayName).joined(separator: ", "))."
+        let dietaryRestrictions = profiles.first?.dietaryRestrictions ?? []
+        let dietaryNote = dietaryRestrictions.isEmpty ? "" :
+            " Dietary needs: \(dietaryRestrictions.map(\.displayName).joined(separator: ", "))."
 
         return """
         You are a meal planning assistant. Assign meals to the following dates.

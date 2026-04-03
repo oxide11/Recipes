@@ -18,6 +18,7 @@ struct AIRecipeEditView: View {
     @State private var result: RecipeIngestionResult?
     @State private var errorMessage: String?
     @State private var service: RecipeIngestionService?
+    @State private var recognizer = SpeechRecognizer()
     @FocusState private var fieldFocused: Bool
 
     // MARK: - Suggestions
@@ -130,9 +131,39 @@ struct AIRecipeEditView: View {
             .lineLimit(2...5)
             .focused($fieldFocused)
             .onChange(of: instruction) {
-                // Clear previous result when user edits the prompt
                 if result != nil { result = nil; errorMessage = nil }
             }
+
+            if recognizer.isListening {
+                HStack(spacing: 10) {
+                    Image(systemName: "mic.fill")
+                        .foregroundStyle(Brand.herbGreen)
+                        .symbolEffect(.pulse)
+                    Text(recognizer.transcript.isEmpty ? "Listening…" : recognizer.transcript)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Button("Done") { recognizer.stop() }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                }
+            } else {
+                Button {
+                    fieldFocused = false
+                    Task { await recognizer.start() }
+                } label: {
+                    Label("Speak your edit", systemImage: "mic")
+                        .font(.subheadline)
+                        .foregroundStyle(Brand.herbGreen)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .onChange(of: recognizer.isListening) { _, isListening in
+            guard !isListening else { return }
+            let text = recognizer.transcript.trimmingCharacters(in: .whitespaces)
+            guard !text.isEmpty else { return }
+            instruction = text
         }
     }
 
@@ -147,7 +178,7 @@ struct AIRecipeEditView: View {
                         ProgressView().padding(.trailing, 8)
                         Text("Updating recipe…")
                     } else {
-                        Image(systemName: "wand.and.stars")
+                        Image(systemName: "sparkles")
                         Text("Apply with AI")
                             .fontWeight(.semibold)
                     }

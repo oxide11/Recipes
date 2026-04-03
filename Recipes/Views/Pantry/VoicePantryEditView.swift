@@ -175,6 +175,13 @@ struct VoicePantryEditView: View {
                                     }
                                 }
                                 Spacer()
+                                Button {
+                                    parsedActions.removeAll { $0.id == action.id }
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(.secondary)
+                                }
+                                .buttonStyle(.plain)
                             }
                             .padding(.vertical, 10)
                             .padding(.horizontal, 16)

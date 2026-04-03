@@ -1,6 +1,9 @@
 import Foundation
 import ActivityKit
 import Observation
+import OSLog
+
+private let logger = Logger(subsystem: "com.recipes", category: "LiveActivity")
 
 // MARK: - Timer Deep Link Router
 
@@ -19,7 +22,8 @@ final class TimerDeepLink {
         guard let uuidString = parts.first,
               let recipeID = UUID(uuidString: uuidString) else { return }
         pendingRecipeID = recipeID
-        pendingStep = parts.dropFirst().first.flatMap(Int.init) ?? 1
+        let step = parts.dropFirst().first.flatMap(Int.init) ?? 1
+        pendingStep = max(1, min(step, 200))
     }
 
     func clear() {
@@ -89,7 +93,7 @@ final class CookingTimerLiveActivityManager {
             )
             isActive = true
         } catch {
-            print("Failed to start Live Activity: \(error)")
+            logger.error("Failed to start Live Activity: \(error)")
         }
     }
 

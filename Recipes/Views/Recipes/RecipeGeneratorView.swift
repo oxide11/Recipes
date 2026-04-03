@@ -37,9 +37,11 @@ struct RecipeGeneratorView: View {
     @State private var dietaryRestrictions: Set<DietaryRestriction> = []
     @State private var hasLoadedProfile = false
     @State private var isGenerating = false
-    @State private var isSaving = false
-    @State private var generatedText: String?
+    @State private var generatedResult: RecipeIngestionResult?
+    @State private var showingResult = false
     @State private var errorMessage: String?
+    @State private var showingDietaryRestrictions = false
+    @State private var descriptionRecognizer = SpeechRecognizer()
 
     // Photo mode
     @State private var selectedPhotoItem: PhotosPickerItem?
@@ -63,7 +65,7 @@ struct RecipeGeneratorView: View {
                     }
                     .pickerStyle(.segmented)
                     .onChange(of: mode) {
-                        generatedText = nil
+                        generatedResult = nil
                         errorMessage = nil
                     }
                 }
@@ -107,15 +109,27 @@ struct RecipeGeneratorView: View {
                     }
                 }
 
-                Section("Dietary Restrictions") {
-                    ForEach(sortedDietaryRestrictions, id: \.self) { restriction in
-                        Toggle(restriction.displayName, isOn: Binding(
-                            get: { dietaryRestrictions.contains(restriction) },
-                            set: { isOn in
-                                if isOn { dietaryRestrictions.insert(restriction) }
-                                else { dietaryRestrictions.remove(restriction) }
+                Section {
+                    DisclosureGroup(isExpanded: $showingDietaryRestrictions) {
+                        ForEach(sortedDietaryRestrictions, id: \.self) { restriction in
+                            Toggle(restriction.displayName, isOn: Binding(
+                                get: { dietaryRestrictions.contains(restriction) },
+                                set: { isOn in
+                                    if isOn { dietaryRestrictions.insert(restriction) }
+                                    else { dietaryRestrictions.remove(restriction) }
+                                }
+                            ))
+                        }
+                    } label: {
+                        HStack {
+                            Text("Dietary Restrictions")
+                            Spacer()
+                            if !dietaryRestrictions.isEmpty {
+                                Text("\(dietaryRestrictions.count) selected")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
-                        ))
+                        }
                     }
                 }
 
@@ -145,20 +159,6 @@ struct RecipeGeneratorView: View {
                             .foregroundStyle(.red)
                     }
                 }
-
-                if let result = generatedText {
-                    Section("Generated Recipe") {
-                        Text(result)
-                            .font(.body)
-                        Button {
-                            Task { await saveGenerated(result) }
-                        } label: {
-                            Label("Save Recipe", systemImage: "square.and.arrow.down")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .disabled(isSaving)
-                    }
-                }
             }
             .navigationTitle("Recipe Generator")
             .navigationBarTitleDisplayMode(.inline)
@@ -166,9 +166,12 @@ struct RecipeGeneratorView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }
                 }
-                if isSaving {
-                    ToolbarItem(placement: .primaryAction) {
-                        ProgressView()
+            }
+            .sheet(isPresented: $showingResult) {
+                if let result = generatedResult {
+                    GeneratedRecipePreviewSheet(result: result) {
+                        showingResult = false
+                        dismiss()
                     }
                 }
             }
@@ -187,6 +190,12 @@ struct RecipeGeneratorView: View {
             }
             .onChange(of: selectedPhotoItem) {
                 Task { await loadSelectedPhoto() }
+            }
+            .onChange(of: descriptionRecognizer.isListening) { _, isListening in
+                guard !isListening else { return }
+                let text = descriptionRecognizer.transcript.trimmingCharacters(in: .whitespaces)
+                guard !text.isEmpty else { return }
+                descriptionInput = descriptionInput.isEmpty ? text : descriptionInput + " " + text
             }
         }
     }
@@ -240,6 +249,30 @@ struct RecipeGeneratorView: View {
         Section("What are you looking for?") {
             TextField("e.g., a cozy Italian dinner, quick weeknight pasta, something with chicken...", text: $descriptionInput, axis: .vertical)
                 .lineLimit(3)
+
+            if descriptionRecognizer.isListening {
+                HStack(spacing: 10) {
+                    Image(systemName: "mic.fill")
+                        .foregroundStyle(Brand.herbGreen)
+                        .symbolEffect(.pulse)
+                    Text(descriptionRecognizer.transcript.isEmpty ? "Listening…" : descriptionRecognizer.transcript)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Button("Done") { descriptionRecognizer.stop() }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                }
+            } else {
+                Button {
+                    Task { await descriptionRecognizer.start() }
+                } label: {
+                    Label("Speak your request", systemImage: "mic")
+                        .font(.subheadline)
+                        .foregroundStyle(Brand.herbGreen)
+                }
+                .buttonStyle(.plain)
+            }
         }
     }
 
@@ -265,17 +298,22 @@ struct RecipeGeneratorView: View {
     private func generate() async {
         isGenerating = true
         errorMessage = nil
-        generatedText = nil
+        generatedResult = nil
         defer { isGenerating = false }
 
         do {
+            let text: String
             switch mode {
-            case .photo:
-                generatedText = try await generateFromPhoto()
-            case .pantry:
-                generatedText = try await generateFromPantry()
-            case .describe:
-                generatedText = try await generateFromDescription()
+            case .photo:   text = try await generateFromPhoto()
+            case .pantry:  text = try await generateFromPantry()
+            case .describe: text = try await generateFromDescription()
+            }
+            let service = RecipeIngestionService(aiRouter: aiRouter)
+            if let result = try? await service.ingestFromText(text) {
+                generatedResult = result
+                showingResult = true
+            } else {
+                errorMessage = "Couldn't parse the recipe. Try generating again."
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -326,7 +364,7 @@ struct RecipeGeneratorView: View {
     }
 
     private var ingredientDeduplicationInstruction: String {
-        " Important: if an ingredient is used in different amounts at different stages, list it ONCE in the ingredients list with the total amount needed. Mention the split in the directions (e.g. 'divide the oil: use 2 tbsp now and reserve 1 tbsp for finishing')."
+        " Important: if an ingredient is used in different amounts at different stages, list it ONCE in the ingredients list with the total amount needed. Mention the split in the directions (e.g. 'divide the oil: use 2 tbsp now and reserve 1 tbsp for finishing'). Treat these as the same ingredient and use only one name: olive oil / extra-virgin olive oil / EVOO; salt / kosher salt / sea salt / table salt; butter / unsalted butter; onion / onions; flour / all-purpose flour."
     }
 
     private func loadSelectedPhoto() async {
@@ -337,16 +375,6 @@ struct RecipeGeneratorView: View {
         }
     }
 
-    func saveGenerated(_ text: String) async {
-        isSaving = true
-        defer { isSaving = false }
-        let service = RecipeIngestionService(aiRouter: aiRouter)
-        if let result = try? await service.ingestFromText(text) {
-            let recipe = await service.convertToRecipe(result)
-            modelContext.insert(recipe)
-            dismiss()
-        }
-    }
 }
 
 // MARK: - Quick Generate View (Dashboard shortcut)
@@ -355,6 +383,8 @@ struct RecipeGeneratorView: View {
 /// Pass `quickMealMode: true` to bias generation toward meals ready in ≤ 30 minutes.
 struct QuickGenerateView: View {
     var quickMealMode: Bool = false
+    /// When set, auto-generates a recipe for this specific cuisine (used by "Expand Your Horizons").
+    var cuisineHint: String? = nil
 
     @Environment(AIServiceRouter.self) private var aiRouter
     @Environment(\.modelContext) private var modelContext
@@ -367,18 +397,13 @@ struct QuickGenerateView: View {
     @State private var isSaving = false
     @State private var generatedResult: RecipeIngestionResult?
     @State private var errorMessage: String?
+    @State private var streamingText = ""
 
     var body: some View {
         NavigationStack {
             Group {
                 if isGenerating {
-                    VStack(spacing: 16) {
-                        ProgressView()
-                            .scaleEffect(1.5)
-                        Text(quickMealMode ? "Finding something quick for you…" : "Generating a recipe for you…")
-                            .foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    StreamingRecipePreview(json: streamingText, cuisineHint: cuisineHint, quickMealMode: quickMealMode)
                 } else if let error = errorMessage {
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle")
@@ -392,10 +417,10 @@ struct QuickGenerateView: View {
                     .padding()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if let result = generatedResult {
-                    recipeCard(result)
+                    RecipeIngestionResultCard(result: result)
                 }
             }
-            .navigationTitle(quickMealMode ? "Quick Meal" : "Quick Generate")
+            .navigationTitle(cuisineHint.map { "\($0.capitalized) Recipe" } ?? (quickMealMode ? "Quick Meal" : "Quick Generate"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -415,91 +440,6 @@ struct QuickGenerateView: View {
         .task { await generate() }
     }
 
-    // MARK: - Formatted Recipe Card
-
-    @ViewBuilder
-    private func recipeCard(_ result: RecipeIngestionResult) -> some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-
-                // Title + metadata
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(result.title)
-                        .font(.title2.weight(.bold))
-
-                    HStack(spacing: 14) {
-                        if let prep = result.prepTimeMinutes {
-                            Label("\(prep) min prep", systemImage: "scissors")
-                        }
-                        if let cook = result.cookTimeMinutes {
-                            Label("\(cook) min cook", systemImage: "flame")
-                        }
-                        if let servings = result.servings {
-                            Label("\(servings) servings", systemImage: "person.2")
-                        }
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                    if let cuisine = result.cuisine {
-                        Text(cuisine.capitalized)
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(Color.secondary.opacity(0.12), in: Capsule())
-                    }
-                }
-
-                Divider()
-
-                // Ingredients
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Ingredients")
-                        .font(.headline)
-
-                    ForEach(result.ingredients, id: \.name) { ing in
-                        HStack(alignment: .top, spacing: 10) {
-                            Circle()
-                                .fill(Color.secondary.opacity(0.4))
-                                .frame(width: 5, height: 5)
-                                .padding(.top, 8)
-                            Group {
-                                if let prep = ing.preparation, !prep.isEmpty {
-                                    Text("\(ing.amount) **\(ing.name)**, \(prep)")
-                                } else {
-                                    Text("\(ing.amount) **\(ing.name)**")
-                                }
-                            }
-                            .font(.body)
-                        }
-                    }
-                }
-
-                Divider()
-
-                // Directions
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Directions")
-                        .font(.headline)
-
-                    ForEach(Array(result.directions.enumerated()), id: \.offset) { i, step in
-                        HStack(alignment: .top, spacing: 12) {
-                            Text("\(i + 1)")
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(.white)
-                                .frame(width: 22, height: 22)
-                                .background(Color.secondary.opacity(0.5), in: Circle())
-                                .padding(.top, 1)
-                            Text(step)
-                                .font(.body)
-                        }
-                    }
-                }
-            }
-            .padding()
-        }
-    }
 
     // MARK: - Generation
 
@@ -513,7 +453,16 @@ struct QuickGenerateView: View {
         let profile = profiles.first
 
         var description: String
-        if quickMealMode {
+        if let cuisine = cuisineHint {
+            // Cuisine-specific auto-generate: pick a well-known dish from that cuisine
+            let staples = pantryItems.filter(\.isStaple).map(\.name)
+            let onHand  = pantryItems.filter { !$0.isStaple }.prefix(15).map(\.name)
+            var parts: [String] = ["Surprise me with a classic, delicious \(cuisine) recipe — something iconic and worth trying for the first time."]
+            if !onHand.isEmpty  { parts.append("I currently have: \(onHand.joined(separator: ", ")).") }
+            if !staples.isEmpty { parts.append("I almost always keep: \(staples.joined(separator: ", ")).") }
+            parts.append("Use pantry items where they fit, but feel free to call for other ingredients — shopping is fine.")
+            description = parts.joined(separator: " ")
+        } else if quickMealMode {
             // Quick meal: use pantry + staples — no shopping trip needed
             let staples = pantryItems.filter(\.isStaple).map(\.name)
             let onHand  = pantryItems.filter { !$0.isStaple }.prefix(20).map(\.name)
@@ -538,16 +487,18 @@ struct QuickGenerateView: View {
         if let restrictions = profile?.dietaryRestrictions, !restrictions.isEmpty {
             description += " Dietary needs: \(restrictions.map(\.displayName).joined(separator: ", "))."
         }
-        if let cuisines = profile?.preferredCuisines, !cuisines.isEmpty {
+        if cuisineHint == nil, let cuisines = profile?.preferredCuisines, !cuisines.isEmpty {
             description += " Preferred cuisines: \(cuisines.map(\.rawValue).joined(separator: ", "))."
         }
         let skill = profile?.skillLevel ?? .intermediate
         description += recipeSkillConstraint(for: skill)
-        description += " If an ingredient is used in different amounts at different stages, list it ONCE with the total and split amounts in the directions."
+        description += " If an ingredient is used in different amounts at different stages, list it ONCE with the total and split amounts in the directions. Treat these as the same ingredient: olive oil / extra-virgin olive oil; salt / kosher salt / sea salt; butter / unsalted butter; onion / onions; flour / all-purpose flour."
 
+        streamingText = ""
         do {
-            // ingestFromText structures the AI output as a RecipeIngestionResult in one call
-            generatedResult = try await service.ingestFromText(description)
+            generatedResult = try await service.ingestFromTextStreaming(description) { chunk in
+                streamingText += chunk
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -560,6 +511,224 @@ struct QuickGenerateView: View {
         let recipe = await service.convertToRecipe(result)
         modelContext.insert(recipe)
         dismiss()
+    }
+}
+
+// MARK: - Generated Recipe Preview Sheet
+
+/// Full-screen preview shown after generation. Parses the result into a
+/// structured card so the user can review before committing to save.
+struct GeneratedRecipePreviewSheet: View {
+    let result: RecipeIngestionResult
+    /// Called after a successful save so the parent can dismiss itself.
+    var onSave: () -> Void
+
+    @Environment(\.modelContext) private var modelContext
+    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var isSaving = false
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                RecipeIngestionResultCard(result: result)
+                    .padding()
+            }
+            .navigationTitle("Recipe Preview")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Discard") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    if isSaving {
+                        ProgressView()
+                    } else {
+                        Button("Save") { Task { await save() } }
+                            .fontWeight(.semibold)
+                    }
+                }
+            }
+        }
+    }
+
+    private func save() async {
+        isSaving = true
+        let service = RecipeIngestionService(aiRouter: aiRouter)
+        let recipe = await service.convertToRecipe(result)
+        modelContext.insert(recipe)
+        onSave()
+    }
+}
+
+// MARK: - Recipe Ingestion Result Card
+
+/// Shared formatted preview card used by both GeneratedRecipePreviewSheet
+// MARK: - Streaming Recipe Preview
+
+/// Shown while AI generation is in progress. Parses readable fields from the
+/// partial JSON stream so the user sees the recipe taking shape, not raw code.
+struct StreamingRecipePreview: View {
+    let json: String
+    var cuisineHint: String? = nil
+    var quickMealMode: Bool = false
+
+    private var title: String? {
+        guard let keyEnd = json.range(of: "\"title\"")?.upperBound else { return nil }
+        let after = json[keyEnd...].drop(while: { ": \"".contains($0) })
+        guard let quoteEnd = after.firstIndex(of: "\"") else { return nil }
+        let t = String(after[..<quoteEnd])
+        return t.isEmpty ? nil : t
+    }
+    private var hasIngredients: Bool { json.contains("\"ingredients\"") }
+    private var hasDirections:   Bool { json.contains("\"directions\"") }
+
+    var body: some View {
+        VStack(spacing: 32) {
+            Spacer()
+
+            // Sparkle icon
+            Image(systemName: "sparkles")
+                .font(.system(size: 40))
+                .foregroundStyle(Brand.herbGreen)
+                .symbolEffect(.pulse)
+
+            // Title fades in as soon as it's extracted
+            Group {
+                if let title {
+                    Text(title)
+                        .font(.title2.weight(.bold))
+                        .multilineTextAlignment(.center)
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                } else {
+                    Text(cuisineHint.map { "Finding a great \($0) recipe…" }
+                         ?? (quickMealMode ? "Finding something quick…" : "Generating a recipe…"))
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .animation(.easeOut(duration: 0.3), value: title)
+            .padding(.horizontal, 32)
+
+            // Progress steps
+            VStack(alignment: .leading, spacing: 12) {
+                streamingStep("Recipe name",  done: title != nil)
+                streamingStep("Ingredients",  done: hasIngredients)
+                streamingStep("Directions",   done: hasDirections)
+            }
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private func streamingStep(_ label: String, done: Bool) -> some View {
+        HStack(spacing: 10) {
+            if done {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(Brand.herbGreen)
+                    .transition(.scale.combined(with: .opacity))
+            } else {
+                ProgressView()
+                    .scaleEffect(0.75)
+                    .frame(width: 18, height: 18)
+            }
+            Text(label)
+                .foregroundStyle(done ? .primary : .secondary)
+                .font(.subheadline)
+        }
+        .animation(.easeOut(duration: 0.25), value: done)
+    }
+}
+
+/// Shared formatted recipe card used by GeneratedRecipePreviewSheet
+/// and QuickGenerateView.
+struct RecipeIngestionResultCard: View {
+    let result: RecipeIngestionResult
+
+    var body: some View {
+        ScrollView {
+        VStack(alignment: .leading, spacing: 20) {
+
+            // Title + metadata
+            VStack(alignment: .leading, spacing: 8) {
+                Text(result.title)
+                    .font(.title2.weight(.bold))
+
+                HStack(spacing: 14) {
+                    if let prep = result.prepTimeMinutes {
+                        Label("\(prep) min prep", systemImage: "scissors")
+                    }
+                    if let cook = result.cookTimeMinutes {
+                        Label("\(cook) min cook", systemImage: "flame")
+                    }
+                    if let servings = result.servings {
+                        Label("\(servings) servings", systemImage: "person.2")
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+                if let cuisine = result.cuisine {
+                    Text(cuisine.capitalized)
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.secondary.opacity(0.12), in: Capsule())
+                }
+            }
+
+            Divider()
+
+            // Ingredients
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Ingredients")
+                    .font(.headline)
+
+                ForEach(result.ingredients, id: \.name) { ing in
+                    HStack(alignment: .top, spacing: 10) {
+                        Circle()
+                            .fill(Color.secondary.opacity(0.4))
+                            .frame(width: 5, height: 5)
+                            .padding(.top, 8)
+                        Group {
+                            if let prep = ing.preparation, !prep.isEmpty {
+                                Text("\(ing.amount) **\(ing.name)**, \(prep)")
+                            } else {
+                                Text("\(ing.amount) **\(ing.name)**")
+                            }
+                        }
+                        .font(.body)
+                    }
+                }
+            }
+
+            Divider()
+
+            // Directions
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Directions")
+                    .font(.headline)
+
+                ForEach(Array(result.directions.enumerated()), id: \.offset) { i, step in
+                    HStack(alignment: .top, spacing: 12) {
+                        Text("\(i + 1)")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 22, height: 22)
+                            .background(Brand.herbGreen.opacity(0.7), in: Circle())
+                            .padding(.top, 1)
+                        Text(step)
+                            .font(.body)
+                    }
+                }
+            }
+        }
+        .padding()
+        } // ScrollView
     }
 }
 

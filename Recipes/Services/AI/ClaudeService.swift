@@ -136,6 +136,67 @@ final class ClaudeService {
         )
     }
 
+    // MARK: - Streaming
+
+    /// Streams the response token-by-token via Claude's SSE endpoint.
+    /// Yields text chunks as they arrive; the caller accumulates them.
+    func sendMessageStreaming(
+        messages: [ClaudeMessage],
+        model: String = "claude-sonnet-4-6",
+        systemPrompt: String? = nil,
+        maxTokens: Int = 4096
+    ) -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { continuation in
+            Task {
+                guard let apiKey = self.apiKey else {
+                    continuation.finish(throwing: AIServiceError.apiKeyMissing(provider: "Claude"))
+                    return
+                }
+
+                var body: [String: Any] = [
+                    "model": model,
+                    "max_tokens": maxTokens,
+                    "stream": true,
+                    "messages": messages.map { $0.toDictionary() }
+                ]
+                if let systemPrompt { body["system"] = systemPrompt }
+
+                guard let bodyData = try? JSONSerialization.data(withJSONObject: body) else {
+                    continuation.finish(throwing: AIServiceError.invalidResponse)
+                    return
+                }
+
+                var request = URLRequest(url: self.baseURL.appendingPathComponent("messages"))
+                request.httpMethod = "POST"
+                request.httpBody = bodyData
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
+                request.setValue(self.apiVersion, forHTTPHeaderField: "anthropic-version")
+
+                do {
+                    let (bytes, response) = try await URLSession.shared.bytes(for: request)
+                    if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
+                        continuation.finish(throwing: AIServiceError.invalidResponse)
+                        return
+                    }
+                    for try await line in bytes.lines {
+                        guard line.hasPrefix("data: ") else { continue }
+                        let json = String(line.dropFirst(6))
+                        guard json != "[DONE]",
+                              let data = json.data(using: .utf8),
+                              let event = try? JSONDecoder().decode(ClaudeStreamEvent.self, from: data),
+                              event.type == "content_block_delta",
+                              let text = event.delta?.text else { continue }
+                        continuation.yield(text)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
+    }
+
     // MARK: - Networking
 
     private func performRequest(
@@ -169,6 +230,18 @@ struct ClaudeMessage: Sendable {
 
     func toDictionary() -> [String: Any] {
         ["role": role.rawValue, "content": content]
+    }
+}
+
+// MARK: - Claude Stream Event
+
+private struct ClaudeStreamEvent: Decodable {
+    let type: String
+    let delta: Delta?
+
+    struct Delta: Decodable {
+        let type: String?
+        let text: String?
     }
 }
 

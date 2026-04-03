@@ -94,7 +94,7 @@ struct RecipeDetailView: View {
                     Button {
                         showingAIEdit = true
                     } label: {
-                        Image(systemName: "wand.and.stars")
+                        Image(systemName: "sparkles")
                             .foregroundStyle(Brand.warmTan)
                     }
                     .accessibilityLabel("AI Edit")
@@ -866,10 +866,8 @@ struct RecipeDetailView: View {
             recipe.ingredients.append(new)
         }
 
-        // Update dietary restrictions if AI detected any
-        if !updated.dietaryRestrictions.isEmpty {
-            recipe.dietaryRestrictions = updated.dietaryRestrictions
-        }
+        // Always apply dietary restrictions — AI may have cleared labels (e.g. removed vegetarian after adding meat)
+        recipe.dietaryRestrictions = updated.dietaryRestrictions
 
         try? modelContext.save()
     }

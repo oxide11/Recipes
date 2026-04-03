@@ -13,6 +13,7 @@ struct ShoppingListView: View {
     @State private var showingAddItem = false
     @State private var showingGuidedShopping = false
     @State private var showingRemindersSetup = false
+    @State private var lastSyncDate: Date = .distantPast
     @AppStorage("shoppingHideCompleted") private var hideCompleted = true
     @AppStorage("hasPromptedRemindersSetup") private var hasPromptedSetup = false
 
@@ -50,11 +51,14 @@ struct ShoppingListView: View {
         }
         .onAppear {
             ensureListExists()
-            triggerSync()
             // Only auto-prompt once — after that the user reaches it via the toolbar icon
             if !remindersSync.isLinked && !hasPromptedSetup {
                 hasPromptedSetup = true
                 showingRemindersSetup = true
+            }
+            // Sync on first appear only — foreground notification handles subsequent syncs
+            if lastSyncDate == .distantPast {
+                triggerSync()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
@@ -64,6 +68,9 @@ struct ShoppingListView: View {
 
     private func triggerSync() {
         guard let list else { return }
+        // Throttle: don't sync more than once every 30 seconds
+        guard Date().timeIntervalSince(lastSyncDate) > 30 else { return }
+        lastSyncDate = Date()
         Task { await remindersSync.sync(groceryList: list, context: modelContext) }
     }
 
@@ -98,10 +105,11 @@ struct ShoppingListView: View {
 
     @ViewBuilder
     private func listContent(_ list: GroceryList) -> some View {
-        let allItems    = list.items
-        let purchased   = allItems.filter(\.isPurchased)
-        let remaining   = allItems.filter { !$0.isPurchased }
+        let allItems     = list.items
+        let purchased    = allItems.filter(\.isPurchased)
+        let remaining    = allItems.filter { !$0.isPurchased }
         let visibleItems = hideCompleted ? remaining : allItems
+        let grouped      = Dictionary(grouping: visibleItems, by: \.storeSection)
 
         List {
             // Progress header
@@ -147,7 +155,7 @@ struct ShoppingListView: View {
 
             // Items grouped by store section
             ForEach(StoreSection.allCases, id: \.self) { section in
-                let sectionItems = visibleItems.filter { $0.storeSection == section }
+                let sectionItems = grouped[section] ?? []
                 if !sectionItems.isEmpty {
                     Section {
                         ForEach(sectionItems) { item in
@@ -155,6 +163,7 @@ struct ShoppingListView: View {
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
                                         let rid = item.remindersIdentifier
+                                        list.items.removeAll { $0.persistentModelID == item.persistentModelID }
                                         modelContext.delete(item)
                                         Task { remindersSync.completeReminderByID(rid) }
                                     } label: {
@@ -180,7 +189,9 @@ struct ShoppingListView: View {
                 Section {
                     Button(role: .destructive) {
                         let rids = purchased.map(\.remindersIdentifier)
+                        let ids = Set(purchased.map(\.persistentModelID))
                         withAnimation {
+                            list.items.removeAll { ids.contains($0.persistentModelID) }
                             purchased.forEach { modelContext.delete($0) }
                         }
                         Task { rids.forEach { remindersSync.completeReminderByID($0) } }

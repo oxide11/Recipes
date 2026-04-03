@@ -43,7 +43,7 @@ final class RecipeIngestionService {
         // Fall back to AI-powered extraction
         progress = "Importing recipe..."
         let stripped = stripHTML(html)
-        let truncated = String(stripped.prefix(12000))
+        let truncated = String(stripped.prefix(6000))
 
         let prompt = """
         Extract a complete recipe from this webpage text content. \
@@ -87,7 +87,13 @@ final class RecipeIngestionService {
         progress = "Parsing recipe text..."
         defer { isProcessing = false; progress = nil }
 
-        let prompt = """
+        let prompt = buildIngestionPrompt(for: text)
+        let response = try await aiRouter.generateText(prompt: prompt, taskType: .recipeIngestion)
+        return try parseIngestionResponse(response, source: "text")
+    }
+
+    private func buildIngestionPrompt(for text: String) -> String {
+        """
         Parse this recipe and extract structured data. Return valid JSON with this structure:
         {
           "title": "Recipe Name",
@@ -108,13 +114,22 @@ final class RecipeIngestionService {
         Recipe text:
         \(text)
         """
+    }
 
-        let response = try await aiRouter.generateText(
-            prompt: prompt,
-            taskType: .recipeIngestion
-        )
+    /// Streaming variant — calls `onChunk` with each text fragment as it arrives,
+    /// then returns the fully parsed result. Use this to show live progress in the UI.
+    func ingestFromTextStreaming(_ text: String, onChunk: @escaping (String) -> Void) async throws -> RecipeIngestionResult {
+        isProcessing = true
+        progress = "Generating recipe…"
+        defer { isProcessing = false; progress = nil }
 
-        return try parseIngestionResponse(response, source: "text")
+        let prompt = buildIngestionPrompt(for: text)
+        var accumulated = ""
+        for try await chunk in aiRouter.generateTextStreaming(prompt: prompt, taskType: .recipeIngestion) {
+            accumulated += chunk
+            onChunk(chunk)
+        }
+        return try parseIngestionResponse(accumulated, source: "ai-generate")
     }
 
     // MARK: - Image Compression
@@ -229,6 +244,10 @@ final class RecipeIngestionService {
         for dir in sortedDirs {
             lines.append("\(dir.stepNumber). \(dir.instruction)")
         }
+        if !recipe.dietaryRestrictions.isEmpty {
+            lines.append("")
+            lines.append("Current dietary labels: \(recipe.dietaryRestrictions.map(\.displayName).joined(separator: ", "))")
+        }
         let recipeText = lines.joined(separator: "\n")
 
         let prompt = """
@@ -252,9 +271,14 @@ final class RecipeIngestionService {
           "dietaryInfo": [],
           "nutritionPerServing": null
         }
+
+        For dietaryInfo: re-evaluate based on the updated ingredients. \
+        Valid values: vegan, vegetarian, glutenFree, dairyFree, nutFree, lowCarb, keto, paleo, halal, kosher. \
+        If the changes add meat or animal products, remove vegetarian/vegan. \
+        Return [] if no special dietary labels apply.
         """
 
-        let response = try await aiRouter.generateText(prompt: prompt, taskType: .recipeIngestion)
+        let response = try await aiRouter.generateText(prompt: prompt, taskType: .recipeIngestion, preferFast: true)
         return try parseIngestionResponse(response, source: recipe.sourceURL ?? "ai-edit")
     }
 

@@ -17,7 +17,10 @@ enum ShoppingListGenerator {
         let listName = name ?? "Shopping — \(plan.name)"
         let list = GroceryList(name: listName, mealPlan: plan)
 
-        // Aggregate all ingredients across meals
+        // Build canonical pantry index for fast lookup
+        let pantryCanonicals = Set(pantryItems.map { IngredientNormalizer.canonicalize($0.name) })
+
+        // Aggregate all ingredients across meals, keyed by canonical name
         var aggregated: [String: AggregatedIngredient] = [:]
 
         for meal in plan.meals {
@@ -25,11 +28,18 @@ enum ShoppingListGenerator {
             let servingScale = Double(meal.servings) / Double(recipe.servings)
 
             for ingredient in recipe.ingredients where !ingredient.isOptional {
-                let key = ingredient.name.lowercased().trimmingCharacters(in: .whitespaces)
-                guard !assumedStaples.contains(key) else { continue }
+                let canonical = IngredientNormalizer.canonicalize(ingredient.name)
+                guard !assumedStaples.contains(canonical) else { continue }
+
+                // Skip if pantry already has this (or its canonical form)
+                if pantryCanonicals.contains(canonical) { continue }
+
+                // Skip if pantry has a usable substitution — no need to buy
+                if IngredientNormalizer.findSubstitute(for: canonical, inPantryCanonicals: pantryCanonicals) != nil { continue }
+
                 let scaledQty = ingredient.amount.quantity * servingScale
 
-                if var existing = aggregated[key] {
+                if var existing = aggregated[canonical] {
                     if existing.unit == ingredient.amount.unit {
                         existing.quantity += scaledQty
                     } else if let converted = MeasurementConversionService.convert(
@@ -39,7 +49,7 @@ enum ShoppingListGenerator {
                         existing.quantity += converted.quantity
                     } else {
                         // Incompatible units (e.g. volume vs weight) — keep as separate entry
-                        let altKey = key + "_\(ingredient.amount.unit.rawValue)"
+                        let altKey = canonical + "_\(ingredient.amount.unit.rawValue)"
                         aggregated[altKey] = AggregatedIngredient(
                             name: ingredient.name,
                             quantity: scaledQty,
@@ -48,9 +58,9 @@ enum ShoppingListGenerator {
                         )
                         continue
                     }
-                    aggregated[key] = existing
+                    aggregated[canonical] = existing
                 } else {
-                    aggregated[key] = AggregatedIngredient(
+                    aggregated[canonical] = AggregatedIngredient(
                         name: ingredient.name,
                         quantity: scaledQty,
                         unit: ingredient.amount.unit,
@@ -60,11 +70,11 @@ enum ShoppingListGenerator {
             }
         }
 
-        // Subtract pantry stock
+        // Subtract pantry stock for any remaining items
+        // (handles partial coverage — e.g. recipe needs 2 cups, pantry has 1 cup)
         for (key, var agg) in aggregated {
-            let pantryMatch = pantryItems.first { item in
-                item.name.lowercased().trimmingCharacters(in: .whitespaces) == key
-            }
+            let canonical = IngredientNormalizer.canonicalize(agg.name)
+            let pantryMatch = pantryItems.first { IngredientNormalizer.canonicalize($0.name) == canonical }
 
             if let pantry = pantryMatch {
                 if pantry.unit == agg.unit {
@@ -98,11 +108,12 @@ enum ShoppingListGenerator {
 
     // MARK: - Helpers
 
-    /// Ingredients that are assumed to be on hand and don't need to appear on a shopping list.
+    /// Canonical ingredient names assumed to be on hand — skipped even without pantry data.
+    /// These use canonical names (post-canonicalize) so variants collapse automatically.
     private static let assumedStaples: Set<String> = [
         "water", "ice", "ice water", "cold water", "boiling water",
-        "salt", "kosher salt", "sea salt", "table salt",
-        "black pepper", "pepper", "ground black pepper",
+        "salt",   // covers kosher salt, sea salt, table salt via canonicalize()
+        "pepper", // covers black pepper, ground black pepper via canonicalize()
     ]
 
     private struct AggregatedIngredient {
