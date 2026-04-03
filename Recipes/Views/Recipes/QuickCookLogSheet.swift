@@ -7,6 +7,7 @@ import SwiftUI
 /// photos, substitutions, and times without creating a duplicate entry.
 struct QuickCookLogSheet: View {
     let recipe: Recipe
+    var logDate: Date = .now
     @Environment(\.dismiss) private var dismiss
 
     @State private var rating: Int = 0
@@ -100,7 +101,7 @@ struct QuickCookLogSheet: View {
         }
         // Full log dismisses this sheet when done — no duplicate entry created
         .sheet(isPresented: $showingFullLog, onDismiss: { dismiss() }) {
-            CookingLogEntryView(recipe: recipe)
+            CookingLogEntryView(recipe: recipe, logDate: logDate)
         }
     }
 
@@ -118,7 +119,7 @@ struct QuickCookLogSheet: View {
     }
 
     private func saveQuickLog() {
-        let entry = CookingLogEntry(rating: rating > 0 ? rating : nil)
+        let entry = CookingLogEntry(date: logDate, rating: rating > 0 ? rating : nil)
         recipe.cookingLog.append(entry)
     }
 }

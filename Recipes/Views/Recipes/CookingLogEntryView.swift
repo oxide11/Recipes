@@ -6,11 +6,13 @@ import PhotosUI
 
 struct CookingLogEntryView: View {
     let recipe: Recipe
+    private var existingEntry: CookingLogEntry?
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
     @Query private var profiles: [UserProfile]
 
+    @State private var logDate: Date
     @State private var rating = 3
     @State private var prepMinutes = ""
     @State private var cookMinutes = ""
@@ -23,6 +25,8 @@ struct CookingLogEntryView: View {
     @State private var showingPantryCleanup = false
     @State private var didSave = false
 
+    private var isEditing: Bool { existingEntry != nil }
+
     private var actualTotalMinutes: Int? {
         let prep = Int(prepMinutes) ?? 0
         let cook = Int(cookMinutes) ?? 0
@@ -30,9 +34,26 @@ struct CookingLogEntryView: View {
         return total > 0 ? total : nil
     }
 
-    init(recipe: Recipe) {
+    /// Create a new log entry, optionally pre-setting the date (e.g. from a meal plan slot).
+    init(recipe: Recipe, logDate: Date = .now) {
         self.recipe = recipe
+        self.existingEntry = nil
+        _logDate = State(initialValue: logDate)
         _servingsCooked = State(initialValue: recipe.servings)
+    }
+
+    /// Edit an existing log entry — all fields are pre-populated.
+    init(recipe: Recipe, entry: CookingLogEntry) {
+        self.recipe = recipe
+        self.existingEntry = entry
+        _logDate = State(initialValue: entry.date)
+        _rating = State(initialValue: entry.rating ?? 3)
+        _prepMinutes = State(initialValue: entry.prepTimeMinutes.map(String.init) ?? "")
+        _cookMinutes = State(initialValue: entry.cookTimeMinutes.map(String.init) ?? "")
+        _notes = State(initialValue: entry.notes ?? "")
+        _substitutions = State(initialValue: entry.substitutionsMade)
+        _servingsCooked = State(initialValue: recipe.servings)
+        _photoData = State(initialValue: entry.photo?.imageData)
     }
 
     var body: some View {
@@ -41,6 +62,11 @@ struct CookingLogEntryView: View {
                 Section("Rating") {
                     StarRatingView(rating: rating, font: .title2) { rating = $0 }
                         .sensoryFeedback(.selection, trigger: rating)
+                }
+
+                Section("Date Cooked") {
+                    DatePicker("Date", selection: $logDate, in: ...Date.now, displayedComponents: .date)
+                        .labelsHidden()
                 }
 
                 Section("Servings & Time") {
@@ -113,7 +139,7 @@ struct CookingLogEntryView: View {
                         .lineLimit(4)
                 }
             }
-            .navigationTitle("Log Cooking Session")
+            .navigationTitle(isEditing ? "Edit Log Entry" : "Log Cooking Session")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -138,39 +164,48 @@ struct CookingLogEntryView: View {
     }
 
     private func saveEntry() {
-        // Create photo if attached
-        var photo: RecipePhoto?
-        if let data = photoData {
-            photo = RecipePhoto(imageData: data)
-        }
+        let timeSaved: Int? = actualTotalMinutes.map { recipe.estimatedTotalMinutes - $0 }
 
-        // Compute time saved vs recipe estimate
-        let timeSaved: Int?
-        if let actual = actualTotalMinutes {
-            timeSaved = recipe.estimatedTotalMinutes - actual
-        } else {
-            timeSaved = nil
-        }
-
-        let entry = CookingLogEntry(
-            prepTimeMinutes: Int(prepMinutes),
-            cookTimeMinutes: Int(cookMinutes),
-            rating: rating,
-            notes: notes.isEmpty ? nil : notes,
-            substitutionsMade: substitutions,
-            timeSavedMinutes: timeSaved
-        )
-        entry.photo = photo
-        recipe.cookingLog.append(entry)
-        didSave = true
-
-        // Show pantry cleanup sheet if there are matching items, otherwise dismiss
-        let recipeIngredientNames = Set(recipe.ingredients.map { $0.name.lowercased() })
-        let hasMatches = pantryItems.contains { recipeIngredientNames.contains($0.name.lowercased()) }
-        if hasMatches {
-            showingPantryCleanup = true
-        } else {
+        if let entry = existingEntry {
+            // Update in place — no new entry, no pantry cleanup
+            entry.date = logDate
+            entry.rating = rating
+            entry.prepTimeMinutes = Int(prepMinutes)
+            entry.cookTimeMinutes = Int(cookMinutes)
+            entry.notes = notes.isEmpty ? nil : notes
+            entry.substitutionsMade = substitutions
+            entry.timeSavedMinutes = timeSaved
+            if let data = photoData, entry.photo == nil {
+                entry.photo = RecipePhoto(imageData: data)
+            }
+            didSave = true
             dismiss()
+        } else {
+            // Create new entry
+            var photo: RecipePhoto?
+            if let data = photoData { photo = RecipePhoto(imageData: data) }
+
+            let entry = CookingLogEntry(
+                date: logDate,
+                prepTimeMinutes: Int(prepMinutes),
+                cookTimeMinutes: Int(cookMinutes),
+                rating: rating,
+                notes: notes.isEmpty ? nil : notes,
+                substitutionsMade: substitutions,
+                timeSavedMinutes: timeSaved
+            )
+            entry.photo = photo
+            recipe.cookingLog.append(entry)
+            didSave = true
+
+            // Pantry cleanup only on new entries
+            let recipeIngredientNames = Set(recipe.ingredients.map { $0.name.lowercased() })
+            let hasMatches = pantryItems.contains { recipeIngredientNames.contains($0.name.lowercased()) }
+            if hasMatches {
+                showingPantryCleanup = true
+            } else {
+                dismiss()
+            }
         }
     }
 }

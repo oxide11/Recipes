@@ -12,6 +12,7 @@ struct RecipeDetailView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showingVariations = false
     @State private var showingQuickLog = false
+    @State private var editingLogEntry: CookingLogEntry?
     @State private var showingCookingMode = false
     @State private var showingBlinkHelp = false
     @State private var showingExport = false
@@ -163,6 +164,9 @@ struct RecipeDetailView: View {
         }
         .sheet(isPresented: $showingQuickLog) {
             QuickCookLogSheet(recipe: recipe)
+        }
+        .sheet(item: $editingLogEntry) { entry in
+            CookingLogEntryView(recipe: recipe, entry: entry)
         }
         .fullScreenCover(isPresented: $showingCookingMode) {
             CookingModeView(recipe: recipe)
@@ -730,28 +734,36 @@ struct RecipeDetailView: View {
                 // Individual log entries
                 let sortedLog = recipe.cookingLog.sorted(by: { $0.date > $1.date })
                 ForEach(Array(sortedLog.enumerated()), id: \.element.id) { index, entry in
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(entry.date, style: .date)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                            if let rating = entry.rating {
-                                StarRatingView(rating: rating)
+                    Button {
+                        editingLogEntry = entry
+                    } label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(entry.date, style: .date)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                if let rating = entry.rating {
+                                    StarRatingView(rating: rating)
+                                }
+                                Image(systemName: "pencil")
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                            }
+                            if let notes = entry.notes {
+                                Text(notes)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            if !entry.substitutionsMade.isEmpty {
+                                Text("Subs: " + entry.substitutionsMade.joined(separator: ", "))
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
                             }
                         }
-                        if let notes = entry.notes {
-                            Text(notes)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        if !entry.substitutionsMade.isEmpty {
-                            Text("Subs: " + entry.substitutionsMade.joined(separator: ", "))
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
-                        }
+                        .padding(.vertical, 4)
                     }
-                    .padding(.vertical, 4)
+                    .buttonStyle(.plain)
                     if index < sortedLog.count - 1 {
                         Divider()
                     }

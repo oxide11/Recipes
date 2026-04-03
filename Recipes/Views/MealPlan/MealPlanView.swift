@@ -579,7 +579,7 @@ struct MealCard: View {
                 }
                 .buttonStyle(.plain)
                 .sheet(isPresented: $showingQuickLog) {
-                    QuickCookLogSheet(recipe: recipe)
+                    QuickCookLogSheet(recipe: recipe, logDate: meal.date)
                 }
             }
         }
