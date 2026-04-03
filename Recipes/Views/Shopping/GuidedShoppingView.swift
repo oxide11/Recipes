@@ -182,6 +182,12 @@ struct GuidedShoppingView: View {
                             }
                         }
                     }
+                    .onDelete { indexSet in
+                        indexSet.forEach { i in
+                            let item = sectionItems[i]
+                            list.items.removeAll { $0.id == item.id }
+                        }
+                    }
                 }
             }
 
@@ -387,8 +393,9 @@ struct SubstitutionSheetView: View {
                                         Task { await fetchAISubstitutions() }
                                     } label: {
                                         Label("Find Substitutions with AI", systemImage: "sparkles")
+                                            .frame(maxWidth: .infinity)
                                     }
-                                    .buttonStyle(.borderedProminent)
+                                    .buttonStyle(.glass)
                                     .tint(Brand.herbGreen)
                                 }
                             }
