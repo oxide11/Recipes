@@ -255,7 +255,6 @@ struct RecipeDetailView: View {
                                             }
                                         }
                                     }
-                            }
                         }
                     }
                 }
