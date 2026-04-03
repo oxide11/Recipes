@@ -285,6 +285,22 @@ struct RecipeDetailView: View {
                 }
             }
 
+            if recipe.cookCount > 0 {
+                HStack(spacing: 6) {
+                    Image(systemName: "frying.pan")
+                        .font(.caption)
+                    Text("Cooked \(recipe.cookCount)×")
+                    if let avg = recipe.averageRating {
+                        Text("·").opacity(0.5)
+                        Image(systemName: "star.fill")
+                            .foregroundStyle(Brand.warmTan)
+                        Text(String(format: "%.1f", avg))
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+
             if !recipe.dietaryRestrictions.isEmpty {
                 HStack(spacing: 12) {
                     ForEach(recipe.dietaryRestrictions, id: \.self) { restriction in
