@@ -359,6 +359,8 @@ struct DashboardView: View {
             .foregroundStyle(Brand.muted)
             .tracking(1)
             .padding(.bottom, 8)
+            .accessibilityLabel(title)
+            .accessibilityAddTraits(.isHeader)
     }
 
     // MARK: - Header
@@ -379,6 +381,7 @@ struct DashboardView: View {
                 .font(.miseMeta)
                 .foregroundStyle(Brand.muted)
         }
+        .accessibilityElement(children: .combine)
     }
 
     private var greetingText: String {
@@ -423,8 +426,9 @@ struct DashboardView: View {
         }
         .padding()
         .glassCard(cornerRadius: 20)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(completedTodayCount) of \(todaysMeals.count) meals cooked today")
+        // .contain keeps individual meal rows focusable and their buttons activatable via VoiceOver.
+        // .combine would swallow all children into one non-interactive element.
+        .accessibilityElement(children: .contain)
     }
 
     private func emptyMealRow(_ mealType: MealType) -> some View {
@@ -648,6 +652,7 @@ struct DashboardView: View {
             Image(systemName: icon)
                 .foregroundStyle(color)
                 .font(.subheadline)
+                .accessibilityHidden(true)
 
             Text(text)
                 .font(.miseBody)
@@ -656,6 +661,8 @@ struct DashboardView: View {
 
             Spacer()
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(isUrgent ? "Alert: \(text)" : text)
     }
 
     // MARK: - Cooking Stat Line
