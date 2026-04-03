@@ -603,7 +603,8 @@ struct RecipeRow: View {
                         Text(String(format: "%.1f", avg))
                     } else if recipe.cookCount > 0 {
                         Text("·").opacity(0.5)
-                        Text("Cooked \(recipe.cookCount)×")
+                        Image(systemName: "frying.pan")
+                        Text("\(recipe.cookCount)×")
                     }
                 }
                 .font(.miseMeta)
