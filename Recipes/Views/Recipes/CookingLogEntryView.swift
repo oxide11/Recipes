@@ -195,6 +195,7 @@ struct CookingLogEntryView: View {
                 timeSavedMinutes: timeSaved
             )
             entry.photo = photo
+            modelContext.insert(entry)
             recipe.cookingLog.append(entry)
             didSave = true
 

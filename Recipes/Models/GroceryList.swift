@@ -83,7 +83,7 @@ extension StoreSection {
         case .snacks:        return .other
         case .deli:          return .protein
         case .international: return .other
-        case .other:         return nil  // non-food, don't add to pantry
+        case .other:         return .other  // catch-all — still add to pantry
         }
     }
 }

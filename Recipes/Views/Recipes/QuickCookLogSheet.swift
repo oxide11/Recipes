@@ -9,6 +9,7 @@ struct QuickCookLogSheet: View {
     let recipe: Recipe
     var logDate: Date = .now
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
 
     @State private var rating: Int = 0
     @State private var showingFullLog = false
@@ -120,6 +121,7 @@ struct QuickCookLogSheet: View {
 
     private func saveQuickLog() {
         let entry = CookingLogEntry(date: logDate, rating: rating > 0 ? rating : nil)
+        modelContext.insert(entry)
         recipe.cookingLog.append(entry)
     }
 }
