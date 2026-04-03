@@ -420,7 +420,7 @@ struct QuickGenerateView: View {
         NavigationStack {
             Group {
                 if isGenerating {
-                    StreamingRecipePreview(json: streamingText, cuisineHint: cuisineHint, quickMealMode: quickMealMode, pantryIsEmpty: pantryItems.isEmpty)
+                    StreamingRecipePreview(json: streamingText, cuisineHint: cuisineHint, quickMealMode: quickMealMode, pantryIsEmpty: pantryItems.filter { !$0.isStaple }.count < 10 && pantryItems.filter(\.isStaple).count < 10)
                 } else if let error = errorMessage {
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle")
