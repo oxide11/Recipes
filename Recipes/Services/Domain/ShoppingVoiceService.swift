@@ -60,7 +60,7 @@ final class ShoppingVoiceService: NSObject {
         stopSession()
         self.voiceEnabled = voiceEnabled
         self.sortedSections = list.itemsBySection
-            .sorted { $0.key.rawValue < $1.key.rawValue }
+            .sorted { $0.key.sortOrder < $1.key.sortOrder }
             .filter { !$0.value.allSatisfy(\.isPurchased) }
         self.currentSectionIndex = 0
         self.currentItemIndex = 0
@@ -123,8 +123,8 @@ final class ShoppingVoiceService: NSObject {
             return
         }
 
-        let amount = "\(item.quantity) \(item.unit.rawValue)"
-        await speak("\(amount) of \(item.name). Did you find it?")
+        let prompt = item.formattedAmount.map { "\($0) of \(item.name)" } ?? item.name
+        await speak("\(prompt). Did you find it?")
         guard !Task.isCancelled else { return }
 
         let response = await listenForConfirmation()

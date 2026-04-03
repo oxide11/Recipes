@@ -39,6 +39,26 @@ enum StoreSection: String, Codable, CaseIterable, Sendable {
         case .other:         return "Other"
         }
     }
+
+    var sortOrder: Int {
+        switch self {
+        case .produce:       return 0
+        case .meat:          return 1
+        case .seafood:       return 2
+        case .dairy:         return 3
+        case .deli:          return 4
+        case .bakery:        return 5
+        case .dryGoods:      return 6
+        case .canned:        return 7
+        case .condiments:    return 8
+        case .spices:        return 9
+        case .international: return 10
+        case .frozen:        return 11
+        case .snacks:        return 12
+        case .beverages:     return 13
+        case .other:         return 14
+        }
+    }
 }
 
 // MARK: - StoreSection Guessing
@@ -111,6 +131,16 @@ final class GroceryItem {
     var isStaple: Bool = false
     /// EKReminder.calendarItemIdentifier for the linked Reminders item, if any.
     var remindersIdentifier: String? = nil
+
+    /// Returns a formatted amount string, or nil when the quantity/unit is
+    /// the default sentinel (1 piece) meaning no amount was specified.
+    var formattedAmount: String? {
+        guard !(quantity == 1 && unit == .piece) else { return nil }
+        let quantityStr = quantity.truncatingRemainder(dividingBy: 1) == 0
+            ? String(Int(quantity))
+            : String(format: "%.1f", quantity)
+        return "\(quantityStr) \(unit.rawValue)"
+    }
 
     init(
         name: String,

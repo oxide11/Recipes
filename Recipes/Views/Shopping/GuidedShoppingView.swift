@@ -175,9 +175,11 @@ struct GuidedShoppingView: View {
 
                             Spacer()
 
-                            Text("\(item.quantity, specifier: "%.1f") \(item.unit.rawValue)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                            if let amount = item.formattedAmount {
+                                Text(amount)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                 }
@@ -196,9 +198,11 @@ struct GuidedShoppingView: View {
                 .font(.title)
                 .fontWeight(.bold)
 
-            Text("\(item.quantity, specifier: "%.1f") \(item.unit.rawValue)")
-                .font(.title3)
-                .foregroundStyle(.secondary)
+            if let amount = item.formattedAmount {
+                Text(amount)
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+            }
 
             VStack(spacing: 12) {
                 // Primary action — full width
@@ -334,6 +338,10 @@ struct SubstitutionSheetView: View {
     let item: GroceryItem
     @Bindable var list: GroceryList
     @Environment(\.dismiss) private var dismiss
+    @Environment(AIServiceRouter.self) private var aiRouter
+    @State private var aiSubstitutions: [SubstitutionEngine.Substitution] = []
+    @State private var isLoadingAI = false
+    @State private var aiError: String?
 
     private var substitutions: [SubstitutionEngine.Substitution] {
         SubstitutionEngine.findSubstitutions(for: item.name)
@@ -344,12 +352,51 @@ struct SubstitutionSheetView: View {
             List {
                 Section("Substitutions for \(item.name)") {
                     if substitutions.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("No known substitutions available for \(item.name).")
-                                .foregroundStyle(.secondary)
-                            Text("Try a similar product at the store, or skip this item for now.")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
+                        if aiSubstitutions.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("No known substitutions for \(item.name).")
+                                    .foregroundStyle(.secondary)
+
+                                if isLoadingAI {
+                                    HStack {
+                                        ProgressView()
+                                        Text("Finding substitutions…")
+                                            .foregroundStyle(.secondary)
+                                    }
+                                } else if let error = aiError {
+                                    Text(error)
+                                        .font(.caption)
+                                        .foregroundStyle(.red)
+                                    Button("Try Again") { Task { await fetchAISubstitutions() } }
+                                        .buttonStyle(.bordered)
+                                } else {
+                                    Button {
+                                        Task { await fetchAISubstitutions() }
+                                    } label: {
+                                        Label("Find Substitutions with AI", systemImage: "sparkles")
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                    .tint(Brand.herbGreen)
+                                }
+                            }
+                        } else {
+                            ForEach(aiSubstitutions, id: \.replacement) { sub in
+                                Button {
+                                    applySubstitution(sub)
+                                } label: {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(sub.replacement)
+                                            .fontWeight(.medium)
+                                            .foregroundStyle(.primary)
+                                        Text("Ratio: \(sub.ratio)")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                        Text(sub.notes)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
                         }
                         Button("Skip Item") {
                             item.isPurchased = true
@@ -394,5 +441,44 @@ struct SubstitutionSheetView: View {
         item.name = sub.replacement
         item.notes = "Substituted: \(sub.notes)"
         dismiss()
+    }
+
+    private func fetchAISubstitutions() async {
+        isLoadingAI = true
+        aiError = nil
+        let prompt = """
+        Suggest 2-3 practical substitutions for "\(item.name)" in cooking.
+        Return ONLY a JSON array, no explanation:
+        [{"replacement":"apple cider vinegar","ratio":"1:1","notes":"Slightly more tart"}]
+        """
+        do {
+            let response = try await aiRouter.generateText(prompt: prompt, taskType: .classification)
+            let parsed = parseAISubstitutions(from: response, original: item.name)
+            aiSubstitutions = parsed
+            if parsed.isEmpty { aiError = "Couldn't find substitutions. Try again." }
+        } catch {
+            aiError = "Couldn't connect. Check your API key in Settings."
+        }
+        isLoadingAI = false
+    }
+
+    private func parseAISubstitutions(from response: String, original: String) -> [SubstitutionEngine.Substitution] {
+        guard let start = response.firstIndex(of: "["),
+              let end = response.lastIndex(of: "]") else { return [] }
+        let json = String(response[start...end])
+        guard let data = json.data(using: .utf8),
+              let array = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else { return [] }
+        return array.compactMap { dict in
+            guard let replacement = dict["replacement"] as? String,
+                  let ratio = dict["ratio"] as? String,
+                  let notes = dict["notes"] as? String else { return nil }
+            return SubstitutionEngine.Substitution(
+                original: original,
+                replacement: replacement,
+                ratio: ratio,
+                notes: notes,
+                dietaryBenefit: []
+            )
+        }
     }
 }
