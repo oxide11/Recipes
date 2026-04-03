@@ -244,7 +244,7 @@ final class Recipe {
 
     /// Cascade-deletes PlannedMeal records when this recipe is deleted,
     /// preventing orphaned meal plan slots with a nil recipe.
-    @Relationship(deleteRule: .cascade, inverse: \PlannedMeal.recipe)
+    @Relationship(deleteRule: .cascade)
     var plannedMeals: [PlannedMeal]
 
     var nutritionalInfo: NutritionalInfo?
