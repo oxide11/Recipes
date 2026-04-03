@@ -12,6 +12,7 @@ struct RecipeDetailView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showingVariations = false
     @State private var showingLogEntry = false
+    @State private var showingQuickLog = false
     @State private var showingCookingMode = false
     @State private var showingBlinkHelp = false
     @State private var showingExport = false
@@ -124,8 +125,15 @@ struct RecipeDetailView: View {
                     }
                     .accessibilityLabel("Start Cooking Mode")
 
+                    Button {
+                        showingQuickLog = true
+                    } label: {
+                        Image(systemName: "flame")
+                    }
+                    .accessibilityLabel("Log a cook")
+
                     Menu {
-                        Button("Log Cooking Session", systemImage: "flame") {
+                        Button("Full Cooking Log", systemImage: "flame") {
                             showingLogEntry = true
                         }
                         Button("Hands-Free Setup", systemImage: "accessibility") {
@@ -156,6 +164,9 @@ struct RecipeDetailView: View {
             AIRecipeEditView(recipe: recipe) { result in
                 Task { await applyAIEdit(result) }
             }
+        }
+        .sheet(isPresented: $showingQuickLog) {
+            QuickCookLogSheet(recipe: recipe)
         }
         .sheet(isPresented: $showingLogEntry) {
             CookingLogEntryView(recipe: recipe)

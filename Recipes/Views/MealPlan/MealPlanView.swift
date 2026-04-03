@@ -421,9 +421,19 @@ struct MealCard: View {
     let pantryItems: [PantryItem]
 
     @State private var addedToCart = false
+    @State private var showingQuickLog = false
     @State private var cachedPantryCanonicals: Set<String> = []
     @State private var cachedTrulyMissing: [Ingredient] = []
     @State private var cachedSubstitutable: [(recipeName: String, substituteName: String)] = []
+
+    /// True when the meal is scheduled for today or earlier and hasn't been logged yet.
+    private var canLogCook: Bool {
+        guard let recipe = meal.recipe else { return false }
+        guard meal.date <= Date() else { return false }
+        return !recipe.cookingLog.contains {
+            Calendar.current.isDate($0.date, inSameDayAs: meal.date)
+        }
+    }
 
     private var titleRow: some View {
         HStack(spacing: 6) {
@@ -553,6 +563,23 @@ struct MealCard: View {
                                 .lineLimit(2)
                         }
                     }
+                }
+            }
+
+            if canLogCook, let recipe = meal.recipe {
+                Button {
+                    showingQuickLog = true
+                } label: {
+                    Label("Cooked it!", systemImage: "flame.fill")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(Brand.spiceRed)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Brand.spiceRed.opacity(0.1), in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .sheet(isPresented: $showingQuickLog) {
+                    QuickCookLogSheet(recipe: recipe)
                 }
             }
         }

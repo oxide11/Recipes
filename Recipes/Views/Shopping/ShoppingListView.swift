@@ -17,7 +17,6 @@ struct ShoppingListView: View {
     @State private var showingRemindersSetup = false
     @State private var lastSyncDate: Date = .distantPast
     @AppStorage("shoppingHideCompleted") private var hideCompleted = true
-    @AppStorage("hasPromptedRemindersSetup") private var hasPromptedSetup = false
 
     private var currencyCode: String { profiles.first?.preferredCurrencyCode ?? "CAD" }
 
@@ -53,11 +52,6 @@ struct ShoppingListView: View {
         }
         .onAppear {
             ensureListExists()
-            // Only auto-prompt once — after that the user reaches it via the toolbar icon
-            if !remindersSync.isLinked && !hasPromptedSetup {
-                hasPromptedSetup = true
-                showingRemindersSetup = true
-            }
             // Sync on first appear only — foreground notification handles subsequent syncs
             if lastSyncDate == .distantPast {
                 triggerSync()
