@@ -100,6 +100,17 @@ struct ShoppingListView: View {
             .buttonStyle(.borderedProminent)
             .tint(Brand.herbGreen)
             .padding(.top, 8)
+
+            if !remindersSync.isLinked {
+                Button {
+                    showingRemindersSetup = true
+                } label: {
+                    Label("Sync with Reminders", systemImage: "checklist.unchecked")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
         }
     }
 
