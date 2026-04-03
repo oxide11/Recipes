@@ -212,6 +212,7 @@ struct RecipeDetailView: View {
                     .frame(maxWidth: .infinity, minHeight: 200, maxHeight: 200)
                     .clipped()
                     .clipShape(.rect(cornerRadius: 12))
+                    .accessibilityLabel("Recipe photo")
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 12) {
@@ -222,6 +223,7 @@ struct RecipeDetailView: View {
                                     .aspectRatio(contentMode: .fill)
                                     .frame(width: 200, height: 150)
                                     .clipShape(.rect(cornerRadius: 12))
+                                    .accessibilityLabel(entry.isLogPhoto ? "Cooking log photo" : "Recipe photo")
                                     .overlay(alignment: .bottomTrailing) {
                                         if entry.isLogPhoto {
                                             Image(systemName: "flame.fill")
