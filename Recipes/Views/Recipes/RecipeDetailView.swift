@@ -91,7 +91,7 @@ struct RecipeDetailView: View {
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 if isEditing {
-                    // In edit mode: AI Edit wand sits alongside Done
+                    // Edit mode: sparkle + Done
                     Button {
                         showingAIEdit = true
                     } label: {
@@ -99,16 +99,14 @@ struct RecipeDetailView: View {
                             .foregroundStyle(Brand.warmTan)
                     }
                     .accessibilityLabel("AI Edit")
-                }
 
-                Button {
-                    withAnimation(.snappy(duration: 0.25)) { isEditing.toggle() }
-                } label: {
-                    Text(isEditing ? "Done" : "Edit")
-                }
-                .fontWeight(isEditing ? .semibold : .regular)
-
-                if !isEditing {
+                    Button {
+                        withAnimation(.snappy(duration: 0.25)) { isEditing = false }
+                    } label: {
+                        Text("Done").fontWeight(.semibold)
+                    }
+                } else {
+                    // Normal mode: cooking actions + management menu
                     Button {
                         recipe.isFavorite.toggle()
                     } label: {
@@ -132,16 +130,18 @@ struct RecipeDetailView: View {
                     .accessibilityLabel("Log a cook")
 
                     Menu {
+                        Button("Edit Recipe", systemImage: "pencil") {
+                            withAnimation(.snappy(duration: 0.25)) { isEditing = true }
+                        }
+                        Divider()
                         Button("Hands-Free Setup", systemImage: "accessibility") {
                             showingBlinkHelp = true
                         }
                         Button("Export Recipe", systemImage: "square.and.arrow.up") {
                             showingExport = true
                         }
-                        Button {
+                        Button("Add Photo", systemImage: "camera") {
                             showingAddPhoto = true
-                        } label: {
-                            Label("Add Photo", systemImage: "camera")
                         }
                         ShareLink(item: recipeShareText)
                     } label: {
