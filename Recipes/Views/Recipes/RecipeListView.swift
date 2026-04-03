@@ -96,7 +96,7 @@ struct RecipeListView: View {
 
     var body: some View {
         NavigationSplitView {
-            List {
+            List(selection: $selectedRecipe) {
                 if !recipes.isEmpty {
                     // Recommendations teaser
                     Section {
@@ -238,6 +238,9 @@ struct RecipeListView: View {
                     ContentUnavailableView("Select a Recipe", systemImage: "book.pages", description: Text("Choose a recipe from the list."))
                 }
             }
+            .navigationDestination(for: Recipe.self) { recipe in
+                RecipeDetailView(recipe: recipe)
+            }
         }
     }
 
@@ -372,12 +375,9 @@ struct RecipeListView: View {
                 )
             } else {
                 ForEach(filteredRecipes) { recipe in
-                    Button {
-                        selectedRecipe = recipe
-                    } label: {
+                    NavigationLink(value: recipe) {
                         RecipeRow(recipe: recipe)
                     }
-                    .buttonStyle(.plain)
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
                             recipeToDelete = recipe
