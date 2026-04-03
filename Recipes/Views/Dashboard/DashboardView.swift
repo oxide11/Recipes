@@ -788,12 +788,11 @@ struct QuickMealsView: View {
                                     .foregroundStyle(Brand.warmTan)
                             }
                             .listRowBackground(Brand.warmTan.opacity(0.1))
-
+                        } footer: {
                             if pantryIsEmpty {
                                 Label("Add pantry items for personalised suggestions.", systemImage: "cart.badge.plus")
                                     .font(.caption)
                                     .foregroundStyle(Brand.muted)
-                                    .listRowBackground(Color.clear)
                             }
                         }
 
