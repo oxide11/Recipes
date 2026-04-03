@@ -10,6 +10,15 @@ struct ContentView: View {
     @State private var showingOnboarding = false
     @Query private var profiles: [UserProfile]
 
+    // Pre-warm the SwiftData store so tab views load instantly on first visit.
+    // These queries fire when ContentView appears, caching data before any tab
+    // is tapped. Without this, each tab cold-starts SwiftData on first navigation.
+    @Query private var _recipes: [Recipe]
+    @Query private var _pantryItems: [PantryItem]
+    @Query private var _plannedMeals: [PlannedMeal]
+    @Query private var _groceryLists: [GroceryList]
+    @Query private var _mealPlans: [MealPlan]
+
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("Mise", systemImage: "sparkles", value: .mise) {
@@ -32,7 +41,7 @@ struct ContentView: View {
                 SettingsView()
             }
         }
-        .adaptiveTabViewStyle(sizeClass: sizeClass)
+        .tabViewStyle(.sidebarAdaptable)
         .onChange(of: timerDeepLink.pendingRecipeID) { _, newID in
             if newID != nil { selectedTab = .recipes }
         }
@@ -53,20 +62,6 @@ enum AppTab: String, Hashable {
     case mise, recipes, planAndShop, activity, settings
 }
 
-// MARK: - Adaptive Tab View Style
-
-private extension View {
-    /// Uses `.sidebarAdaptable` on iPad (regular width) for the collapsible sidebar,
-    /// and `.automatic` on iPhone to avoid the zoom pill animation.
-    @ViewBuilder
-    func adaptiveTabViewStyle(sizeClass: UserInterfaceSizeClass?) -> some View {
-        if sizeClass == .regular {
-            self.tabViewStyle(.sidebarAdaptable)
-        } else {
-            self.tabViewStyle(.automatic)
-        }
-    }
-}
 
 #Preview("Empty") {
     ContentView()
