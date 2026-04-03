@@ -19,6 +19,7 @@ struct AIRecipeEditView: View {
     @State private var errorMessage: String?
     @State private var service: RecipeIngestionService?
     @State private var recognizer = SpeechRecognizer()
+    @State private var streamingText = ""
     @FocusState private var fieldFocused: Bool
 
     // MARK: - Suggestions
@@ -168,24 +169,29 @@ struct AIRecipeEditView: View {
     }
 
     private var generateSection: some View {
-        Section {
-            Button {
-                Task { await generate() }
-            } label: {
-                HStack {
-                    Spacer()
-                    if isGenerating {
-                        ProgressView().padding(.trailing, 8)
-                        Text("Updating recipe…")
-                    } else {
-                        Image(systemName: "sparkles")
-                        Text("Apply with AI")
-                            .fontWeight(.semibold)
+        Group {
+            if isGenerating {
+                Section {
+                    StreamingRecipePreview(json: streamingText)
+                        .listRowInsets(EdgeInsets())
+                        .frame(minHeight: 260)
+                }
+            } else {
+                Section {
+                    Button {
+                        Task { await generate() }
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Image(systemName: "sparkles")
+                            Text("Apply with AI")
+                                .fontWeight(.semibold)
+                            Spacer()
+                        }
                     }
-                    Spacer()
+                    .disabled(instruction.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
-            .disabled(instruction.trimmingCharacters(in: .whitespaces).isEmpty || isGenerating)
         }
     }
 
@@ -332,9 +338,12 @@ struct AIRecipeEditView: View {
         guard let service else { return }
         isGenerating = true
         errorMessage = nil
+        streamingText = ""
         defer { isGenerating = false }
         do {
-            result = try await service.editRecipe(recipe, instruction: instruction)
+            result = try await service.editRecipeStreaming(recipe, instruction: instruction) { chunk in
+                streamingText += chunk
+            }
         } catch {
             errorMessage = error.localizedDescription
         }

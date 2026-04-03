@@ -28,6 +28,7 @@ struct RecipeListView: View {
     @State private var showingTagManagement = false
     @State private var cachedNoWasteMatches: [NoWasteMatchingEngine.MatchResult] = []
     @State private var cachedSeasonalRecipes: [Recipe] = []
+    @State private var cachedFilteredRecipes: [Recipe] = []
     @State private var debouncedSearch = ""
     @State private var searchDebounceTask: Task<Void, Never>?
     @State private var noWasteTask: Task<Void, Never>?
@@ -49,7 +50,9 @@ struct RecipeListView: View {
         return count
     }
 
-    private var filteredRecipes: [Recipe] {
+    private var filteredRecipes: [Recipe] { cachedFilteredRecipes }
+
+    private func rebuildFilteredRecipes() {
         var result = recipes
         if !debouncedSearch.isEmpty {
             result = result.filter {
@@ -88,7 +91,7 @@ struct RecipeListView: View {
             let rest = result.filter { !$0.isFavorite && !$0.isAutoFavorite }
             result = favs + rest
         }
-        return result
+        cachedFilteredRecipes = result
     }
 
     var body: some View {
@@ -206,13 +209,24 @@ struct RecipeListView: View {
             .task {
                 updateNoWasteMatches()
                 updateSeasonalCache()
+                rebuildFilteredRecipes()
                 hasLoadedProfile = true
             }
+            .onAppear { rebuildFilteredRecipes() }
             .onChange(of: recipes.count) {
                 updateNoWasteMatches()
                 updateSeasonalCache()
+                rebuildFilteredRecipes()
             }
             .onChange(of: pantryItems.count) { updateNoWasteMatches() }
+            .onChange(of: debouncedSearch) { rebuildFilteredRecipes() }
+            .onChange(of: selectedCuisine) { rebuildFilteredRecipes() }
+            .onChange(of: selectedDifficulty) { rebuildFilteredRecipes() }
+            .onChange(of: maxTimeFilter) { rebuildFilteredRecipes() }
+            .onChange(of: showFavoritesOnly) { rebuildFilteredRecipes() }
+            .onChange(of: selectedDietaryRestrictions) { rebuildFilteredRecipes() }
+            .onChange(of: selectedTags) { rebuildFilteredRecipes() }
+            .onChange(of: selectedMealType) { rebuildFilteredRecipes() }
             .onChange(of: searchText) { _, newValue in
                 searchDebounceTask?.cancel()
                 searchDebounceTask = Task {

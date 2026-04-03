@@ -626,9 +626,12 @@ struct WeekMealView: View {
     let onWeekSwipe: (Bool) -> Void  // true = forward, false = back
 
     @State private var showingPrepList = false
+    @State private var cachedWeekMeals: [PlannedMeal] = []
 
-    private var weekMealsWithRecipes: [PlannedMeal] {
-        weekDays.flatMap { day in
+    private var weekMealsWithRecipes: [PlannedMeal] { cachedWeekMeals }
+
+    private func rebuildWeekMeals() {
+        cachedWeekMeals = weekDays.flatMap { day in
             allMeals.filter {
                 Calendar.current.isDate($0.date, inSameDayAs: day) && $0.recipe != nil
             }
@@ -728,6 +731,8 @@ struct WeekMealView: View {
                 weekEndDate: weekDays.last
             )
         }
+        .onAppear { Task { rebuildWeekMeals() } }
+        .onChange(of: allMeals.count) { rebuildWeekMeals() }
     }
 }
 

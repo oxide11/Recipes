@@ -39,6 +39,7 @@ struct RecipeGeneratorView: View {
     @State private var isGenerating = false
     @State private var generatedResult: RecipeIngestionResult?
     @State private var showingResult = false
+    @State private var streamingText = ""
     @State private var errorMessage: String?
     @State private var showingDietaryRestrictions = false
     @State private var descriptionRecognizer = SpeechRecognizer()
@@ -168,7 +169,18 @@ struct RecipeGeneratorView: View {
                 }
             }
             .sheet(isPresented: $showingResult) {
-                if let result = generatedResult {
+                if isGenerating {
+                    NavigationStack {
+                        StreamingRecipePreview(json: streamingText)
+                            .navigationTitle("Generating…")
+                            .navigationBarTitleDisplayMode(.inline)
+                            .toolbar {
+                                ToolbarItem(placement: .cancellationAction) {
+                                    Button("Cancel") { showingResult = false }
+                                }
+                            }
+                    }
+                } else if let result = generatedResult {
                     GeneratedRecipePreviewSheet(result: result) {
                         showingResult = false
                         dismiss()
@@ -299,23 +311,28 @@ struct RecipeGeneratorView: View {
         isGenerating = true
         errorMessage = nil
         generatedResult = nil
+        streamingText = ""
+        showingResult = true
         defer { isGenerating = false }
 
         do {
             let text: String
             switch mode {
-            case .photo:   text = try await generateFromPhoto()
-            case .pantry:  text = try await generateFromPantry()
+            case .photo:    text = try await generateFromPhoto()
+            case .pantry:   text = try await generateFromPantry()
             case .describe: text = try await generateFromDescription()
             }
             let service = RecipeIngestionService(aiRouter: aiRouter)
-            if let result = try? await service.ingestFromText(text) {
-                generatedResult = result
-                showingResult = true
-            } else {
+            do {
+                generatedResult = try await service.ingestFromTextStreaming(text) { chunk in
+                    streamingText += chunk
+                }
+            } catch {
+                showingResult = false
                 errorMessage = "Couldn't parse the recipe. Try generating again."
             }
         } catch {
+            showingResult = false
             errorMessage = error.localizedDescription
         }
     }

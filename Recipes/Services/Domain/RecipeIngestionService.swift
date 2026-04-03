@@ -224,7 +224,28 @@ final class RecipeIngestionService {
         progress = "Applying changes with AI…"
         defer { isProcessing = false; progress = nil }
 
-        // Serialize recipe as plain text — easier than raw JSON escaping
+        let prompt = buildEditPrompt(recipe: recipe, instruction: instruction)
+        let response = try await aiRouter.generateText(prompt: prompt, taskType: .recipeIngestion, preferFast: true)
+        return try parseIngestionResponse(response, source: recipe.sourceURL ?? "ai-edit")
+    }
+
+    /// Streaming variant of `editRecipe` — calls `onChunk` with each text fragment as it
+    /// arrives, then returns the fully parsed result.
+    func editRecipeStreaming(_ recipe: Recipe, instruction: String, onChunk: @escaping (String) -> Void) async throws -> RecipeIngestionResult {
+        isProcessing = true
+        progress = "Applying changes with AI…"
+        defer { isProcessing = false; progress = nil }
+
+        let prompt = buildEditPrompt(recipe: recipe, instruction: instruction)
+        var accumulated = ""
+        for try await chunk in aiRouter.generateTextStreaming(prompt: prompt, taskType: .recipeIngestion) {
+            accumulated += chunk
+            onChunk(chunk)
+        }
+        return try parseIngestionResponse(accumulated, source: recipe.sourceURL ?? "ai-edit")
+    }
+
+    private func buildEditPrompt(recipe: Recipe, instruction: String) -> String {
         let sortedDirs = recipe.directions.sorted { $0.stepNumber < $1.stepNumber }
         var lines: [String] = [
             "Title: \(recipe.title)",
@@ -250,7 +271,7 @@ final class RecipeIngestionService {
         }
         let recipeText = lines.joined(separator: "\n")
 
-        let prompt = """
+        return """
         Modify the following recipe based on the user's request. \
         Make ONLY the changes needed to fulfil the request; keep everything else identical.
 
@@ -277,9 +298,6 @@ final class RecipeIngestionService {
         If the changes add meat or animal products, remove vegetarian/vegan. \
         Return [] if no special dietary labels apply.
         """
-
-        let response = try await aiRouter.generateText(prompt: prompt, taskType: .recipeIngestion, preferFast: true)
-        return try parseIngestionResponse(response, source: recipe.sourceURL ?? "ai-edit")
     }
 
     // MARK: - Convert Result to Recipe Model
