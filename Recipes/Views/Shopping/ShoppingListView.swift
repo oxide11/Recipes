@@ -22,6 +22,14 @@ struct ShoppingListView: View {
     /// Always the single persistent list. Created on appear if absent.
     private var list: GroceryList? { lists.first }
 
+    // Extracted from listContent so SwiftUI tracks these as view-level
+    // dependencies — avoids recomputing inside @ViewBuilder on every re-render.
+    private var allItems:     [GroceryItem] { list?.items ?? [] }
+    private var purchased:    [GroceryItem] { allItems.filter(\.isPurchased) }
+    private var remaining:    [GroceryItem] { allItems.filter { !$0.isPurchased } }
+    private var visibleItems: [GroceryItem] { hideCompleted ? remaining : allItems }
+    private var grouped:      [StoreSection: [GroceryItem]] { Dictionary(grouping: visibleItems, by: \.storeSection) }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -117,11 +125,6 @@ struct ShoppingListView: View {
 
     @ViewBuilder
     private func listContent(_ list: GroceryList) -> some View {
-        let allItems     = list.items
-        let purchased    = allItems.filter(\.isPurchased)
-        let remaining    = allItems.filter { !$0.isPurchased }
-        let visibleItems = hideCompleted ? remaining : allItems
-        let grouped      = Dictionary(grouping: visibleItems, by: \.storeSection)
 
         List {
             // Progress header

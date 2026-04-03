@@ -32,10 +32,22 @@ struct PlanAndShopView: View {
 
             // All three views rendered at once — only the active one is visible.
             // This keeps @Query caches warm so segment switches are instant.
+            // Inactive views get .ignoresSafeArea(.keyboard) so they don't
+            // participate in keyboard-avoidance layout when another segment
+            // has a focused text field.
             ZStack {
-                PantryView()      .opacity(segment == .pantry   ? 1 : 0).allowsHitTesting(segment == .pantry)
-                MealPlanView()    .opacity(segment == .mealPlan ? 1 : 0).allowsHitTesting(segment == .mealPlan)
-                ShoppingListView().opacity(segment == .shopping ? 1 : 0).allowsHitTesting(segment == .shopping)
+                PantryView()
+                    .opacity(segment == .pantry ? 1 : 0)
+                    .allowsHitTesting(segment == .pantry)
+                    .ignoresSafeArea(segment == .pantry ? [] : .keyboard)
+                MealPlanView()
+                    .opacity(segment == .mealPlan ? 1 : 0)
+                    .allowsHitTesting(segment == .mealPlan)
+                    .ignoresSafeArea(segment == .mealPlan ? [] : .keyboard)
+                ShoppingListView()
+                    .opacity(segment == .shopping ? 1 : 0)
+                    .allowsHitTesting(segment == .shopping)
+                    .ignoresSafeArea(segment == .shopping ? [] : .keyboard)
             }
         }
     }
