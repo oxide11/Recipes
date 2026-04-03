@@ -86,7 +86,7 @@ struct RecipeDetailView: View {
             .animation(reduceMotion ? .none : .snappy(duration: 0.25), value: isEditing)
         }
         .scrollPosition(id: $initialScrollID, anchor: .top)
-        .navigationTitle(recipe.title)
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.automatic, for: .navigationBar)
         .toolbar {
