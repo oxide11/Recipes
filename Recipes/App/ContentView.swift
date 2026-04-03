@@ -32,7 +32,7 @@ struct ContentView: View {
                 SettingsView()
             }
         }
-        .tabViewStyle(.sidebarAdaptable)
+        .tabViewStyle(sizeClass == .regular ? .sidebarAdaptable : .automatic)
         .onChange(of: timerDeepLink.pendingRecipeID) { _, newID in
             if newID != nil { selectedTab = .recipes }
         }
