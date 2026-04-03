@@ -46,8 +46,8 @@ extension Font {
     static let miseHeading  = Font.headline.weight(.medium)
     /// Small metadata labels — scales with Dynamic Type (base 12pt).
     static let miseMeta     = Font.caption
-    /// Display / hero text — fixed for now; will be revisited in dashboard redesign.
-    static let miseDisplay  = Font.system(size: 26, weight: .medium)
+    /// Display / hero text — scales with Dynamic Type (base 28pt).
+    static let miseDisplay  = Font.title.weight(.medium)
 }
 
 extension View {
