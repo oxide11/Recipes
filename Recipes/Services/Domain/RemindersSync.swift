@@ -212,7 +212,10 @@ final class RemindersSync {
             }
         }
 
-        try? store.commit()
+        // Commit off the main actor — EKEventStore is thread-safe and the
+        // SQLite write can take 50–100 ms, which would otherwise block the UI.
+        let capturedStore = store
+        Task.detached(priority: .utility) { try? capturedStore.commit() }
     }
 
     /// Push the current isPurchased state to Reminders immediately when the user

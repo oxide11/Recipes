@@ -71,7 +71,12 @@ struct ShoppingListView: View {
         // Throttle: don't sync more than once every 30 seconds
         guard Date().timeIntervalSince(lastSyncDate) > 30 else { return }
         lastSyncDate = Date()
-        Task { await remindersSync.sync(groceryList: list, context: modelContext) }
+        Task {
+            // Short pause so tab-switch animations finish and the user can
+            // navigate away before the sync holds the main actor
+            try? await Task.sleep(for: .milliseconds(600))
+            await remindersSync.sync(groceryList: list, context: modelContext)
+        }
     }
 
     // MARK: - Empty State
