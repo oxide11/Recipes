@@ -27,15 +27,12 @@ enum PantryDeductionService {
                 item.name.lowercased().trimmingCharacters(in: .whitespaces) == key
             }) else { continue }
 
-            // Deduct — only if same unit (or pantry unit is compatible)
-            if pantryItem.unit == ingredient.amount.unit {
-                pantryItem.quantity = max(0, pantryItem.quantity - neededQty)
-                pantryItem.lastUsed = .now
-            } else {
-                // Best-effort: deduct by proportion for piece/whole units
-                pantryItem.quantity = max(0, pantryItem.quantity - neededQty)
-                pantryItem.lastUsed = .now
-            }
+            // Only deduct when units match — mismatched units (e.g. grams vs cups)
+            // cannot be safely converted without a unit conversion table, so we
+            // skip the deduction rather than corrupt the pantry quantity.
+            guard pantryItem.unit == ingredient.amount.unit else { continue }
+            pantryItem.quantity = max(0, pantryItem.quantity - neededQty)
+            pantryItem.lastUsed = .now
 
             if pantryItem.quantity <= 0 {
                 fullyConsumed.append(pantryItem)

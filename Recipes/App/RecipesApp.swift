@@ -53,9 +53,9 @@ struct RecipesApp: App {
             let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
             return try ModelContainer(for: schema, configurations: [config])
         } catch {
-            // Schema migration failed — wipe store and start fresh.
-            // This is safe during development; production apps should migrate.
-            logger.error("Schema migration failed, resetting store: \(error)")
+            logger.error("Schema migration failed: \(error)")
+#if DEBUG
+            // Wipe and recreate during development only — never in production.
             let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
             do {
                 let storeURL = URL.applicationSupportDirectory
@@ -65,8 +65,11 @@ struct RecipesApp: App {
                 try? FileManager.default.removeItem(at: storeURL.appendingPathExtension("wal"))
                 return try ModelContainer(for: schema, configurations: [config])
             } catch {
-                fatalError("Cannot create ModelContainer: \(error)")
+                fatalError("Cannot create ModelContainer after reset: \(error)")
             }
+#else
+            fatalError("Schema migration failed — a migration plan is required: \(error)")
+#endif
         }
     }()
 

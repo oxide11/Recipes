@@ -298,6 +298,7 @@ struct CookingModeView: View {
                 .font(.system(size: min(timerFontSize, 96), weight: .bold, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(isPaused ? Color.secondary : Color.orange)
+                .accessibilityLabel(isPaused ? "Timer paused" : "Timer running")
 
                 HStack(spacing: 12) {
                     Button(isPaused ? "Resume" : "Pause") {
@@ -310,12 +311,15 @@ struct CookingModeView: View {
                     .font(.title3)
                     .buttonStyle(.glass)
                     .tint(.orange)
+                    .accessibilityLabel(isPaused ? "Resume timer" : "Pause timer")
+                    .accessibilityHint(isPaused ? "Timer is currently paused" : "Timer is currently running")
 
                     Button("Stop Timer") {
                         stopTimer(for: currentStepIndex)
                     }
                     .font(.title3)
                     .buttonStyle(.glass)
+                    .accessibilityLabel("Stop timer for this step")
                 }
             } else {
                 VStack(spacing: 8) {

@@ -18,9 +18,12 @@ struct StarRatingView: View {
                         onRate(star)
                     } label: {
                         starImage(for: star)
+                            .frame(minWidth: 44, minHeight: 44)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("\(star) star\(star == 1 ? "" : "s")")
+                    .accessibilityHint(star == rating ? "Current rating" : "Double tap to rate")
                 } else {
                     starImage(for: star)
                 }

@@ -55,7 +55,7 @@ actor SmartNotificationService {
         // Remove existing pantry notifications before rescheduling.
         center.removePendingNotificationRequests(withIdentifiers:
             items.flatMap { item in
-                ["\(Category.pantryExpiry)_3d_\(item.name)", "\(Category.pantryExpiry)_1d_\(item.name)"]
+                ["\(Category.pantryExpiry)_3d_\(item.id.uuidString)", "\(Category.pantryExpiry)_1d_\(item.id.uuidString)"]
             }
         )
 
@@ -84,7 +84,7 @@ actor SmartNotificationService {
 
                 let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
                 let request = UNNotificationRequest(
-                    identifier: "\(Category.pantryExpiry)_3d_\(item.name)",
+                    identifier: "\(Category.pantryExpiry)_3d_\(item.id.uuidString)",
                     content: threeDayContent,
                     trigger: trigger
                 )
@@ -107,7 +107,7 @@ actor SmartNotificationService {
 
                 let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
                 let request = UNNotificationRequest(
-                    identifier: "\(Category.pantryExpiry)_1d_\(item.name)",
+                    identifier: "\(Category.pantryExpiry)_1d_\(item.id.uuidString)",
                     content: oneDayContent,
                     trigger: trigger
                 )

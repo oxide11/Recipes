@@ -187,6 +187,8 @@ struct PantryView: View {
                                         .clipShape(Capsule())
                                 }
                                 .buttonStyle(.plain)
+                                .accessibilityLabel("Keep \(item.name)")
+                                .accessibilityHint("Confirms you still have this item")
 
                                 Button {
                                     modelContext.delete(item)
@@ -195,6 +197,7 @@ struct PantryView: View {
                                         .foregroundStyle(.secondary)
                                 }
                                 .buttonStyle(.plain)
+                                .accessibilityLabel("Remove \(item.name)")
                             }
                         }
                     } header: {

@@ -154,9 +154,9 @@ struct RestaurantJournalView: View {
                             Label("Recommend", systemImage: "hand.thumbsup")
                         }
 
-                        if entry.hasCoordinates {
+                        if let lat = entry.latitude, let lon = entry.longitude {
                             Button {
-                                openInMaps(entry.restaurantName, latitude: entry.latitude!, longitude: entry.longitude!)
+                                openInMaps(entry.restaurantName, latitude: lat, longitude: lon)
                             } label: {
                                 Label("View on Map", systemImage: "map")
                             }
@@ -313,33 +313,37 @@ struct RestaurantMapView: View {
         NavigationStack {
             Map {
                 ForEach(entries.filter(\.hasCoordinates)) { entry in
-                    Annotation(entry.restaurantName, coordinate: CLLocationCoordinate2D(
-                        latitude: entry.latitude!,
-                        longitude: entry.longitude!
-                    )) {
-                        VStack(spacing: 2) {
-                            Image(systemName: "fork.knife.circle.fill")
-                                .font(.title2)
-                                .foregroundStyle(Brand.herbGreen)
-                            Text(entry.restaurantName)
-                                .font(.caption2)
-                                .fontWeight(.medium)
+                    if let lat = entry.latitude, let lon = entry.longitude {
+                        Annotation(entry.restaurantName, coordinate: CLLocationCoordinate2D(
+                            latitude: lat,
+                            longitude: lon
+                        )) {
+                            VStack(spacing: 2) {
+                                Image(systemName: "fork.knife.circle.fill")
+                                    .font(.title2)
+                                    .foregroundStyle(Brand.herbGreen)
+                                Text(entry.restaurantName)
+                                    .font(.caption2)
+                                    .fontWeight(.medium)
+                            }
                         }
                     }
                 }
 
                 ForEach(wantToTry.filter(\.hasCoordinates)) { restaurant in
-                    Annotation(restaurant.restaurantName, coordinate: CLLocationCoordinate2D(
-                        latitude: restaurant.latitude!,
-                        longitude: restaurant.longitude!
-                    )) {
-                        VStack(spacing: 2) {
-                            Image(systemName: "bookmark.circle.fill")
-                                .font(.title2)
-                                .foregroundStyle(Brand.warmTan)
-                            Text(restaurant.restaurantName)
-                                .font(.caption2)
-                                .fontWeight(.medium)
+                    if let lat = restaurant.latitude, let lon = restaurant.longitude {
+                        Annotation(restaurant.restaurantName, coordinate: CLLocationCoordinate2D(
+                            latitude: lat,
+                            longitude: lon
+                        )) {
+                            VStack(spacing: 2) {
+                                Image(systemName: "bookmark.circle.fill")
+                                    .font(.title2)
+                                    .foregroundStyle(Brand.warmTan)
+                                Text(restaurant.restaurantName)
+                                    .font(.caption2)
+                                    .fontWeight(.medium)
+                            }
                         }
                     }
                 }

@@ -200,7 +200,10 @@ struct RecipeListView: View {
                 .presentationDetents([.medium])
             }
             .sheet(isPresented: $showingSeasonalGenerator) {
-                RecipeGeneratorView(initialIngredient: selectedSeasonalIngredient ?? "")
+                let hint = selectedSeasonalIngredient.map {
+                    "Generate a recipe that features \($0.lowercased()) as a key ingredient. It's in season right now."
+                } ?? "Generate a recipe using a seasonal ingredient that's at its peak right now."
+                QuickGenerateView(initialDescription: hint)
             }
             .task {
                 updateNoWasteMatches()
@@ -389,11 +392,21 @@ struct RecipeListView: View {
 
                 // Recipes — filtered when a chip is selected, all seasonal otherwise
                 if seasonalFilteredRecipes.isEmpty {
-                    Text(selectedSeasonalIngredient.map { "No recipes with \($0.capitalized) — tap Generate to make one" }
-                         ?? "No seasonal recipes yet")
-                        .font(.miseMeta)
-                        .foregroundStyle(Brand.muted)
-                        .listRowBackground(Color.clear)
+                    VStack(spacing: 10) {
+                        Image(systemName: "leaf")
+                            .font(.title2)
+                            .foregroundStyle(Brand.herbGreen.opacity(0.5))
+                        Text(selectedSeasonalIngredient.map { "No recipes with \($0.capitalized) yet" }
+                             ?? "No seasonal recipes yet")
+                            .font(.miseMeta)
+                            .foregroundStyle(Brand.muted)
+                        Text("Tap Generate to create one")
+                            .font(.caption)
+                            .foregroundStyle(Brand.herbGreen.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .listRowBackground(Color.clear)
                 } else {
                     ScrollView(.horizontal, showsIndicators: false) {
                         LazyHStack(alignment: .top, spacing: 12) {
@@ -479,7 +492,8 @@ struct RecipeListView: View {
         ) {
             Button("Delete", role: .destructive) {
                 if let recipe = recipeToDelete {
-                    modelContext.delete(recipe)
+                    if selectedRecipe?.id == recipe.id { selectedRecipe = nil }
+                    modelContext.deleteRecipe(recipe)
                     recipeToDelete = nil
                 }
             }
@@ -540,6 +554,8 @@ struct TagChipGrid: View {
                         .foregroundStyle(isSelected ? .white : .primary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("\(tag)\(isSelected ? ", selected" : "")")
+                .accessibilityHint(isSelected ? "Double tap to remove filter" : "Double tap to filter by this tag")
             }
         }
         .padding(.vertical, 4)
@@ -570,6 +586,8 @@ struct DietaryChipGrid: View {
                         .foregroundStyle(isSelected ? .white : .primary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("\(restriction.displayName)\(isSelected ? ", selected" : "")")
+                .accessibilityHint(isSelected ? "Double tap to remove filter" : "Double tap to filter by this restriction")
             }
         }
         .padding(.vertical, 4)
@@ -698,7 +716,7 @@ struct RecipeCardCompact: View {
         VStack(alignment: .leading, spacing: 6) {
             Group {
                 let firstPhoto = recipe.photos.first
-                    ?? recipe.cookingLog.sorted { $0.date > $1.date }.first?.photo
+                    ?? recipe.cookingLog.max(by: { $0.date < $1.date })?.photo
                 if let photo = firstPhoto {
                     RecipePhotoImage(photo: photo)
                         .frame(width: 130, height: 86)

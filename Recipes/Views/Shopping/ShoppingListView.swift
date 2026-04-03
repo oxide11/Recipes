@@ -184,7 +184,7 @@ struct ShoppingListView: View {
                                         modelContext.delete(item)
                                         Task { remindersSync.completeReminderByID(rid) }
                                     } label: {
-                                        Label("Delete", systemImage: "trash")
+                                        Label("Delete \(item.name)", systemImage: "trash")
                                     }
                                 }
                         }

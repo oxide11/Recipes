@@ -205,7 +205,7 @@ final class GroceryList {
     @Relationship(deleteRule: .nullify)
     var mealPlan: MealPlan?
 
-    @Relationship(deleteRule: .nullify)
+    @Relationship(deleteRule: .cascade)
     var receipts: [GroceryReceipt]
 
     var totalEstimatedCost: Double {
