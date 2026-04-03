@@ -404,8 +404,18 @@ struct SubstitutionSheetView: View {
             List {
                 Section("Substitutions for \(item.name)") {
                     if substitutions.isEmpty {
-                        Text("No known substitutions available.")
-                            .foregroundStyle(.secondary)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("No known substitutions available for \(item.name).")
+                                .foregroundStyle(.secondary)
+                            Text("Try a similar product at the store, or skip this item for now.")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                        Button("Skip Item") {
+                            item.isPurchased = true
+                            dismiss()
+                        }
+                        .foregroundStyle(.orange)
                     } else {
                         ForEach(substitutions, id: \.replacement) { sub in
                             Button {

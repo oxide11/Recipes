@@ -420,7 +420,7 @@ struct QuickGenerateView: View {
         NavigationStack {
             Group {
                 if isGenerating {
-                    StreamingRecipePreview(json: streamingText, cuisineHint: cuisineHint, quickMealMode: quickMealMode)
+                    StreamingRecipePreview(json: streamingText, cuisineHint: cuisineHint, quickMealMode: quickMealMode, pantryIsEmpty: pantryItems.isEmpty)
                 } else if let error = errorMessage {
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle")
@@ -590,6 +590,7 @@ struct StreamingRecipePreview: View {
     let json: String
     var cuisineHint: String? = nil
     var quickMealMode: Bool = false
+    var pantryIsEmpty: Bool = false
 
     private var title: String? {
         guard let keyEnd = json.range(of: "\"title\"")?.upperBound else { return nil }
@@ -620,7 +621,9 @@ struct StreamingRecipePreview: View {
                         .transition(.opacity.combined(with: .move(edge: .bottom)))
                 } else {
                     Text(cuisineHint.map { "Finding a great \($0) recipe…" }
-                         ?? (quickMealMode ? "Finding something quick…" : "Generating a recipe…"))
+                         ?? (quickMealMode
+                             ? (pantryIsEmpty ? "Finding something quick to make…" : "Finding something quick with what you have…")
+                             : "Generating a recipe…"))
                         .font(.title3)
                         .foregroundStyle(.secondary)
                 }

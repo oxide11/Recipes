@@ -14,6 +14,7 @@ struct RecommendationsView: View {
     @State private var recommendations: [RecommendationAgent.Recommendation] = []
     @State private var isLoading = false
     @State private var hasLoaded = false
+    @State private var loadFailed = false
 
     private var profile: UserProfile? { profiles.first }
 
@@ -24,11 +25,30 @@ struct RecommendationsView: View {
                     ProgressView("Analyzing your cooking history...")
                         .padding(.top, 40)
                 } else if recommendations.isEmpty && hasLoaded {
-                    ContentUnavailableView(
-                        "No Recommendations Yet",
-                        systemImage: "sparkles",
-                        description: Text("Cook a few recipes and add items to your pantry to get personalized suggestions.")
-                    )
+                    if loadFailed {
+                        ContentUnavailableView {
+                            Label("Couldn't Load Suggestions", systemImage: "exclamationmark.triangle")
+                        } description: {
+                            Text("Check your connection and pull down to try again.")
+                        } actions: {
+                            Button("Try Again") {
+                                Task { await loadRecommendations() }
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                    } else if recipes.isEmpty {
+                        ContentUnavailableView(
+                            "No Recipes Yet",
+                            systemImage: "book.closed",
+                            description: Text("Add some recipes and start cooking to unlock personalised suggestions.")
+                        )
+                    } else {
+                        ContentUnavailableView(
+                            "No Recommendations Yet",
+                            systemImage: "sparkles",
+                            description: Text("Cook a few recipes and add items to your pantry to get personalised suggestions. Pull down to refresh.")
+                        )
+                    }
                 } else {
                     // Group by category
                     ForEach(groupedRecommendations, id: \.0) { category, recs in
@@ -70,12 +90,18 @@ struct RecommendationsView: View {
 
     private func loadRecommendations() async {
         isLoading = true
+        loadFailed = false
         let agent = RecommendationAgent(aiRouter: aiRouter)
-        recommendations = await agent.generateRecommendations(
+        let result = await agent.generateRecommendations(
             recipes: recipes,
             pantryItems: pantryItems,
             profile: profile
         )
+        // If we have recipes but still got nothing, assume an AI failure
+        if result.isEmpty && !recipes.isEmpty {
+            loadFailed = true
+        }
+        recommendations = result
         isLoading = false
         hasLoaded = true
     }

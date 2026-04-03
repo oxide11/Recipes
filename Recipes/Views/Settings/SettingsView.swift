@@ -19,6 +19,7 @@ struct SettingsView: View {
     @State private var showingSavedAlert = false
     @State private var showingSampleDataConfirm = false
     @State private var sampleDataLoaded = false
+    @State private var apiKeyWarning: String? = nil
 
     private var profile: UserProfile? { profiles.first }
 
@@ -47,6 +48,18 @@ struct SettingsView: View {
             }
             .alert("Settings Saved", isPresented: $showingSavedAlert) {
                 Button("OK") {}
+            }
+            .alert("Check Your API Key", isPresented: Binding(
+                get: { apiKeyWarning != nil },
+                set: { if !$0 { apiKeyWarning = nil } }
+            )) {
+                Button("Save Anyway") {
+                    apiKeyWarning = nil
+                    commitAPIKeys()
+                }
+                Button("Cancel", role: .cancel) { apiKeyWarning = nil }
+            } message: {
+                Text(apiKeyWarning ?? "")
             }
         }
     }
@@ -422,6 +435,23 @@ struct SettingsView: View {
     }
 
     private func saveAPIKeys() {
+        let trimmedOpenAI = openAIKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedClaude = claudeKey.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Basic format validation — warn but allow the user to save anyway
+        if !trimmedOpenAI.isEmpty && !trimmedOpenAI.hasPrefix("sk-") {
+            apiKeyWarning = "Your OpenAI key doesn't look right — it should start with "sk-". Double-check it and try again."
+            return
+        }
+        if !trimmedClaude.isEmpty && !trimmedClaude.hasPrefix("sk-ant-") {
+            apiKeyWarning = "Your Claude key doesn't look right — it should start with "sk-ant-". Double-check it and try again."
+            return
+        }
+
+        commitAPIKeys()
+    }
+
+    private func commitAPIKeys() {
         let trimmedOpenAI = openAIKey.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedClaude = claudeKey.trimmingCharacters(in: .whitespacesAndNewlines)
         if !trimmedOpenAI.isEmpty {

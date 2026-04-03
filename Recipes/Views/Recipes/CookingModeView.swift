@@ -61,7 +61,26 @@ struct CookingModeView: View {
             // Progress bar
             progressBar
 
-            if let step = currentStep {
+            if sortedDirections.isEmpty {
+                VStack(spacing: 20) {
+                    Spacer()
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.orange)
+                    Text("No Steps Found")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(.white)
+                    Text("This recipe doesn't have any cooking directions. Try editing it to add steps first.")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                    Button("Done") { dismiss() }
+                        .buttonStyle(.borderedProminent)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let step = currentStep {
                 stepContent(step)
             } else {
                 completionView

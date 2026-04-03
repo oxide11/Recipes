@@ -728,7 +728,12 @@ struct SeasonalRecipesView: View {
 struct QuickMealsView: View {
     let recipes: [Recipe]
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
     @State private var showingGenerator = false
+
+    private var pantryIsEmpty: Bool {
+        pantryItems.filter { !$0.isStaple }.isEmpty && pantryItems.filter(\.isStaple).isEmpty
+    }
 
     var body: some View {
         NavigationStack {
@@ -748,6 +753,16 @@ struct QuickMealsView: View {
                             .foregroundStyle(Brand.muted)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
+                        if pantryIsEmpty {
+                            HStack(spacing: 8) {
+                                Image(systemName: "cart.badge.plus")
+                                    .foregroundStyle(Brand.warmTan)
+                                Text("Add pantry items to get suggestions based on what you have on hand.")
+                                    .font(.caption)
+                                    .foregroundStyle(Brand.muted)
+                            }
+                            .padding(.horizontal, 40)
+                        }
                         Button {
                             showingGenerator = true
                         } label: {
@@ -773,6 +788,13 @@ struct QuickMealsView: View {
                                     .foregroundStyle(Brand.warmTan)
                             }
                             .listRowBackground(Brand.warmTan.opacity(0.1))
+
+                            if pantryIsEmpty {
+                                Label("Add pantry items for personalised suggestions.", systemImage: "cart.badge.plus")
+                                    .font(.caption)
+                                    .foregroundStyle(Brand.muted)
+                                    .listRowBackground(Color.clear)
+                            }
                         }
 
                         Section {
