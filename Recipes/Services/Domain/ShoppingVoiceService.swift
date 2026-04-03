@@ -83,24 +83,45 @@ final class ShoppingVoiceService: NSObject {
 
     func markFound() {
         currentItem?.isPurchased = true
-        advanceToNextItem()
+        // The purchased item drops out of the unpurchased filtered list, so the
+        // next item slides into currentItemIndex automatically. Do NOT increment —
+        // just check whether the section is now exhausted.
+        advanceSectionIfExhausted()
         restartGuidanceIfNeeded()
     }
 
     func skip() {
+        // Explicitly move past the current item without purchasing it.
         advanceToNextItem()
         restartGuidanceIfNeeded()
     }
 
     // MARK: - Private Navigation
 
+    /// Called after marking an item purchased. The index stays the same;
+    /// only move to the next section if the current one is fully done.
+    private func advanceSectionIfExhausted() {
+        guard currentSectionIndex < sortedSections.count else {
+            isComplete = true
+            return
+        }
+        let remaining = sortedSections[currentSectionIndex].1.filter { !$0.isPurchased }
+        guard remaining.isEmpty || currentItemIndex >= remaining.count else { return }
+        currentSectionIndex += 1
+        currentItemIndex = 0
+        if currentSectionIndex >= sortedSections.count {
+            isComplete = true
+        }
+    }
+
+    /// Called when skipping an item. Increments the index to move past it.
     private func advanceToNextItem() {
         guard currentSectionIndex < sortedSections.count else {
             isComplete = true
             return
         }
         let unpurchased = sortedSections[currentSectionIndex].1.filter { !$0.isPurchased }
-        if currentItemIndex < unpurchased.count - 1 {
+        if unpurchased.count > 1 && currentItemIndex < unpurchased.count - 1 {
             currentItemIndex += 1
         } else {
             currentSectionIndex += 1
