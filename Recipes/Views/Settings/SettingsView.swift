@@ -440,11 +440,11 @@ struct SettingsView: View {
 
         // Basic format validation — warn but allow the user to save anyway
         if !trimmedOpenAI.isEmpty && !trimmedOpenAI.hasPrefix("sk-") {
-            apiKeyWarning = "Your OpenAI key doesn't look right — it should start with "sk-". Double-check it and try again."
+            apiKeyWarning = "Your OpenAI key doesn't look right — it should start with \"sk-\". Double-check it and try again."
             return
         }
         if !trimmedClaude.isEmpty && !trimmedClaude.hasPrefix("sk-ant-") {
-            apiKeyWarning = "Your Claude key doesn't look right — it should start with "sk-ant-". Double-check it and try again."
+            apiKeyWarning = "Your Claude key doesn't look right — it should start with \"sk-ant-\". Double-check it and try again."
             return
         }
 
