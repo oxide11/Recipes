@@ -267,7 +267,7 @@ struct RecipeGeneratorView: View {
                 HStack(spacing: 10) {
                     Image(systemName: "mic.fill")
                         .foregroundStyle(Brand.herbGreen)
-                        .symbolEffect(.pulse, isActive: !reduceMotion)
+                        .symbolEffect(.pulse)
                     Text(descriptionRecognizer.transcript.isEmpty ? "Listening…" : descriptionRecognizer.transcript)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -613,7 +613,7 @@ struct StreamingRecipePreview: View {
             Image(systemName: "sparkles")
                 .font(.system(size: 40))
                 .foregroundStyle(Brand.herbGreen)
-                .symbolEffect(.pulse, isActive: !reduceMotion)
+                .symbolEffect(.pulse)
                 .accessibilityHidden(true)
 
             // Title fades in as soon as it's extracted
