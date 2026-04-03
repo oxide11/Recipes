@@ -83,7 +83,8 @@ struct NutritionCardView: View {
                 macroIndicator(label: "Fat", percentage: info.fatPercentage, color: .orange)
             }
 
-            // Proportional bar
+            // Proportional bar — hidden from VoiceOver as the legend above conveys
+            // the same percentages with text labels.
             GeometryReader { geo in
                 HStack(spacing: 1) {
                     Rectangle()
@@ -99,6 +100,7 @@ struct NutritionCardView: View {
                 .clipShape(.rect(cornerRadius: 4))
             }
             .frame(height: 8)
+            .accessibilityHidden(true)
         }
         .padding(.top, 8)
     }

@@ -96,7 +96,7 @@ struct MealPrepView: View {
                 .foregroundStyle(Brand.muted)
 
             Text(totalTimeLabel)
-                .font(.system(size: 13, weight: .medium))
+                .font(.footnote.weight(.medium))
                 .foregroundStyle(Brand.warmTan)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
@@ -175,8 +175,9 @@ struct MealPrepView: View {
             // Ingredient name + total amount — header, no checkbox
             HStack {
                 Text(group.ingredientName)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(group.isFullyCompleted ? Brand.muted : Brand.cream)
+                    .accessibilityLabel("\(group.ingredientName)\(group.isFullyCompleted ? ", all steps completed" : "")")
                 Spacer()
                 Text(group.totalAmount)
                     .font(.miseMeta)
@@ -217,8 +218,9 @@ struct MealPrepView: View {
             } label: {
                 HStack(spacing: 10) {
                     Image(systemName: allDone ? "checkmark.circle.fill" : "circle")
-                        .font(.system(size: 18))
+                        .font(.title3)
                         .foregroundStyle(allDone ? Brand.herbGreen : Brand.muted)
+                        .accessibilityHidden(true)
 
                     let displayAction = action.hasPrefix("Wash and ") ? String(action.dropFirst("Wash and ".count)).capitalized : action
                     let hasPassiveTime = MealPrepPlanGenerator.actionPassiveNote[action] != nil
@@ -228,12 +230,12 @@ struct MealPrepView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         HStack(spacing: 6) {
                             Text(displayAction)
-                                .font(.system(size: 13, weight: .medium))
+                                .font(.footnote.weight(.medium))
                                 .foregroundStyle(allDone ? Brand.muted : Brand.cream)
                                 .strikethrough(allDone)
                             if showAmount {
                                 Text(totalAmount)
-                                    .font(.system(size: 11))
+                                    .font(.caption2)
                                     .foregroundStyle(Brand.warmTan.opacity(allDone ? 0.4 : 0.7))
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 2)
@@ -242,11 +244,11 @@ struct MealPrepView: View {
                             Spacer()
                             if hasPassiveTime {
                                 Image(systemName: "clock.badge")
-                                    .font(.system(size: 12))
+                                    .font(.caption)
                                     .foregroundStyle(Brand.spiceRed.opacity(allDone ? 0.4 : 0.9))
                             }
                             Text("~\(mins) min")
-                                .font(.system(size: 11))
+                                .font(.caption2)
                                 .foregroundStyle(Brand.muted.opacity(allDone ? 0.4 : 0.7))
                         }
                     }
@@ -255,13 +257,15 @@ struct MealPrepView: View {
                 }
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("\(action)\(allDone ? ", completed" : ", not completed")")
+            .accessibilityHint("Double tap to \(allDone ? "mark as incomplete" : "mark as complete")")
 
             if let src = detailSource {
                 Button {
                     detailTask = src
                 } label: {
                     Image(systemName: "info.circle")
-                        .font(.system(size: 16))
+                        .font(.body)
                         .foregroundStyle(Brand.warmTan.opacity(0.7))
                 }
                 .buttonStyle(.plain)
@@ -306,7 +310,7 @@ struct PrepDetailSheet: View {
 
                     if let detail = task.detail {
                         Text(detail)
-                            .font(.system(size: 15))
+                            .font(.subheadline)
                             .foregroundStyle(Brand.cream)
                             .lineSpacing(4)
                     }
