@@ -29,6 +29,7 @@ final class ShoppingVoiceService: NSObject {
     // MARK: - Text-to-Speech
 
     func speak(_ text: String) async {
+        stopListening()
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .voicePrompt, options: .duckOthers)
         try? AVAudioSession.sharedInstance().setActive(true)
 
@@ -71,18 +72,31 @@ final class ShoppingVoiceService: NSObject {
             return .error
         }
 
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.record, mode: .measurement, options: .duckOthers)
+            try AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
+        } catch {
+            return .error
+        }
+
         let audioEngine = AVAudioEngine()
         self.audioEngine = audioEngine
         let request = SFSpeechAudioBufferRecognitionRequest()
 
         let inputNode = audioEngine.inputNode
+        inputNode.removeTap(onBus: 0)
         let format = inputNode.outputFormat(forBus: 0)
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
             request.append(buffer)
         }
 
         audioEngine.prepare()
-        try? audioEngine.start()
+        do {
+            try audioEngine.start()
+        } catch {
+            inputNode.removeTap(onBus: 0)
+            return .error
+        }
         isListening = true
 
         let result = await withCheckedContinuation { (continuation: CheckedContinuation<ShoppingResponse, Never>) in
@@ -116,7 +130,9 @@ final class ShoppingVoiceService: NSObject {
     func stopListening() {
         audioEngine?.stop()
         audioEngine?.inputNode.removeTap(onBus: 0)
+        audioEngine = nil
         recognitionTask?.cancel()
+        recognitionTask = nil
         isListening = false
     }
 

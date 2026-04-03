@@ -230,41 +230,37 @@ struct GuidedShoppingView: View {
                 .font(.title3)
                 .foregroundStyle(.secondary)
 
-            HStack(spacing: 16) {
-                Button {
-                    markFound(item)
-                } label: {
+            VStack(spacing: 12) {
+                // Primary action — full width
+                Button { markFound(item) } label: {
                     Label("Found It", systemImage: "checkmark.circle.fill")
                         .frame(maxWidth: .infinity)
-                        .padding()
+                        .padding(.vertical, 4)
                 }
                 .buttonStyle(.glass)
                 .tint(Brand.herbGreen)
                 .sensoryFeedback(.success, trigger: item.isPurchased)
 
-                Button {
-                    substitutionItem = item
-                    showingSubstitution = true
-                } label: {
-                    Label("Substitute", systemImage: "arrow.triangle.2.circlepath")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                }
-                .buttonStyle(.glass)
+                // Secondary actions — side by side
+                HStack(spacing: 12) {
+                    Button { substitutionItem = item; showingSubstitution = true } label: {
+                        Label("Substitute", systemImage: "arrow.triangle.2.circlepath")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.glass)
 
-                Button {
-                    skipItem()
-                } label: {
-                    Label("Skip", systemImage: "forward.fill")
-                        .frame(maxWidth: .infinity)
-                        .padding()
+                    Button { skipItem() } label: {
+                        Label("Skip", systemImage: "forward.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.glass)
+                    .tint(.secondary)
                 }
-                .buttonStyle(.glass)
-                .tint(.secondary)
             }
             .padding(.horizontal)
         }
         .padding()
+        .padding(.vertical, 8)
         .background(in: .rect)
         .glassEffect(.regular, in: .rect)
     }
