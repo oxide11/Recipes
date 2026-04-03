@@ -746,9 +746,9 @@ struct RecipeDetailView: View {
                                 if let rating = entry.rating {
                                     StarRatingView(rating: rating)
                                 }
-                                Image(systemName: "pencil")
-                                    .font(.caption2)
-                                    .foregroundStyle(.tertiary)
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
                             if let notes = entry.notes {
                                 Text(notes)
@@ -764,6 +764,7 @@ struct RecipeDetailView: View {
                         .padding(.vertical, 4)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Edit log entry from \(entry.date.formatted(date: .long, time: .omitted))")
                     if index < sortedLog.count - 1 {
                         Divider()
                     }
