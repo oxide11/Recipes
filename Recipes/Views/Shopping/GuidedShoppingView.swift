@@ -166,19 +166,24 @@ struct GuidedShoppingView: View {
                 let sectionItems = voiceService.sortedSections[sectionIndex].1
                 List {
                     ForEach(sectionItems) { item in
-                        HStack {
-                            Image(systemName: item.isPurchased ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(item.isPurchased ? .green : .secondary)
+                        Button {
+                            item.isPurchased.toggle()
+                        } label: {
+                            HStack {
+                                Image(systemName: item.isPurchased ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(item.isPurchased ? .green : .secondary)
 
-                            Text(item.name)
-                                .strikethrough(item.isPurchased)
+                                Text(item.name)
+                                    .strikethrough(item.isPurchased)
+                                    .foregroundStyle(.primary)
 
-                            Spacer()
+                                Spacer()
 
-                            if let amount = item.formattedAmount {
-                                Text(amount)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                if let amount = item.formattedAmount {
+                                    Text(amount)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
                             }
                         }
                     }
