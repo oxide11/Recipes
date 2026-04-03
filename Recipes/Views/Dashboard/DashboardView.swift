@@ -25,13 +25,14 @@ struct DashboardView: View {
     @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
     @Query private var receipts: [GroceryReceipt]
     @Query private var profiles: [UserProfile]
+    /// Fetched directly — avoids flatMapping over the entire recipe graph.
+    @Query(sort: \CookingLogEntry.date, order: .reverse) private var cookingLogs: [CookingLogEntry]
 
     @State private var showingReceiptScanner = false
     @State private var showingQuickMeals = false
     @State private var showingShoppingList = false
     @State private var showingWantToTry = false
     @State private var selectedSeasonalIngredient: IngredientFilter? = nil
-    @State private var cachedRecentLogs: [CookingLogEntry] = []
     @State private var cachedTodaysMeals: [PlannedMeal] = []
     @State private var cachedQuickRecipes: [Recipe] = []
 
@@ -53,7 +54,8 @@ struct DashboardView: View {
         pantryItems.filter(\.isExpired)
     }
 
-    private var recentCookingLogs: [CookingLogEntry] { cachedRecentLogs }
+    /// Capped at 50 — covers any realistic streak or weekly count.
+    private var recentCookingLogs: [CookingLogEntry] { Array(cookingLogs.prefix(50)) }
 
     private var thisWeekCookCount: Int {
         let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: .now) ?? .now
@@ -137,7 +139,6 @@ struct DashboardView: View {
 
     private func rebuildCaches() {
         rebuildTodaysMeals()
-        cachedRecentLogs = recipes.flatMap(\.cookingLog).sorted { $0.date > $1.date }
         cachedQuickRecipes = recipes.filter { $0.estimatedTotalMinutes <= 30 }
             .sorted { $0.cookCount > $1.cookCount }
     }
