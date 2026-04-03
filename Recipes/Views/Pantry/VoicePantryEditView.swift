@@ -60,6 +60,7 @@ struct VoicePantryEditView: View {
                     }
                 }
             }
+            .task { await startListening() }
             .onChange(of: recognizer.isListening) { _, listening in
                 if !listening && phase == .listening {
                     // Auto-stopped (silence timeout) — notify and move to parsing
@@ -216,7 +217,7 @@ struct VoicePantryEditView: View {
         Button {
             parsedActions = []
             errorMessage = nil
-            phase = .idle
+            Task { await startListening() }
         } label: {
             Label("Try Again", systemImage: "arrow.counterclockwise")
         }
