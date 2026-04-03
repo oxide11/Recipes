@@ -6,6 +6,7 @@ import Speech
 /// Audio-based guided shopping experience.
 /// Reads the grocery list section by section, item by item,
 /// and waits for voice confirmation before proceeding.
+/// ShoppingVoiceService is the single source of truth for all session state.
 @Observable
 @MainActor
 final class ShoppingVoiceService: NSObject {
@@ -20,10 +21,136 @@ final class ShoppingVoiceService: NSObject {
     var lastHeardText: String?
     var currentItemName: String?
 
+    // MARK: - Session State
+
+    private(set) var sortedSections: [(StoreSection, [GroceryItem])] = []
+    private(set) var currentSectionIndex = 0
+    private(set) var currentItemIndex = 0
+    private(set) var isActive = false
+    private(set) var isComplete = false
+    private var voiceEnabled = false
+    private var guidanceTask: Task<Void, Never>?
+
+    // MARK: - Computed State
+
+    var currentItem: GroceryItem? {
+        guard currentSectionIndex < sortedSections.count else { return nil }
+        let unpurchased = sortedSections[currentSectionIndex].1.filter { !$0.isPurchased }
+        guard currentItemIndex < unpurchased.count else { return nil }
+        return unpurchased[currentItemIndex]
+    }
+
+    var currentSection: StoreSection? {
+        guard currentSectionIndex < sortedSections.count else { return nil }
+        return sortedSections[currentSectionIndex].0
+    }
+
+    var totalItems: Int { sortedSections.flatMap { $0.1 }.count }
+    var purchasedItems: Int { sortedSections.flatMap { $0.1 }.filter(\.isPurchased).count }
+
     override init() {
         self.speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
         super.init()
         self.synthesizer.delegate = self
+    }
+
+    // MARK: - Session Control
+
+    func startSession(list: GroceryList, voiceEnabled: Bool) {
+        stopSession()
+        self.voiceEnabled = voiceEnabled
+        self.sortedSections = list.itemsBySection
+            .sorted { $0.key.rawValue < $1.key.rawValue }
+            .filter { !$0.value.allSatisfy(\.isPurchased) }
+        self.currentSectionIndex = 0
+        self.currentItemIndex = 0
+        self.isComplete = false
+        self.isActive = true
+
+        if voiceEnabled {
+            guidanceTask = Task { await runVoiceGuidance() }
+        }
+    }
+
+    func stopSession() {
+        guidanceTask?.cancel()
+        guidanceTask = nil
+        stopSpeaking()
+        stopListening()
+        isActive = false
+        isComplete = false
+    }
+
+    func markFound() {
+        currentItem?.isPurchased = true
+        advanceToNextItem()
+        restartGuidanceIfNeeded()
+    }
+
+    func skip() {
+        advanceToNextItem()
+        restartGuidanceIfNeeded()
+    }
+
+    // MARK: - Private Navigation
+
+    private func advanceToNextItem() {
+        guard currentSectionIndex < sortedSections.count else {
+            isComplete = true
+            return
+        }
+        let unpurchased = sortedSections[currentSectionIndex].1.filter { !$0.isPurchased }
+        if currentItemIndex < unpurchased.count - 1 {
+            currentItemIndex += 1
+        } else {
+            currentSectionIndex += 1
+            currentItemIndex = 0
+        }
+        if currentSectionIndex >= sortedSections.count {
+            isComplete = true
+        }
+    }
+
+    private func restartGuidanceIfNeeded() {
+        guard voiceEnabled, !isComplete else { return }
+        guidanceTask?.cancel()
+        guidanceTask = Task { await runVoiceGuidance() }
+    }
+
+    private func runVoiceGuidance() async {
+        guard let item = currentItem else {
+            if isComplete { await speak("Shopping complete! All done.") }
+            return
+        }
+
+        let amount = "\(item.quantity) \(item.unit.rawValue)"
+        await speak("\(amount) of \(item.name). Did you find it?")
+        guard !Task.isCancelled else { return }
+
+        let response = await listenForConfirmation()
+        guard !Task.isCancelled else { return }
+
+        switch response {
+        case .yes:
+            await speak("Got it.")
+            markFound()
+        case .no, .cantFind:
+            await speak("No worries, keeping it on the list.")
+            skip()
+        case .substitute:
+            await speak("I'll flag that for substitution.")
+            // View will show substitution sheet — just advance
+            skip()
+        case .skip:
+            await speak("Skipping.")
+            skip()
+        case .done:
+            await speak("Finishing up.")
+            stopSession()
+        case .error:
+            await speak("I didn't catch that. Moving on.")
+            skip()
+        }
     }
 
     // MARK: - Text-to-Speech
@@ -134,55 +261,6 @@ final class ShoppingVoiceService: NSObject {
         recognitionTask = nil
         isListening = false
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-    }
-
-    // MARK: - Guided Shopping Flow
-
-    func guideShopping(list: GroceryList) async {
-        let sections = list.itemsBySection.sorted { $0.key.rawValue < $1.key.rawValue }
-
-        await speak("Let's start shopping. You have \(list.items.count) items across \(sections.count) sections.")
-
-        for (section, items) in sections {
-            guard !Task.isCancelled else { break }
-            let unpurchased = items.filter { !$0.isPurchased }
-            guard !unpurchased.isEmpty else { continue }
-
-            await speak("Moving to \(section.displayName). You need \(unpurchased.count) items here.")
-
-            for item in unpurchased {
-                guard !Task.isCancelled else { break }
-                currentItemName = item.name
-                let amount = "\(item.quantity) \(item.unit.rawValue)"
-                await speak("\(amount) of \(item.name). Did you find it?")
-
-                let response = await listenForConfirmation()
-
-                switch response {
-                case .yes:
-                    item.isPurchased = true
-                    await speak("Got it.")
-                case .no, .cantFind:
-                    await speak("No worries. I'll keep it on the list for substitution.")
-                case .substitute:
-                    await speak("I'll suggest a substitution for \(item.name).")
-                case .skip:
-                    await speak("Skipping \(item.name).")
-                case .done:
-                    await speak("Finishing shopping session.")
-                    return
-                case .error:
-                    await speak("I didn't catch that. Moving on.")
-                }
-            }
-        }
-
-        if Task.isCancelled {
-            stopSpeaking()
-            stopListening()
-        } else {
-            await speak("Shopping complete! All sections covered.")
-        }
     }
 
     // MARK: - Audio Tap

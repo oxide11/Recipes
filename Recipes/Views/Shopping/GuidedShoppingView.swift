@@ -4,6 +4,7 @@ import SwiftUI
 
 /// Full-screen guided shopping experience with voice interaction,
 /// visual progress tracking, and real-time substitution support.
+/// All session state lives in voiceService — this view is read-only.
 struct GuidedShoppingView: View {
     @Bindable var list: GroceryList
     @Environment(\.dismiss) private var dismiss
@@ -11,42 +12,11 @@ struct GuidedShoppingView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var voiceService = ShoppingVoiceService()
-    @State private var currentSectionIndex = 0
-    @State private var currentItemIndex = 0
-    @State private var isActive = false
-    @State private var isPaused = false
     @State private var showingSubstitution = false
     @State private var substitutionItem: GroceryItem?
-    @State private var shoppingTask: Task<Void, Never>?
-
-    private var sortedSections: [(StoreSection, [GroceryItem])] {
-        list.itemsBySection
-            .sorted { $0.key.rawValue < $1.key.rawValue }
-            .filter { !$0.value.allSatisfy(\.isPurchased) }
-    }
-
-    private var totalItems: Int {
-        list.items.count
-    }
-
-    private var purchasedItems: Int {
-        list.items.filter(\.isPurchased).count
-    }
-
-    private var currentSection: (StoreSection, [GroceryItem])? {
-        guard currentSectionIndex < sortedSections.count else { return nil }
-        return sortedSections[currentSectionIndex]
-    }
 
     private var hasUnpurchasedItems: Bool {
-        !sortedSections.isEmpty
-    }
-
-    private var currentItem: GroceryItem? {
-        guard let section = currentSection else { return nil }
-        let unpurchased = section.1.filter { !$0.isPurchased }
-        guard currentItemIndex < unpurchased.count else { return nil }
-        return unpurchased[currentItemIndex]
+        !voiceService.sortedSections.isEmpty
     }
 
     var body: some View {
@@ -57,7 +27,7 @@ struct GuidedShoppingView: View {
 
                 Divider()
 
-                if isActive {
+                if voiceService.isActive {
                     activeShoppingView
                 } else {
                     startView
@@ -68,9 +38,7 @@ struct GuidedShoppingView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") {
-                        shoppingTask?.cancel()
-                        voiceService.stopSpeaking()
-                        voiceService.stopListening()
+                        voiceService.stopSession()
                         dismiss()
                     }
                 }
@@ -87,9 +55,9 @@ struct GuidedShoppingView: View {
 
     private var progressHeader: some View {
         VStack(spacing: 8) {
-            ProgressView(value: Double(purchasedItems), total: Double(totalItems)) {
+            ProgressView(value: Double(voiceService.purchasedItems), total: Double(max(voiceService.totalItems, 1))) {
                 HStack {
-                    Text("\(purchasedItems) of \(totalItems) items")
+                    Text("\(voiceService.purchasedItems) of \(voiceService.totalItems) items")
                     Spacer()
                     Text("\(Int(list.progress * 100))%")
                 }
@@ -98,10 +66,10 @@ struct GuidedShoppingView: View {
             }
             .tint(Brand.herbGreen)
 
-            if let section = currentSection {
+            if let section = voiceService.currentSection {
                 HStack {
-                    Image(systemName: sectionIcon(section.0))
-                    Text(section.0.displayName)
+                    Image(systemName: sectionIcon(section))
+                    Text(section.displayName)
                         .fontWeight(.semibold)
                 }
                 .font(.subheadline)
@@ -148,7 +116,7 @@ struct GuidedShoppingView: View {
                 .padding(.horizontal, 32)
 
                 Button("Shop Without Voice") {
-                    isActive = true
+                    voiceService.startSession(list: list, voiceEnabled: false)
                 }
                 .font(.subheadline)
             } else {
@@ -183,19 +151,21 @@ struct GuidedShoppingView: View {
     private var activeShoppingView: some View {
         VStack(spacing: 0) {
             // Current item card
-            if let item = currentItem {
+            if let item = voiceService.currentItem {
                 currentItemCard(item)
             } else {
-                // All done in this section or overall
+                // All done overall
                 allDoneView
             }
 
             Divider()
 
-            // Section items list
-            if let section = currentSection {
+            // Section items list — show all items in current section
+            if let sectionIndex = voiceService.sortedSections.indices.contains(voiceService.currentSectionIndex)
+                ? voiceService.currentSectionIndex : nil {
+                let sectionItems = voiceService.sortedSections[sectionIndex].1
                 List {
-                    ForEach(section.1) { item in
+                    ForEach(sectionItems) { item in
                         HStack {
                             Image(systemName: item.isPurchased ? "checkmark.circle.fill" : "circle")
                                 .foregroundStyle(item.isPurchased ? .green : .secondary)
@@ -243,7 +213,11 @@ struct GuidedShoppingView: View {
 
                 // Secondary actions — side by side
                 HStack(spacing: 12) {
-                    Button { substitutionItem = item; showingSubstitution = true } label: {
+                    Button {
+                        substitutionItem = item
+                        showingSubstitution = true
+                        voiceService.skip()
+                    } label: {
                         Label("Substitute", systemImage: "arrow.triangle.2.circlepath")
                             .frame(maxWidth: .infinity)
                     }
@@ -272,34 +246,20 @@ struct GuidedShoppingView: View {
                 .foregroundStyle(Brand.herbGreen)
                 .accessibilityHidden(true)
 
-            if currentSectionIndex < sortedSections.count - 1 {
-                Text("Section Complete!")
-                    .font(.title3)
-                    .fontWeight(.semibold)
+            Text("Shopping Complete!")
+                .font(.title3)
+                .fontWeight(.semibold)
 
-                Button("Next Section") {
-                    currentSectionIndex += 1
-                    currentItemIndex = 0
-                }
-                .buttonStyle(.glass)
-            } else {
-                Text("Shopping Complete!")
-                    .font(.title3)
-                    .fontWeight(.semibold)
+            Text("\(voiceService.purchasedItems) of \(voiceService.totalItems) items purchased")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
 
-                Text("\(purchasedItems) of \(totalItems) items purchased")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-
-                Button("Done") {
-                    shoppingTask?.cancel()
-                    voiceService.stopSpeaking()
-                    voiceService.stopListening()
-                    dismiss()
-                }
-                .buttonStyle(.glass)
-                .tint(Brand.herbGreen)
+            Button("Done") {
+                voiceService.stopSession()
+                dismiss()
             }
+            .buttonStyle(.glass)
+            .tint(Brand.herbGreen)
         }
         .padding()
     }
@@ -336,37 +296,15 @@ struct GuidedShoppingView: View {
     // MARK: - Actions
 
     private func startGuidedShopping() {
-        guard hasUnpurchasedItems else { return }
-        // Cancel any existing session before starting a new one
-        shoppingTask?.cancel()
-        isActive = true
-        shoppingTask = Task {
-            await voiceService.guideShopping(list: list)
-        }
+        voiceService.startSession(list: list, voiceEnabled: true)
     }
 
     private func markFound(_ item: GroceryItem) {
-        item.isPurchased = true
-        advanceToNextItem()
+        voiceService.markFound()
     }
 
     private func skipItem() {
-        advanceToNextItem()
-    }
-
-    private func advanceToNextItem() {
-        guard let section = currentSection else { return }
-        let unpurchased = section.1.filter { !$0.isPurchased }
-
-        if currentItemIndex < unpurchased.count - 1 {
-            currentItemIndex += 1
-        } else {
-            // Move to next section
-            currentItemIndex = 0
-            if currentSectionIndex < sortedSections.count - 1 {
-                currentSectionIndex += 1
-            }
-        }
+        voiceService.skip()
     }
 
     private func sectionIcon(_ section: StoreSection) -> String {
