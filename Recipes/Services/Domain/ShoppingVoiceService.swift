@@ -17,7 +17,11 @@ final class ShoppingVoiceService: NSObject {
 
     var isListening = false
     var isSpeaking = false
+    private(set) var isMuted = false
     private var speechFinishedContinuation: AsyncStream<Void>.Continuation?
+    /// Identifies the current speak() call so stale cancelled-task cleanup
+    /// doesn't wipe the continuation that belongs to the next speak() call.
+    private var speakToken: UUID?
     var lastHeardText: String?
     var currentItemName: String?
 
@@ -176,8 +180,18 @@ final class ShoppingVoiceService: NSObject {
 
     // MARK: - Text-to-Speech
 
+    func toggleMute() {
+        isMuted.toggle()
+    }
+
     func speak(_ text: String) async {
+        // Return immediately when muted — guidance loop continues, user uses buttons.
+        guard !isMuted else { return }
+
         stopListening()
+        // Stop any in-progress speech so a fresh call doesn't queue behind it.
+        stopSpeaking()
+
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .voicePrompt, options: .duckOthers)
         try? AVAudioSession.sharedInstance().setActive(true)
 
@@ -186,17 +200,26 @@ final class ShoppingVoiceService: NSObject {
         utterance.pitchMultiplier = 1.0
         utterance.volume = 1.0
 
+        // Stamp this invocation so the cleanup below doesn't clobber a newer
+        // speak() call's continuation. If this task is cancelled and a new
+        // speak() starts before our cleanup runs, the new call's token differs
+        // and we skip the nil-assignment that would orphan its continuation.
+        let myToken = UUID()
+        speakToken = myToken
+
         isSpeaking = true
         synthesizer.speak(utterance)
 
-        // Wait for speech to finish using an async stream instead of polling
         let stream = AsyncStream<Void> { continuation in
             self.speechFinishedContinuation = continuation
         }
         for await _ in stream {
             break
         }
-        speechFinishedContinuation = nil
+        // Only clear the shared continuation if we still own it.
+        if speakToken == myToken {
+            speechFinishedContinuation = nil
+        }
     }
 
     func stopSpeaking() {

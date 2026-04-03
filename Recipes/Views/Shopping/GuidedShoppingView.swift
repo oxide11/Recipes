@@ -185,8 +185,8 @@ struct GuidedShoppingView: View {
                 }
             }
 
-            // Voice status bar
-            if voiceService.isListening || voiceService.isSpeaking {
+            // Voice status bar — shown whenever voice mode is active
+            if voiceService.isActive {
                 voiceStatusBar
             }
         }
@@ -270,7 +270,11 @@ struct GuidedShoppingView: View {
 
     private var voiceStatusBar: some View {
         HStack {
-            if voiceService.isSpeaking {
+            if voiceService.isMuted {
+                Image(systemName: "speaker.slash.fill")
+                    .foregroundStyle(.secondary)
+                Text("Muted")
+            } else if voiceService.isSpeaking {
                 Image(systemName: "speaker.wave.3.fill")
                     .foregroundStyle(Brand.warmTan)
                     .symbolEffect(.variableColor)
@@ -284,12 +288,21 @@ struct GuidedShoppingView: View {
 
             Spacer()
 
-            if let heard = voiceService.lastHeardText {
+            if let heard = voiceService.lastHeardText, !voiceService.isMuted {
                 Text("\"\(heard)\"")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
+
+            Button {
+                voiceService.toggleMute()
+            } label: {
+                Image(systemName: voiceService.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                    .foregroundStyle(voiceService.isMuted ? .secondary : Brand.warmTan)
+            }
+            .accessibilityLabel(voiceService.isMuted ? "Unmute voice" : "Mute voice")
+            .frame(width: 44, height: 44)
         }
         .font(.caption)
         .padding()
