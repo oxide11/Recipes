@@ -347,24 +347,9 @@ struct RecipeListView: View {
     private var seasonalSection: some View {
         if !cachedSeasonalIngredients.isEmpty {
             Section {
-                // Chips row: sticky Generate button + ingredient filter chips
+                // Ingredient filter chips
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
-                        // Sticky generate button
-                        Button {
-                            showingSeasonalGenerator = true
-                        } label: {
-                            Label(selectedSeasonalIngredient.map { "Generate with \($0.capitalized)" } ?? "Generate",
-                                  systemImage: "sparkles")
-                                .font(.miseMeta.weight(.medium))
-                                .foregroundStyle(Brand.midnight)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 7)
-                                .background(Brand.herbGreen, in: Capsule())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(selectedSeasonalIngredient.map { "Generate recipe with \($0)" } ?? "Generate seasonal recipe")
-
                         ForEach(cachedSeasonalIngredients, id: \.self) { ingredient in
                             let isSelected = selectedSeasonalIngredient == ingredient
                             Button {
@@ -390,38 +375,42 @@ struct RecipeListView: View {
                 .listRowInsets(EdgeInsets())
                 .contentMargins(.vertical, 8, for: .scrollContent)
 
-                // Recipes — filtered when a chip is selected, all seasonal otherwise
-                if seasonalFilteredRecipes.isEmpty {
-                    VStack(spacing: 10) {
-                        Image(systemName: "leaf")
-                            .font(.title2)
-                            .foregroundStyle(Brand.herbGreen.opacity(0.5))
-                        Text(selectedSeasonalIngredient.map { "No recipes with \($0.capitalized) yet" }
-                             ?? "No seasonal recipes yet")
-                            .font(.miseMeta)
-                            .foregroundStyle(Brand.muted)
-                        Text("Tap Generate to create one")
-                            .font(.caption)
-                            .foregroundStyle(Brand.herbGreen.opacity(0.7))
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 20)
-                    .listRowBackground(Color.clear)
-                } else {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        LazyHStack(alignment: .top, spacing: 12) {
-                            ForEach(seasonalFilteredRecipes.prefix(8)) { recipe in
-                                Button { selectedRecipe = recipe } label: {
-                                    RecipeCardCompact(recipe: recipe)
-                                }
-                                .buttonStyle(.plain)
+                // Recipes or empty state — both in the same row
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(alignment: .top, spacing: 12) {
+                        ForEach(seasonalFilteredRecipes.prefix(8)) { recipe in
+                            Button { selectedRecipe = recipe } label: {
+                                RecipeCardCompact(recipe: recipe)
                             }
+                            .buttonStyle(.plain)
                         }
-                        .padding(.horizontal)
+
+                        // Generate card — shown alone when empty, or as trailing card
+                        Button {
+                            showingSeasonalGenerator = true
+                        } label: {
+                            VStack(spacing: 8) {
+                                Image(systemName: "sparkles")
+                                    .font(.title2)
+                                    .foregroundStyle(Brand.herbGreen)
+                                Text(selectedSeasonalIngredient.map { "Generate with \($0.capitalized)" } ?? "Generate a seasonal recipe")
+                                    .font(.miseMeta.weight(.medium))
+                                    .foregroundStyle(Brand.cream)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .frame(width: 130)
+                            .padding(.vertical, 20)
+                            .padding(.horizontal, 12)
+                            .background(Brand.herbGreen.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Brand.herbGreen.opacity(0.3), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(selectedSeasonalIngredient.map { "Generate recipe with \($0)" } ?? "Generate seasonal recipe")
                     }
-                    .contentMargins(.vertical, 12, for: .scrollContent)
-                    .listRowInsets(EdgeInsets())
+                    .padding(.horizontal)
                 }
+                .contentMargins(.vertical, 12, for: .scrollContent)
+                .listRowInsets(EdgeInsets())
             } header: {
                 HStack(spacing: 4) {
                     Image(systemName: "leaf")
