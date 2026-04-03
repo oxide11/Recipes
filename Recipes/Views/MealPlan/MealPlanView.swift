@@ -226,11 +226,11 @@ struct DayChip: View {
     var body: some View {
         VStack(spacing: 3) {
             Text(dayLetter)
-                .font(.system(size: 10, weight: .medium))
+                .font(.caption2.weight(.medium))
                 .foregroundStyle(isSelected ? Brand.warmTan : Brand.muted)
 
             Text(dayNumber)
-                .font(.system(size: 14, weight: .medium))
+                .font(.subheadline.weight(.medium))
                 .foregroundStyle(isSelected ? .white : Brand.cream)
                 .frame(width: 30, height: 30)
                 .background(isSelected ? Brand.warmTan : Color.clear, in: Circle())
@@ -291,7 +291,7 @@ struct DayMealView: View {
                             Image(systemName: "cart.fill")
                                 .foregroundStyle(Brand.warmTan)
                             Text("Shop today — stock up for the week!")
-                                .font(.system(size: 13, weight: .medium))
+                                .font(.footnote.weight(.medium))
                                 .foregroundStyle(Brand.cream)
                         }
                         .frame(maxWidth: .infinity)
@@ -302,7 +302,7 @@ struct DayMealView: View {
                             Image(systemName: "frying.pan.fill")
                                 .foregroundStyle(Brand.herbGreen)
                             Text("Prep day — cook for the week ahead!")
-                                .font(.system(size: 13, weight: .medium))
+                                .font(.footnote.weight(.medium))
                                 .foregroundStyle(Brand.cream)
                         }
                         .frame(maxWidth: .infinity)
@@ -363,13 +363,13 @@ struct MealSlotSection: View {
                     .font(.caption)
                     .foregroundStyle(Brand.warmTan)
                 Text(mealType.rawValue.capitalized)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.caption2.weight(.semibold))
                     .foregroundStyle(Brand.warmTan)
                     .tracking(0.6)
                 Spacer()
                 Button(action: onAdd) {
                     Image(systemName: "plus.circle")
-                        .font(.system(size: 16))
+                        .font(.body)
                         .foregroundStyle(Brand.muted)
                 }
             }
@@ -379,7 +379,7 @@ struct MealSlotSection: View {
                 Button(action: onAdd) {
                     HStack(spacing: 6) {
                         Image(systemName: "plus").font(.caption)
-                        Text("Add recipe").font(.system(size: 13))
+                        Text("Add recipe").font(.footnote)
                     }
                     .foregroundStyle(Brand.muted.opacity(0.5))
                     .frame(maxWidth: .infinity)
@@ -425,14 +425,15 @@ struct MealCard: View {
     private var titleRow: some View {
         HStack(spacing: 6) {
             Text(meal.recipe?.title ?? "Unassigned")
-                .font(.system(size: 14, weight: .medium))
+                .font(.subheadline.weight(.medium))
                 .foregroundStyle(Brand.cream)
 
             if meal.isAISuggested {
                 Image(systemName: "sparkles")
-                    .font(.system(size: 10))
+                    .font(.caption2)
                     .foregroundStyle(Brand.warmTan)
                     .help("AI-suggested recipe — saved to your library")
+                    .accessibilityHidden(true)
             }
 
             Spacer()
@@ -444,7 +445,7 @@ struct MealCard: View {
                         .foregroundStyle(Brand.muted)
                     if meal.recipe != nil {
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 10, weight: .semibold))
+                            .font(.caption2.weight(.semibold))
                             .foregroundStyle(Brand.muted.opacity(0.5))
                     }
                 }
@@ -501,7 +502,7 @@ struct MealCard: View {
                     // Everything is already in the pantry
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark.circle")
-                            .font(.system(size: 10))
+                            .font(.caption2)
                         Text("All ingredients in pantry")
                             .font(.miseMeta)
                     }
@@ -511,14 +512,14 @@ struct MealCard: View {
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(spacing: 4) {
                             Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 10))
+                                .font(.caption2)
                             Text("Added for this meal")
                                 .font(.miseMeta)
                         }
                         .foregroundStyle(Brand.herbGreen)
                         if !substitutableIngredients.isEmpty {
                             Text(substitutableIngredients.map { "~\($0.substituteName) for \($0.recipeName)" }.joined(separator: ", "))
-                                .font(.system(size: 10))
+                                .font(.caption2)
                                 .foregroundStyle(Brand.warmTan)
                                 .lineLimit(2)
                         }
@@ -531,7 +532,7 @@ struct MealCard: View {
                         } label: {
                             HStack(spacing: 5) {
                                 Image(systemName: trulyMissingIngredients.isEmpty ? "checkmark.circle" : "cart.badge.plus")
-                                    .font(.system(size: 11))
+                                    .font(.caption2)
                                 Text(trulyMissingIngredients.isEmpty
                                      ? "Ready to cook (substitutions available)"
                                      : "Add \(trulyMissingIngredients.count) ingredient\(trulyMissingIngredients.count == 1 ? "" : "s") to shopping list")
@@ -672,7 +673,7 @@ struct WeekMealView: View {
                                         .foregroundStyle(Brand.warmTan)
                                         .frame(width: 16)
                                     Text(meal.recipe?.title ?? "Unassigned")
-                                        .font(.system(size: 13))
+                                        .font(.footnote)
                                         .foregroundStyle(Brand.cream)
                                     Spacer()
                                     if meal.isCompleted {
@@ -701,7 +702,7 @@ struct WeekMealView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "frying.pan.fill")
                         Text("Week Prep List")
-                            .font(.system(size: 15, weight: .semibold))
+                            .font(.subheadline.weight(.semibold))
                     }
                     .foregroundStyle(Brand.midnight)
                     .frame(maxWidth: .infinity)
