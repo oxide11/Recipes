@@ -261,8 +261,12 @@ struct ShoppingListView: View {
 
     private func addToPantryIfNeeded(_ item: GroceryItem) {
         guard let category = item.storeSection.pantryCategory else { return }
-        // Don't add if already linked to a pantry item from a previous check-off.
         guard item.linkedPantryItemID == nil else { return }
+        let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
+        // Item already in pantry from another source — don't duplicate it.
+        guard !pantryItems.contains(where: {
+            $0.name.lowercased().trimmingCharacters(in: .whitespaces) == key
+        }) else { return }
         let pantryItem = PantryItem(
             name: item.name,
             category: category,
