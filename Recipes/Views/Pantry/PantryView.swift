@@ -478,6 +478,7 @@ struct BarcodeScannerFullView: View {
                         Image(systemName: "barcode.viewfinder")
                             .font(.system(size: 60))
                             .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
 
                         Button("Start Scanning") {
                             Task {

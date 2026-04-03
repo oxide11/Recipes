@@ -105,6 +105,7 @@ struct IngredientLookupView: View {
                             Image(systemName: "circle.fill")
                                 .font(.system(size: 4))
                                 .foregroundStyle(Brand.muted)
+                                .accessibilityHidden(true)
                             Text(substitute)
                                 .font(.subheadline)
                         }

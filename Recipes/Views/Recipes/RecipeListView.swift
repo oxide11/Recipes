@@ -106,7 +106,7 @@ struct RecipeListView: View {
                             Label {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("Recommended for you")
-                                        .font(.system(size: 14, weight: .medium))
+                                        .font(.subheadline.weight(.medium))
                                         .foregroundStyle(Brand.cream)
                                     Text("Personalized suggestions based on your cooking history")
                                         .font(.miseMeta)
@@ -283,7 +283,7 @@ struct RecipeListView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(match.recipe.title)
-                                    .font(.system(size: 14, weight: .medium))
+                                    .font(.subheadline.weight(.medium))
                                     .foregroundStyle(Brand.cream)
                                 HStack(spacing: 6) {
                                     Text("\(Int(match.coveragePercent))% covered")
@@ -590,7 +590,7 @@ struct RecipeRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(recipe.title)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.subheadline.weight(.medium))
                     .tracking(-0.2)
                     .foregroundStyle(Brand.cream)
 
@@ -668,8 +668,7 @@ struct RecipeCardCompact: View {
             }
 
             Text(recipe.title)
-                .font(.system(size: 12, weight: .medium))
-                .tracking(-0.2)
+                .font(.caption.weight(.medium))
                 .foregroundStyle(Brand.cream)
                 .lineLimit(2)
 

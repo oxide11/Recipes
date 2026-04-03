@@ -274,6 +274,7 @@ struct RecipeImportView: View {
                                     .background(.black.opacity(0.6), in: .rect(cornerRadius: 4))
                                     .foregroundStyle(.white)
                                     .padding(3)
+                                    .accessibilityHidden(true)
                             }
                         Text("Tap to view full size")
                             .foregroundStyle(.secondary)

@@ -244,11 +244,12 @@ struct OnboardingView: View {
                 Image(systemName: "fork.knife")
                     .font(.system(size: 40, weight: .medium))
                     .foregroundStyle(Brand.warmTan)
+                    .accessibilityHidden(true)
             }
             .padding(.bottom, 24)
 
             Text("Welcome to Recipes")
-                .font(.system(size: 32, weight: .bold))
+                .font(.title.weight(.bold))
                 .foregroundStyle(Brand.cream)
                 .multilineTextAlignment(.center)
                 .padding(.bottom, 10)
@@ -263,7 +264,7 @@ struct OnboardingView: View {
             // Name field
             VStack(alignment: .leading, spacing: 6) {
                 Text("What should we call you?")
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.footnote.weight(.medium))
                     .foregroundStyle(Brand.muted)
                     .padding(.horizontal, 4)
                 TextField("Your name", text: $displayName)
@@ -279,7 +280,7 @@ struct OnboardingView: View {
             // Cooking level selection
             VStack(alignment: .leading, spacing: 10) {
                 Text("Cooking level")
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.footnote.weight(.medium))
                     .foregroundStyle(Brand.muted)
                     .padding(.horizontal, 4)
 

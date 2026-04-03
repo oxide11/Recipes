@@ -25,6 +25,11 @@ struct CookingModeView: View {
     @State private var selectedConversion: DirectionIngredientRef?
     @AppStorage("hasSeenCookingModeTutorial") private var hasSeenTutorial = false
     private let synthesizer = AVSpeechSynthesizer()
+    @ScaledMetric(relativeTo: .title) private var instructionFontSize: CGFloat = 28
+    @ScaledMetric(relativeTo: .largeTitle) private var timerFontSize: CGFloat = 64
+    @ScaledMetric(relativeTo: .title2) private var starRatingSize: CGFloat = 36
+    @ScaledMetric(relativeTo: .title) private var navButtonSize: CGFloat = 48
+    @ScaledMetric(relativeTo: .title3) private var controlButtonSize: CGFloat = 32
 
     // Cooking log
     private let sessionStartDate = Date()
@@ -204,7 +209,7 @@ struct CookingModeView: View {
             VStack(spacing: 24) {
                 // Instruction — large text with color-coded ingredients
                 Text(coloredInstruction(step))
-                    .font(.system(size: 28, weight: .medium))
+                    .font(.system(size: min(instructionFontSize, 44), weight: .medium))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
@@ -290,7 +295,7 @@ struct CookingModeView: View {
                         Text(end, style: .timer)
                     }
                 }
-                .font(.system(size: 64, weight: .bold, design: .rounded))
+                .font(.system(size: min(timerFontSize, 96), weight: .bold, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(isPaused ? Color.secondary : Color.orange)
 
@@ -363,7 +368,7 @@ struct CookingModeView: View {
                     HStack(spacing: 12) {
                         ForEach(1...5, id: \.self) { star in
                             Image(systemName: star <= (logRating ?? 0) ? "star.fill" : "star")
-                                .font(.system(size: 36))
+                                .font(.system(size: min(starRatingSize, 52)))
                                 .foregroundStyle(star <= (logRating ?? 0) ? .yellow : .white.opacity(0.3))
                                 .onTapGesture {
                                     logRating = logRating == star ? nil : star
@@ -422,7 +427,7 @@ struct CookingModeView: View {
                 goBack()
             } label: {
                 Image(systemName: "chevron.left.circle.fill")
-                    .font(.system(size: 48))
+                    .font(.system(size: navButtonSize))
             }
             .disabled(currentStepIndex == 0)
             .opacity(currentStepIndex == 0 ? 0.3 : 1)
@@ -436,7 +441,7 @@ struct CookingModeView: View {
                 }
             } label: {
                 Image(systemName: isVoiceEnabled ? "speaker.wave.3.fill" : "speaker.slash.fill")
-                    .font(.system(size: 32))
+                    .font(.system(size: controlButtonSize))
                     .frame(width: 36, height: 36)
             }
             .accessibilityLabel(isVoiceEnabled ? "Disable voice" : "Enable voice")
@@ -446,7 +451,7 @@ struct CookingModeView: View {
                 dismiss()
             } label: {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 32))
+                    .font(.system(size: controlButtonSize))
             }
             .accessibilityLabel("Exit cooking mode")
 
@@ -455,7 +460,7 @@ struct CookingModeView: View {
                 advanceStep()
             } label: {
                 Image(systemName: "chevron.right.circle.fill")
-                    .font(.system(size: 48))
+                    .font(.system(size: navButtonSize))
             }
             .disabled(currentStepIndex >= sortedDirections.count)
             .opacity(currentStepIndex >= sortedDirections.count ? 0.3 : 1)
@@ -699,6 +704,7 @@ struct CookingModeTutorialOverlay: View {
                 Image(systemName: "hand.tap.fill")
                     .font(.system(size: 48))
                     .foregroundStyle(Brand.warmTan)
+                    .accessibilityHidden(true)
 
                 Text("Cooking Mode")
                     .font(.title)

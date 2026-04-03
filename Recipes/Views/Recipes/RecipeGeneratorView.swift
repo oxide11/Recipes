@@ -611,6 +611,7 @@ struct StreamingRecipePreview: View {
                 .font(.system(size: 40))
                 .foregroundStyle(Brand.herbGreen)
                 .symbolEffect(.pulse)
+                .accessibilityHidden(true)
 
             // Title fades in as soon as it's extracted
             Group {

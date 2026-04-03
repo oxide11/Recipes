@@ -545,7 +545,7 @@ struct MealCard: View {
 
                         if !substitutableIngredients.isEmpty {
                             Text(substitutableIngredients.map { "~\($0.substituteName) for \($0.recipeName)" }.joined(separator: ", "))
-                                .font(.system(size: 10))
+                                .font(.caption2)
                                 .foregroundStyle(Brand.warmTan.opacity(0.8))
                                 .lineLimit(2)
                         }

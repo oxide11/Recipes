@@ -576,7 +576,7 @@ struct RecipeDetailView: View {
                         Text("Estimate Nutrition")
                     }
                 }
-                .font(.system(size: 14, weight: .medium))
+                .font(.subheadline.weight(.medium))
                 .foregroundStyle(Brand.warmTan)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)

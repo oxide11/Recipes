@@ -111,7 +111,7 @@ struct TagManagementView: View {
                                 } label: {
                                     HStack(spacing: 4) {
                                         Image(systemName: "plus")
-                                            .font(.system(size: 10, weight: .semibold))
+                                            .font(.caption2.weight(.semibold))
                                         Text(tag)
                                             .font(.caption.weight(.medium))
                                     }

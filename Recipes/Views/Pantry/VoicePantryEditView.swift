@@ -77,6 +77,7 @@ struct VoicePantryEditView: View {
             Image(systemName: "mic.circle.fill")
                 .font(.system(size: 80))
                 .foregroundStyle(Brand.herbGreen)
+                .accessibilityHidden(true)
 
             VStack(spacing: 8) {
                 Text("What would you like to change?")
@@ -138,6 +139,7 @@ struct VoicePantryEditView: View {
                     Image(systemName: "questionmark.circle")
                         .font(.system(size: 48))
                         .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
                     Text("Couldn't work out any changes from that.")
                         .foregroundStyle(.secondary)
                     retryButton
@@ -327,6 +329,7 @@ private struct PulsingMicView: View {
                 .font(.system(size: 40))
                 .foregroundStyle(isActive ? Brand.herbGreen : .secondary)
                 .animation(.easeInOut(duration: 0.2), value: isActive)
+                .accessibilityLabel(isActive ? "Microphone active" : "Microphone inactive")
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {

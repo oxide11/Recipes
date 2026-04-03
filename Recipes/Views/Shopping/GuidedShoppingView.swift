@@ -122,6 +122,7 @@ struct GuidedShoppingView: View {
                     .font(.system(size: 80))
                     .foregroundStyle(Brand.herbGreen)
                     .symbolEffect(.pulse)
+                    .accessibilityHidden(true)
 
                 Text("Ready to Shop")
                     .font(.title2)
@@ -153,6 +154,7 @@ struct GuidedShoppingView: View {
                 Image(systemName: list.items.isEmpty ? "cart" : "checkmark.seal.fill")
                     .font(.system(size: 80))
                     .foregroundStyle(list.items.isEmpty ? Brand.muted : Brand.herbGreen)
+                    .accessibilityHidden(true)
 
                 Text(list.items.isEmpty ? "No Items to Shop" : "All Done!")
                     .font(.title2)
@@ -271,6 +273,7 @@ struct GuidedShoppingView: View {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 48))
                 .foregroundStyle(Brand.herbGreen)
+                .accessibilityHidden(true)
 
             if currentSectionIndex < sortedSections.count - 1 {
                 Text("Section Complete!")
