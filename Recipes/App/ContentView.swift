@@ -12,23 +12,22 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            Tab("Mise", systemImage: "sparkles", value: AppTab.mise) {
-                DashboardView()
-            }
-            Tab("Plan & Shop", systemImage: "cart", value: AppTab.planAndShop) {
-                PlanAndShopView()
-            }
-            Tab("Recipes", systemImage: "book.pages", value: AppTab.recipes) {
-                RecipeListView()
-            }
-            Tab("Activity", systemImage: "chart.bar", value: AppTab.activity) {
-                ActivityView()
-            }
-            Tab("Settings", systemImage: "gear", value: AppTab.settings) {
-                SettingsView()
-            }
+            DashboardView()
+                .tabItem { Label("Mise", systemImage: "sparkles") }
+                .tag(AppTab.mise)
+            PlanAndShopView()
+                .tabItem { Label("Plan & Shop", systemImage: "cart") }
+                .tag(AppTab.planAndShop)
+            RecipeListView()
+                .tabItem { Label("Recipes", systemImage: "book.pages") }
+                .tag(AppTab.recipes)
+            ActivityView()
+                .tabItem { Label("Activity", systemImage: "chart.bar") }
+                .tag(AppTab.activity)
+            SettingsView()
+                .tabItem { Label("Settings", systemImage: "gear") }
+                .tag(AppTab.settings)
         }
-        .tabViewStyle(.sidebarAdaptable)
         .onChange(of: timerDeepLink.pendingRecipeID) { _, newID in
             if newID != nil { selectedTab = .recipes }
         }
