@@ -342,8 +342,7 @@ struct AddShoppingItemView: View {
                         .submitLabel(.done)
                         .onSubmit { addItem() }
                         .onChange(of: name) { _, newName in
-                            let guessed = StoreSection.guess(for: newName)
-                            if guessed != .other { section = guessed }
+                            section = StoreSection.guess(for: newName)
                         }
 
                     Picker("Section", selection: $section) {
