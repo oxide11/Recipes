@@ -45,7 +45,7 @@ struct ShoppingListView: View {
                 if let list { GuidedShoppingView(list: list) }
             }
             .sheet(isPresented: $showingRemindersSetup) {
-                RemindersSetupView(sync: remindersSync)
+                RemindersSetupView(sync: remindersSync, groceryList: list)
             }
         }
         .onAppear {

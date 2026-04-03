@@ -7,11 +7,14 @@ import SwiftUI
 /// Reminders list or create a new one (e.g. "Shopping").
 struct RemindersSetupView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     var sync: RemindersSync
+    var groceryList: GroceryList?
 
     @State private var calendars: [EKCalendar] = []
     @State private var newListName = "Shopping"
     @State private var isRequesting = false
+    @State private var isMigrating = false
     @State private var errorMessage: String?
 
     var body: some View {
@@ -28,6 +31,21 @@ struct RemindersSetupView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Not Now") { dismiss() }
+                        .disabled(isMigrating)
+                }
+            }
+            .overlay {
+                if isMigrating {
+                    ZStack {
+                        Color(.systemBackground).opacity(0.85)
+                        VStack(spacing: 12) {
+                            ProgressView()
+                            Text("Merging lists…")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .ignoresSafeArea()
                 }
             }
             .onAppear {
@@ -124,7 +142,7 @@ struct RemindersSetupView: View {
                     ForEach(calendars, id: \.calendarIdentifier) { calendar in
                         Button {
                             sync.link(to: calendar)
-                            dismiss()
+                            runMigrationAndDismiss()
                         } label: {
                             HStack(spacing: 12) {
                                 Circle()
@@ -155,9 +173,18 @@ struct RemindersSetupView: View {
     private func createAndLink() {
         do {
             try sync.createAndLink(named: newListName.trimmingCharacters(in: .whitespaces))
-            dismiss()
+            runMigrationAndDismiss()
         } catch {
             errorMessage = "Couldn't create list: \(error.localizedDescription)"
+        }
+    }
+
+    private func runMigrationAndDismiss() {
+        guard let list = groceryList else { dismiss(); return }
+        isMigrating = true
+        Task {
+            await sync.performInitialMigration(groceryList: list, context: modelContext)
+            dismiss()
         }
     }
 }

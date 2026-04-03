@@ -64,6 +64,68 @@ final class RemindersSync {
         linkedCalendarIdentifier = nil
     }
 
+    // MARK: - Initial Migration
+
+    /// Run once when the user first links a Reminders list.
+    /// 1. Removes completed Mise items (they're done).
+    /// 2. Pushes remaining Mise items to Reminders (so Reminders gets them too).
+    /// 3. Pulls incomplete Reminders items not already in Mise (by name, case-insensitive).
+    /// Result: both lists contain exactly the same active items with no duplicates.
+    func performInitialMigration(groceryList: GroceryList, context: ModelContext) async {
+        guard let identifier = linkedCalendarIdentifier,
+              let calendar = store.calendar(withIdentifier: identifier) else { return }
+
+        isSyncing = true
+        defer { isSyncing = false }
+
+        let reminders = await fetchAllReminders(in: calendar)
+        let incompleteReminders = reminders.filter { !$0.isCompleted }
+        let remindersByTitle = Dictionary(grouping: incompleteReminders) {
+            ($0.title ?? "").lowercased().trimmingCharacters(in: .whitespaces)
+        }
+
+        // Snapshot before mutating
+        let completedItems = groceryList.items.filter(\.isPurchased)
+        let activeItems    = groceryList.items.filter { !$0.isPurchased }
+
+        // Step 1 — remove completed Mise items
+        completedItems.forEach { context.delete($0) }
+
+        // Step 2 — push active Mise items to Reminders (link or create)
+        for item in activeItems {
+            let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
+            if let existing = remindersByTitle[key]?.first {
+                item.remindersIdentifier = existing.calendarItemIdentifier
+            } else {
+                let reminder = EKReminder(eventStore: store)
+                reminder.title = item.name
+                reminder.calendar = calendar
+                try? store.save(reminder, commit: false)
+                item.remindersIdentifier = reminder.calendarItemIdentifier
+            }
+        }
+
+        // Step 3 — pull incomplete Reminders items not already in Mise
+        let activeKeys = Set(activeItems.map { $0.name.lowercased().trimmingCharacters(in: .whitespaces) })
+        for reminder in incompleteReminders {
+            guard let title = reminder.title, !title.isEmpty else { continue }
+            let key = title.lowercased().trimmingCharacters(in: .whitespaces)
+            guard !activeKeys.contains(key) else { continue }
+
+            let item = GroceryItem(
+                name: title,
+                quantity: 1,
+                unit: .piece,
+                storeSection: guessSection(for: title)
+            )
+            item.remindersIdentifier = reminder.calendarItemIdentifier
+            context.insert(item)
+            groceryList.items.append(item)
+        }
+
+        try? store.commit()
+    }
+
     // MARK: - Sync
 
     /// Pull from Reminders → app, push app → Reminders. Safe to call on every foreground.
