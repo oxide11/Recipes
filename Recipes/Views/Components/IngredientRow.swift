@@ -23,7 +23,7 @@ struct IngredientRow: View {
                 if onToggle != nil {
                     Image(systemName: isChecked ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 18))
-                        .foregroundStyle(isChecked ? Brand.herbGreen : Brand.muted.opacity(0.4))
+                        .foregroundStyle(isChecked ? Brand.herbGreen : Brand.muted.opacity(0.6))
                 } else {
                     Circle()
                         .fill(colorForCategory(ingredient.category))

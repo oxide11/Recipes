@@ -369,7 +369,7 @@ struct CookingModeView: View {
                         ForEach(1...5, id: \.self) { star in
                             Image(systemName: star <= (logRating ?? 0) ? "star.fill" : "star")
                                 .font(.system(size: min(starRatingSize, 52)))
-                                .foregroundStyle(star <= (logRating ?? 0) ? .yellow : .white.opacity(0.3))
+                                .foregroundStyle(star <= (logRating ?? 0) ? .yellow : .white.opacity(0.5))
                                 .onTapGesture {
                                     logRating = logRating == star ? nil : star
                                 }

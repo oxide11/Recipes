@@ -461,27 +461,25 @@ struct TagChipGrid: View {
     }
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(visibleTags, id: \.self) { (tag: String) in
-                    let isSelected = selectedTags.contains(tag)
-                    Button {
-                        if isSelected { selectedTags.remove(tag) }
-                        else { selectedTags.insert(tag) }
-                    } label: {
-                        Text(tag)
-                            .font(.subheadline.weight(.medium))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(isSelected ? AnyShapeStyle(.tint) : AnyShapeStyle(.clear), in: .capsule)
-                            .overlay(Capsule().strokeBorder(isSelected ? Color.clear : Color.secondary.opacity(0.4)))
-                            .foregroundStyle(isSelected ? .white : .primary)
-                    }
-                    .buttonStyle(.plain)
+        FlowLayout(spacing: 8) {
+            ForEach(visibleTags, id: \.self) { (tag: String) in
+                let isSelected = selectedTags.contains(tag)
+                Button {
+                    if isSelected { selectedTags.remove(tag) }
+                    else { selectedTags.insert(tag) }
+                } label: {
+                    Text(tag)
+                        .font(.subheadline.weight(.medium))
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(isSelected ? AnyShapeStyle(.tint) : AnyShapeStyle(.clear), in: .capsule)
+                        .overlay(Capsule().strokeBorder(isSelected ? Color.clear : Color.secondary.opacity(0.6)))
+                        .foregroundStyle(isSelected ? .white : .primary)
                 }
+                .buttonStyle(.plain)
             }
-            .padding(.vertical, 4)
         }
+        .padding(.vertical, 4)
     }
 }
 
@@ -493,27 +491,25 @@ struct DietaryChipGrid: View {
     let sortedRestrictions: [DietaryRestriction]
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(sortedRestrictions, id: \.self) { (restriction: DietaryRestriction) in
-                    let isSelected = selectedRestrictions.contains(restriction)
-                    Button {
-                        if isSelected { selectedRestrictions.remove(restriction) }
-                        else { selectedRestrictions.insert(restriction) }
-                    } label: {
-                        Text(restriction.displayName)
-                            .font(.subheadline.weight(.medium))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(isSelected ? AnyShapeStyle(.tint) : AnyShapeStyle(.clear), in: .capsule)
-                            .overlay(Capsule().strokeBorder(isSelected ? Color.clear : Color.secondary.opacity(0.4)))
-                            .foregroundStyle(isSelected ? .white : .primary)
-                    }
-                    .buttonStyle(.plain)
+        FlowLayout(spacing: 8) {
+            ForEach(sortedRestrictions, id: \.self) { (restriction: DietaryRestriction) in
+                let isSelected = selectedRestrictions.contains(restriction)
+                Button {
+                    if isSelected { selectedRestrictions.remove(restriction) }
+                    else { selectedRestrictions.insert(restriction) }
+                } label: {
+                    Text(restriction.displayName)
+                        .font(.subheadline.weight(.medium))
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(isSelected ? AnyShapeStyle(.tint) : AnyShapeStyle(.clear), in: .capsule)
+                        .overlay(Capsule().strokeBorder(isSelected ? Color.clear : Color.secondary.opacity(0.6)))
+                        .foregroundStyle(isSelected ? .white : .primary)
                 }
+                .buttonStyle(.plain)
             }
-            .padding(.vertical, 4)
         }
+        .padding(.vertical, 4)
     }
 }
 

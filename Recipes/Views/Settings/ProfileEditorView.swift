@@ -132,7 +132,7 @@ struct ProfileEditorView: View {
                                     .strokeBorder(
                                         preferredCuisines.contains(cuisine)
                                             ? Color.accentColor
-                                            : Color.secondary.opacity(0.3),
+                                            : Color.secondary.opacity(0.5),
                                         lineWidth: 1
                                     )
                             )
