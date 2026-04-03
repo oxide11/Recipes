@@ -19,6 +19,7 @@ struct RecipeListView: View {
     @State private var selectedDietaryRestrictions: Set<DietaryRestriction> = []
     @State private var selectedTags: Set<String> = []
     @State private var selectedMealType: MealType?
+    @State private var minRatingFilter: Int?
     @State private var hasLoadedProfile = false
     @State private var showingAddRecipe = false
     @State private var showingRecipeGenerator = false
@@ -47,6 +48,7 @@ struct RecipeListView: View {
         if !selectedDietaryRestrictions.isEmpty { count += 1 }
         if !selectedTags.isEmpty { count += 1 }
         if selectedMealType != nil { count += 1 }
+        if minRatingFilter != nil { count += 1 }
         return count
     }
 
@@ -85,6 +87,9 @@ struct RecipeListView: View {
         }
         if let mealType = selectedMealType {
             result = result.filter { $0.mealType == mealType }
+        }
+        if let minRating = minRatingFilter {
+            result = result.filter { ($0.averageRating ?? 0) >= Double(minRating) }
         }
         if !showFavoritesOnly {
             let favs = result.filter { $0.isFavorite || $0.isAutoFavorite }
@@ -197,6 +202,7 @@ struct RecipeListView: View {
                     selectedMealType: $selectedMealType,
                     selectedDietaryRestrictions: $selectedDietaryRestrictions,
                     selectedTags: $selectedTags,
+                    minRatingFilter: $minRatingFilter,
                     availableTags: allTags
                 )
                 .presentationDetents([.medium])
@@ -222,6 +228,7 @@ struct RecipeListView: View {
             .onChange(of: selectedDietaryRestrictions) { rebuildFilteredRecipes() }
             .onChange(of: selectedTags) { rebuildFilteredRecipes() }
             .onChange(of: selectedMealType) { rebuildFilteredRecipes() }
+            .onChange(of: minRatingFilter) { rebuildFilteredRecipes() }
             .onChange(of: searchText) { _, newValue in
                 searchDebounceTask?.cancel()
                 searchDebounceTask = Task {
@@ -692,6 +699,7 @@ struct RecipeFilterSheet: View {
     @Binding var selectedMealType: MealType?
     @Binding var selectedDietaryRestrictions: Set<DietaryRestriction>
     @Binding var selectedTags: Set<String>
+    @Binding var minRatingFilter: Int?
     let availableTags: [String]
     @Environment(\.dismiss) private var dismiss
     @State private var tagChipSearch = ""
@@ -742,6 +750,16 @@ struct RecipeFilterSheet: View {
                     .pickerStyle(.menu)
                 }
 
+                Section("Minimum Rating") {
+                    Picker("Rating", selection: $minRatingFilter) {
+                        Text("Any").tag(Int?.none)
+                        Text("★★★ 3+").tag(Int?.some(3))
+                        Text("★★★★ 4+").tag(Int?.some(4))
+                        Text("★★★★★ 5 only").tag(Int?.some(5))
+                    }
+                    .pickerStyle(.menu)
+                }
+
                 Section("Max Total Time") {
                     Picker("Time", selection: $maxTimeFilter) {
                         Text("No Limit").tag(Int?.none)
@@ -781,6 +799,7 @@ struct RecipeFilterSheet: View {
                         selectedMealType = nil
                         selectedDietaryRestrictions = []
                         selectedTags = []
+                        minRatingFilter = nil
                     }
                     .foregroundStyle(.red)
                 }
