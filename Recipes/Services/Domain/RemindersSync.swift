@@ -15,10 +15,10 @@ final class RemindersSync {
     var authorizationStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .reminder)
     var isSyncing = false
 
-    /// The calendarIdentifier of the linked Reminders list, persisted across launches.
+    /// Stored property so @Observable tracks changes and SwiftUI re-renders immediately.
+    /// Persisted to UserDefaults via didSet.
     var linkedCalendarIdentifier: String? {
-        get { UserDefaults.standard.string(forKey: "remindersCalendarIdentifier") }
-        set { UserDefaults.standard.set(newValue, forKey: "remindersCalendarIdentifier") }
+        didSet { UserDefaults.standard.set(linkedCalendarIdentifier, forKey: "remindersCalendarIdentifier") }
     }
 
     var isLinked: Bool { linkedCalendarIdentifier != nil }
@@ -31,6 +31,10 @@ final class RemindersSync {
     // MARK: Private
 
     private let store = EKEventStore()
+
+    init() {
+        linkedCalendarIdentifier = UserDefaults.standard.string(forKey: "remindersCalendarIdentifier")
+    }
 
     // MARK: - Access
 
