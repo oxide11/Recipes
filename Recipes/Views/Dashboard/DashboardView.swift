@@ -20,6 +20,7 @@ private enum DashboardStyle {
 
 struct DashboardView: View {
     @Binding var selectedTab: AppTab
+    @Binding var planAndShopSegment: PlanAndShopSegment
     @Environment(\.modelContext) private var modelContext
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Query(sort: \PantryItem.expirationDate) private var pantryItems: [PantryItem]
@@ -585,7 +586,10 @@ struct DashboardView: View {
     private var myKitchenCard: some View {
         VStack(spacing: 0) {
             // Shopping row — always present, tappable
-            Button { selectedTab = .planAndShop } label: {
+            Button {
+                planAndShopSegment = .shopping
+                selectedTab = .planAndShop
+            } label: {
                 HStack(spacing: 12) {
                     Image(systemName: "cart.fill")
                         .font(.title3)
@@ -1141,13 +1145,13 @@ struct FlowLayout: Layout {
 // MARK: - Previews
 
 #Preview("Dashboard - iPhone") {
-    DashboardView(selectedTab: .constant(.mise))
+    DashboardView(selectedTab: .constant(.mise), planAndShopSegment: .constant(.mealPlan))
         .modelContainer(for: Recipe.self, inMemory: true)
         .environment(AIServiceRouter())
 }
 
 #Preview("Dashboard - iPad") {
-    DashboardView(selectedTab: .constant(.mise))
+    DashboardView(selectedTab: .constant(.mise), planAndShopSegment: .constant(.mealPlan))
         .modelContainer(for: Recipe.self, inMemory: true)
         .environment(AIServiceRouter())
 }

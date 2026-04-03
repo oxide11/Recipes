@@ -7,6 +7,7 @@ struct ContentView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(TimerDeepLink.self) private var timerDeepLink
     @State private var selectedTab: AppTab = .mise
+    @State private var planAndShopSegment: PlanAndShopSegment = .mealPlan
     @State private var showingOnboarding = false
     @Query private var profiles: [UserProfile]
 
@@ -22,11 +23,11 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("Mise", systemImage: "sparkles", value: .mise) {
-                DashboardView(selectedTab: $selectedTab)
+                DashboardView(selectedTab: $selectedTab, planAndShopSegment: $planAndShopSegment)
             }
 
             Tab("Plan & Shop", systemImage: "cart", value: .planAndShop) {
-                PlanAndShopView()
+                PlanAndShopView(segment: $planAndShopSegment)
             }
 
             Tab("Recipes", systemImage: "book.pages", value: .recipes) {

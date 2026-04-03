@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - Plan & Shop Segments
 
-private enum PlanAndShopSegment: String, CaseIterable {
+enum PlanAndShopSegment: String, CaseIterable {
     case pantry   = "Pantry"
     case mealPlan = "Meal Plan"
     case shopping = "Shopping"
@@ -11,9 +11,11 @@ private enum PlanAndShopSegment: String, CaseIterable {
 // MARK: - Plan & Shop View
 
 /// Combined tab: Pantry → Meal Plan → Shopping.
-/// Each segment renders the existing standalone view unchanged.
+/// All three sub-views are kept alive simultaneously (opacity swap) so their
+/// @Query properties stay warm — no cold-start stutter when switching segments.
 struct PlanAndShopView: View {
-    @State private var segment: PlanAndShopSegment = .mealPlan
+    /// Lifted to ContentView so the dashboard can jump directly to a segment.
+    @Binding var segment: PlanAndShopSegment
 
     var body: some View {
         VStack(spacing: 0) {
@@ -28,14 +30,12 @@ struct PlanAndShopView: View {
             .padding(.top, 8)
             .padding(.bottom, 4)
 
-            // Content
-            switch segment {
-            case .pantry:
-                PantryView()
-            case .mealPlan:
-                MealPlanView()
-            case .shopping:
-                ShoppingListView()
+            // All three views rendered at once — only the active one is visible.
+            // This keeps @Query caches warm so segment switches are instant.
+            ZStack {
+                PantryView()      .opacity(segment == .pantry   ? 1 : 0).allowsHitTesting(segment == .pantry)
+                MealPlanView()    .opacity(segment == .mealPlan ? 1 : 0).allowsHitTesting(segment == .mealPlan)
+                ShoppingListView().opacity(segment == .shopping ? 1 : 0).allowsHitTesting(segment == .shopping)
             }
         }
     }
