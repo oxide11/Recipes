@@ -596,9 +596,13 @@ struct RecipeRow: View {
                     Text("·").opacity(0.5)
                     Image(systemName: "fork.knife")
                     Text(recipe.cuisine.rawValue.capitalized)
-                    if recipe.cookCount > 0 {
+                    if let avg = recipe.averageRating {
                         Text("·").opacity(0.5)
-                        Image(systemName: "flame")
+                        Image(systemName: "star.fill")
+                            .foregroundStyle(Brand.warmTan)
+                        Text(String(format: "%.1f", avg))
+                    } else if recipe.cookCount > 0 {
+                        Text("·").opacity(0.5)
                         Text("Cooked \(recipe.cookCount)×")
                     }
                 }
