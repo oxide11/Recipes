@@ -61,6 +61,33 @@ enum StoreSection: String, Codable, CaseIterable, Sendable {
     }
 }
 
+// MARK: - StoreSection Pantry Category Mapping
+
+extension StoreSection {
+    /// Maps a store section to an IngredientCategory for pantry auto-addition.
+    /// Returns nil for non-food sections (`.other`) — callers skip pantry insertion
+    /// when this is nil.
+    var pantryCategory: IngredientCategory? {
+        switch self {
+        case .produce:       return .vegetable
+        case .meat:          return .protein
+        case .seafood:       return .protein
+        case .dairy:         return .dairy
+        case .bakery:        return .grain
+        case .dryGoods:      return .grain
+        case .spices:        return .spice
+        case .condiments:    return .condiment
+        case .beverages:     return .liquid
+        case .frozen:        return .other
+        case .canned:        return .other
+        case .snacks:        return .other
+        case .deli:          return .protein
+        case .international: return .other
+        case .other:         return nil  // non-food, don't add to pantry
+        }
+    }
+}
+
 // MARK: - StoreSection Guessing
 
 extension StoreSection {

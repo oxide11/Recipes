@@ -25,6 +25,12 @@ final class ShoppingVoiceService: NSObject {
     var lastHeardText: String?
     var currentItemName: String?
 
+    // MARK: - Callbacks
+
+    /// Called on MainActor whenever an item is marked as found.
+    /// The view uses this to add food items to the pantry.
+    var onItemFound: ((GroceryItem) -> Void)?
+
     // MARK: - Session State
 
     private(set) var sortedSections: [(StoreSection, [GroceryItem])] = []
@@ -86,7 +92,10 @@ final class ShoppingVoiceService: NSObject {
     }
 
     func markFound() {
-        currentItem?.isPurchased = true
+        if let item = currentItem {
+            onItemFound?(item)
+            item.isPurchased = true
+        }
         // The purchased item drops out of the unpurchased filtered list, so the
         // next item slides into currentItemIndex automatically. Do NOT increment —
         // just check whether the section is now exhausted.

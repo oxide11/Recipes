@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 // MARK: - Guided Shopping View
 
@@ -8,8 +9,11 @@ import SwiftUI
 struct GuidedShoppingView: View {
     @Bindable var list: GroceryList
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @Environment(AIServiceRouter.self) private var aiRouter
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    @Query private var pantryItems: [PantryItem]
 
     @State private var voiceService = ShoppingVoiceService()
     @State private var showingSubstitution = false
@@ -116,6 +120,9 @@ struct GuidedShoppingView: View {
                 .padding(.horizontal, 32)
 
                 Button("Shop Without Voice") {
+                    voiceService.onItemFound = { item in
+                        addToPantryIfNeeded(item)
+                    }
                     voiceService.startSession(list: list, voiceEnabled: false)
                 }
                 .font(.subheadline)
@@ -324,6 +331,9 @@ struct GuidedShoppingView: View {
     // MARK: - Actions
 
     private func startGuidedShopping() {
+        voiceService.onItemFound = { item in
+            addToPantryIfNeeded(item)
+        }
         voiceService.startSession(list: list, voiceEnabled: true)
     }
 
@@ -333,6 +343,21 @@ struct GuidedShoppingView: View {
 
     private func skipItem() {
         voiceService.skip()
+    }
+
+    private func addToPantryIfNeeded(_ item: GroceryItem) {
+        guard let category = item.storeSection.pantryCategory else { return }
+        let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
+        guard !pantryItems.contains(where: {
+            $0.name.lowercased().trimmingCharacters(in: .whitespaces) == key
+        }) else { return }
+        let pantryItem = PantryItem(
+            name: item.name,
+            category: category,
+            quantity: item.quantity,
+            unit: item.unit
+        )
+        modelContext.insert(pantryItem)
     }
 
     private func sectionIcon(_ section: StoreSection) -> String {
