@@ -132,13 +132,15 @@ struct SafeTemperature: Codable, Hashable, Sendable {
 @Model
 final class RecipePhoto {
     var id: UUID
-    var imageData: Data
+    /// Filename (not full path) of the JPEG stored in Documents/RecipePhotos/.
+    /// Use PhotoStorageService to read, write, and delete the file.
+    var imageFilename: String
     var caption: String?
     var dateTaken: Date
 
-    init(imageData: Data, caption: String? = nil) {
-        self.id = UUID()
-        self.imageData = imageData
+    init(id: UUID = UUID(), imageFilename: String, caption: String? = nil) {
+        self.id = id
+        self.imageFilename = imageFilename
         self.caption = caption
         self.dateTaken = .now
     }

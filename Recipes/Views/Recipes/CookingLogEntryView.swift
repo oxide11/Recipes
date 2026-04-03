@@ -21,7 +21,8 @@ struct CookingLogEntryView: View {
     @State private var newSubstitution = ""
     @State private var servingsCooked: Int
     @State private var selectedPhoto: PhotosPickerItem?
-    @State private var photoData: Data?
+    @State private var photoData: Data?           // newly picked, not yet saved to disk
+    @State private var existingPhotoFilename: String?  // filename of existing photo when editing
     @State private var showingPantryCleanup = false
     @State private var didSave = false
 
@@ -53,7 +54,7 @@ struct CookingLogEntryView: View {
         _notes = State(initialValue: entry.notes ?? "")
         _substitutions = State(initialValue: entry.substitutionsMade)
         _servingsCooked = State(initialValue: recipe.servings)
-        _photoData = State(initialValue: entry.photo?.imageData)
+        _existingPhotoFilename = State(initialValue: entry.photo?.imageFilename)
     }
 
     var body: some View {
@@ -78,7 +79,10 @@ struct CookingLogEntryView: View {
                 }
 
                 Section("Photo") {
-                    PhotoPickerButton(selection: $selectedPhoto, hasPhoto: photoData != nil) { uiImage in
+                    PhotoPickerButton(
+                        selection: $selectedPhoto,
+                        hasPhoto: existingPhotoFilename != nil || photoData != nil
+                    ) { uiImage in
                         photoData = uiImage.jpegData(compressionQuality: 0.8)
                     }
                 }
@@ -176,14 +180,25 @@ struct CookingLogEntryView: View {
             entry.substitutionsMade = substitutions
             entry.timeSavedMinutes = timeSaved
             if let data = photoData, entry.photo == nil {
-                entry.photo = RecipePhoto(imageData: data)
+                let id = UUID()
+                if let filename = try? PhotoStorageService.save(data, id: id) {
+                    let photo = RecipePhoto(id: id, imageFilename: filename)
+                    modelContext.insert(photo)
+                    entry.photo = photo
+                }
             }
             didSave = true
             dismiss()
         } else {
             // Create new entry
             var photo: RecipePhoto?
-            if let data = photoData { photo = RecipePhoto(imageData: data) }
+            if let data = photoData {
+                let id = UUID()
+                if let filename = try? PhotoStorageService.save(data, id: id) {
+                    photo = RecipePhoto(id: id, imageFilename: filename)
+                    modelContext.insert(photo!)
+                }
+            }
 
             let entry = CookingLogEntry(
                 date: logDate,

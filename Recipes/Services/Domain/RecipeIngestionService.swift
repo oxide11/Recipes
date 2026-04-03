@@ -416,8 +416,11 @@ final class RecipeIngestionService {
            let imageURL = URL(string: imageURLString),
            let (imageData, _) = try? await URLSession.shared.data(from: imageURL),
            !imageData.isEmpty {
-            let photo = RecipePhoto(imageData: imageData)
-            recipe.photos.append(photo)
+            let id = UUID()
+            if let filename = try? PhotoStorageService.save(imageData, id: id) {
+                let photo = RecipePhoto(id: id, imageFilename: filename)
+                recipe.photos.append(photo)
+            }
         }
 
         return recipe

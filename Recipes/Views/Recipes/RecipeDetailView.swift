@@ -176,12 +176,22 @@ struct RecipeDetailView: View {
                 isPresented: $showingAddPhoto
             ) { uiImage in
                 if let data = uiImage.jpegData(compressionQuality: 0.8) {
-                    recipe.photos.append(RecipePhoto(imageData: data))
+                    let id = UUID()
+                    if let filename = try? PhotoStorageService.save(data, id: id) {
+                        let photo = RecipePhoto(id: id, imageFilename: filename)
+                        modelContext.insert(photo)
+                        recipe.photos.append(photo)
+                    }
                 }
             }
             .task(id: selectedPhoto) {
                 if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) {
-                    recipe.photos.append(RecipePhoto(imageData: data))
+                    let id = UUID()
+                    if let filename = try? PhotoStorageService.save(data, id: id) {
+                        let photo = RecipePhoto(id: id, imageFilename: filename)
+                        modelContext.insert(photo)
+                        recipe.photos.append(photo)
+                    }
                 }
             }
             .hidden()
@@ -205,11 +215,9 @@ struct RecipeDetailView: View {
     private var photoGallerySection: some View {
         let photos = galleryPhotos
         if !photos.isEmpty {
-            if photos.count == 1, let uiImage = UIImage(data: photos[0].photo.imageData) {
+            if photos.count == 1 {
                 // Single photo: show centered and wider
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
+                RecipePhotoImage(photo: photos[0].photo)
                     .frame(maxWidth: .infinity, minHeight: 200, maxHeight: 200)
                     .clipped()
                     .clipShape(.rect(cornerRadius: 12))
@@ -218,10 +226,7 @@ struct RecipeDetailView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 12) {
                         ForEach(photos, id: \.photo.id) { entry in
-                            if let uiImage = UIImage(data: entry.photo.imageData) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
+                            RecipePhotoImage(photo: entry.photo)
                                     .frame(width: 200, height: 150)
                                     .clipShape(.rect(cornerRadius: 12))
                                     .accessibilityLabel(entry.isLogPhoto ? "Cooking log photo" : "Recipe photo")
@@ -246,6 +251,7 @@ struct RecipeDetailView: View {
                                         if !entry.isLogPhoto {
                                             Button("Delete", systemImage: "trash", role: .destructive) {
                                                 recipe.photos.removeAll { $0.id == entry.photo.id }
+                                                modelContext.deletePhoto(entry.photo)
                                             }
                                         }
                                     }
@@ -727,13 +733,9 @@ struct RecipeDetailView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
                             ForEach(photos) { photo in
-                                if let uiImage = UIImage(data: photo.imageData) {
-                                    Image(uiImage: uiImage)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 120, height: 120)
-                                        .clipShape(.rect(cornerRadius: 10))
-                                }
+                                RecipePhotoImage(photo: photo)
+                                    .frame(width: 120, height: 120)
+                                    .clipShape(.rect(cornerRadius: 10))
                             }
                         }
                     }

@@ -631,11 +631,8 @@ struct RecipeCardCompact: View {
             Group {
                 let firstPhoto = recipe.photos.first
                     ?? recipe.cookingLog.sorted { $0.date > $1.date }.first?.photo
-                if let photo = firstPhoto,
-                   let uiImage = UIImage(data: photo.imageData) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
+                if let photo = firstPhoto {
+                    RecipePhotoImage(photo: photo)
                         .frame(width: 130, height: 86)
                         .clipShape(.rect(cornerRadius: 10))
                 } else {
