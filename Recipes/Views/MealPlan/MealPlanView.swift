@@ -506,7 +506,25 @@ struct MealCard: View {
                     }
                     .buttonStyle(.plain)
                 } else {
-                    titleRow
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(meal.mealType.displayName)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text("No recipe assigned")
+                                .font(.subheadline)
+                                .foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Button(role: .destructive) {
+                            modelContext.delete(meal)
+                        } label: {
+                            Image(systemName: "trash")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
 
