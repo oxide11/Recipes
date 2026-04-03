@@ -209,8 +209,8 @@ struct RecipeDetailView: View {
                 Image(uiImage: uiImage)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 200)
+                    .frame(maxWidth: .infinity, minHeight: 200, maxHeight: 200)
+                    .clipped()
                     .clipShape(.rect(cornerRadius: 12))
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
