@@ -510,7 +510,7 @@ struct MealCard: View {
                 }
             }
 
-            if let recipe = meal.recipe, !recipe.ingredients.isEmpty {
+            if let recipe = meal.recipe, !recipe.ingredients.isEmpty, meal.date >= Calendar.current.startOfDay(for: Date()) {
                 if allInPantry {
                     // Everything is already in the pantry
                     HStack(spacing: 4) {
