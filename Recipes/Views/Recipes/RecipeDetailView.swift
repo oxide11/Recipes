@@ -349,8 +349,7 @@ struct RecipeDetailView: View {
                     }
                 }
                 .padding()
-                .background(in: .rect(cornerRadius: 12))
-                .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
+                .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 12))
             } else {
                 HStack(spacing: 0) {
                     infoItem(title: "Prep", value: "\(recipe.prepTimeMinutes)m", icon: "scissors")
@@ -378,8 +377,7 @@ struct RecipeDetailView: View {
                     .frame(maxWidth: .infinity)
                 }
                 .padding()
-                .background(in: .rect(cornerRadius: 12))
-                .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
+                .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 12))
             }
         }
     }
