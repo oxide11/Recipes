@@ -62,7 +62,8 @@ struct VoicePantryEditView: View {
             }
             .onChange(of: recognizer.isListening) { _, listening in
                 if !listening && phase == .listening {
-                    // Auto-stopped (silence timeout) — move to parsing
+                    // Auto-stopped (silence timeout) — notify and move to parsing
+                    UINotificationFeedbackGenerator().notificationOccurred(.warning)
                     Task { await parse(recognizer.transcript) }
                 }
             }
@@ -99,7 +100,7 @@ struct VoicePantryEditView: View {
 
     private var listeningView: some View {
         VStack(spacing: 20) {
-            PulsingMicView()
+            PulsingMicView(isActive: recognizer.isListening)
 
             Text(recognizer.transcript.isEmpty ? "Listening…" : recognizer.transcript)
                 .font(.body)
@@ -304,18 +305,21 @@ struct VoicePantryEditView: View {
 // MARK: - Pulsing Mic Animation
 
 private struct PulsingMicView: View {
+    var isActive: Bool = true
     @State private var scale = 1.0
 
     var body: some View {
         ZStack {
             Circle()
-                .fill(Brand.herbGreen.opacity(0.15))
+                .fill(isActive ? Brand.herbGreen.opacity(0.15) : Color.secondary.opacity(0.1))
                 .frame(width: 100, height: 100)
-                .scaleEffect(scale)
+                .scaleEffect(isActive ? scale : 1.0)
+                .animation(.easeInOut(duration: 0.3), value: isActive)
 
-            Image(systemName: "mic.fill")
+            Image(systemName: isActive ? "mic.fill" : "mic.slash.fill")
                 .font(.system(size: 40))
-                .foregroundStyle(Brand.herbGreen)
+                .foregroundStyle(isActive ? Brand.herbGreen : .secondary)
+                .animation(.easeInOut(duration: 0.2), value: isActive)
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
