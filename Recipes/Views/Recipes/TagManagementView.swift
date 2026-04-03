@@ -99,8 +99,8 @@ struct TagManagementView: View {
                     WrappingLayout(itemSpacing: 8, rowSpacing: 8) {
                         ForEach(suggestions, id: \.self) { tag in
                             Button {
-                                newTagName = tag
-                                createTag()
+                                selectedTag = tag
+                                showingBatchTag = true
                             } label: {
                                 Text(tag)
                                     .font(.caption)
@@ -142,8 +142,10 @@ struct TagManagementView: View {
     private func createTag() {
         let tag = newTagName.trimmingCharacters(in: .whitespaces).lowercased()
         guard !tag.isEmpty else { return }
+        // Tags live on recipes — open batch tagger so user can apply it immediately
+        selectedTag = tag
         newTagName = ""
-        // Tag is created — it just needs to be added to recipes
+        showingBatchTag = true
     }
 
     private func removeTagFromAll(_ tag: String) {
@@ -270,58 +272,131 @@ struct BatchTagView: View {
 
 struct RecipeTagEditorView: View {
     @Bindable var recipe: Recipe
+    @Query(sort: \Recipe.dateModified, order: .reverse) private var allRecipes: [Recipe]
     @State private var newTag = ""
+    @FocusState private var fieldFocused: Bool
+
+    /// All unique tags across all recipes, excluding ones already on this recipe.
+    private var existingTags: [String] {
+        var seen = Set<String>()
+        var result: [String] = []
+        for r in allRecipes {
+            for tag in r.tags where !recipe.tags.contains(tag) && seen.insert(tag).inserted {
+                result.append(tag)
+            }
+        }
+        return result.sorted()
+    }
+
+    /// Filtered suggestions — existing tags that match what's being typed.
+    private var suggestions: [String] {
+        guard !newTag.isEmpty else { return existingTags }
+        let q = newTag.lowercased()
+        return existingTags.filter { $0.contains(q) }
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Tags")
                 .font(.title2)
                 .fontWeight(.bold)
 
-            WrappingLayout(itemSpacing: 6, rowSpacing: 6) {
-                ForEach(recipe.tags, id: \.self) { tag in
-                    HStack(spacing: 4) {
-                        Text("#\(tag)")
+            // Current tags
+            if !recipe.tags.isEmpty {
+                WrappingLayout(itemSpacing: 6, rowSpacing: 6) {
+                    ForEach(recipe.tags, id: \.self) { tag in
+                        HStack(spacing: 4) {
+                            Text("#\(tag)")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                            Button {
+                                withAnimation { recipe.tags.removeAll { $0 == tag } }
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Brand.herbGreen.opacity(0.15), in: .capsule)
+                    }
+                }
+            }
+
+            // Input row
+            HStack(spacing: 8) {
+                Image(systemName: "tag")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                TextField("Add a tag…", text: $newTag)
+                    .font(.subheadline)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .focused($fieldFocused)
+                    .submitLabel(.done)
+                    .onSubmit { addTag() }
+                if !newTag.isEmpty {
+                    Button { addTag() } label: {
+                        Image(systemName: "return")
                             .font(.caption)
-                        Button {
-                            recipe.tags.removeAll { $0 == tag }
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.caption2)
+                            .foregroundStyle(Brand.herbGreen)
+                    }
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 10))
+
+            // Suggestions — existing tags from your library, or new one to create
+            if !suggestions.isEmpty || !newTag.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    if !newTag.isEmpty && !existingTags.contains(newTag.lowercased().trimmingCharacters(in: .whitespaces)) {
+                        suggestionButton(label: "Create \"\(newTag.lowercased().trimmingCharacters(in: .whitespaces))\"", isNew: true) {
+                            addTag()
                         }
                     }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(.tint.opacity(0.1), in: .capsule)
-                }
-
-                // Add tag field
-                HStack(spacing: 4) {
-                    TextField("add tag", text: $newTag)
-                        .font(.caption)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .frame(width: 80)
-                    Button {
-                        addTag()
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.caption)
+                    ForEach(suggestions.prefix(6), id: \.self) { tag in
+                        suggestionButton(label: "#\(tag)", isNew: false) {
+                            applyExisting(tag)
+                        }
                     }
-                    .disabled(newTag.isEmpty)
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(.secondary.opacity(0.1), in: .capsule)
+                .padding(.top, 2)
             }
         }
         .sensoryFeedback(.selection, trigger: recipe.tags.count)
     }
 
+    @ViewBuilder
+    private func suggestionButton(label: String, isNew: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: isNew ? "plus.circle" : "tag")
+                    .font(.caption)
+                    .foregroundStyle(isNew ? Brand.herbGreen : .secondary)
+                Text(label)
+                    .font(.subheadline)
+                    .foregroundStyle(.primary)
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color(.tertiarySystemGroupedBackground), in: .rect(cornerRadius: 8))
+        }
+        .buttonStyle(.plain)
+    }
+
     private func addTag() {
         let tag = newTag.trimmingCharacters(in: .whitespaces).lowercased()
-        guard !tag.isEmpty, !recipe.tags.contains(tag) else { return }
-        recipe.tags.append(tag)
+        guard !tag.isEmpty, !recipe.tags.contains(tag) else { newTag = ""; return }
+        withAnimation { recipe.tags.append(tag) }
+        newTag = ""
+    }
+
+    private func applyExisting(_ tag: String) {
+        guard !recipe.tags.contains(tag) else { return }
+        withAnimation { recipe.tags.append(tag) }
         newTag = ""
     }
 }
