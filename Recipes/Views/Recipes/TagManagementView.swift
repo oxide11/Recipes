@@ -113,7 +113,7 @@ struct TagManagementView: View {
                                         Image(systemName: "plus")
                                             .font(.system(size: 10, weight: .semibold))
                                         Text(tag)
-                                            .font(.caption)
+                                            .font(.caption.weight(.medium))
                                     }
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 6)
@@ -123,8 +123,10 @@ struct TagManagementView: View {
                             }
                         }
                         .padding(.vertical, 4)
+                        .padding(.trailing, 16)
                     }
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
+                    .listRowSeparator(.hidden)
                 }
             } header: {
                 Text("Suggested Tags")

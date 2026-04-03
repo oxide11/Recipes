@@ -230,7 +230,7 @@ struct DayChip: View {
                 .foregroundStyle(isSelected ? Brand.warmTan : Brand.muted)
 
             Text(dayNumber)
-                .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
+                .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(isSelected ? .white : Brand.cream)
                 .frame(width: 30, height: 30)
                 .background(isSelected ? Brand.warmTan : Color.clear, in: Circle())

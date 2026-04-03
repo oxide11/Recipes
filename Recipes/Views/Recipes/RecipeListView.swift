@@ -463,8 +463,7 @@ struct TagChipGrid: View {
                         else { selectedTags.insert(tag) }
                     } label: {
                         Text(tag)
-                            .font(.subheadline)
-                            .fontWeight(isSelected ? .semibold : .regular)
+                            .font(.subheadline.weight(.medium))
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
                             .background(isSelected ? AnyShapeStyle(.tint) : AnyShapeStyle(.clear), in: .capsule)
@@ -496,8 +495,7 @@ struct DietaryChipGrid: View {
                         else { selectedRestrictions.insert(restriction) }
                     } label: {
                         Text(restriction.displayName)
-                            .font(.subheadline)
-                            .fontWeight(isSelected ? .semibold : .regular)
+                            .font(.subheadline.weight(.medium))
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
                             .background(isSelected ? AnyShapeStyle(.tint) : AnyShapeStyle(.clear), in: .capsule)
