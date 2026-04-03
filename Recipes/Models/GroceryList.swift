@@ -41,6 +41,59 @@ enum StoreSection: String, Codable, CaseIterable, Sendable {
     }
 }
 
+// MARK: - StoreSection Guessing
+
+extension StoreSection {
+    /// Keyword-based section guess from an item name. More specific multi-word
+    /// terms come before general single-word ones to avoid substring false positives
+    /// (e.g. "nutritional yeast" before "nut", "easter egg" before "egg").
+    static func guess(for name: String) -> StoreSection {
+        let n = name.lowercased()
+        let map: [(StoreSection, [String])] = [
+            (.snacks,     ["easter egg","chocolate egg","kinder","candy egg"]),
+            (.condiments, ["nutritional yeast","yeast flakes","nooch",
+                           "sauce","ketchup","mustard","mayo","mayonnaise","vinegar","oil","dressing",
+                           "salsa","hummus","pesto","soy sauce","hot sauce","sriracha","tahini",
+                           "fish sauce","oyster sauce","hoisin","worcestershire","miso"]),
+            (.produce,    ["apple","banana","berry","berries","spinach","lettuce","tomato","onion","garlic",
+                           "pepper","carrot","broccoli","cucumber","lemon","lime","avocado","mushroom",
+                           "basil","cilantro","parsley","kale","zucchini","potato","celery","corn",
+                           "mango","pineapple","grape","peach","pear","plum","strawberry","blueberry",
+                           "raspberry","arugula","beet","radish","leek","fennel","asparagus","squash",
+                           "bok choy","cabbage","cauliflower","eggplant","grapefruit","watermelon"]),
+            (.dairy,      ["milk","cheese","yogurt","butter","cream","kefir","sour cream",
+                           "cottage cheese","ricotta","mozzarella","cheddar","parmesan","feta","brie",
+                           "gouda","gruyere","halloumi","quark","crème fraîche"]),
+            (.dairy,      ["egg"]),
+            (.meat,       ["chicken","beef","pork","turkey","lamb","steak","ground beef","bacon",
+                           "sausage","ham","salmon","tuna","shrimp","fish","cod","tilapia","scallop",
+                           "crab","lobster","anchovy","sardine","prosciutto","pancetta","chorizo"]),
+            (.bakery,     ["bread","bagel","muffin","croissant","bun","roll","tortilla","pita","wrap",
+                           "sourdough","focaccia","naan","roti"]),
+            (.frozen,     ["frozen","ice cream","popsicle","gelato"]),
+            (.spices,     ["salt","pepper","cumin","cinnamon","paprika","oregano","thyme","rosemary",
+                           "turmeric","ginger","spice","seasoning","chili flake","bay leaf","clove",
+                           "curry","masala","za'atar","sumac","cardamom","coriander","allspice",
+                           "nutmeg","cayenne","chili powder","onion powder","garlic powder","dill",
+                           "fennel seed","caraway","fenugreek","smoked paprika"]),
+            (.dryGoods,   ["pasta","rice","flour","sugar","oat","cereal","quinoa","lentil","bean",
+                           "chickpea","noodle","breadcrumb","cracker","granola","barley","couscous",
+                           "polenta","farro","bulgur","millet","tapioca","cornstarch","baking soda",
+                           "baking powder","cocoa","yeast"]),
+            (.beverages,  ["juice","water","soda","coffee","tea","wine","beer","kombucha","sparkling",
+                           "almond milk","oat milk","coconut water","electrolyte","protein shake",
+                           "cold brew","matcha","cider"]),
+            (.snacks,     ["chip","nuts","almond","cashew","walnut","peanut","popcorn","pretzel",
+                           "chocolate","candy","cookie","granola bar","trail mix","jerky","rice cake"]),
+            (.canned,     ["canned","tomato paste","coconut milk","broth","stock","soup","tinned"]),
+        ]
+        for (section, keywords) in map {
+            if keywords.contains(where: { n.contains($0) }) { return section }
+        }
+        return .other
+    }
+}
+
 // MARK: - Grocery Item
 
 @Model

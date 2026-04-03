@@ -341,6 +341,10 @@ struct AddShoppingItemView: View {
                         .focused($nameFocused)
                         .submitLabel(.done)
                         .onSubmit { addItem() }
+                        .onChange(of: name) { _, newName in
+                            let guessed = StoreSection.guess(for: newName)
+                            if guessed != .other { section = guessed }
+                        }
 
                     Picker("Section", selection: $section) {
                         ForEach(StoreSection.allCases, id: \.self) { s in
@@ -348,7 +352,7 @@ struct AddShoppingItemView: View {
                         }
                     }
                 } footer: {
-                    Text("Press return or tap Add to add another item.")
+                    Text("Section is set automatically — change it if needed.")
                 }
 
                 if !recentlyAdded.isEmpty {
