@@ -567,6 +567,7 @@ struct MealCard: View {
         }
         .onAppear { Task { rebuildIngredientCaches() } }
         .onChange(of: pantryItems.count) { rebuildIngredientCaches() }
+        .onChange(of: pantryItems.map { $0.name + $0.id.uuidString }) { rebuildIngredientCaches() }
     }
 
     private func addMissingToShopping() {
@@ -942,6 +943,7 @@ struct GenerateMealPlanSheet: View {
         return try JSONDecoder().decode([MealSuggestion].self, from: data)
     }
 
+    @MainActor
     private func applyMeals(_ suggestions: [MealSuggestion], recipeSnapshot: [Recipe]) async {
         let recipeMap = Dictionary(
             uniqueKeysWithValues: recipeSnapshot.map { ($0.title.lowercased(), $0) }

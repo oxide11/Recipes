@@ -161,17 +161,18 @@ struct MealPrepView: View {
         }
     }
 
-    private func findGroupIndex(_ group: PrepTaskGroup) -> Int {
-        taskGroups.firstIndex(where: { $0.id == group.id }) ?? 0
+    private func findGroupIndex(_ group: PrepTaskGroup) -> Int? {
+        taskGroups.firstIndex(where: { $0.id == group.id })
     }
 
-    private func ingredientGroupCard(groupIndex: Int) -> some View {
+    private func ingredientGroupCard(groupIndex: Int?) -> some View {
+        guard let groupIndex else { return AnyView(EmptyView()) }
         let group = taskGroups[groupIndex]
         // Group task indices by action so each action gets its own checkbox row
         let tasksByAction = Dictionary(grouping: group.tasks.indices, by: { group.tasks[$0].preparationNote })
         let sortedActions = tasksByAction.keys.sorted()
 
-        return VStack(alignment: .leading, spacing: 10) {
+        return AnyView(VStack(alignment: .leading, spacing: 10) {
             // Ingredient name + total amount — header, no checkbox
             HStack {
                 Text(group.ingredientName)
@@ -195,7 +196,7 @@ struct MealPrepView: View {
             }
         }
         .padding(12)
-        .background(Brand.surface, in: RoundedRectangle(cornerRadius: 10))
+        .background(Brand.surface, in: RoundedRectangle(cornerRadius: 10)))
     }
 
     private func actionRow(groupIndex: Int, action: String, indices: [Int], showAmount: Bool) -> some View {
