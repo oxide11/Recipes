@@ -14,6 +14,23 @@ enum PantryStarterKit {
         let quantity: Double
     }
 
+    /// Ingredients every kitchen should have, regardless of cuisine.
+    /// Added first so they're always at the top of the list.
+    static let universals: [StarterIngredient] = [
+        .init(name: "Salt",              category: .spice,     unit: .tablespoon, quantity: 4),
+        .init(name: "Black pepper",      category: .spice,     unit: .tablespoon, quantity: 2),
+        .init(name: "Olive oil",         category: .oil,       unit: .cup,        quantity: 1),
+        .init(name: "Neutral oil",       category: .oil,       unit: .cup,        quantity: 1),
+        .init(name: "White wine vinegar",category: .condiment, unit: .cup,        quantity: 0.5),
+        .init(name: "Garlic",            category: .vegetable, unit: .whole,      quantity: 1),
+        .init(name: "Yellow onion",      category: .vegetable, unit: .whole,      quantity: 2),
+        .init(name: "Butter",            category: .dairy,     unit: .ounce,      quantity: 8),
+        .init(name: "Eggs",              category: .protein,   unit: .whole,      quantity: 6),
+        .init(name: "All-purpose flour", category: .grain,     unit: .cup,        quantity: 2),
+        .init(name: "Sugar",             category: .sweetener, unit: .cup,        quantity: 1),
+        .init(name: "Honey",             category: .sweetener, unit: .tablespoon, quantity: 3),
+    ]
+
     static let kits: [Cuisine: [StarterIngredient]] = [
         .italian: [
             .init(name: "Olive oil",          category: .oil,       unit: .cup,       quantity: 1),
@@ -188,11 +205,14 @@ enum PantryStarterKit {
         ],
     ]
 
-    /// Returns deduplicated starter ingredients for the given cuisines, in encounter order.
+    /// Returns deduplicated starter ingredients: universals first, then
+    /// cuisine-specific additions in encounter order.
     static func ingredients(for cuisines: [Cuisine]) -> [StarterIngredient] {
         var seen = Set<String>()
-        return cuisines
+        let base = universals.filter { seen.insert($0.name.lowercased()).inserted }
+        let extras = cuisines
             .flatMap { kits[$0] ?? [] }
             .filter { seen.insert($0.name.lowercased()).inserted }
+        return base + extras
     }
 }
