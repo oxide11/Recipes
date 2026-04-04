@@ -122,7 +122,7 @@ struct OnboardingView: View {
             Spacer()
 
             VStack(spacing: 24) {
-                Image(systemName: "fork.knife")
+                Image(systemName: "house")
                     .font(.system(size: 56))
                     .foregroundStyle(Brand.herbGreen)
                     .accessibilityHidden(true)
