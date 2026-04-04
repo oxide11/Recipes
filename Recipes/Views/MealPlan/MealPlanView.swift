@@ -176,6 +176,7 @@ struct WeekStripView: View {
                     .foregroundStyle(Brand.muted)
                     .frame(width: 44, height: 44)
             }
+            .accessibilityLabel("Previous week")
 
             HStack(spacing: 2) {
                 ForEach(weekDays, id: \.self) { day in
@@ -194,6 +195,7 @@ struct WeekStripView: View {
                     .foregroundStyle(Brand.muted)
                     .frame(width: 44, height: 44)
             }
+            .accessibilityLabel("Next week")
         }
         .gesture(
             DragGesture(minimumDistance: 30)
@@ -373,6 +375,7 @@ struct MealSlotSection: View {
                         .font(.body)
                         .foregroundStyle(Brand.muted)
                 }
+                .accessibilityLabel("Add meal")
             }
 
             // Content
@@ -522,6 +525,7 @@ struct MealCard: View {
                                 .foregroundStyle(.secondary)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Remove meal")
                     }
                 }
             }
@@ -659,8 +663,9 @@ struct MealCard: View {
         case .grain, .legume, .nut:   return .dryGoods
         case .dairy:                  return .dairy
         case .spice, .herb:           return .spices
-        case .condiment, .sweetener:  return .condiments
-        case .oil, .liquid:           return .condiments
+        case .condiment, .sweetener:        return .condiments
+        case .oil, .liquid:                 return .condiments
+        case .baking:                       return .dryGoods
         case .other:                  return .other
         }
     }
@@ -1011,7 +1016,7 @@ struct GenerateMealPlanSheet: View {
             // Find or generate the recipe
             let recipe: Recipe?
             if suggestion.isNew == true, let description = suggestion.description {
-                let prompt = "Generate a complete recipe for: \(description). Include title, ingredients with measurements, and step-by-step instructions."
+                let prompt = "Generate a complete recipe for: \(description.sanitizedForAI). Include title, ingredients with measurements, and step-by-step instructions."
                 do {
                     let text = try await aiRouter.generateText(prompt: prompt, taskType: .recipeGeneration)
                     let result = try await ingestionService.ingestFromText(text)

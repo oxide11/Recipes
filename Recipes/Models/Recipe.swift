@@ -42,6 +42,18 @@ enum DietaryRestriction: String, Codable, CaseIterable, Sendable {
 
 enum RecipeDifficulty: String, Codable, CaseIterable, Sendable {
     case beginner, intermediate, advanced, expert
+
+    /// Numeric rank used to compare levels (higher = more experienced).
+    var rank: Int {
+        switch self {
+        case .beginner:     return 0
+        case .intermediate: return 1
+        case .advanced:     return 2
+        case .expert:       return 3
+        }
+    }
+
+    var displayName: String { rawValue.capitalized }
 }
 
 // MARK: - Timer Step

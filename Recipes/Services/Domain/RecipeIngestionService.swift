@@ -65,7 +65,7 @@ final class RecipeIngestionService {
         Never use the ounce count as the ingredient quantity.
 
         Webpage content:
-        \(truncated)
+        \(truncated.sanitizedForAI)
         """
 
         let response = try await aiRouter.generateText(
@@ -112,7 +112,7 @@ final class RecipeIngestionService {
         Never use the ounce count as the ingredient quantity.
 
         Recipe text:
-        \(text)
+        \(text.sanitizedForAI)
         """
     }
 
@@ -278,7 +278,7 @@ final class RecipeIngestionService {
         Recipe:
         \(recipeText)
 
-        User request: \(instruction)
+        User request: \(instruction.sanitizedForAI)
 
         Return the complete updated recipe as valid JSON with this exact structure:
         {

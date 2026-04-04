@@ -30,12 +30,15 @@ enum OpenFoodFactsService {
 
     /// Look up a product by barcode using the Open Food Facts API.
     static func lookup(barcode: String) async throws -> Product? {
-        let sanitized = barcode.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? barcode
-        let urlString = "https://world.openfoodfacts.org/api/v2/product/\(sanitized).json?fields=product_name,brands,categories_tags,image_url,nutriments,quantity"
-
-        guard let url = URL(string: urlString) else {
-            return nil
-        }
+        // URLComponents handles path encoding safely — no manual percent-encoding needed.
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host   = "world.openfoodfacts.org"
+        components.path   = "/api/v2/product/\(barcode).json"
+        components.queryItems = [
+            URLQueryItem(name: "fields", value: "product_name,brands,categories_tags,image_url,nutriments,quantity")
+        ]
+        guard let url = components.url else { return nil }
 
         var request = URLRequest(url: url)
         request.setValue("RecipesApp/1.0 iOS", forHTTPHeaderField: "User-Agent")
@@ -61,12 +64,18 @@ enum OpenFoodFactsService {
 
     /// Search for products by name.
     static func search(query: String, page: Int = 1) async throws -> [Product] {
-        let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
-        let urlString = "https://world.openfoodfacts.org/cgi/search.pl?search_terms=\(encoded)&json=1&page=\(page)&page_size=10&fields=product_name,brands,categories_tags,code,image_url,nutriments,quantity"
-
-        guard let url = URL(string: urlString) else {
-            return []
-        }
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host   = "world.openfoodfacts.org"
+        components.path   = "/cgi/search.pl"
+        components.queryItems = [
+            URLQueryItem(name: "search_terms", value: query),
+            URLQueryItem(name: "json",         value: "1"),
+            URLQueryItem(name: "page",         value: "\(page)"),
+            URLQueryItem(name: "page_size",    value: "10"),
+            URLQueryItem(name: "fields",       value: "product_name,brands,categories_tags,code,image_url,nutriments,quantity")
+        ]
+        guard let url = components.url else { return [] }
 
         var request = URLRequest(url: url)
         request.setValue("RecipesApp/1.0 iOS", forHTTPHeaderField: "User-Agent")

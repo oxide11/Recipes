@@ -71,6 +71,44 @@ final class UserProfile {
     var totalTimePrepMinutes: Int
     var totalTimeShoppingMinutes: Int
 
+    // MARK: - Skill Inference
+
+    /// Call this once per new cooking log entry to keep skill level up to date.
+    /// Skill only ever ratchets upward — a bad week won't demote you.
+    func recordCook(ofRecipeWithDifficulty difficulty: RecipeDifficulty) {
+        totalRecipesCooked += 1
+        let proposed = Self.proposedSkillLevel(cookCount: totalRecipesCooked, difficulty: difficulty)
+        if proposed.rank > skillLevel.rank {
+            skillLevel = proposed
+        }
+    }
+
+    private static func proposedSkillLevel(cookCount: Int, difficulty: RecipeDifficulty) -> RecipeDifficulty {
+        switch difficulty {
+        case .advanced, .expert:
+            return .advanced
+        case .intermediate:
+            return .intermediate
+        case .beginner:
+            // Upgrade to intermediate once they've cooked 5+ times
+            return cookCount >= 5 ? .intermediate : .beginner
+        }
+    }
+
+    /// Human-readable description of how the skill level was determined.
+    var skillLevelDescription: String {
+        switch skillLevel {
+        case .beginner:
+            return "Based on your cooking history — keep logging cooks to level up."
+        case .intermediate:
+            return "You've built a solid base. Inferred from your cooking history."
+        case .advanced:
+            return "You've tackled advanced recipes. Inferred from your cooking history."
+        case .expert:
+            return "Expert level. Inferred from your cooking history."
+        }
+    }
+
     init(
         displayName: String = "Chef",
         dietaryRestrictions: [DietaryRestriction] = [],

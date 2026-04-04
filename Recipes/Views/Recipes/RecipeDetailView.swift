@@ -83,6 +83,10 @@ struct RecipeDetailView: View {
                 cookingLogSection
             }
             .padding()
+            // On iPad the reading line becomes uncomfortably wide at full screen width.
+            // Cap at 720 pt and centre — content still fills narrower screens normally.
+            .frame(maxWidth: 720)
+            .frame(maxWidth: .infinity, alignment: .center)
             .animation(reduceMotion ? .none : .snappy(duration: 0.25), value: isEditing)
         }
         .scrollPosition(id: $initialScrollID, anchor: .top)
@@ -216,49 +220,54 @@ struct RecipeDetailView: View {
         let photos = galleryPhotos
         if !photos.isEmpty {
             if photos.count == 1 {
-                // Single photo: show centered and wider
+                // Single photo — no dots needed, show full-width.
                 RecipePhotoImage(photo: photos[0].photo)
                     .frame(maxWidth: .infinity, minHeight: 200, maxHeight: 200)
                     .clipped()
                     .clipShape(.rect(cornerRadius: 12))
                     .accessibilityLabel("Recipe photo")
             } else {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    LazyHStack(spacing: 12) {
-                        ForEach(photos, id: \.photo.id) { entry in
-                            RecipePhotoImage(photo: entry.photo)
-                                    .frame(width: 200, height: 150)
-                                    .clipShape(.rect(cornerRadius: 12))
-                                    .accessibilityLabel(entry.isLogPhoto ? "Cooking log photo" : "Recipe photo")
-                                    .overlay(alignment: .bottomTrailing) {
-                                        if entry.isLogPhoto {
-                                            Image(systemName: "flame.fill")
-                                                .font(.caption2)
-                                                .padding(6)
-                                                .background(in: .circle)
-                                                .glassEffect(.regular, in: .circle)
-                                                .padding(8)
-                                        } else if let caption = entry.photo.caption {
-                                            Text(caption)
-                                                .font(.caption2)
-                                                .padding(4)
-                                                .background(in: .capsule)
-                                                .glassEffect(.regular, in: .capsule)
-                                                .padding(8)
-                                        }
+                // Multiple photos — swipeable page carousel with page dots.
+                // TabView(.page) shows system page indicators and handles
+                // gesture conflicts with the parent ScrollView correctly.
+                TabView {
+                    ForEach(photos, id: \.photo.id) { entry in
+                        RecipePhotoImage(photo: entry.photo)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .clipShape(.rect(cornerRadius: 12))
+                            .accessibilityLabel(entry.isLogPhoto ? "Cooking log photo, photo \(photos.firstIndex(where: { $0.photo.id == entry.photo.id }).map { "\($0 + 1) of \(photos.count)" } ?? "")" : "Recipe photo, photo \(photos.firstIndex(where: { $0.photo.id == entry.photo.id }).map { "\($0 + 1) of \(photos.count)" } ?? "")")
+                            .overlay(alignment: .bottomTrailing) {
+                                if entry.isLogPhoto {
+                                    Image(systemName: "flame.fill")
+                                        .font(.caption2)
+                                        .padding(6)
+                                        .background(in: .circle)
+                                        .glassEffect(.regular, in: .circle)
+                                        .padding(8)
+                                        .accessibilityHidden(true)
+                                } else if let caption = entry.photo.caption {
+                                    Text(caption)
+                                        .font(.caption2)
+                                        .padding(4)
+                                        .background(in: .capsule)
+                                        .glassEffect(.regular, in: .capsule)
+                                        .padding(8)
+                                }
+                            }
+                            .contextMenu {
+                                if !entry.isLogPhoto {
+                                    Button("Delete", systemImage: "trash", role: .destructive) {
+                                        recipe.photos.removeAll { $0.id == entry.photo.id }
+                                        modelContext.deletePhoto(entry.photo)
                                     }
-                                    .contextMenu {
-                                        if !entry.isLogPhoto {
-                                            Button("Delete", systemImage: "trash", role: .destructive) {
-                                                recipe.photos.removeAll { $0.id == entry.photo.id }
-                                                modelContext.deletePhoto(entry.photo)
-                                            }
-                                        }
-                                    }
-                        }
+                                }
+                            }
+                            // Padding keeps photos from touching the carousel edges
+                            .padding(.bottom, 24)
                     }
                 }
-                .contentMargins(.vertical, 12, for: .scrollContent)
+                .tabViewStyle(.page)
+                .frame(height: 220)
             }
         }
     }

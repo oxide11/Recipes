@@ -35,35 +35,54 @@ struct CameraPicker: UIViewControllerRepresentable {
 
 // MARK: - Photo Picker Button
 //
-// Shows a confirmation dialog to choose between camera and photo library.
+// On devices with a camera: renders as a Menu so both "Take Photo" and
+// "Choose from Library" are reachable in one tap with no popup dialog.
+// On devices without a camera (simulator, some iPads): goes straight to
+// the photo library.
 
 struct PhotoPickerButton: View {
     @Binding var selection: PhotosPickerItem?
     let hasPhoto: Bool
 
-    /// Optionally trigger the picker from an external boolean (e.g. from a Menu item).
+    /// Optionally trigger the library picker from an external boolean (e.g. from a Menu item).
     var isPresented: Binding<Bool>? = nil
     /// Called when a photo is taken directly with the camera.
     var onCameraImage: ((UIImage) -> Void)? = nil
 
-    @State private var showingDialog = false
     @State private var showingCamera = false
     @State private var showingLibrary = false
     @State private var cameraImage: UIImage?
 
+    private var cameraAvailable: Bool {
+        UIImagePickerController.isSourceTypeAvailable(.camera)
+    }
+
     var body: some View {
-        Button {
-            showingDialog = true
-        } label: {
-            Label(
-                hasPhoto ? "Change Photo" : "Add Photo",
-                systemImage: hasPhoto ? "camera.badge.ellipsis" : "camera.badge.plus"
-            )
-        }
-        .confirmationDialog("Add Photo", isPresented: $showingDialog) {
-            Button("Take Photo") { showingCamera = true }
-            Button("Choose from Library") { showingLibrary = true }
-            Button("Cancel", role: .cancel) {}
+        Group {
+            if cameraAvailable {
+                Menu {
+                    Button("Take Photo", systemImage: "camera") {
+                        showingCamera = true
+                    }
+                    Button("Choose from Library", systemImage: "photo.on.rectangle") {
+                        showingLibrary = true
+                    }
+                } label: {
+                    Label(
+                        hasPhoto ? "Change Photo" : "Add Photo",
+                        systemImage: hasPhoto ? "camera.badge.ellipsis" : "camera.badge.plus"
+                    )
+                }
+            } else {
+                Button {
+                    showingLibrary = true
+                } label: {
+                    Label(
+                        hasPhoto ? "Change Photo" : "Add Photo",
+                        systemImage: hasPhoto ? "camera.badge.ellipsis" : "camera.badge.plus"
+                    )
+                }
+            }
         }
         .fullScreenCover(isPresented: $showingCamera) {
             CameraPicker(image: $cameraImage)
@@ -76,9 +95,11 @@ struct PhotoPickerButton: View {
                 cameraImage = nil
             }
         }
+        // External trigger (e.g. a toolbar Menu item) goes straight to the library —
+        // the caller's menu already acts as the source chooser.
         .onChange(of: isPresented?.wrappedValue ?? false) { _, triggered in
             if triggered {
-                showingDialog = true
+                showingLibrary = true
                 isPresented?.wrappedValue = false
             }
         }
@@ -92,26 +113,44 @@ struct ImportPhotoPickerButton: View {
     let hasPhoto: Bool
     var onCameraImage: ((UIImage) -> Void)? = nil
 
-    @State private var showingDialog = false
     @State private var showingCamera = false
     @State private var showingLibrary = false
     @State private var cameraImage: UIImage?
 
+    private var cameraAvailable: Bool {
+        UIImagePickerController.isSourceTypeAvailable(.camera)
+    }
+
     var body: some View {
-        Button {
-            showingDialog = true
-        } label: {
-            if hasPhoto {
-                Label("Photo Selected", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
+        Group {
+            if cameraAvailable {
+                Menu {
+                    Button("Take Photo", systemImage: "camera") {
+                        showingCamera = true
+                    }
+                    Button("Choose from Library", systemImage: "photo.on.rectangle") {
+                        showingLibrary = true
+                    }
+                } label: {
+                    if hasPhoto {
+                        Label("Photo Selected", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    } else {
+                        Label("Choose Photo", systemImage: "photo.on.rectangle")
+                    }
+                }
             } else {
-                Label("Choose Photo", systemImage: "photo.on.rectangle")
+                Button {
+                    showingLibrary = true
+                } label: {
+                    if hasPhoto {
+                        Label("Photo Selected", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    } else {
+                        Label("Choose Photo", systemImage: "photo.on.rectangle")
+                    }
+                }
             }
-        }
-        .confirmationDialog("Add Photo", isPresented: $showingDialog) {
-            Button("Take Photo") { showingCamera = true }
-            Button("Choose from Library") { showingLibrary = true }
-            Button("Cancel", role: .cancel) {}
         }
         .fullScreenCover(isPresented: $showingCamera) {
             CameraPicker(image: $cameraImage)

@@ -135,6 +135,7 @@ enum ShoppingListGenerator {
         case .condiment: return .condiments
         case .liquid:    return .beverages
         case .sweetener: return .dryGoods
+        case .baking:    return .dryGoods
         case .nut:       return .snacks
         case .legume:    return .canned
         case .herb:      return .produce

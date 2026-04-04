@@ -12,6 +12,8 @@ enum PantryStarterKit {
         let category: IngredientCategory
         let unit: MeasurementUnit
         let quantity: Double
+        /// Dietary restrictions for which this ingredient should be excluded.
+        var excludedFor: Set<DietaryRestriction> = []
     }
 
     /// Ingredients every kitchen should have, regardless of cuisine.
@@ -23,11 +25,11 @@ enum PantryStarterKit {
         .init(name: "Neutral oil",       category: .oil,       unit: .cup,        quantity: 1),
         .init(name: "Garlic",            category: .vegetable, unit: .whole,      quantity: 1),
         .init(name: "Yellow onion",      category: .vegetable, unit: .whole,      quantity: 2),
-        .init(name: "Butter",            category: .dairy,     unit: .ounce,      quantity: 8),
-        .init(name: "Eggs",              category: .protein,   unit: .whole,      quantity: 6),
-        .init(name: "Flour",             category: .grain,     unit: .cup,        quantity: 2),
+        .init(name: "Butter",            category: .dairy,     unit: .ounce,      quantity: 8,  excludedFor: [.vegan, .dairyFree]),
+        .init(name: "Eggs",              category: .protein,   unit: .whole,      quantity: 6,  excludedFor: [.vegan]),
+        .init(name: "Flour",             category: .grain,     unit: .cup,        quantity: 2,  excludedFor: [.glutenFree]),
         .init(name: "Sugar",             category: .sweetener, unit: .cup,        quantity: 1),
-        .init(name: "Honey",             category: .sweetener, unit: .tablespoon, quantity: 3),
+        .init(name: "Honey",             category: .sweetener, unit: .tablespoon, quantity: 3,  excludedFor: [.vegan]),
         .init(name: "Lemon",             category: .fruit,     unit: .whole,      quantity: 2),
         .init(name: "Tomato paste",      category: .condiment, unit: .tablespoon, quantity: 3),
         .init(name: "Bay leaves",        category: .herb,      unit: .piece,      quantity: 4),
@@ -41,16 +43,16 @@ enum PantryStarterKit {
     static let kits: [Cuisine: [StarterIngredient]] = [
         .italian: [
             .init(name: "Canned tomatoes",     category: .vegetable, unit: .can,        quantity: 2),
-            .init(name: "Dried pasta",         category: .grain,     unit: .pound,      quantity: 1),
-            .init(name: "Parmesan",            category: .dairy,     unit: .ounce,      quantity: 4),
+            .init(name: "Dried pasta",         category: .grain,     unit: .pound,      quantity: 1,  excludedFor: [.glutenFree]),
+            .init(name: "Parmesan",            category: .dairy,     unit: .ounce,      quantity: 4,  excludedFor: [.vegan, .dairyFree]),
             .init(name: "White wine",          category: .liquid,    unit: .cup,        quantity: 1),
             .init(name: "Red wine vinegar",    category: .condiment, unit: .cup,        quantity: 0.5),
             .init(name: "Dried oregano",       category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Dried basil",         category: .herb,      unit: .tablespoon, quantity: 1),
-            .init(name: "Bacon",               category: .protein,   unit: .ounce,      quantity: 6),
+            .init(name: "Bacon",               category: .protein,   unit: .ounce,      quantity: 6,  excludedFor: [.vegetarian, .vegan, .pescatarian, .halal, .kosher]),
             .init(name: "Cocoa powder",        category: .baking,    unit: .tablespoon, quantity: 3),
             .init(name: "Vanilla extract",     category: .baking,    unit: .tablespoon, quantity: 1),
-            .init(name: "Breadcrumbs",         category: .grain,     unit: .cup,        quantity: 1),
+            .init(name: "Breadcrumbs",         category: .grain,     unit: .cup,        quantity: 1,  excludedFor: [.glutenFree]),
         ],
         .japanese: [
             .init(name: "Soy sauce",           category: .condiment, unit: .cup,        quantity: 1),
@@ -62,7 +64,7 @@ enum PantryStarterKit {
             .init(name: "Sesame oil",          category: .oil,       unit: .cup,        quantity: 0.5),
             .init(name: "Toasted sesame seeds",category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Instant dashi powder",category: .other,     unit: .tablespoon, quantity: 2),
-            .init(name: "Panko",               category: .grain,     unit: .cup,        quantity: 1),
+            .init(name: "Panko",               category: .grain,     unit: .cup,        quantity: 1,  excludedFor: [.glutenFree]),
             .init(name: "Tofu",                category: .protein,   unit: .piece,      quantity: 1),
             .init(name: "Green onions",        category: .vegetable, unit: .bunch,      quantity: 1),
             .init(name: "Ginger",              category: .vegetable, unit: .whole,      quantity: 1),
@@ -74,10 +76,10 @@ enum PantryStarterKit {
             .init(name: "Masa harina",         category: .grain,     unit: .cup,        quantity: 2),
             .init(name: "Chipotle in adobo",   category: .condiment, unit: .can,        quantity: 1),
             .init(name: "Dried oregano",       category: .spice,     unit: .tablespoon, quantity: 2),
-            .init(name: "Lard",                category: .oil,       unit: .cup,        quantity: 0.5),
+            .init(name: "Lard",                category: .oil,       unit: .cup,        quantity: 0.5, excludedFor: [.vegetarian, .vegan, .pescatarian, .halal, .kosher]),
             .init(name: "Limes",               category: .fruit,     unit: .whole,      quantity: 4),
             .init(name: "Jalapeños",           category: .vegetable, unit: .whole,      quantity: 4),
-            .init(name: "Cocoa powder",        category: .other,     unit: .tablespoon, quantity: 3),
+            .init(name: "Cocoa powder",        category: .baking,    unit: .tablespoon, quantity: 3),
         ],
         .american: [
             .init(name: "Worcestershire sauce",category: .condiment, unit: .tablespoon, quantity: 3),
@@ -100,17 +102,17 @@ enum PantryStarterKit {
             .init(name: "Garam masala",        category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Cardamom",            category: .spice,     unit: .tablespoon, quantity: 1),
             .init(name: "Dried red chiles",    category: .spice,     unit: .piece,      quantity: 4),
-            .init(name: "Ghee",                category: .oil,       unit: .cup,        quantity: 0.5),
+            .init(name: "Ghee",                category: .oil,       unit: .cup,        quantity: 0.5, excludedFor: [.vegan, .dairyFree]),
             .init(name: "Basmati rice",        category: .grain,     unit: .cup,        quantity: 2),
             .init(name: "Lentils",             category: .legume,    unit: .cup,        quantity: 2),
             .init(name: "Tamarind paste",      category: .condiment, unit: .tablespoon, quantity: 2),
             .init(name: "Coconut milk",        category: .liquid,    unit: .can,        quantity: 2),
-            .init(name: "Plain yogurt",        category: .dairy,     unit: .cup,        quantity: 1),
+            .init(name: "Plain yogurt",        category: .dairy,     unit: .cup,        quantity: 1,  excludedFor: [.vegan, .dairyFree]),
             .init(name: "Curry leaves",        category: .herb,      unit: .piece,      quantity: 10),
             .init(name: "Ginger",              category: .vegetable, unit: .whole,      quantity: 1),
         ],
         .thai: [
-            .init(name: "Fish sauce",          category: .condiment, unit: .cup,        quantity: 0.5),
+            .init(name: "Fish sauce",          category: .condiment, unit: .cup,        quantity: 0.5, excludedFor: [.vegetarian, .vegan]),
             .init(name: "Coconut milk",        category: .liquid,    unit: .can,        quantity: 2),
             .init(name: "Curry paste",         category: .condiment, unit: .tablespoon, quantity: 3),
             .init(name: "Palm sugar",          category: .sweetener, unit: .tablespoon, quantity: 3),
@@ -143,7 +145,7 @@ enum PantryStarterKit {
             .init(name: "Sesame oil",          category: .oil,       unit: .cup,        quantity: 0.5),
             .init(name: "Rice vinegar",        category: .condiment, unit: .cup,        quantity: 0.5),
             .init(name: "Short-grain rice",    category: .grain,     unit: .cup,        quantity: 2),
-            .init(name: "Dried anchovies",     category: .protein,   unit: .ounce,      quantity: 2),
+            .init(name: "Dried anchovies",     category: .protein,   unit: .ounce,      quantity: 2,  excludedFor: [.vegetarian, .vegan]),
             .init(name: "Dried kelp",          category: .other,     unit: .piece,      quantity: 2),
             .init(name: "Kimchi",              category: .vegetable, unit: .cup,        quantity: 1),
             .init(name: "Tofu",                category: .protein,   unit: .piece,      quantity: 1),
@@ -156,8 +158,8 @@ enum PantryStarterKit {
             .init(name: "Dry white wine",      category: .liquid,    unit: .cup,        quantity: 1),
             .init(name: "Herbes de Provence",  category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Nutmeg",              category: .spice,     unit: .tablespoon, quantity: 1),
-            .init(name: "Crème fraîche",       category: .dairy,     unit: .cup,        quantity: 0.5),
-            .init(name: "Bacon",               category: .protein,   unit: .ounce,      quantity: 6),
+            .init(name: "Crème fraîche",       category: .dairy,     unit: .cup,        quantity: 0.5, excludedFor: [.vegan, .dairyFree]),
+            .init(name: "Bacon",               category: .protein,   unit: .ounce,      quantity: 6,  excludedFor: [.vegetarian, .vegan, .pescatarian, .halal, .kosher]),
             .init(name: "Cocoa powder",        category: .baking,    unit: .tablespoon, quantity: 3),
             .init(name: "Vanilla extract",     category: .baking,    unit: .tablespoon, quantity: 1),
         ],
@@ -167,9 +169,9 @@ enum PantryStarterKit {
             .init(name: "Dried mint",          category: .herb,      unit: .tablespoon, quantity: 2),
             .init(name: "Allspice",            category: .spice,     unit: .tablespoon, quantity: 1),
             .init(name: "Dried chickpeas",     category: .legume,    unit: .cup,        quantity: 2),
-            .init(name: "Feta",                category: .dairy,     unit: .ounce,      quantity: 6),
-            .init(name: "Kalamata olives",     category: .condiment, unit: .cup,        quantity: 0.5),
-            .init(name: "Plain yogurt",        category: .dairy,     unit: .cup,        quantity: 1),
+            .init(name: "Feta",                category: .dairy,     unit: .ounce,      quantity: 6,  excludedFor: [.vegan, .dairyFree]),
+            .init(name: "Kalamata olives",     category: .vegetable, unit: .cup,        quantity: 0.5),
+            .init(name: "Plain yogurt",        category: .dairy,     unit: .cup,        quantity: 1,  excludedFor: [.vegan, .dairyFree]),
             .init(name: "Tahini",              category: .condiment, unit: .cup,        quantity: 0.5),
             .init(name: "Cumin",               category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Coriander",           category: .spice,     unit: .tablespoon, quantity: 1),
@@ -190,11 +192,11 @@ enum PantryStarterKit {
             .init(name: "Smoked paprika",      category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Saffron",             category: .spice,     unit: .pinch,      quantity: 2),
             .init(name: "Sherry vinegar",      category: .condiment, unit: .tablespoon, quantity: 3),
-            .init(name: "Chorizo",             category: .protein,   unit: .ounce,      quantity: 6),
+            .init(name: "Chorizo",             category: .protein,   unit: .ounce,      quantity: 6,  excludedFor: [.vegetarian, .vegan, .pescatarian, .halal, .kosher]),
             .init(name: "White beans",         category: .legume,    unit: .can,        quantity: 2),
         ],
         .vietnamese: [
-            .init(name: "Fish sauce",          category: .condiment, unit: .cup,        quantity: 0.5),
+            .init(name: "Fish sauce",          category: .condiment, unit: .cup,        quantity: 0.5, excludedFor: [.vegetarian, .vegan]),
             .init(name: "Rice noodles",        category: .grain,     unit: .ounce,      quantity: 8),
             .init(name: "Jasmine rice",        category: .grain,     unit: .cup,        quantity: 2),
             .init(name: "Star anise",          category: .spice,     unit: .piece,      quantity: 4),
@@ -213,7 +215,7 @@ enum PantryStarterKit {
             .init(name: "Paprika",             category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Limes",               category: .fruit,     unit: .whole,      quantity: 4),
             .init(name: "Green onions",        category: .vegetable, unit: .bunch,      quantity: 1),
-            .init(name: "Bacon",               category: .protein,   unit: .ounce,      quantity: 6),
+            .init(name: "Bacon",               category: .protein,   unit: .ounce,      quantity: 6,  excludedFor: [.vegetarian, .vegan, .pescatarian, .halal, .kosher]),
         ],
         .ethiopian: [
             .init(name: "Berbere spice blend", category: .spice,     unit: .tablespoon, quantity: 3),
@@ -221,7 +223,7 @@ enum PantryStarterKit {
             .init(name: "Chickpeas",           category: .legume,    unit: .can,        quantity: 2),
             .init(name: "Cardamom",            category: .spice,     unit: .tablespoon, quantity: 1),
             .init(name: "Fenugreek",           category: .spice,     unit: .tablespoon, quantity: 1),
-            .init(name: "Niter kibbeh",        category: .oil,       unit: .tablespoon, quantity: 3),
+            .init(name: "Niter kibbeh",        category: .oil,       unit: .tablespoon, quantity: 3,  excludedFor: [.vegan, .dairyFree]),
             .init(name: "Injera",              category: .grain,     unit: .piece,      quantity: 4),
         ],
         .turkish: [
@@ -231,7 +233,7 @@ enum PantryStarterKit {
             .init(name: "Bulgur",              category: .grain,     unit: .cup,        quantity: 2),
             .init(name: "Red lentils",         category: .legume,    unit: .cup,        quantity: 2),
             .init(name: "Tahini",              category: .condiment, unit: .cup,        quantity: 0.5),
-            .init(name: "Plain yogurt",        category: .dairy,     unit: .cup,        quantity: 1),
+            .init(name: "Plain yogurt",        category: .dairy,     unit: .cup,        quantity: 1,  excludedFor: [.vegan, .dairyFree]),
             .init(name: "Cumin",               category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Coriander",           category: .spice,     unit: .tablespoon, quantity: 1),
             .init(name: "Dried chickpeas",     category: .legume,    unit: .cup,        quantity: 2),
@@ -242,7 +244,7 @@ enum PantryStarterKit {
             .init(name: "Sweet paprika",       category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Whole-grain mustard", category: .condiment, unit: .tablespoon, quantity: 3),
             .init(name: "White wine vinegar",  category: .condiment, unit: .cup,        quantity: 0.5),
-            .init(name: "Bacon",               category: .protein,   unit: .ounce,      quantity: 6),
+            .init(name: "Bacon",               category: .protein,   unit: .ounce,      quantity: 6,  excludedFor: [.vegetarian, .vegan, .pescatarian, .halal, .kosher]),
             .init(name: "Cocoa powder",        category: .baking,    unit: .tablespoon, quantity: 3),
             .init(name: "Vanilla extract",     category: .baking,    unit: .tablespoon, quantity: 1),
         ],
@@ -250,7 +252,7 @@ enum PantryStarterKit {
             .init(name: "Dried oregano",       category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Chickpeas",           category: .legume,    unit: .can,        quantity: 2),
             .init(name: "Feta",                category: .dairy,     unit: .ounce,      quantity: 6),
-            .init(name: "Kalamata olives",     category: .condiment, unit: .cup,        quantity: 0.5),
+            .init(name: "Kalamata olives",     category: .vegetable, unit: .cup,        quantity: 0.5),
             .init(name: "Tahini",              category: .condiment, unit: .cup,        quantity: 0.5),
             .init(name: "Cumin",               category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Za'atar",             category: .spice,     unit: .tablespoon, quantity: 2),
@@ -259,12 +261,19 @@ enum PantryStarterKit {
 
     /// Returns deduplicated starter ingredients: universals first, then
     /// cuisine-specific additions in encounter order.
-    static func ingredients(for cuisines: [Cuisine]) -> [StarterIngredient] {
+    /// Ingredients incompatible with any of the user's dietary restrictions are excluded.
+    static func ingredients(
+        for cuisines: [Cuisine],
+        dietaryRestrictions: Set<DietaryRestriction> = []
+    ) -> [StarterIngredient] {
         var seen = Set<String>()
-        let base = universals.filter { seen.insert($0.name.lowercased()).inserted }
+        func allowed(_ item: StarterIngredient) -> Bool {
+            item.excludedFor.isDisjoint(with: dietaryRestrictions)
+        }
+        let base = universals.filter { allowed($0) && seen.insert($0.name.lowercased()).inserted }
         let extras = cuisines
             .flatMap { kits[$0] ?? [] }
-            .filter { seen.insert($0.name.lowercased()).inserted }
+            .filter { allowed($0) && seen.insert($0.name.lowercased()).inserted }
         return base + extras
     }
 }

@@ -20,9 +20,9 @@ final class MealPlanGenerator: Sendable {
     ) async throws -> GeneratedMealPlan {
         let session = LanguageModelSession()
 
-        let recipeList = recipeDescriptions.joined(separator: "\n")
-        let pantryList = pantryItemNames.joined(separator: ", ")
-        let constraints = constraintsText
+        let recipeList = recipeDescriptions.map(\.sanitizedForAI).joined(separator: "\n")
+        let pantryList = pantryItemNames.map(\.sanitizedForAI).joined(separator: ", ")
+        let constraints = constraintsText.sanitizedForAI
 
         let mealTypeNames = mealsPerDay.map(\.rawValue).joined(separator: ", ")
 

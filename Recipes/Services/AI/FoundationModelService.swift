@@ -28,6 +28,17 @@ final class FoundationModelService {
         }
     }
 
+    // MARK: - General Text Generation
+
+    /// Free-form text prompt using the cached session.
+    /// Use this instead of creating a new LanguageModelSession() at the call site —
+    /// each new session allocates 10-30 MB and is never freed until the session is deallocated.
+    func respond(to prompt: String) async throws -> String {
+        let session = session()
+        let response = try await session.respond(to: prompt)
+        return response.content
+    }
+
     // MARK: - Recipe Generation
 
     /// Generate a recipe from a list of available ingredients.

@@ -61,13 +61,15 @@ struct IngredientRow: View {
                         .font(.caption2)
                         .foregroundStyle(.orange)
                         .help("Not in season")
+                        .accessibilityHidden(true)
                 }
             }
         }
         .buttonStyle(.plain)
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(ingredient.name), \(scaledAmount.displayString)\(ingredient.isOptional ? ", optional" : "")")
+        .accessibilityLabel("\(ingredient.name), \(scaledAmount.displayString)\(ingredient.isOptional ? ", optional" : "")\(onToggle != nil ? ", \(isChecked ? "Checked" : "Unchecked")" : "")")
+        .accessibilityHint(onToggle != nil ? "Double tap to toggle" : "")
         .accessibilityAddTraits(isChecked ? [.isSelected] : [])
         .contextMenu {
             Button {

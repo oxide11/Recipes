@@ -12,7 +12,6 @@ struct ProfileEditorView: View {
     var existingProfile: UserProfile?
 
     @State private var displayName: String
-    @State private var skillLevel: RecipeDifficulty
     @State private var measurementSystem: MeasurementSystem
     @State private var hemisphere: Hemisphere
     @State private var dietaryRestrictions: Set<DietaryRestriction>
@@ -27,7 +26,6 @@ struct ProfileEditorView: View {
     init(profile: UserProfile? = nil) {
         self.existingProfile = profile
         _displayName = State(initialValue: profile?.displayName ?? "")
-        _skillLevel = State(initialValue: profile?.skillLevel ?? .intermediate)
         _measurementSystem = State(initialValue: profile?.measurementSystem ?? .imperial)
         _hemisphere = State(initialValue: profile?.hemisphere ?? .northern)
         _dietaryRestrictions = State(initialValue: Set(profile?.dietaryRestrictions ?? []))
@@ -69,10 +67,11 @@ struct ProfileEditorView: View {
             TextField("Your Name", text: $displayName)
                 .textContentType(.name)
 
-            Picker("Cooking Skill Level", selection: $skillLevel) {
-                ForEach(RecipeDifficulty.allCases, id: \.self) { level in
-                    Text(level.rawValue.capitalized).tag(level)
-                }
+            if let profile = existingProfile {
+                LabeledContent("Skill Level", value: profile.skillLevel.displayName)
+                Text(profile.skillLevelDescription)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Picker("Measurement System", selection: $measurementSystem) {
@@ -176,7 +175,6 @@ struct ProfileEditorView: View {
         let profile = existingProfile ?? UserProfile()
 
         profile.displayName = displayName
-        profile.skillLevel = skillLevel
         profile.measurementSystem = measurementSystem
         profile.hemisphere = hemisphere
         profile.dietaryRestrictions = Array(dietaryRestrictions)

@@ -158,11 +158,10 @@ final class AIServiceRouter {
         guard await foundationModelService.isAvailable else {
             throw AIServiceError.onDeviceUnavailable
         }
-
-        // For on-device, use the FoundationModels session directly for text
-        let session = LanguageModelSession()
-        let response = try await session.respond(to: prompt)
-        return response.content
+        // Use the service's cached session — never create LanguageModelSession() directly
+        // here, as each fresh allocation costs 10-30 MB that isn't freed until the session
+        // is released. The service keeps one session alive for the app's lifetime.
+        return try await foundationModelService.respond(to: prompt)
     }
 
     /// Task types where on-device inference is unsuitable due to large context requirements.
@@ -210,3 +209,42 @@ final class AIServiceRouter {
 
 // Need this import for LanguageModelSession in the router
 import FoundationModels
+
+// MARK: - AI Input Sanitizer
+
+/// Sanitizes user-controlled text before embedding it in AI prompts,
+/// preventing prompt-injection attacks where user input overrides system instructions.
+enum AIInputSanitizer {
+
+    private static let maxLength = 2_000
+
+    private static let injectionPatterns: [String] = [
+        "ignore previous instructions", "ignore all previous",
+        "disregard the above", "forget all previous",
+        "new instructions:", "system prompt:",
+        "you are now", "act as if you are",
+        "pretend you are", "from now on you",
+        "override instructions",
+    ]
+
+    static func sanitize(_ input: String) -> String {
+        var result = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lines = result.components(separatedBy: .newlines)
+        result = lines
+            .filter { line in
+                let lower = line.lowercased()
+                return !injectionPatterns.contains(where: { lower.contains($0) })
+            }
+            .joined(separator: "\n")
+        if result.count > maxLength {
+            let index = result.index(result.startIndex, offsetBy: maxLength)
+            result = String(result[..<index]) + "…"
+        }
+        return result
+    }
+}
+
+extension String {
+    /// Returns this string sanitized for safe embedding in an AI prompt.
+    var sanitizedForAI: String { AIInputSanitizer.sanitize(self) }
+}

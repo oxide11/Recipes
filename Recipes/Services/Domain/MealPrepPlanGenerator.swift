@@ -473,7 +473,7 @@ enum MealPrepPlanGenerator {
             return "Roughly chop"
         case .other:
             return "Portion out"
-        case .oil, .condiment, .liquid, .sweetener:
+        case .oil, .condiment, .liquid, .sweetener, .baking:
             return "Portion out"
         }
     }
@@ -501,7 +501,7 @@ enum MealPrepPlanGenerator {
         case .grain, .legume, .nut:                 return .grain
         case .dairy:                                return .dairy
         case .spice, .herb:                         return .seasoning
-        case .condiment, .oil, .liquid, .sweetener: return .sauce
+        case .condiment, .oil, .liquid, .sweetener, .baking: return .sauce
         case .other:                                return .other
         }
     }

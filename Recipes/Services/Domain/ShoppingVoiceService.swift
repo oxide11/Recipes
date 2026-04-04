@@ -10,7 +10,7 @@ import Speech
 @Observable
 @MainActor
 final class ShoppingVoiceService: NSObject {
-    private let synthesizer = AVSpeechSynthesizer()
+    nonisolated(unsafe) private let synthesizer = AVSpeechSynthesizer()
     private var speechRecognizer: SFSpeechRecognizer?
     private var recognitionTask: SFSpeechRecognitionTask?
     private var audioEngine: AVAudioEngine?
@@ -292,24 +292,36 @@ final class ShoppingVoiceService: NSObject {
         }
         isListening = true
 
-        let result = await withCheckedContinuation { (continuation: CheckedContinuation<ShoppingResponse, Never>) in
-            var hasResumed = false
-            recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
-                Task { @MainActor [weak self] in
-                    guard let self, !hasResumed else { return }
-                    if let result {
-                        self.lastHeardText = result.bestTranscription.formattedString.lowercased()
-                        if result.isFinal {
+        // withTaskCancellationHandler guarantees the continuation is always resumed.
+        // Without it, cancelling the guidance task while listening would leave the
+        // continuation suspended forever, keeping the audio engine and recognition
+        // task alive and consuming memory indefinitely.
+        let result = await withTaskCancellationHandler {
+            await withCheckedContinuation { (continuation: CheckedContinuation<ShoppingResponse, Never>) in
+                var hasResumed = false
+                recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
+                    Task { @MainActor [weak self] in
+                        guard let self, !hasResumed else { return }
+                        if let result {
+                            self.lastHeardText = result.bestTranscription.formattedString.lowercased()
+                            if result.isFinal {
+                                hasResumed = true
+                                let response = Self.parseResponse(self.lastHeardText ?? "")
+                                continuation.resume(returning: response)
+                            }
+                        } else if error != nil {
                             hasResumed = true
-                            let response = Self.parseResponse(self.lastHeardText ?? "")
-                            continuation.resume(returning: response)
+                            continuation.resume(returning: .error)
                         }
-                    } else if error != nil {
-                        hasResumed = true
-                        continuation.resume(returning: .error)
                     }
                 }
             }
+        } onCancel: {
+            // Fired immediately on the cancelling thread when the parent task is cancelled.
+            // stopListening() is @MainActor so we hop there; the audio engine and recognition
+            // task are torn down, which causes the recognition callback to fire with an error,
+            // which in turn resumes the continuation — completing the cleanup chain.
+            Task { @MainActor [weak self] in self?.stopListening() }
         }
 
         stopListening()

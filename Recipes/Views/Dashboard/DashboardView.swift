@@ -37,8 +37,10 @@ struct DashboardView: View {
     @State private var activeSheet: DashboardSheet? = nil
     @State private var startCookingRecipe: Recipe? = nil
     @State private var cachedTodaysMeals: [PlannedMeal] = []
+    @State private var cachedCookingStreak = 0
     @State private var suggestions: [DiscoverSuggestion] = []
     @State private var suggestionIndex: Int = 0
+    @State private var suggestionTask: Task<Void, Never>?
 
     // MARK: - Computed Data
 
@@ -70,7 +72,8 @@ struct DashboardView: View {
         return recentCookingLogs.filter { $0.date >= weekAgo }.count
     }
 
-    private var cookingStreak: Int {
+    /// Computed once and cached in `cachedCookingStreak` — not called from body.
+    private func computeCookingStreak() -> Int {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
         let logDates = Set(recentCookingLogs.map { calendar.startOfDay(for: $0.date) })
@@ -148,11 +151,13 @@ struct DashboardView: View {
             .task {
                 ensurePlanExists()
                 rebuildTodaysMeals()
+                cachedCookingStreak = computeCookingStreak()
                 await rebuildSuggestions()
             }
             .onChange(of: plannedMeals.count) { rebuildTodaysMeals() }
-            .onChange(of: pantryItems.count) { Task { await rebuildSuggestions() } }
-            .onChange(of: recipes.count) { Task { await rebuildSuggestions() } }
+            .onChange(of: cookingLogs.count)  { cachedCookingStreak = computeCookingStreak() }
+            .onChange(of: pantryItems.count) { scheduleSuggestionRebuild() }
+            .onChange(of: recipes.count)    { scheduleSuggestionRebuild() }
         }
     }
 
@@ -175,6 +180,13 @@ struct DashboardView: View {
         cachedTodaysMeals = plannedMeals.filter {
             Calendar.current.isDate($0.date, inSameDayAs: today)
         }.sorted { $0.mealType.sortOrder < $1.mealType.sortOrder }
+    }
+
+    /// Cancel any in-flight rebuild before starting a new one.
+    /// Prevents concurrent rebuilds from accumulating intermediate arrays in memory.
+    private func scheduleSuggestionRebuild() {
+        suggestionTask?.cancel()
+        suggestionTask = Task { await rebuildSuggestions() }
     }
 
     @MainActor
@@ -673,8 +685,8 @@ struct DashboardView: View {
 
     private var cookingStatLine: some View {
         HStack(spacing: 0) {
-            if cookingStreak > 1 {
-                Label("\(cookingStreak)-day streak", systemImage: "flame.fill")
+            if cachedCookingStreak > 1 {
+                Label("\(cachedCookingStreak)-day streak", systemImage: "flame.fill")
                     .font(.miseMeta)
                     .foregroundStyle(.orange)
                     .padding(.trailing, 16)
@@ -684,7 +696,7 @@ struct DashboardView: View {
                 Label("\(thisWeekCookCount) cooked this week", systemImage: "chart.bar.fill")
                     .font(.miseMeta)
                     .foregroundStyle(Brand.muted)
-            } else if cookingStreak == 0 {
+            } else if cachedCookingStreak == 0 {
                 Label("No cooks logged yet", systemImage: "chart.bar.fill")
                     .font(.miseMeta)
                     .foregroundStyle(Brand.muted.opacity(0.6))
@@ -744,26 +756,87 @@ struct DashboardView: View {
     // MARK: - Fact Tables
 
     static let seasonalFacts: [String: String] = [
-        "asparagus":    "Best picked in spring when the tips are still tight.",
-        "strawberry":   "Peak sweetness comes from warm days and cool nights.",
-        "corn":         "Sweetness converts to starch fast — best eaten the day it's picked.",
-        "pumpkin":      "Smaller pumpkins tend to have sweeter, denser flesh.",
-        "rhubarb":      "Botanically a vegetable, but almost always treated as a fruit.",
-        "peach":        "A ripe peach should smell fragrant at the stem end.",
-        "apple":        "Over 7,500 varieties exist worldwide — most stores carry fewer than 10.",
-        "blueberry":    "The blue colour comes from anthocyanins, potent antioxidants.",
-        "tomato":       "The US Supreme Court ruled it a vegetable in 1893. Botanists disagree.",
-        "zucchini":     "Left unpicked, a zucchini can grow to baseball-bat size overnight.",
-        "mango":        "There are over 500 mango varieties — most of the world's supply comes from India.",
-        "fig":          "Figs are inverted flowers — what you're eating is technically the flower.",
-        "pear":         "Pears ripen from the inside out, so check the neck rather than the skin.",
-        "plum":         "The bloom (white haze) on a plum's skin is a natural protective coating.",
-        "cherry":       "Cherries contain melatonin, which may help regulate sleep.",
-        "spinach":      "Baby spinach and mature spinach have different textures and iron bioavailability.",
-        "kale":         "A light frost actually sweetens kale by converting starches to sugars.",
-        "beet":         "The pigment in red beets, betanin, can temporarily tint urine pink.",
-        "carrot":       "Originally purple and white — the orange variety was bred in the Netherlands.",
-        "leek":         "Leeks are harvested when finger-sized but left longer for a milder flavour.",
+        // SPRING
+        "asparagus":         "Best picked in spring when the tips are still tight.",
+        "artichoke":         "The artichoke is actually a flower bud — left unpicked, it blooms into a stunning purple thistle.",
+        "rhubarb":           "Botanically a vegetable, but almost always treated as a fruit.",
+        "peas":              "Fresh peas start converting sugar to starch the moment they're picked — freezing stops that clock.",
+        "snap peas":         "Unlike shelling peas, the entire snap pea pod is edible — pull the tough string along the seam first.",
+        "radish":            "Radishes grow some of the fastest of any vegetable — from seed to table in as little as three weeks.",
+        "spinach":           "Baby spinach and mature spinach have different textures and iron bioavailability.",
+        "arugula":           "The peppery bite in arugula comes from glucosinolates — the same compounds that give mustard its heat.",
+        "fava beans":        "Fava beans are one of the oldest cultivated plants — they've been found in ancient Egyptian tombs.",
+        "mint":              "Mint spreads aggressively underground — most gardeners grow it in containers to keep it from taking over.",
+        "watercress":        "Watercress ranks among the most nutrient-dense vegetables per gram of any leafy green.",
+        "fennel":            "Every part of fennel is edible — the bulb, stalks, fronds, and seeds all have distinct culinary uses.",
+        "strawberry":        "Peak sweetness comes from warm days and cool nights.",
+        "leek":              "Leeks are harvested when finger-sized but can be left longer for a milder, sweeter flavour.",
+
+        // SUMMER
+        "tomato":            "The US Supreme Court ruled it a vegetable in 1893. Botanists still disagree.",
+        "cherry tomato":     "Cherry tomatoes are thought to be closer to the wild ancestors of all cultivated tomatoes.",
+        "corn":              "Sweetness converts to starch fast — best eaten the same day it's picked.",
+        "zucchini":          "Left unpicked, a zucchini can grow to baseball-bat size overnight.",
+        "yellow squash":     "Yellow squash and zucchini are essentially the same plant — just different varieties bred for colour.",
+        "bell pepper":       "Green, yellow, orange, and red bell peppers are all the same fruit at different stages of ripeness.",
+        "jalapeño":          "Most of the heat in a jalapeño is in the white pith, not the seeds.",
+        "shishito pepper":   "About one in ten shishito peppers will be surprisingly spicy — the rest are mild.",
+        "eggplant":          "Named after the small, white, egg-shaped variety — not the familiar deep-purple kind.",
+        "cucumber":          "Cucumbers are 96% water, making them one of the most hydrating foods you can eat.",
+        "green bean":        "Called 'string beans' until breeders developed the stringless variety in the 1890s.",
+        "okra":              "Okra's slippery texture comes from mucilage — the same quality that makes it a natural gumbo thickener.",
+        "tomatillo":         "Despite resembling small green tomatoes, tomatillos are more closely related to gooseberries.",
+        "basil":             "Fresh basil bruises and blackens quickly — tear rather than chop it to keep the edges bright.",
+        "lemongrass":        "Lemongrass contains citral, the same compound responsible for lemon's scent — but no citrus at all.",
+        "peach":             "A ripe peach should smell fragrant at the stem end — that's the truest sign of readiness.",
+        "nectarine":         "Nectarines aren't a cross between a peach and a plum — they're a natural genetic variation of peach.",
+        "watermelon":        "Watermelon is 92% water and was historically carried by travellers as portable hydration.",
+        "cantaloupe":        "The netting on cantaloupe skin forms as the flesh grows faster than the rind — the cracks create the pattern.",
+        "blueberry":         "The blue colour comes from anthocyanins — the same antioxidants that give red wine and purple cabbage their hue.",
+        "blackberry":        "What looks like a single blackberry is actually a cluster of tiny individual fruits called drupelets.",
+        "raspberry":         "When you pick a raspberry, it comes off hollow — the core stays on the plant.",
+        "plum":              "The white bloom on a plum's skin is a natural waxy coating that protects the fruit.",
+        "fig":               "Figs are inverted flowers — what you're eating is technically the flower.",
+        "mango":             "There are over 500 mango varieties, and most of the world's supply comes from India.",
+        "lime":              "The most common supermarket lime (Persian) is a seedless hybrid — a genuine botanical accident.",
+        "passion fruit":     "A passion fruit is ready when the skin is wrinkled — smooth skin means it's not yet ripe.",
+
+        // AUTUMN
+        "pumpkin":           "Smaller pumpkins tend to have sweeter, denser flesh than the large carving varieties.",
+        "sweet potato":      "Sweet potatoes and yams are entirely different plants — most 'yams' in North America are sweet potatoes.",
+        "butternut squash":  "Butternut squash is botanically a fruit. Its hollow seed cavity is perfect for stuffing.",
+        "acorn squash":      "Acorn squash gets its name from its shape — the green skin softens enough to eat after roasting.",
+        "delicata squash":   "Delicata squash has thin, edible skin that doesn't need peeling — unusual for a winter squash.",
+        "brussels sprout":   "Brussels sprouts become sweeter after a frost — cold converts their starches to sugars.",
+        "kale":              "A light frost actually sweetens kale — cold converts starches to sugars right in the leaf.",
+        "beet":              "The pigment in red beets, betanin, can temporarily tint urine pink — entirely harmless.",
+        "parsnip":           "Parsnips were used as a sweetener in Europe before sugar cane became widely available.",
+        "turnip":            "Young turnips have a mild, slightly sweet flavour — the bitterness increases with size and age.",
+        "chestnut":          "Unlike most nuts, chestnuts are low in fat and high in starch — they behave more like a grain.",
+        "persimmon":         "Astringent varieties (like Hachiya) must be fully ripe before eating — unripe ones are intensely puckering.",
+        "apple":             "Over 7,500 apple varieties exist worldwide — most stores carry fewer than ten.",
+        "pear":              "Pears ripen from the inside out, so check the neck near the stem rather than the skin.",
+        "cranberry":         "Cranberries float — commercial harvesting floods the bogs so the berries rise to the surface.",
+        "grape":             "Wine grapes are smaller and more intensely flavoured than table grapes — size isn't quality.",
+        "quince":            "Raw quince is too astringent to eat, but heat transforms it — cooking turns the flesh a deep rose.",
+        "pomegranate":       "Each pomegranate contains 200 to 1,400 seeds, called arils.",
+
+        // WINTER
+        "cauliflower":       "Cauliflower comes in purple, orange, and green varieties — all taste similar but differ in nutrients.",
+        "celery root":       "Celeriac is a different cultivar from stalk celery, bred over centuries for its root rather than its stems.",
+        "sunchoke":          "Jerusalem artichokes have nothing to do with Jerusalem — the name likely corrupted from the Italian 'girasole' (sunflower).",
+        "rutabaga":          "Rutabagas are a natural cross between a turnip and a wild cabbage, developed in Scandinavia around 1600.",
+        "radicchio":         "Radicchio's bitterness intensifies in warmth and mellows with cold — it's at its best after a frost.",
+        "endive":            "Belgian endive is grown in complete darkness — light exposure turns the leaves green and sharply bitter.",
+        "meyer lemon":       "Meyer lemons are a cross between a lemon and a mandarin orange — hence the sweeter, floral juice.",
+        "blood orange":      "The red flesh of blood oranges comes from anthocyanins that only develop when nights turn cold.",
+        "grapefruit":        "Grapefruit appeared in Barbados around 1750 as a natural hybrid of the pomelo — a relatively new fruit.",
+        "navel orange":      "Every navel orange is a clone — all trees descend from a single mutant branch found in Brazil in the 1820s.",
+        "clementine":        "Clementines are seedless because they're self-sterile — growers keep other varieties away to prevent pollination.",
+
+        // YEAR-ROUND (used in scoring but rarely shown — kept for completeness)
+        "carrot":            "Originally purple and white — the orange variety was selectively bred in the Netherlands.",
+        "cherry":            "Cherries contain melatonin, which may help support healthy sleep rhythms.",
     ]
 
     static let cuisineFacts: [Cuisine: (dish: String, fact: String)] = [

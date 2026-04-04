@@ -212,6 +212,7 @@ struct CookingLogEntryView: View {
             entry.photo = photo
             modelContext.insert(entry)
             recipe.cookingLog.append(entry)
+            profiles.first?.recordCook(ofRecipeWithDifficulty: recipe.difficulty)
             didSave = true
 
             // Pantry cleanup only on new entries

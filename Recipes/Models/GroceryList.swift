@@ -242,7 +242,9 @@ final class GroceryList {
 @Model
 final class GroceryReceipt {
     var id: UUID
-    var imageData: Data?
+    /// Filename in the app's photo storage directory — load via PhotoStorageService.
+    /// Never store raw Data inline in SwiftData; it bloats every fetch that touches receipts.
+    var imageFilename: String?
     var storeName: String?
     var date: Date
     var totalAmount: Double

@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 // MARK: - Quick Cook Log Sheet
 
@@ -10,6 +11,7 @@ struct QuickCookLogSheet: View {
     var logDate: Date = .now
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Query private var profiles: [UserProfile]
 
     @State private var rating: Int = 0
     @State private var showingFullLog = false
@@ -123,5 +125,6 @@ struct QuickCookLogSheet: View {
         let entry = CookingLogEntry(date: logDate, rating: rating > 0 ? rating : nil)
         modelContext.insert(entry)
         recipe.cookingLog.append(entry)
+        profiles.first?.recordCook(ofRecipeWithDifficulty: recipe.difficulty)
     }
 }

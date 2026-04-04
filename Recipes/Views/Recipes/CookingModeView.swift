@@ -12,6 +12,7 @@ struct CookingModeView: View {
     let recipe: Recipe
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Query private var profiles: [UserProfile]
 
     @State private var currentStepIndex = 0
     @State private var stepEndDates: [Int: Date] = [:]
@@ -611,6 +612,7 @@ struct CookingModeView: View {
             notes: logNotes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : logNotes
         )
         recipe.cookingLog.append(entry)
+        profiles.first?.recordCook(ofRecipeWithDifficulty: recipe.difficulty)
     }
 
 }

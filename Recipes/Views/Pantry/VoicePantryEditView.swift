@@ -61,6 +61,7 @@ struct VoicePantryEditView: View {
                 }
             }
             .task { await startListening() }
+            .onDisappear { recognizer.stop() }
             .onChange(of: recognizer.isListening) { _, listening in
                 if !listening && phase == .listening {
                     // Auto-stopped (silence timeout) — notify and move to parsing
@@ -241,10 +242,10 @@ struct VoicePantryEditView: View {
         let prompt = """
         Parse these spoken pantry commands into structured add/remove actions.
         Normalize ingredient names (e.g. "Italian type spices" → "Italian Seasoning", "some eggs" → "Eggs").
-        Input: "\(transcript)"
+        Input: "\(transcript.sanitizedForAI)"
         Return ONLY a JSON array, no explanation:
         [{"action":"add","name":"Cumin","category":"spice"},{"action":"remove","name":"Kefir"}]
-        Valid categories: protein, dairy, vegetable, fruit, grain, spice, herb, condiment, oil, liquid, sweetener, nut, other
+        Valid categories: protein, dairy, vegetable, fruit, grain, legume, baking, spice, herb, condiment, oil, liquid, sweetener, nut, other
         """
 
         do {
@@ -258,6 +259,7 @@ struct VoicePantryEditView: View {
     }
 
     private func applyChanges() {
+        recognizer.stop()
         for action in parsedActions {
             switch action.type {
             case .add:

@@ -1099,9 +1099,12 @@ struct AddDishView: View {
     @State private var photoData: Data?
     @State private var selectedItem: PhotosPickerItem?
     @State private var cameraImage: UIImage?
-    @State private var showingPhotoDialog = false
     @State private var showingCamera = false
     @State private var showingLibrary = false
+
+    private var cameraAvailable: Bool {
+        UIImagePickerController.isSourceTypeAvailable(.camera)
+    }
 
     init(editing: DishEntry? = nil, onSave: @escaping (DishEntry) -> Void) {
         self.editing = editing
@@ -1118,8 +1121,25 @@ struct AddDishView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                // Photo tap area
-                Button { showingPhotoDialog = true } label: {
+                // Photo tap area — Menu gives one-tap access to camera and library
+                // with no intermediate dialog sheet.
+                Menu {
+                    if cameraAvailable {
+                        Button("Take Photo", systemImage: "camera") {
+                            showingCamera = true
+                        }
+                    }
+                    Button("Choose from Library", systemImage: "photo.on.rectangle") {
+                        showingLibrary = true
+                    }
+                    if hasPhoto {
+                        Button("Remove Photo", systemImage: "trash", role: .destructive) {
+                            if let old = existingPhotoFilename { PhotoStorageService.delete(filename: old) }
+                            existingPhotoFilename = nil
+                            photoData = nil
+                        }
+                    }
+                } label: {
                     ZStack {
                         if let data = photoData, let uiImage = UIImage(data: data) {
                             Image(uiImage: uiImage)
@@ -1146,7 +1166,6 @@ struct AddDishView: View {
                     .frame(height: 220)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
-                .buttonStyle(.plain)
                 .accessibilityLabel(hasPhoto ? "Change photo" : "Add photo")
                 .task {
                     if let filename = existingPhotoFilename, photoData == nil {
@@ -1203,18 +1222,6 @@ struct AddDishView: View {
                     }
                     .disabled(!canSave)
                 }
-            }
-            .confirmationDialog("Add Photo", isPresented: $showingPhotoDialog) {
-                Button("Take Photo") { showingCamera = true }
-                Button("Choose from Library") { showingLibrary = true }
-                if hasPhoto {
-                    Button("Remove Photo", role: .destructive) {
-                        if let old = existingPhotoFilename { PhotoStorageService.delete(filename: old) }
-                        existingPhotoFilename = nil
-                        photoData = nil
-                    }
-                }
-                Button("Cancel", role: .cancel) {}
             }
             .fullScreenCover(isPresented: $showingCamera) {
                 CameraPicker(image: $cameraImage)
