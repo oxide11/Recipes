@@ -30,7 +30,11 @@ struct ProfileEditorView: View {
         _cookingGoal = State(initialValue: profile?.cookingGoal ?? .greatFood)
         _measurementSystem = State(initialValue: profile?.measurementSystem ?? .imperial)
         _hemisphere = State(initialValue: profile?.hemisphere ?? .northern)
-        _dietaryRestrictions = State(initialValue: Set(profile?.dietaryRestrictions ?? []))
+        let restrictions = Set(profile?.dietaryRestrictions ?? [])
+        _dietaryRestrictions = State(initialValue: restrictions)
+        // Auto-expand if the user already has lifestyle restrictions selected
+        let lifestyle: [DietaryRestriction] = [.keto, .paleo, .whole30, .fodmap, .lowCarb, .lowSodium]
+        _showMoreDietaryOptions = State(initialValue: restrictions.contains { lifestyle.contains($0) })
         _preferredCuisines = State(initialValue: Set(profile?.preferredCuisines ?? []))
         _dislikedIngredients = State(initialValue: profile?.dislikedIngredients.joined(separator: ", ") ?? "")
         _allergens = State(initialValue: profile?.allergens.joined(separator: ", ") ?? "")
@@ -117,9 +121,22 @@ struct ProfileEditorView: View {
                     }
                 },
                 label: {
-                    Text(showMoreDietaryOptions ? "Fewer options" : "More options")
-                        .foregroundStyle(.secondary)
-                        .font(.subheadline)
+                    let selectedCount = dietaryRestrictions.filter {
+                        Self.lifestyleRestrictions.contains($0)
+                    }.count
+                    HStack {
+                        Text(showMoreDietaryOptions ? "Fewer options" : "More options")
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                        if !showMoreDietaryOptions && selectedCount > 0 {
+                            Text("\(selectedCount) selected")
+                                .font(.caption)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 2)
+                                .background(Color.accentColor, in: Capsule())
+                        }
+                    }
                 }
             )
         } header: {
