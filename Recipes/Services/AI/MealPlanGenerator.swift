@@ -11,7 +11,7 @@ final class MealPlanGenerator: Sendable {
     /// Reusable session — allocating a fresh LanguageModelSession costs 10-30 MB
     /// that isn't freed until the session is released. One session per generator
     /// instance avoids repeated allocation overhead across plan generations.
-    private nonisolated(unsafe) lazy var session = LanguageModelSession()
+    private let session = LanguageModelSession()
 
     /// Generate a meal plan using AI, selecting from the user's existing recipes.
     /// Accepts pre-extracted string data to avoid sending non-Sendable SwiftData models across isolation boundaries.

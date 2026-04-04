@@ -6,6 +6,8 @@
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -14,34 +16,48 @@
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.recipes.timer</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>recipes</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSApplicationCategoryType</key>
 	<string></string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSRemindersUsageDescription</key>
-	<string>Mise syncs your shopping list with Reminders so you can add items via Siri and check things off on your Apple Watch.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Recipes needs camera access to scan barcodes for pantry management and to take photos of your dishes.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Recipes needs microphone access for voice-guided shopping so you can confirm items while your hands are full.</string>
+	<key>NSRemindersUsageDescription</key>
+	<string>Mise syncs your shopping list with Reminders so you can add items via Siri and check things off on your Apple Watch.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Recipes uses speech recognition for the guided shopping experience, allowing you to confirm items hands-free.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>recipes</string>
-			</array>
-			<key>CFBundleURLName</key>
-			<string>com.recipes.timer</string>
-		</dict>
-	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
 </dict>
 </plist>

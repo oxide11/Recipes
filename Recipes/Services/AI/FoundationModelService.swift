@@ -125,6 +125,70 @@ final class FoundationModelService {
         return try await session.respond(to: prompt, generating: InferredRecipeSteps.self).content
     }
 
+    // MARK: - OCR Text to Recipe Parsing
+
+    /// Parse OCR-extracted text from a recipe image into structured recipe data.
+    func parseRecipeFromOCRText(_ ocrText: String) async throws -> ParsedRecipeFromOCR {
+        let session = session()
+
+        let prompt = """
+        Parse this text extracted from a recipe image (via OCR) into a structured recipe. \
+        The text may contain OCR artifacts, line breaks in odd places, or partial words. \
+        Do your best to interpret the recipe accurately.
+
+        For canned/packaged goods like "1 (14 ounce) can sweetened condensed milk", \
+        use the container count as the quantity — amount should be "1 can" and \
+        name "sweetened condensed milk".
+
+        OCR Text:
+        \(ocrText)
+        """
+
+        return try await session.respond(to: prompt, generating: ParsedRecipeFromOCR.self).content
+    }
+
+    // MARK: - Text Recipe Parsing
+
+    /// Parse user-provided recipe text (pasted, generated, etc.) into structured recipe data.
+    func parseRecipeFromText(_ text: String) async throws -> ParsedRecipeFromOCR {
+        let session = session()
+
+        let prompt = """
+        Parse this recipe text into a structured recipe. Extract the title, servings, \
+        cuisine, timing, ingredients, directions, and any dietary labels.
+
+        For canned/packaged goods like "1 (14 ounce) can sweetened condensed milk", \
+        use the container count as the quantity — amount should be "1 can" and \
+        name "sweetened condensed milk".
+
+        Recipe text:
+        \(text)
+        """
+
+        return try await session.respond(to: prompt, generating: ParsedRecipeFromOCR.self).content
+    }
+
+    // MARK: - Recipe Editing
+
+    /// Apply a natural-language modification to a recipe on-device.
+    func editRecipeOnDevice(recipeText: String, instruction: String) async throws -> ParsedRecipeFromOCR {
+        let session = session()
+
+        let prompt = """
+        Modify the following recipe based on the user's request. \
+        Make ONLY the changes needed to fulfil the request; keep everything else identical.
+
+        Recipe:
+        \(recipeText)
+
+        User request: \(instruction)
+
+        Return the complete updated recipe with all fields.
+        """
+
+        return try await session.respond(to: prompt, generating: ParsedRecipeFromOCR.self).content
+    }
+
     // MARK: - Recipe Classification & Recommendation
 
     /// Classify a recipe image or description for recommendation purposes.
@@ -239,4 +303,45 @@ struct BlindSpotSuggestions {
 
     @Guide(description: "Specific recipe ideas to broaden their repertoire")
     var recipeIdeas: [String]
+}
+
+// MARK: - OCR Recipe Parsing Types
+
+@Generable
+struct ParsedRecipeFromOCR {
+    @Guide(description: "The name or title of the recipe")
+    var title: String
+
+    @Guide(description: "Number of servings the recipe makes, or 0 if not specified")
+    var servings: Int
+
+    @Guide(description: "The cuisine type such as italian, mexican, indian, american, etc.")
+    var cuisine: String
+
+    @Guide(description: "Estimated prep time in minutes, or 0 if not specified")
+    var prepTimeMinutes: Int
+
+    @Guide(description: "Estimated cook time in minutes, or 0 if not specified")
+    var cookTimeMinutes: Int
+
+    @Guide(description: "List of ingredients with their names, amounts, and optional preparation notes")
+    var ingredients: [ParsedOCRIngredient]
+
+    @Guide(description: "Ordered list of cooking step instructions")
+    var directions: [String]
+
+    @Guide(description: "Dietary labels that apply such as vegetarian, vegan, glutenFree, dairyFree. Empty if none apply")
+    var dietaryInfo: [String]
+}
+
+@Generable
+struct ParsedOCRIngredient {
+    @Guide(description: "Name of the ingredient")
+    var name: String
+
+    @Guide(description: "Amount and unit such as '2 cups' or '1 tablespoon'")
+    var amount: String
+
+    @Guide(description: "Preparation instructions such as 'diced' or 'melted', or empty string if none")
+    var preparation: String
 }

@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import PhotosUI
+import Vision
 
 // MARK: - Recipe Ingestion Service
 
@@ -87,6 +88,17 @@ final class RecipeIngestionService {
         progress = "Parsing recipe text..."
         defer { isProcessing = false; progress = nil }
 
+        // Try on-device structured parsing first
+        let foundationService = aiRouter.foundationModelService
+        if await foundationService.isAvailable {
+            do {
+                let parsed = try await foundationService.parseRecipeFromText(text)
+                return convertToIngestionResult(parsed)
+            } catch {
+                // On-device failed — fall through to cloud
+            }
+        }
+
         let prompt = buildIngestionPrompt(for: text)
         let response = try await aiRouter.generateText(prompt: prompt, taskType: .recipeIngestion)
         return try parseIngestionResponse(response, source: "text")
@@ -123,6 +135,20 @@ final class RecipeIngestionService {
         progress = "Generating recipe…"
         defer { isProcessing = false; progress = nil }
 
+        // Try on-device structured parsing first (yields result as single chunk)
+        let foundationService = aiRouter.foundationModelService
+        if await foundationService.isAvailable {
+            do {
+                let parsed = try await foundationService.parseRecipeFromText(text)
+                let result = convertToIngestionResult(parsed)
+                // Emit the parsed title so the UI has something to display
+                onChunk(result.title)
+                return result
+            } catch {
+                // On-device failed — fall through to cloud streaming
+            }
+        }
+
         let prompt = buildIngestionPrompt(for: text)
         var accumulated = ""
         for try await chunk in aiRouter.generateTextStreaming(prompt: prompt, taskType: .recipeIngestion) {
@@ -146,13 +172,92 @@ final class RecipeIngestionService {
         return image.jpegData(compressionQuality: 0.1)
     }
 
+    // MARK: - Vision OCR
+
+    /// Extract text from image data using the Vision framework's OCR engine.
+    private func recognizeText(in imageData: Data) async throws -> String {
+        guard let cgImage = UIImage(data: imageData)?.cgImage else {
+            throw IngestionError.invalidContent
+        }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            let request = VNRecognizeTextRequest { request, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                guard let observations = request.results as? [VNRecognizedTextObservation] else {
+                    continuation.resume(throwing: IngestionError.invalidContent)
+                    return
+                }
+
+                let lines = observations.compactMap { $0.topCandidates(1).first?.string }
+                let fullText = lines.joined(separator: "\n")
+
+                if fullText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    continuation.resume(throwing: IngestionError.invalidContent)
+                } else {
+                    continuation.resume(returning: fullText)
+                }
+            }
+
+            request.recognitionLevel = .accurate
+            request.usesLanguageCorrection = true
+
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            do {
+                try handler.perform([request])
+            } catch {
+                continuation.resume(throwing: error)
+            }
+        }
+    }
+
+    /// Convert an on-device parsed recipe into the standard ingestion result.
+    private func convertToIngestionResult(_ parsed: ParsedRecipeFromOCR) -> RecipeIngestionResult {
+        RecipeIngestionResult(
+            title: parsed.title,
+            servings: parsed.servings > 0 ? parsed.servings : nil,
+            cuisine: parsed.cuisine.isEmpty ? nil : parsed.cuisine,
+            ingredients: parsed.ingredients.map {
+                .init(name: $0.name, amount: $0.amount,
+                      preparation: $0.preparation.isEmpty ? nil : $0.preparation)
+            },
+            directions: parsed.directions,
+            prepTimeMinutes: parsed.prepTimeMinutes > 0 ? parsed.prepTimeMinutes : nil,
+            cookTimeMinutes: parsed.cookTimeMinutes > 0 ? parsed.cookTimeMinutes : nil,
+            source: "image",
+            dietaryInfo: parsed.dietaryInfo.isEmpty ? nil : parsed.dietaryInfo
+        )
+    }
+
     // MARK: - Ingest from Image
 
     func ingestFromImage(_ imageData: Data) async throws -> RecipeIngestionResult {
         isProcessing = true
-        progress = "Importing recipe..."
+        progress = "Analyzing recipe image..."
         defer { isProcessing = false; progress = nil }
 
+        // Try on-device pipeline: Vision OCR + FoundationModels parsing
+        let foundationService = aiRouter.foundationModelService
+        let isOnDevice = await foundationService.isAvailable
+
+        if isOnDevice {
+            do {
+                progress = "Reading text from image..."
+                let ocrText = try await recognizeText(in: imageData)
+
+                progress = "Parsing recipe..."
+                let parsed = try await foundationService.parseRecipeFromOCRText(ocrText)
+                return convertToIngestionResult(parsed)
+            } catch {
+                // On-device failed — fall through to cloud
+                progress = "Trying cloud import..."
+            }
+        }
+
+        // Fall back to cloud vision API
         let base64 = imageData.base64EncodedString()
 
         let response = try await aiRouter.analyzeImage(
@@ -224,6 +329,22 @@ final class RecipeIngestionService {
         progress = "Applying changes with AI…"
         defer { isProcessing = false; progress = nil }
 
+        // Try on-device structured editing first
+        let foundationService = aiRouter.foundationModelService
+        if await foundationService.isAvailable {
+            do {
+                let recipeText = buildRecipeText(recipe: recipe)
+                let parsed = try await foundationService.editRecipeOnDevice(
+                    recipeText: recipeText, instruction: instruction
+                )
+                var result = convertToIngestionResult(parsed)
+                result.source = recipe.sourceURL ?? "ai-edit"
+                return result
+            } catch {
+                // On-device failed — fall through to cloud
+            }
+        }
+
         let prompt = buildEditPrompt(recipe: recipe, instruction: instruction)
         let response = try await aiRouter.generateText(prompt: prompt, taskType: .recipeIngestion, preferFast: true)
         return try parseIngestionResponse(response, source: recipe.sourceURL ?? "ai-edit")
@@ -236,6 +357,23 @@ final class RecipeIngestionService {
         progress = "Applying changes with AI…"
         defer { isProcessing = false; progress = nil }
 
+        // Try on-device structured editing first (yields result as single chunk)
+        let foundationService = aiRouter.foundationModelService
+        if await foundationService.isAvailable {
+            do {
+                let recipeText = buildRecipeText(recipe: recipe)
+                let parsed = try await foundationService.editRecipeOnDevice(
+                    recipeText: recipeText, instruction: instruction
+                )
+                var result = convertToIngestionResult(parsed)
+                result.source = recipe.sourceURL ?? "ai-edit"
+                onChunk(result.title)
+                return result
+            } catch {
+                // On-device failed — fall through to cloud streaming
+            }
+        }
+
         let prompt = buildEditPrompt(recipe: recipe, instruction: instruction)
         var accumulated = ""
         for try await chunk in aiRouter.generateTextStreaming(prompt: prompt, taskType: .recipeIngestion) {
@@ -245,7 +383,8 @@ final class RecipeIngestionService {
         return try parseIngestionResponse(accumulated, source: recipe.sourceURL ?? "ai-edit")
     }
 
-    private func buildEditPrompt(recipe: Recipe, instruction: String) -> String {
+    /// Serialize a recipe into plain text for AI prompts.
+    private func buildRecipeText(recipe: Recipe) -> String {
         let sortedDirs = recipe.directions.sorted { $0.stepNumber < $1.stepNumber }
         var lines: [String] = [
             "Title: \(recipe.title)",
@@ -269,7 +408,11 @@ final class RecipeIngestionService {
             lines.append("")
             lines.append("Current dietary labels: \(recipe.dietaryRestrictions.map(\.displayName).joined(separator: ", "))")
         }
-        let recipeText = lines.joined(separator: "\n")
+        return lines.joined(separator: "\n")
+    }
+
+    private func buildEditPrompt(recipe: Recipe, instruction: String) -> String {
+        let recipeText = buildRecipeText(recipe: recipe)
 
         return """
         Modify the following recipe based on the user's request. \

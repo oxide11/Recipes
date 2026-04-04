@@ -60,6 +60,11 @@ final class AIServiceRouter {
 
     var preferredProvider: AIProvider = .hybrid
 
+    /// Whether any cloud AI provider has an API key configured.
+    var hasCloudProvider: Bool {
+        claudeService.isConfigured || openAIService.isConfigured
+    }
+
     /// Route a text generation request to the best available provider.
     /// Pass `preferFast: true` for structured/mechanical tasks where speed matters more than quality.
     func generateText(
@@ -89,12 +94,63 @@ final class AIServiceRouter {
         }
     }
 
-    /// Streaming variant — yields text chunks as Claude generates them.
-    /// Falls back to a single-chunk stream for other providers.
+    /// Streaming variant — tries on-device first (as a single chunk), then Claude streaming,
+    /// then wraps other providers in a single-chunk stream.
     func generateTextStreaming(
         prompt: String,
         taskType: AITaskType
     ) -> AsyncThrowingStream<String, Error> {
+        // Try on-device first for suitable tasks when in hybrid or onDevice mode
+        let useOnDeviceForTask = !Self.largeContextTasks.contains(taskType)
+        if useOnDeviceForTask && (preferredProvider == .hybrid || preferredProvider == .onDevice) {
+            return AsyncThrowingStream { continuation in
+                let task = Task { @MainActor [weak self] in
+                    guard let self else { continuation.finish(); return }
+                    // Attempt on-device generation
+                    if await self.foundationModelService.isAvailable {
+                        do {
+                            let result = try await self.foundationModelService.respond(to: prompt)
+                            continuation.yield(result)
+                            continuation.finish()
+                            return
+                        } catch {
+                            // On-device failed — fall through to cloud
+                        }
+                    }
+                    // Fall back to cloud streaming or single-chunk
+                    if self.claudeService.isConfigured {
+                        do {
+                            let stream = self.claudeService.sendMessageStreaming(
+                                messages: [ClaudeMessage(role: .user, content: prompt)],
+                                systemPrompt: """
+                                    You are a professional chef and recipe developer with deep knowledge of \
+                                    global cuisines, dietary restrictions, and nutritional science. Generate \
+                                    detailed, accurate recipes with precise measurements and clear step-by-step \
+                                    instructions. Always respond with valid JSON.
+                                    """
+                            )
+                            for try await chunk in stream {
+                                continuation.yield(chunk)
+                            }
+                            continuation.finish()
+                            return
+                        } catch {
+                            // Claude failed — try other providers
+                        }
+                    }
+                    do {
+                        let result = try await self.generateText(prompt: prompt, taskType: taskType)
+                        continuation.yield(result)
+                        continuation.finish()
+                    } catch {
+                        continuation.finish(throwing: error)
+                    }
+                }
+                continuation.onTermination = { _ in task.cancel() }
+            }
+        }
+
+        // Direct cloud streaming when cloud provider is explicitly selected
         if claudeService.isConfigured {
             return claudeService.sendMessageStreaming(
                 messages: [ClaudeMessage(role: .user, content: prompt)],
@@ -107,7 +163,6 @@ final class AIServiceRouter {
             )
         }
         // Wrap non-streaming providers in a single-chunk stream.
-        // Store the Task so it's cancelled if the stream consumer disposes early.
         return AsyncThrowingStream { continuation in
             let task = Task { @MainActor [weak self] in
                 guard let self else { continuation.finish(); return }
@@ -165,7 +220,7 @@ final class AIServiceRouter {
     }
 
     /// Task types where on-device inference is unsuitable due to large context requirements.
-    private static let largeContextTasks: Set<AITaskType> = [.recipeIngestion, .imageAnalysis]
+    private static let largeContextTasks: Set<AITaskType> = [.imageAnalysis]
 
     /// Try on-device first, fall back to cloud providers.
     private func hybridGeneration(prompt: String, taskType: AITaskType, preferFast: Bool = false) async throws -> String {
