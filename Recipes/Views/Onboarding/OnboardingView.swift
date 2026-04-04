@@ -714,7 +714,7 @@ struct OnboardingView: View {
             Include precise measurements, clear steps, and estimated nutrition per serving.\(dietaryClause)
             """
             do {
-                let result = try await service.ingestFromTextStreaming(prompt) { _ in }
+                let result = try await service.ingestFromTextStreaming(prompt, isGeneration: true) { _ in }
                 let recipe = await service.convertToRecipe(result)
                 modelContext.insert(recipe)
             } catch {

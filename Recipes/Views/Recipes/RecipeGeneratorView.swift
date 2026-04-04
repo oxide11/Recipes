@@ -325,7 +325,7 @@ struct RecipeGeneratorView: View {
             }
             let service = RecipeIngestionService(aiRouter: aiRouter)
             do {
-                generatedResult = try await service.ingestFromTextStreaming(text) { chunk in
+                generatedResult = try await service.ingestFromTextStreaming(text, isGeneration: true) { chunk in
                     streamingText += chunk
                 }
             } catch {
@@ -538,7 +538,7 @@ struct QuickGenerateView: View {
 
         streamingText = ""
         do {
-            generatedResult = try await service.ingestFromTextStreaming(description) { chunk in
+            generatedResult = try await service.ingestFromTextStreaming(description, isGeneration: true) { chunk in
                 streamingText += chunk
             }
         } catch {
