@@ -255,7 +255,7 @@ struct PantryView: View {
                             pantryItemRow(item)
                         }
                     } header: {
-                        Label("Spice Rack", systemImage: "sparkles")
+                        Label("Spice Rack", systemImage: "leaf")
                     }
                 }
 
