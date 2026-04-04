@@ -534,7 +534,8 @@ struct QuickGenerateView: View {
             description += recipeSkillConstraint(for: skill)
         }
 
-        description += " If an ingredient is used in different amounts at different stages, list it ONCE with the total and split amounts in the directions. Treat these as the same ingredient: olive oil / extra-virgin olive oil; salt / kosher salt / sea salt; butter / unsalted butter; onion / onions; flour / all-purpose flour."
+        // Note: ingredient deduplication instructions are baked into buildGenerationPrompt
+        // so they don't clutter the user's request string.
 
         streamingText = ""
         do {

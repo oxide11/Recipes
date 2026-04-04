@@ -139,6 +139,11 @@ final class RecipeIngestionService {
         The recipe must match the request closely — if the user asked for chicken salad, \
         return a chicken salad recipe. Do not substitute a different dish.
         Keep ingredients to 10 or fewer. Everyday cooking, not restaurant food.
+        If an ingredient is used in different amounts at different stages, list it ONCE \
+        with the total quantity and split the amounts in the directions. \
+        Treat these as the same ingredient: olive oil / extra-virgin olive oil; \
+        salt / kosher salt / sea salt; butter / unsalted butter; onion / onions; \
+        flour / all-purpose flour.
 
         Request: \(description.sanitizedForAI)
         """
