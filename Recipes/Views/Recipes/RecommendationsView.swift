@@ -144,8 +144,11 @@ struct RecommendationCard: View {
         }
     }
 
-    /// For blind spots, auto-generate with a cuisine hint. For everything else, open the generator form.
-    private var isBlindSpot: Bool { recommendation.category == .blindSpot }
+    /// Any card with a cuisine suggestion auto-generates via QuickGenerateView.
+    /// Cards without one open the full generator form for manual specification.
+    private var hasCuisineHint: Bool {
+        recommendation.cuisineSuggestion != nil || cuisineMatch != nil
+    }
 
     var body: some View {
         Button {
@@ -157,9 +160,9 @@ struct RecommendationCard: View {
                         .font(.subheadline)
                         .fontWeight(.semibold)
                     Spacer()
-                    Image(systemName: isBlindSpot ? "sparkles" : "chevron.right")
-                        .font(isBlindSpot ? .subheadline : .caption)
-                        .foregroundStyle(isBlindSpot ? AnyShapeStyle(.tint) : AnyShapeStyle(.tertiary))
+                    Image(systemName: hasCuisineHint ? "sparkles" : "chevron.right")
+                        .font(hasCuisineHint ? .subheadline : .caption)
+                        .foregroundStyle(hasCuisineHint ? AnyShapeStyle(.tint) : AnyShapeStyle(.tertiary))
                 }
 
                 Text(recommendation.reason)
@@ -183,10 +186,10 @@ struct RecommendationCard: View {
         }
         .buttonStyle(.plain)
         .sheet(isPresented: $showingGenerator) {
-            if isBlindSpot {
+            if hasCuisineHint {
                 QuickGenerateView(cuisineHint: recommendation.cuisineSuggestion ?? cuisineMatch?.rawValue)
             } else {
-                RecipeGeneratorView(initialCuisine: cuisineMatch)
+                RecipeGeneratorView()
             }
         }
     }

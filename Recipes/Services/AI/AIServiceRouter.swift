@@ -224,8 +224,12 @@ final class AIServiceRouter {
         return try await foundationModelService.respond(to: prompt)
     }
 
-    /// Task types where on-device inference is unsuitable due to large context requirements.
-    private static let largeContextTasks: Set<AITaskType> = [.imageAnalysis]
+    /// Task types where on-device inference is unsuitable due to large context or strict JSON schema requirements.
+    /// These always go to a cloud provider — on-device models ignore complex prompts and return prose instead of JSON.
+    private static let largeContextTasks: Set<AITaskType> = [
+        .imageAnalysis,     // vision not available on-device
+        .mealPlanGeneration // complex JSON schema; on-device returns prose
+    ]
 
     /// Try on-device first, fall back to cloud providers.
     private func hybridGeneration(prompt: String, taskType: AITaskType, preferFast: Bool = false) async throws -> String {

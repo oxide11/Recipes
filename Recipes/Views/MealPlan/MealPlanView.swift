@@ -954,6 +954,29 @@ struct GenerateMealPlanSheet: View {
             return goal.promptContext.isEmpty ? "" : " \(goal.promptContext)"
         } ?? ""
 
+        // Build a cuisine affinity summary from ratings + cook history.
+        // Tells the AI which cuisines the user tends to genuinely enjoy, not just save.
+        let cuisineAffinityNote: String = {
+            var scores: [Cuisine: (total: Double, cooks: Int)] = [:]
+            for recipe in filteredRecipes {
+                let cooks = recipe.cookCount
+                guard cooks > 0 else { continue }
+                let rating = recipe.averageRating ?? 3.0
+                let prev = scores[recipe.cuisine] ?? (0, 0)
+                scores[recipe.cuisine] = (prev.total + rating * Double(cooks), prev.cooks + cooks)
+            }
+            // Average rating per cuisine, weighted by cook count
+            let ranked = scores.compactMap { (cuisine, data) -> (String, Double)? in
+                guard data.cooks > 0 else { return nil }
+                let avg = data.total / Double(data.cooks)
+                return (cuisine.rawValue, avg)
+            }.sorted { $0.1 > $1.1 }.prefix(4)
+
+            if ranked.isEmpty { return "" }
+            let parts = ranked.map { "\($0.0) (avg \(String(format: "%.1f", $0.1))★)" }
+            return " Based on cook history and ratings, the user tends to enjoy: \(parts.joined(separator: ", ")). Novel meals can draw from these or introduce variety with different cuisines."
+        }()
+
         return """
         You are a meal planning assistant. Assign meals to the following dates.
 
@@ -970,7 +993,7 @@ struct GenerateMealPlanSheet: View {
         - Prefer [favorite] recipes where appropriate.
         - Recipes tagged [breakfast], [lunch], or [dinner] must only be assigned to that meal type.
         - Match meal type to recipe suitability (e.g. don't assign a heavy dinner to breakfast).
-        - Include exactly \(novelCount) novel meal suggestion\(novelCount == 1 ? "" : "s") not from the saved list, spread across the plan for variety and discovery. Novel meals must vary in cuisine and style — do not suggest multiple dishes with the same ingredient base or flavour theme. Choose simple, classic, universally appealing dishes appropriate to the meal type (e.g. breakfast novel meals should be breakfast food).\(dietaryNote)\(goalNote) For novel meals set "isNew": true and provide a short "description" naming the dish. For saved meals omit both fields.
+        - Include exactly \(novelCount) novel meal suggestion\(novelCount == 1 ? "" : "s") not from the saved list, spread across the plan for variety and discovery. Novel meals must vary in cuisine and style — do not suggest multiple dishes with the same ingredient base or flavour theme. Choose simple, classic, universally appealing dishes appropriate to the meal type (e.g. breakfast novel meals should be breakfast food). For novel meals, deliberately draw from a variety of world cuisines — if the saved recipe list is heavy in one cuisine, pick something different for novel meals.\(cuisineAffinityNote)\(dietaryNote)\(goalNote) For novel meals set "isNew": true and provide a short "description" naming the dish (e.g. "Bacon and Eggs", "Shakshuka", "Avocado Toast"). For saved meals omit both fields.
 
         Return ONLY a JSON array with no markdown fences and no commentary.
         Saved meal example: {"date":"2025-01-01","mealType":"dinner","recipeTitle":"Exact Recipe Title"}
@@ -1058,6 +1081,16 @@ struct GenerateMealPlanSheet: View {
 
 // MARK: - Add Meal View
 
+/// Carries the data needed to present QuickGenerateView from AddMealView.
+/// Using sheet(item:) instead of sheet(isPresented:) guarantees the hint is
+/// captured correctly — sheet(isPresented:) can read stale state when a
+/// separate hint variable is set in the same button action.
+private struct GeneratorRequest: Identifiable {
+    let id = UUID()
+    let hint: String?
+    let mealType: MealType
+}
+
 struct AddMealView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -1068,9 +1101,8 @@ struct AddMealView: View {
     @State private var selectedMealType: MealType
     @State private var selectedDate: Date
     @State private var query: String = ""
-    @State private var showingGenerator = false
+    @State private var generatorRequest: GeneratorRequest? = nil
     @State private var showingImport = false
-    @State private var generatorHint: String? = nil
     @State private var lastRecipeCount = 0
     @FocusState private var fieldFocused: Bool
 
@@ -1254,8 +1286,8 @@ struct AddMealView: View {
                 }
             }
             .onAppear { fieldFocused = true }
-            .sheet(isPresented: $showingGenerator) {
-                QuickGenerateView(mealType: selectedMealType, initialDescription: generatorHint)
+            .sheet(item: $generatorRequest) { req in
+                QuickGenerateView(mealType: req.mealType, initialDescription: req.hint)
             }
             .sheet(isPresented: $showingImport) {
                 RecipeImportView()
@@ -1298,9 +1330,11 @@ struct AddMealView: View {
                 lastRecipeCount = recipes.count
                 showingImport = true
             } else {
-                generatorHint = hint
                 lastRecipeCount = recipes.count
-                showingGenerator = true
+                // Use sheet(item:) so the hint is bundled with the request —
+                // sheet(isPresented:) + a separate hint variable has a race condition
+                // where the sheet reads the old nil value before the state update lands.
+                generatorRequest = GeneratorRequest(hint: hint, mealType: selectedMealType)
             }
         } label: {
             Label(label, systemImage: icon)

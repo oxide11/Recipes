@@ -316,32 +316,19 @@ struct RecipeGeneratorView: View {
         showingResult = true
         defer { isGenerating = false }
 
+        let service = RecipeIngestionService(aiRouter: aiRouter)
         do {
-            let service = RecipeIngestionService(aiRouter: aiRouter)
-
             switch mode {
             case .photo:
-                // Photo mode: cloud vision generates narrative, then parse it
-                let text = try await generateFromPhoto()
-                do {
-                    generatedResult = try await service.ingestFromTextStreaming(text) { chunk in
-                        streamingText += chunk
-                    }
-                } catch {
-                    showingResult = false
-                    errorMessage = "Couldn't parse the recipe. Try generating again."
+                // Vision API identifies the dish and returns recipe text — parse it, don't re-generate.
+                let recipeText = try await generateFromPhoto()
+                generatedResult = try await service.ingestFromTextStreaming(recipeText, isGeneration: false) { chunk in
+                    streamingText += chunk
                 }
-
             case .pantry, .describe:
-                // Build the full request with preferences and generate in a single pass
-                let request = buildGenerationRequest()
-                do {
-                    generatedResult = try await service.ingestFromTextStreaming(request, isGeneration: true) { chunk in
-                        streamingText += chunk
-                    }
-                } catch {
-                    showingResult = false
-                    errorMessage = "Couldn't generate the recipe. Try again."
+                // Build the request string and generate + stream in one call.
+                generatedResult = try await service.ingestFromTextStreaming(buildGenerationRequest(), isGeneration: true) { chunk in
+                    streamingText += chunk
                 }
             }
         } catch {
@@ -350,22 +337,8 @@ struct RecipeGeneratorView: View {
         }
     }
 
-    /// Build a single request string with all user preferences for one-pass generation.
-    private func buildGenerationRequest() -> String {
-        var request: String
-        switch mode {
-        case .pantry:
-            let names = pantryItems.map(\.name).joined(separator: ", ")
-            request = "Generate a recipe using some or all of these ingredients I have in my pantry: \(names)."
-        case .describe:
-            request = "Generate a detailed recipe for: \(descriptionInput)."
-        case .photo:
-            request = ""
-        }
-        request += preferencesSuffix
-        return request
-    }
-
+    /// Photo mode: vision API identifies the dish and returns a full recipe description.
+    /// The caller parses this with isGeneration: false — no second AI call needed.
     private func generateFromPhoto() async throws -> String {
         guard let image = selectedImage,
               let jpegData = RecipeIngestionService.compressedForAI(image) else {
@@ -375,6 +348,23 @@ struct RecipeGeneratorView: View {
         var prompt = "This is a photo of a dish. Identify the dish and generate a complete recipe to recreate it at home. Include the dish name, all ingredients with precise measurements, and clear step-by-step cooking instructions."
         prompt += preferencesSuffix
         return try await aiRouter.analyzeImage(imageBase64: base64, prompt: prompt)
+    }
+
+    /// Builds the user request string for pantry and describe modes — no AI call here.
+    /// ingestFromTextStreaming(isGeneration: true) handles generation and streaming in one pass.
+    private func buildGenerationRequest() -> String {
+        var request: String
+        switch mode {
+        case .pantry:
+            let names = pantryItems.map(\.name).joined(separator: ", ")
+            request = "A recipe using some or all of these pantry ingredients: \(names)."
+        case .describe:
+            request = descriptionInput
+        case .photo:
+            request = ""
+        }
+        request += preferencesSuffix
+        return request
     }
 
     private var preferencesSuffix: String {
@@ -540,13 +530,12 @@ struct QuickGenerateView: View {
                 .map { $0.key.rawValue }
 
             if let mt = mealType {
-                // Meal plan context — user wants something they'll actually make and enjoy.
-                // Lean into their preferred cuisines; this isn't about discovery.
-                description += " This should be a great \(mt.displayName.lowercased())."
-                let preferredCuisines = profile?.preferredCuisines.map(\.rawValue) ?? []
-                if !preferredCuisines.isEmpty {
-                    description += " I enjoy \(preferredCuisines.joined(separator: ", ")) food."
-                }
+                // Meal plan context — the user tapped Generate from a specific meal slot.
+                // Let the meal type be the primary driver: breakfast → breakfast food,
+                // dinner → dinner food. No cuisine hint is added here — that would often
+                // override the meal type (e.g. "Mexican breakfast" instead of actual breakfast).
+                // If the user wants a specific cuisine they can type it in the search field.
+                description += " This should be a great \(mt.displayName.lowercased()) — something approachable and satisfying."
                 if !existingRecipes.isEmpty {
                     description += " I already have \(existingRecipes.count) recipes saved — avoid exact duplicates."
                 }
@@ -810,6 +799,55 @@ struct RecipeIngestionResultCard: View {
 }
 
 // MARK: - Shared helpers
+
+/// Picks a cuisine for a "surprise me" generation using a weighted probability
+/// distribution across **all** cuisines so the user isn't locked into their favourites.
+///
+/// Weights are built in three layers:
+///  1. **Base exploration weight (1.0)** — every cuisine is always possible.
+///  2. **Profile preference boost (+2.0)** — cuisines the user said they enjoy.
+///  3. **Behaviour signal (rating × cookCount)** — per recipe in the library;
+///     an unrated recipe uses a neutral 3.0 so cook frequency still counts.
+///
+/// The result is a weighted random draw, so high-affinity cuisines appear more
+/// often but variety is preserved across multiple generations.
+private func suggestCuisine(from recipes: [Recipe], profile: UserProfile?) -> Cuisine? {
+    let allCuisines = Cuisine.allCases.filter { $0 != .other }
+    guard !allCuisines.isEmpty else { return nil }
+
+    var scores: [Cuisine: Double] = [:]
+
+    // Layer 1 — base weight ensures nothing is ever impossible
+    for cuisine in allCuisines {
+        scores[cuisine] = 1.0
+    }
+
+    // Layer 2 — profile preferences get a small boost when cook data is sparse
+    let preferred = Set(profile?.preferredCuisines ?? [])
+    for cuisine in preferred {
+        scores[cuisine, default: 0] += 2.0
+    }
+
+    // Layer 3 — behaviour signal from rated / cooked recipes (strongest signal)
+    for recipe in recipes {
+        let cooks = recipe.cookCount
+        guard cooks > 0 else { continue }
+        let rating = recipe.averageRating ?? 3.0   // neutral score for unrated recipes
+        scores[recipe.cuisine, default: 0] += rating * Double(cooks)
+    }
+
+    // Weighted random draw
+    let ranked = scores.sorted { $0.value > $1.value }
+    let total  = ranked.reduce(0) { $0 + $1.value }
+    guard total > 0 else { return allCuisines.randomElement() }
+
+    var roll = Double.random(in: 0..<total)
+    for (cuisine, score) in ranked {
+        roll -= score
+        if roll <= 0 { return cuisine }
+    }
+    return ranked.first?.key
+}
 
 private func recipeSkillConstraint(for skill: RecipeDifficulty) -> String {
     switch skill {
