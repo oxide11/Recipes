@@ -67,9 +67,11 @@ final class ShoppingVoiceService: NSObject {
     }
 
     deinit {
-        // Break the retain cycle: AVSpeechSynthesizer holds a strong reference
-        // to its delegate, which would prevent this object from deallocating.
-        synthesizer.delegate = nil
+        // Swift 6: deinit is nonisolated, so we can't touch AVSpeechSynthesizer
+        // directly. Capture the synthesizer (not self) in a MainActor Task to
+        // nil the delegate and break the retain cycle.
+        let synth = synthesizer
+        Task { @MainActor in synth.delegate = nil }
     }
 
     // MARK: - Session Control
