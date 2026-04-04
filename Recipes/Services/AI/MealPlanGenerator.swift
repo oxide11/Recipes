@@ -6,14 +6,14 @@ import FoundationModels
 /// Uses on-device AI or cloud services to auto-generate a balanced meal plan
 /// from the user's recipe collection, dietary preferences, and pantry state.
 @Observable
-final class MealPlanGenerator: Sendable {
+final class MealPlanGenerator: @unchecked Sendable {
 
     /// Reusable session — allocating a fresh LanguageModelSession costs 10-30 MB
     /// that isn't freed until the session is released. One session per generator
     /// instance avoids repeated allocation overhead across plan generations.
     /// Stored as Optional and created on first use since lazy+@Observable conflict.
-    private nonisolated(unsafe) var _session: LanguageModelSession?
-    private nonisolated(unsafe) var session: LanguageModelSession {
+    @ObservationIgnored private var _session: LanguageModelSession?
+    private var session: LanguageModelSession {
         if let s = _session { return s }
         let s = LanguageModelSession()
         _session = s
