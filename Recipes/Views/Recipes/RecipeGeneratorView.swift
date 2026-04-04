@@ -524,16 +524,19 @@ struct QuickGenerateView: View {
             if let mt = mealType {
                 description += " This recipe must be appropriate for \(mt.displayName.lowercased()) — use typical \(mt.displayName.lowercased()) ingredients and portion sizes."
             }
-            if let cuisines = profile?.preferredCuisines, !cuisines.isEmpty {
-                description += " Feel free to draw from my favourite cuisines (\(cuisines.map(\.rawValue).joined(separator: ", "))) but variety is welcome."
-            }
+            // For "surprise me", use cooking history to encourage variety rather than
+            // repeat the same cuisines. Don't list favourites as suggestions — that
+            // just causes the AI to generate the same cuisines every time.
             if !existingRecipes.isEmpty {
                 let topCuisines = Dictionary(grouping: existingRecipes, by: \.cuisine)
                     .sorted { $0.value.count > $1.value.count }
                     .prefix(3)
                     .map { $0.key.rawValue }
-                let cuisineStr = topCuisines.isEmpty ? "" : " My most-cooked cuisines are \(topCuisines.joined(separator: ", "))."
-                description += " I already have \(existingRecipes.count) recipes saved — please suggest something fresh.\(cuisineStr)"
+                if !topCuisines.isEmpty {
+                    description += " I cook \(topCuisines.joined(separator: ", ")) a lot — surprise me with something from a different cuisine."
+                } else {
+                    description += " I already have \(existingRecipes.count) recipes saved — please suggest something fresh."
+                }
             }
             let skill = profile?.skillLevel ?? .intermediate
             description += recipeSkillConstraint(for: skill)
