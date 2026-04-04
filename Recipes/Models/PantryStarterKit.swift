@@ -168,6 +168,24 @@ enum PantryStarterKit {
             .init(name: "Dried mint",          category: .herb,      unit: .tablespoon,quantity: 2),
             .init(name: "Cumin",               category: .spice,     unit: .tablespoon,quantity: 2),
         ],
+        .german: [
+            .init(name: "Mustard",             category: .condiment, unit: .tablespoon,quantity: 3),
+            .init(name: "Caraway seeds",       category: .spice,     unit: .tablespoon,quantity: 2),
+            .init(name: "White wine vinegar",  category: .condiment, unit: .cup,       quantity: 0.5),
+            .init(name: "Smoked paprika",      category: .spice,     unit: .tablespoon,quantity: 2),
+            .init(name: "Juniper berries",     category: .spice,     unit: .tablespoon,quantity: 1),
+            .init(name: "Butter",              category: .dairy,     unit: .ounce,     quantity: 8),
+            .init(name: "Rye flour",           category: .grain,     unit: .cup,       quantity: 2),
+        ],
+        .british: [
+            .init(name: "Worcestershire sauce",category: .condiment, unit: .tablespoon,quantity: 3),
+            .init(name: "Malt vinegar",        category: .condiment, unit: .cup,       quantity: 0.5),
+            .init(name: "Dried thyme",         category: .herb,      unit: .tablespoon,quantity: 2),
+            .init(name: "Butter",              category: .dairy,     unit: .ounce,     quantity: 8),
+            .init(name: "All-purpose flour",   category: .grain,     unit: .cup,       quantity: 2),
+            .init(name: "Chicken stock",       category: .liquid,    unit: .cup,       quantity: 4),
+            .init(name: "Yellow onion",        category: .vegetable, unit: .whole,     quantity: 2),
+        ],
     ]
 
     /// Returns deduplicated starter ingredients for the given cuisines, in encounter order.
