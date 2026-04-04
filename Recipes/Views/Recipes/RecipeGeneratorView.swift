@@ -509,32 +509,35 @@ struct QuickGenerateView: View {
             let hint = hints.isEmpty ? "" : " \(hints.joined(separator: ". ")). Feel free to use these but don't feel constrained."
             description = "Surprise me with a delicious recipe.\(hint)"
         }
-        if let mt = mealType {
-            description += " This recipe must be appropriate for \(mt.displayName.lowercased()) — use typical \(mt.displayName.lowercased()) ingredients and portion sizes."
-        }
+        // Dietary restrictions are a hard requirement — always included.
         if let restrictions = profile?.dietaryRestrictions, !restrictions.isEmpty {
             description += " Dietary needs: \(restrictions.map(\.displayName).joined(separator: ", "))."
         }
-        // Only nudge toward preferred cuisines when the prompt has no specific
-        // direction (no cuisine hint, no initial description, not a quick meal).
-        // Applying it to seasonal or targeted generates causes everything to
-        // skew toward a single cuisine regardless of what was asked for.
-        if cuisineHint == nil, initialDescription == nil, !quickMealMode,
-           let cuisines = profile?.preferredCuisines, !cuisines.isEmpty {
-            description += " Feel free to draw from my favourite cuisines (\(cuisines.map(\.rawValue).joined(separator: ", "))) but variety is welcome."
+
+        // When the user asked for something specific (initialDescription set, or a named
+        // cuisine), keep the prompt tight — variety signals, skill constraints, and cuisine
+        // nudges just muddle a specific request. "Just make honey butter" should produce
+        // honey butter, not a chef's elevated interpretation of it.
+        let isSpecificRequest = initialDescription != nil || cuisineHint != nil
+        if !isSpecificRequest {
+            if let mt = mealType {
+                description += " This recipe must be appropriate for \(mt.displayName.lowercased()) — use typical \(mt.displayName.lowercased()) ingredients and portion sizes."
+            }
+            if let cuisines = profile?.preferredCuisines, !cuisines.isEmpty {
+                description += " Feel free to draw from my favourite cuisines (\(cuisines.map(\.rawValue).joined(separator: ", "))) but variety is welcome."
+            }
+            if !existingRecipes.isEmpty {
+                let topCuisines = Dictionary(grouping: existingRecipes, by: \.cuisine)
+                    .sorted { $0.value.count > $1.value.count }
+                    .prefix(3)
+                    .map { $0.key.rawValue }
+                let cuisineStr = topCuisines.isEmpty ? "" : " My most-cooked cuisines are \(topCuisines.joined(separator: ", "))."
+                description += " I already have \(existingRecipes.count) recipes saved — please suggest something fresh.\(cuisineStr)"
+            }
+            let skill = profile?.skillLevel ?? .intermediate
+            description += recipeSkillConstraint(for: skill)
         }
-        if !existingRecipes.isEmpty {
-            // Signal variety without listing every title — the AI responds better
-            // to count + dominant cuisines than to a long list it tends to ignore.
-            let topCuisines = Dictionary(grouping: existingRecipes, by: \.cuisine)
-                .sorted { $0.value.count > $1.value.count }
-                .prefix(3)
-                .map { $0.key.rawValue }
-            let cuisineStr = topCuisines.isEmpty ? "" : " My most-cooked cuisines are \(topCuisines.joined(separator: ", "))."
-            description += " I already have \(existingRecipes.count) recipes saved — please suggest something fresh.\(cuisineStr)"
-        }
-        let skill = profile?.skillLevel ?? .intermediate
-        description += recipeSkillConstraint(for: skill)
+
         description += " If an ingredient is used in different amounts at different stages, list it ONCE with the total and split amounts in the directions. Treat these as the same ingredient: olive oil / extra-virgin olive oil; salt / kosher salt / sea salt; butter / unsalted butter; onion / onions; flour / all-purpose flour."
 
         streamingText = ""
