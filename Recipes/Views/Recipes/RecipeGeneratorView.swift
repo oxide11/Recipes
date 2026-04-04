@@ -498,12 +498,10 @@ struct QuickGenerateView: View {
                 description = "Generate a quick meal ready in 30 minutes or less. \(parts.joined(separator: ". ")). Use these ingredients where possible — no shopping trip."
             }
         } else {
-            // General recipe: not pantry-constrained — shopping is fine.
-            // Only mention staples (salt, oil, etc.) — listing specific pantry items
-            // causes the AI to combine them creatively, resulting in complex dishes.
-            let staples = pantryItems.filter(\.isStaple).map(\.name)
-            let stapleHint = staples.isEmpty ? "" : " I always have the basics: \(staples.joined(separator: ", "))."
-            description = "Surprise me with a simple, delicious home-cooked recipe.\(stapleHint) Aim for 10 ingredients or fewer — everyday cooking, not restaurant food."
+            // General recipe: don't mention pantry at all. Even "staples" can include
+            // highly specific ingredients (jalapeños, chipotle, masa harina) that bias
+            // the AI toward one cuisine. Let the AI choose freely what fits the dish.
+            description = "Surprise me with a simple, delicious home-cooked recipe. Aim for 10 ingredients or fewer — everyday cooking, not restaurant food."
         }
         // Dietary restrictions are a hard requirement — always included.
         if let restrictions = profile?.dietaryRestrictions, !restrictions.isEmpty {
