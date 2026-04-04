@@ -970,10 +970,11 @@ struct GenerateMealPlanSheet: View {
         - Prefer [favorite] recipes where appropriate.
         - Recipes tagged [breakfast], [lunch], or [dinner] must only be assigned to that meal type.
         - Match meal type to recipe suitability (e.g. don't assign a heavy dinner to breakfast).
-        - Include exactly \(novelCount) novel meal suggestion\(novelCount == 1 ? "" : "s") not from the saved list, spread across the plan for variety and discovery.\(dietaryNote)\(goalNote) For novel meals set "isNew": true and provide a one-sentence "description". For saved meals omit both fields.
+        - Include exactly \(novelCount) novel meal suggestion\(novelCount == 1 ? "" : "s") not from the saved list, spread across the plan for variety and discovery. Novel meals must vary in cuisine and style — do not suggest multiple dishes with the same ingredient base or flavour theme. Choose simple, classic, universally appealing dishes appropriate to the meal type (e.g. breakfast novel meals should be breakfast food).\(dietaryNote)\(goalNote) For novel meals set "isNew": true and provide a short "description" naming the dish. For saved meals omit both fields.
 
-        Return ONLY a JSON array with no markdown fences and no commentary:
-        [{"date":"YYYY-MM-DD","mealType":"breakfast|lunch|dinner","recipeTitle":"Title","isNew":false}]
+        Return ONLY a JSON array with no markdown fences and no commentary.
+        Saved meal example: {"date":"2025-01-01","mealType":"dinner","recipeTitle":"Exact Recipe Title"}
+        Novel meal example: {"date":"2025-01-02","mealType":"breakfast","recipeTitle":"Scrambled Eggs","isNew":true,"description":"Scrambled eggs"}
         """
     }
 
