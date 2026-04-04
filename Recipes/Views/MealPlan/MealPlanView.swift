@@ -97,6 +97,18 @@ struct MealPlanView: View {
                                     removal:   .move(edge: swipeForward ? .leading  : .trailing)
                                 ))
                         }
+                        .accessibilityLabel(selectedDate.formatted(.dateTime.weekday(.wide).month().day()))
+                        .accessibilityAdjustableAction { direction in
+                            switch direction {
+                            case .increment:
+                                swipeForward = true
+                                selectedDate = calendar.date(byAdding: .day, value: 1, to: selectedDate) ?? selectedDate
+                            case .decrement:
+                                swipeForward = false
+                                selectedDate = calendar.date(byAdding: .day, value: -1, to: selectedDate) ?? selectedDate
+                            @unknown default: break
+                            }
+                        }
                         .gesture(
                             DragGesture(minimumDistance: 40, coordinateSpace: .local)
                                 .onEnded { value in
@@ -141,6 +153,9 @@ struct MealPlanView: View {
             .sheet(isPresented: $showingGenerate) {
                 if let plan = activePlan {
                     GenerateMealPlanSheet(plan: plan)
+                } else {
+                    ProgressView("Setting up your meal plan…")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .task {
@@ -242,9 +257,17 @@ struct DayChip: View {
             Circle()
                 .fill(mealCount > 0 ? Brand.herbGreen : Color.clear)
                 .frame(width: 4, height: 4)
+                .accessibilityHidden(true)
         }
         .contentShape(Rectangle())
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel({
+            let dayName = date.formatted(.dateTime.weekday(.wide))
+            let dayNum  = date.formatted(.dateTime.day())
+            let mealStr = mealCount == 0 ? "no meals" : mealCount == 1 ? "1 meal" : "\(mealCount) meals"
+            return "\(dayName) \(dayNum), \(mealStr)\(isSelected ? ", selected" : "")"
+        }())
     }
 }
 

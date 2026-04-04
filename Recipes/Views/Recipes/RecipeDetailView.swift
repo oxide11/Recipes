@@ -566,6 +566,13 @@ struct RecipeDetailView: View {
                     }
                     .padding()
                     .background(.red.opacity(0.05), in: .rect(cornerRadius: 8))
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel({
+                        var label = "\(temp.protein): minimum \(Int(temp.minimumFahrenheit)) degrees Fahrenheit, \(Int(temp.minimumCelsius)) degrees Celsius"
+                        if let rest = temp.restTimeMinutes { label += ", rest \(rest) minutes" }
+                        if let notes = temp.notes { label += ". \(notes)" }
+                        return label
+                    }())
                 }
             }
         }
@@ -741,13 +748,15 @@ struct RecipeDetailView: View {
                 if !photos.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
-                            ForEach(photos) { photo in
+                            ForEach(Array(photos.enumerated()), id: \.element.id) { index, photo in
                                 RecipePhotoImage(photo: photo)
                                     .frame(width: 120, height: 120)
                                     .clipShape(.rect(cornerRadius: 10))
+                                    .accessibilityLabel("Cooking photo \(index + 1) of \(photos.count)")
                             }
                         }
                     }
+                    .accessibilityLabel("Cooking photos, \(photos.count) total")
                 }
 
                 // Individual log entries
