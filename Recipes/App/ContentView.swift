@@ -8,7 +8,8 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(TimerDeepLink.self) private var timerDeepLink
     @State private var selectedTab: AppTab = .mise
-    @State private var planAndShopSegment: PlanAndShopSegment = .mealPlan
+    @State private var cookSegment: CookSegment = .mealPlan
+    @State private var pantryShopSegment: PantryShopSegment = .pantry
     @State private var showingOnboarding = false
     @Query private var profiles: [UserProfile]
     @Query private var mealPlans: [MealPlan]
@@ -19,15 +20,19 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("Mise", systemImage: "house", value: .mise) {
-                DashboardView(selectedTab: $selectedTab, planAndShopSegment: $planAndShopSegment)
+                DashboardView(
+                    selectedTab: $selectedTab,
+                    cookSegment: $cookSegment,
+                    pantryShopSegment: $pantryShopSegment
+                )
             }
 
-            Tab("Plan & Shop", systemImage: "cart", value: .planAndShop) {
-                PlanAndShopView(segment: $planAndShopSegment)
+            Tab("Cook", systemImage: "book.pages", value: .cook) {
+                CookView(segment: $cookSegment)
             }
 
-            Tab("Recipes", systemImage: "book.pages", value: .recipes) {
-                RecipeListView()
+            Tab("Pantry & Shop", systemImage: "cart", value: .pantryShop) {
+                PantryShopView(segment: $pantryShopSegment)
             }
 
             Tab("Activity", systemImage: "chart.bar", value: .activity) {
@@ -40,7 +45,11 @@ struct ContentView: View {
         }
         .tabViewStyle(.sidebarAdaptable)
         .onChange(of: timerDeepLink.pendingRecipeID) { _, newID in
-            if newID != nil { selectedTab = .recipes }
+            // Deep-link into the Recipes segment of the Cook tab
+            if newID != nil {
+                cookSegment = .recipes
+                selectedTab = .cook
+            }
         }
         // Schedule all smart notifications on launch and keep them current
         // as data changes or the app returns to the foreground.
@@ -79,7 +88,7 @@ struct ContentView: View {
 // MARK: - App Tab
 
 enum AppTab: String, Hashable {
-    case mise, recipes, planAndShop, activity, settings
+    case mise, cook, pantryShop, activity, settings
 }
 
 
