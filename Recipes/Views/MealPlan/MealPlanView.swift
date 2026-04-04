@@ -1025,10 +1025,10 @@ struct GenerateMealPlanSheet: View {
             // Find or generate the recipe
             let recipe: Recipe?
             if suggestion.isNew == true, let description = suggestion.description {
-                let prompt = "Generate a complete recipe for: \(description.sanitizedForAI). Include title, ingredients with measurements, and step-by-step instructions."
                 do {
-                    let text = try await aiRouter.generateText(prompt: prompt, taskType: .recipeGeneration)
-                    let result = try await ingestionService.ingestFromText(text)
+                    // Use the generation prompt path (not parse) so the AI receives
+                    // a "generate this specific dish" instruction rather than "parse this recipe".
+                    let result = try await ingestionService.ingestFromTextStreaming(description, isGeneration: true) { _ in }
                     let generated = await ingestionService.convertToRecipe(result)
                     modelContext.insert(generated)
                     recipe = generated
