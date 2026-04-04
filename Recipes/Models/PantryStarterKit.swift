@@ -186,7 +186,7 @@ enum PantryStarterKit {
         ],
         .german: [
             .init(name: "Mustard",             category: .condiment, unit: .tablespoon,quantity: 3),
-            .init(name: "Rye bread",           category: .grain,     unit: .whole,     quantity: 1),
+            .init(name: "Bread",               category: .grain,     unit: .whole,     quantity: 1),
             .init(name: "Sauerkraut",          category: .vegetable, unit: .cup,       quantity: 2),
             .init(name: "Smoked paprika",      category: .spice,     unit: .tablespoon,quantity: 2),
             .init(name: "White wine vinegar",  category: .condiment, unit: .cup,       quantity: 0.5),
