@@ -285,7 +285,7 @@ struct RecipeListView: View {
             // Shuffle so ingredient chips rotate on each load / refresh.
             let inSeason = SeasonalAwarenessService.currentlyInSeason(hemisphere: hemisphere)
                 .filter { !$0.availableAllYear }
-                .shuffled()
+                .sorted { $0.name < $1.name }
                 .prefix(8)
                 .map(\.name)
             guard !Task.isCancelled else { return }
