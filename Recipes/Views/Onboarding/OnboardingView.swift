@@ -269,24 +269,13 @@ struct OnboardingView: View {
 
     private var kitchenStep: some View {
         VStack(spacing: 0) {
-            if pantryIngredients.isEmpty {
-                emptyKitchenStep
-            } else if showingKitchenEditor {
+            // Always show the editor when there's nothing to preview,
+            // so the screen never looks broken/empty.
+            if pantryIngredients.isEmpty || showingKitchenEditor {
                 kitchenEditor
             } else {
                 kitchenPreview
             }
-        }
-    }
-
-    private var emptyKitchenStep: some View {
-        VStack(spacing: 0) {
-            stepHeading(
-                title: "Your Kitchen",
-                subtitle: "Select some cuisines first to get starter pantry suggestions, or head straight in."
-            )
-            Spacer()
-            bottomButtons(continueLabel: "Let's go", onContinue: { finish() })
         }
     }
 
@@ -349,8 +338,10 @@ struct OnboardingView: View {
     private var kitchenEditor: some View {
         VStack(spacing: 0) {
             stepHeading(
-                title: "Does this look right?",
-                subtitle: "Remove anything you don't have. Add anything we missed."
+                title: "Your Kitchen",
+                subtitle: pantryIngredients.isEmpty
+                    ? "What do you keep stocked? Add ingredients by typing or use the mic."
+                    : "Remove anything you don't have. Add anything we missed."
             )
 
             // Chips
