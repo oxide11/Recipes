@@ -1096,10 +1096,81 @@ struct AddMealView: View {
 
     private var trimmed: String { query.trimmingCharacters(in: .whitespaces) }
 
+    // MARK: - Query intent detection
+
+    private enum QueryIntent {
+        case cuisine(Cuisine)   // "italian", "thai", etc.
+        case quick              // "quick", "fast", "easy", "30 min"
+        case title              // plain text — match recipe titles
+    }
+
+    private var queryIntent: QueryIntent {
+        let lower = trimmed.lowercased()
+        // Cuisine: check if any cuisine name is contained in (or equals) the query
+        if let match = Cuisine.allCases.first(where: {
+            let name = $0.rawValue.lowercased()
+            return lower == name || lower.contains(name) || name.contains(lower)
+        }) {
+            return .cuisine(match)
+        }
+        // Speed keywords
+        let quickWords = ["quick", "fast", "easy", "simple", "30 min", "30min", "speedy"]
+        if quickWords.contains(where: { lower.contains($0) }) {
+            return .quick
+        }
+        return .title
+    }
+
     /// Library recipes that match what the user is typing.
     private var libraryMatches: [Recipe] {
         guard !trimmed.isEmpty else { return [] }
-        return recipes.filter { $0.title.localizedCaseInsensitiveContains(trimmed) }
+        switch queryIntent {
+        case .cuisine(let cuisine):
+            return recipes.filter { $0.cuisine == cuisine }
+        case .quick:
+            return recipes.filter { $0.totalTimeMinutes > 0 && $0.totalTimeMinutes <= 30 }
+        case .title:
+            return recipes.filter { $0.title.localizedCaseInsensitiveContains(trimmed) }
+        }
+    }
+
+    /// Human-readable section header for library matches.
+    private var libraryMatchesHeader: String {
+        switch queryIntent {
+        case .cuisine(let cuisine): return "\(cuisine.rawValue.capitalized) recipes"
+        case .quick:                return "Under 30 minutes"
+        case .title:                return "From your library"
+        }
+    }
+
+    /// Hint passed to the recipe generator when the user taps Generate.
+    private var generateHint: String {
+        switch queryIntent {
+        case .cuisine(let cuisine):
+            return "\(cuisine.rawValue.capitalized) \(selectedMealType.displayName.lowercased())"
+        case .quick:
+            return "quick \(selectedMealType.displayName.lowercased())"
+        case .title:
+            return trimmed
+        }
+    }
+
+    /// Label for the generate action row.
+    private var generateLabel: String {
+        switch queryIntent {
+        case .cuisine(let cuisine):
+            return libraryMatches.isEmpty
+                ? "Generate a \(cuisine.rawValue.capitalized) recipe"
+                : "Generate another \(cuisine.rawValue.capitalized) recipe"
+        case .quick:
+            return libraryMatches.isEmpty
+                ? "Generate a quick meal"
+                : "Generate another quick meal"
+        case .title:
+            return libraryMatches.isEmpty
+                ? "Generate a recipe for \"\(trimmed)\""
+                : "Generate something like \"\(trimmed)\""
+        }
     }
 
     var body: some View {
@@ -1159,7 +1230,7 @@ struct AddMealView: View {
                     } else {
                         // Query active — library matches first, then smart actions
                         if !libraryMatches.isEmpty {
-                            Section("From your library") {
+                            Section(libraryMatchesHeader) {
                                 ForEach(libraryMatches) { recipe in
                                     recipeRow(recipe)
                                 }
@@ -1168,20 +1239,21 @@ struct AddMealView: View {
 
                         Section {
                             // Add freeform — always available when typing
-                            Button {
-                                addFreeform()
-                            } label: {
-                                Label("Add \"\(trimmed)\"", systemImage: "plus.circle")
-                                    .foregroundStyle(.primary)
+                            // (skip for cuisine/quick intents — doesn't make sense to add "italian" as a meal name)
+                            if case .title = queryIntent {
+                                Button {
+                                    addFreeform()
+                                } label: {
+                                    Label("Add \"\(trimmed)\"", systemImage: "plus.circle")
+                                        .foregroundStyle(.primary)
+                                }
                             }
 
-                            // Generate with the typed text as the seed
+                            // Generate — label and hint are intent-aware
                             actionRow(
-                                label: libraryMatches.isEmpty
-                                    ? "Generate a recipe for \"\(trimmed)\""
-                                    : "Generate something like \"\(trimmed)\"",
+                                label: generateLabel,
                                 icon: "sparkles",
-                                hint: trimmed
+                                hint: generateHint
                             )
                         }
                     }
