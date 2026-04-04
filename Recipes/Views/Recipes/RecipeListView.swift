@@ -35,6 +35,7 @@ struct RecipeListView: View {
     @State private var debouncedSearch = ""
     @State private var searchDebounceTask: Task<Void, Never>?
     @State private var noWasteTask: Task<Void, Never>?
+    @State private var seasonalTask: Task<Void, Never>?
     @State private var recipeToDelete: Recipe?
     @State private var selectedRecipe: Recipe?
     @Environment(TimerDeepLink.self) private var timerDeepLink
@@ -197,13 +198,19 @@ struct RecipeListView: View {
                     minRatingFilter: $minRatingFilter,
                     availableTags: allTags
                 )
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                .presentationCompactAdaptation(.none)
             }
             .sheet(isPresented: $showingSeasonalGenerator) {
                 let hint = selectedSeasonalIngredient.map {
                     "Generate a recipe that features \($0.lowercased()) as a key ingredient. It's in season right now."
                 } ?? "Generate a recipe using a seasonal ingredient that's at its peak right now."
                 QuickGenerateView(initialDescription: hint)
+            }
+            .refreshable {
+                updateNoWasteMatches()
+                updateSeasonalCache()
             }
             .task {
                 updateNoWasteMatches()
@@ -212,6 +219,11 @@ struct RecipeListView: View {
                 hasLoadedProfile = true
             }
             .onAppear { rebuildFilteredRecipes() }
+            .onDisappear {
+                searchDebounceTask?.cancel()
+                noWasteTask?.cancel()
+                seasonalTask?.cancel()
+            }
             .onChange(of: recipes.count) {
                 updateNoWasteMatches()
                 updateSeasonalCache()
@@ -267,21 +279,24 @@ struct RecipeListView: View {
     }
 
     private func updateSeasonalCache() {
-        Task {
+        seasonalTask?.cancel()
+        seasonalTask = Task {
             let hemisphere = profiles.first?.hemisphere ?? .northern
+            // Shuffle so ingredient chips rotate on each load / refresh.
             let inSeason = SeasonalAwarenessService.currentlyInSeason(hemisphere: hemisphere)
                 .filter { !$0.availableAllYear }
+                .shuffled()
                 .prefix(8)
                 .map(\.name)
+            guard !Task.isCancelled else { return }
             cachedSeasonalIngredients = Array(inSeason)
 
             // Include any recipe with at least one currently in-season ingredient.
-            // The old 0.5 score threshold was too strict — a recipe featuring
-            // asparagus alongside pantry staples (garlic, oil, pasta) would score
-            // ~0.17 and be excluded even though it belongs here.
+            // Shuffle so the cards row surfaces different recipes on each load / refresh.
             let seasonal = recipes.filter { recipe in
                 recipe.ingredients.contains { SeasonalAwarenessService.isInSeason($0.name) }
-            }
+            }.shuffled()
+            guard !Task.isCancelled else { return }
             cachedSeasonalRecipes = seasonal
         }
     }
@@ -648,6 +663,7 @@ struct CuisineFilterSheet: View {
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .presentationCompactAdaptation(.none)
     }
 }
 

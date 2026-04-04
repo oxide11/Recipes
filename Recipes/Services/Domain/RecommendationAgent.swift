@@ -133,7 +133,9 @@ final class RecommendationAgent {
             return (recipe, score)
         }
 
-        let topRecipes = scored.sorted { $0.1 > $1.1 }.prefix(2).map(\.0)
+        // Take the top-scoring recipes, then shuffle within the top tier so
+        // pull-to-refresh surfaces different seasonal picks each time.
+        let topRecipes = scored.sorted { $0.1 > $1.1 }.prefix(6).map(\.0).shuffled().prefix(2)
 
         return topRecipes.map { recipe in
             Recommendation(
