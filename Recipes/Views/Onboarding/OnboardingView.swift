@@ -277,6 +277,17 @@ struct OnboardingView: View {
         .accessibilityHint(selected ? "Double tap to deselect" : "Double tap to select")
     }
 
+    // Common intolerances and beliefs — shown by default
+    private static let commonRestrictions: [DietaryRestriction] = [
+        .vegetarian, .vegan, .pescatarian, .glutenFree, .dairyFree, .nutFree, .halal, .kosher
+    ]
+    // Lifestyle/protocol diets — hidden under "More options"
+    private static let lifestyleRestrictions: [DietaryRestriction] = [
+        .keto, .paleo, .whole30, .fodmap, .lowCarb, .lowSodium
+    ]
+
+    @State private var showMoreRestrictions = false
+
     // MARK: - Screen 3: Your Table
 
     private var tableStep: some View {
@@ -287,43 +298,55 @@ struct OnboardingView: View {
             )
 
             ScrollView {
-                FlowLayout(spacing: 10) {
-                    // "None" chip — prominent if nothing is selected
-                    let noneSelected = selectedRestrictions.isEmpty
-                    Button {
-                        withAnimation { selectedRestrictions.removeAll() }
-                    } label: {
-                        Text("None")
-                            .font(.system(.subheadline, design: .rounded, weight: .medium))
-                            .foregroundStyle(noneSelected ? Brand.midnight : Brand.cream)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(noneSelected ? Brand.herbGreen : Brand.surface, in: Capsule())
-                            .overlay(Capsule().stroke(noneSelected ? Color.clear : Brand.border, lineWidth: 1))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("None\(noneSelected ? ", selected" : "")")
-                    .accessibilityHint(noneSelected ? "Selected" : "Double tap to clear all restrictions")
-
-                    ForEach(DietaryRestriction.allCases, id: \.self) { restriction in
-                        let selected = selectedRestrictions.contains(restriction)
+                VStack(alignment: .leading, spacing: 16) {
+                    FlowLayout(spacing: 10) {
+                        // "None" chip — prominent if nothing is selected
+                        let noneSelected = selectedRestrictions.isEmpty
                         Button {
-                            withAnimation {
-                                if selected { selectedRestrictions.remove(restriction) }
-                                else { selectedRestrictions.insert(restriction) }
-                            }
+                            withAnimation { selectedRestrictions.removeAll() }
                         } label: {
-                            Text(restriction.displayName)
+                            Text("None")
                                 .font(.system(.subheadline, design: .rounded, weight: .medium))
-                                .foregroundStyle(selected ? Brand.midnight : Brand.cream)
+                                .foregroundStyle(noneSelected ? Brand.midnight : Brand.cream)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 10)
-                                .background(selected ? Brand.herbGreen : Brand.surface, in: Capsule())
-                                .overlay(Capsule().stroke(selected ? Color.clear : Brand.border, lineWidth: 1))
+                                .background(noneSelected ? Brand.herbGreen : Brand.surface, in: Capsule())
+                                .overlay(Capsule().stroke(noneSelected ? Color.clear : Brand.border, lineWidth: 1))
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("\(restriction.displayName)\(selected ? ", selected" : "")")
-                        .accessibilityHint(selected ? "Double tap to deselect" : "Double tap to select")
+                        .accessibilityLabel("None\(noneSelected ? ", selected" : "")")
+                        .accessibilityHint(noneSelected ? "Selected" : "Double tap to clear all restrictions")
+
+                        ForEach(Self.commonRestrictions, id: \.self) { restriction in
+                            dietaryChip(restriction)
+                        }
+                    }
+
+                    // "More options" expander for lifestyle/protocol diets
+                    VStack(alignment: .leading, spacing: 10) {
+                        Button {
+                            withAnimation(.spring(duration: 0.3)) { showMoreRestrictions.toggle() }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text(showMoreRestrictions ? "Fewer options" : "More options")
+                                    .font(.system(.subheadline, design: .rounded, weight: .medium))
+                                    .foregroundStyle(Brand.muted)
+                                Image(systemName: showMoreRestrictions ? "chevron.up" : "chevron.down")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(Brand.muted)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint(showMoreRestrictions ? "Double tap to collapse" : "Double tap to show keto, paleo, and more")
+
+                        if showMoreRestrictions {
+                            FlowLayout(spacing: 10) {
+                                ForEach(Self.lifestyleRestrictions, id: \.self) { restriction in
+                                    dietaryChip(restriction)
+                                }
+                            }
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
                     }
                 }
                 .padding(.horizontal, 24)
@@ -335,6 +358,27 @@ struct OnboardingView: View {
                 .padding(.bottom, 40)
                 .padding(.top, 8)
         }
+    }
+
+    private func dietaryChip(_ restriction: DietaryRestriction) -> some View {
+        let selected = selectedRestrictions.contains(restriction)
+        return Button {
+            withAnimation {
+                if selected { selectedRestrictions.remove(restriction) }
+                else { selectedRestrictions.insert(restriction) }
+            }
+        } label: {
+            Text(restriction.displayName)
+                .font(.system(.subheadline, design: .rounded, weight: .medium))
+                .foregroundStyle(selected ? Brand.midnight : Brand.cream)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(selected ? Brand.herbGreen : Brand.surface, in: Capsule())
+                .overlay(Capsule().stroke(selected ? Color.clear : Brand.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(restriction.displayName)\(selected ? ", selected" : "")")
+        .accessibilityHint(selected ? "Double tap to deselect" : "Double tap to select")
     }
 
     // MARK: - Screen 4: Your Kitchen

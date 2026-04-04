@@ -12,6 +12,7 @@ struct ProfileEditorView: View {
     var existingProfile: UserProfile?
 
     @State private var displayName: String
+    @State private var cookingGoal: CookingGoal
     @State private var measurementSystem: MeasurementSystem
     @State private var hemisphere: Hemisphere
     @State private var dietaryRestrictions: Set<DietaryRestriction>
@@ -26,6 +27,7 @@ struct ProfileEditorView: View {
     init(profile: UserProfile? = nil) {
         self.existingProfile = profile
         _displayName = State(initialValue: profile?.displayName ?? "")
+        _cookingGoal = State(initialValue: profile?.cookingGoal ?? .greatFood)
         _measurementSystem = State(initialValue: profile?.measurementSystem ?? .imperial)
         _hemisphere = State(initialValue: profile?.hemisphere ?? .northern)
         _dietaryRestrictions = State(initialValue: Set(profile?.dietaryRestrictions ?? []))
@@ -74,6 +76,12 @@ struct ProfileEditorView: View {
                     .foregroundStyle(.secondary)
             }
 
+            Picker("Cooking Goal", selection: $cookingGoal) {
+                ForEach(CookingGoal.allCases, id: \.self) { goal in
+                    Text(goal.title).tag(goal)
+                }
+            }
+
             Picker("Measurement System", selection: $measurementSystem) {
                 Text("Imperial (cups, oz, °F)").tag(MeasurementSystem.imperial)
                 Text("Metric (ml, g, °C)").tag(MeasurementSystem.metric)
@@ -86,22 +94,49 @@ struct ProfileEditorView: View {
         }
     }
 
+    @State private var showMoreDietaryOptions = false
+
+    private static let commonRestrictions: [DietaryRestriction] = [
+        .vegetarian, .vegan, .pescatarian, .glutenFree, .dairyFree, .nutFree, .halal, .kosher
+    ]
+    private static let lifestyleRestrictions: [DietaryRestriction] = [
+        .keto, .paleo, .whole30, .fodmap, .lowCarb, .lowSodium
+    ]
+
     private var dietaryRestrictionsSection: some View {
         Section {
-            ForEach(DietaryRestriction.allCases, id: \.self) { restriction in
-                Toggle(restriction.displayName, isOn: Binding(
-                    get: { dietaryRestrictions.contains(restriction) },
-                    set: { isOn in
-                        if isOn { dietaryRestrictions.insert(restriction) }
-                        else { dietaryRestrictions.remove(restriction) }
-                    }
-                ))
+            ForEach(Self.commonRestrictions, id: \.self) { restriction in
+                dietaryToggle(restriction)
             }
+
+            DisclosureGroup(
+                isExpanded: $showMoreDietaryOptions,
+                content: {
+                    ForEach(Self.lifestyleRestrictions, id: \.self) { restriction in
+                        dietaryToggle(restriction)
+                    }
+                },
+                label: {
+                    Text(showMoreDietaryOptions ? "Fewer options" : "More options")
+                        .foregroundStyle(.secondary)
+                        .font(.subheadline)
+                }
+            )
         } header: {
             Text("Dietary Restrictions")
         } footer: {
             Text("Recipes will be filtered and AI suggestions will respect these preferences.")
         }
+    }
+
+    private func dietaryToggle(_ restriction: DietaryRestriction) -> some View {
+        Toggle(restriction.displayName, isOn: Binding(
+            get: { dietaryRestrictions.contains(restriction) },
+            set: { isOn in
+                if isOn { dietaryRestrictions.insert(restriction) }
+                else { dietaryRestrictions.remove(restriction) }
+            }
+        ))
     }
 
     private var favoriteCuisinesSection: some View {
@@ -175,6 +210,7 @@ struct ProfileEditorView: View {
         let profile = existingProfile ?? UserProfile()
 
         profile.displayName = displayName
+        profile.cookingGoal = cookingGoal
         profile.measurementSystem = measurementSystem
         profile.hemisphere = hemisphere
         profile.dietaryRestrictions = Array(dietaryRestrictions)
