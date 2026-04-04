@@ -132,6 +132,35 @@ struct PantryView: View {
             .sorted { $0.name.localizedCompare($1.name) == .orderedAscending }
     }
 
+    // MARK: - Merged pantry display sections
+
+    private struct PantryDisplaySection {
+        let title: String
+        let icon: String
+        let items: [PantryItem]
+    }
+
+    /// Collapsed view of pantry categories into logical kitchen shelves.
+    /// Order matches how a kitchen is mentally organised, not a grocery store.
+    private var pantrySections: [PantryDisplaySection] {
+        let g = groupedItems
+        func merged(_ cats: IngredientCategory...) -> [PantryItem] {
+            cats.flatMap { g[$0] ?? [] }
+                .sorted { $0.name.localizedCompare($1.name) == .orderedAscending }
+        }
+        return [
+            .init(title: "Spice Rack",       icon: "leaf",            items: merged(.spice, .herb)),
+            .init(title: "Baking",           icon: "birthday.cake",   items: merged(.baking)),
+            .init(title: "Protein",          icon: "flame",           items: merged(.protein)),
+            .init(title: "Produce",          icon: "carrot",          items: merged(.vegetable, .fruit)),
+            .init(title: "Dairy",            icon: "drop.fill",       items: merged(.dairy)),
+            .init(title: "Dry Goods",        icon: "bag.fill",        items: merged(.grain, .legume, .nut)),
+            .init(title: "Condiments & Oils",icon: "cylinder",        items: merged(.oil, .condiment, .liquid)),
+            .init(title: "Sweetener",        icon: "cube.fill",       items: merged(.sweetener)),
+            .init(title: "Other",            icon: "archivebox",      items: merged(.other)),
+        ]
+    }
+
     var body: some View {
         NavigationStack {
         List {
@@ -248,24 +277,17 @@ struct PantryView: View {
                     }
                 }
 
-                // Spice Rack
-                if !spiceRackItems.isEmpty {
-                    Section {
-                        ForEach(spiceRackItems) { item in
-                            pantryItemRow(item)
-                        }
-                    } header: {
-                        Label("Spice Rack", systemImage: "leaf")
-                    }
-                }
-
-                // Items by category (excluding spices/herbs shown above)
-                ForEach(IngredientCategory.allCases.filter({ $0 != .spice && $0 != .herb }), id: \.self) { category in
-                    if let categoryItems = groupedItems[category], !categoryItems.isEmpty {
-                        Section(category.rawValue.capitalized) {
-                            ForEach(categoryItems) { item in
+                // Render merged display sections in logical kitchen order.
+                // Multiple IngredientCategory values can share a display section;
+                // deduplication is handled by pantrySections below.
+                ForEach(pantrySections, id: \.title) { sec in
+                    if !sec.items.isEmpty {
+                        Section {
+                            ForEach(sec.items) { item in
                                 pantryItemRow(item)
                             }
+                        } header: {
+                            Label(sec.title, systemImage: sec.icon)
                         }
                     }
                 }
@@ -849,7 +871,7 @@ struct QuickAddPantryView: View {
         // Ask AI to categorise all tokens in one call
         let list = tokens.enumerated().map { "\($0.offset + 1). \($0.element)" }.joined(separator: "\n")
         let prompt = """
-        Categorise each grocery/pantry item into one of these categories: protein, dairy, vegetable, fruit, grain, spice, herb, condiment, oil, liquid, sweetener, nut, other.
+        Categorise each grocery/pantry item into one of these categories: protein, dairy, vegetable, fruit, grain, spice, herb, baking, condiment, oil, liquid, sweetener, nut, legume, other. Use "baking" for items like flour, sugar, baking soda, baking powder, cocoa powder, vanilla extract, sprinkles, yeast, and similar baking-specific goods.
         Items:
         \(list)
         Respond with ONLY a JSON array, one object per item, in order:

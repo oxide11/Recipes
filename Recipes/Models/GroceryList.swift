@@ -73,7 +73,7 @@ extension StoreSection {
         case .meat:          return .protein
         case .seafood:       return .protein
         case .dairy:         return .dairy
-        case .bakery:        return .grain
+        case .bakery:        return .baking
         case .dryGoods:      return .grain
         case .spices:        return .spice
         case .condiments:    return .condiment

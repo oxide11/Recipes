@@ -33,8 +33,8 @@ enum PantryStarterKit {
         .init(name: "Bay leaves",        category: .herb,      unit: .piece,      quantity: 4),
         .init(name: "Stock cubes",       category: .liquid,    unit: .piece,      quantity: 4),
         .init(name: "Red pepper flakes", category: .spice,     unit: .tablespoon, quantity: 1),
-        .init(name: "Baking soda",       category: .other,     unit: .tablespoon, quantity: 1),
-        .init(name: "Baking powder",     category: .other,     unit: .tablespoon, quantity: 1),
+        .init(name: "Baking soda",       category: .baking,    unit: .tablespoon, quantity: 1),
+        .init(name: "Baking powder",     category: .baking,    unit: .tablespoon, quantity: 1),
         .init(name: "White vinegar",     category: .condiment, unit: .cup,        quantity: 0.5),
     ]
 
@@ -48,8 +48,8 @@ enum PantryStarterKit {
             .init(name: "Dried oregano",       category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Dried basil",         category: .herb,      unit: .tablespoon, quantity: 1),
             .init(name: "Bacon",               category: .protein,   unit: .ounce,      quantity: 6),
-            .init(name: "Cocoa powder",        category: .other,     unit: .tablespoon, quantity: 3),
-            .init(name: "Vanilla extract",     category: .other,     unit: .tablespoon, quantity: 1),
+            .init(name: "Cocoa powder",        category: .baking,    unit: .tablespoon, quantity: 3),
+            .init(name: "Vanilla extract",     category: .baking,    unit: .tablespoon, quantity: 1),
             .init(name: "Breadcrumbs",         category: .grain,     unit: .cup,        quantity: 1),
         ],
         .japanese: [
@@ -88,8 +88,8 @@ enum PantryStarterKit {
             .init(name: "Yellow mustard",      category: .condiment, unit: .tablespoon, quantity: 3),
             .init(name: "Garlic powder",       category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Onion powder",        category: .spice,     unit: .tablespoon, quantity: 2),
-            .init(name: "Cocoa powder",        category: .other,     unit: .tablespoon, quantity: 3),
-            .init(name: "Vanilla extract",     category: .other,     unit: .tablespoon, quantity: 1),
+            .init(name: "Cocoa powder",        category: .baking,    unit: .tablespoon, quantity: 3),
+            .init(name: "Vanilla extract",     category: .baking,    unit: .tablespoon, quantity: 1),
             .init(name: "Canned beans",        category: .legume,    unit: .can,        quantity: 2),
         ],
         .indian: [
@@ -158,8 +158,8 @@ enum PantryStarterKit {
             .init(name: "Nutmeg",              category: .spice,     unit: .tablespoon, quantity: 1),
             .init(name: "Crème fraîche",       category: .dairy,     unit: .cup,        quantity: 0.5),
             .init(name: "Bacon",               category: .protein,   unit: .ounce,      quantity: 6),
-            .init(name: "Cocoa powder",        category: .other,     unit: .tablespoon, quantity: 3),
-            .init(name: "Vanilla extract",     category: .other,     unit: .tablespoon, quantity: 1),
+            .init(name: "Cocoa powder",        category: .baking,    unit: .tablespoon, quantity: 3),
+            .init(name: "Vanilla extract",     category: .baking,    unit: .tablespoon, quantity: 1),
         ],
         .greek: [
             .init(name: "Dried oregano",       category: .spice,     unit: .tablespoon, quantity: 2),
@@ -243,8 +243,8 @@ enum PantryStarterKit {
             .init(name: "Whole-grain mustard", category: .condiment, unit: .tablespoon, quantity: 3),
             .init(name: "White wine vinegar",  category: .condiment, unit: .cup,        quantity: 0.5),
             .init(name: "Bacon",               category: .protein,   unit: .ounce,      quantity: 6),
-            .init(name: "Cocoa powder",        category: .other,     unit: .tablespoon, quantity: 3),
-            .init(name: "Vanilla extract",     category: .other,     unit: .tablespoon, quantity: 1),
+            .init(name: "Cocoa powder",        category: .baking,    unit: .tablespoon, quantity: 3),
+            .init(name: "Vanilla extract",     category: .baking,    unit: .tablespoon, quantity: 1),
         ],
         .mediterranean: [
             .init(name: "Dried oregano",       category: .spice,     unit: .tablespoon, quantity: 2),

@@ -12,13 +12,14 @@ enum IngredientCategory: String, Codable, CaseIterable, Sendable {
     case grain
     case dairy
     case spice
+    case herb
+    case baking
     case oil
     case condiment
     case liquid
     case sweetener
     case nut
     case legume
-    case herb
     case other
 
     var sortOrder: Int {
@@ -27,16 +28,17 @@ enum IngredientCategory: String, Codable, CaseIterable, Sendable {
         case .vegetable: return 1
         case .fruit:     return 2
         case .grain:     return 3
-        case .dairy:     return 4
-        case .spice:     return 5
-        case .oil:       return 6
-        case .condiment: return 7
-        case .liquid:    return 8
-        case .sweetener: return 9
-        case .nut:       return 10
-        case .legume:    return 11
-        case .herb:      return 12
-        case .other:     return 13
+        case .legume:    return 4
+        case .nut:       return 5
+        case .dairy:     return 6
+        case .baking:    return 7
+        case .sweetener: return 8
+        case .spice:     return 9
+        case .herb:      return 10
+        case .oil:       return 11
+        case .condiment: return 12
+        case .liquid:    return 13
+        case .other:     return 14
         }
     }
 
@@ -48,13 +50,14 @@ enum IngredientCategory: String, Codable, CaseIterable, Sendable {
         case .grain:     return .amber
         case .dairy:     return .blue
         case .spice:     return .purple
+        case .herb:      return .lime
+        case .baking:    return .pink
         case .oil:       return .yellow
         case .condiment: return .teal
         case .liquid:    return .cyan
         case .sweetener: return .pink
         case .nut:       return .brown
         case .legume:    return .mint
-        case .herb:      return .lime
         case .other:     return .gray
         }
     }
@@ -67,14 +70,47 @@ enum IngredientCategory: String, Codable, CaseIterable, Sendable {
         case .grain:     return .dryGoods
         case .dairy:     return .dairy
         case .spice:     return .spices
+        case .herb:      return .produce
+        case .baking:    return .dryGoods
         case .oil:       return .condiments
         case .condiment: return .condiments
         case .liquid:    return .beverages
         case .sweetener: return .dryGoods
         case .nut:       return .snacks
         case .legume:    return .canned
-        case .herb:      return .produce
         case .other:     return .other
+        }
+    }
+
+    /// Human-readable section name used in the pantry view.
+    var pantrySection: String {
+        switch self {
+        case .protein:             return "Protein"
+        case .vegetable, .fruit:   return "Produce"
+        case .grain, .legume, .nut:return "Dry Goods"
+        case .dairy:               return "Dairy"
+        case .baking:              return "Baking"
+        case .sweetener:           return "Sweetener"
+        case .spice, .herb:        return "Spice Rack"
+        case .oil, .condiment,
+             .liquid:              return "Condiments & Oils"
+        case .other:               return "Other"
+        }
+    }
+
+    /// SF Symbol name for the pantry section header.
+    var pantrySectionIcon: String {
+        switch self {
+        case .protein:             return "flame"
+        case .vegetable, .fruit:   return "carrot"
+        case .grain, .legume, .nut:return "bag.fill"
+        case .dairy:               return "drop.fill"
+        case .baking:              return "birthday.cake"
+        case .sweetener:           return "cube.fill"
+        case .spice, .herb:        return "leaf"
+        case .oil, .condiment,
+             .liquid:              return "cylinder"
+        case .other:               return "archivebox"
         }
     }
 }
