@@ -275,8 +275,12 @@ struct RecipeListView: View {
                 .map(\.name)
             cachedSeasonalIngredients = Array(inSeason)
 
+            // Include any recipe with at least one currently in-season ingredient.
+            // The old 0.5 score threshold was too strict — a recipe featuring
+            // asparagus alongside pantry staples (garlic, oil, pasta) would score
+            // ~0.17 and be excluded even though it belongs here.
             let seasonal = recipes.filter { recipe in
-                SeasonalAwarenessService.seasonalityScore(ingredientNames: recipe.ingredients.map(\.name)) > 0.5
+                recipe.ingredients.contains { SeasonalAwarenessService.isInSeason($0.name) }
             }
             cachedSeasonalRecipes = seasonal
         }
