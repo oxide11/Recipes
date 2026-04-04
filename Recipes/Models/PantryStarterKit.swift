@@ -26,9 +26,8 @@ enum PantryStarterKit {
         .init(name: "Yellow onion",      category: .vegetable, unit: .whole,      quantity: 2),
         .init(name: "Butter",            category: .dairy,     unit: .ounce,      quantity: 8),
         .init(name: "Eggs",              category: .protein,   unit: .whole,      quantity: 6),
-        .init(name: "All-purpose flour", category: .grain,     unit: .cup,        quantity: 2),
+        .init(name: "Flour",             category: .grain,     unit: .cup,        quantity: 2),
         .init(name: "Sugar",             category: .sweetener, unit: .cup,        quantity: 1),
-        .init(name: "Honey",             category: .sweetener, unit: .tablespoon, quantity: 3),
     ]
 
     static let kits: [Cuisine: [StarterIngredient]] = [
