@@ -55,6 +55,21 @@ struct OnboardingView: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.3), value: step)
+                // VoiceOver: allow swipe-up/down to advance or go back through steps
+                // so users who cannot perform the horizontal swipe can still navigate.
+                .accessibilityAdjustableAction { direction in
+                    switch direction {
+                    case .increment: advance()
+                    case .decrement:
+                        switch step {
+                        case .welcome:  break
+                        case .style:    step = .welcome
+                        case .table:    step = .style
+                        case .kitchen:  step = .table
+                        }
+                    @unknown default: break
+                    }
+                }
             }
         }
         // When the user swipes (or the continue button advances) to the kitchen
@@ -79,9 +94,14 @@ struct OnboardingView: View {
                 Capsule()
                     .fill(s == step ? Brand.herbGreen : Brand.muted.opacity(0.3))
                     .frame(width: s == step ? 20 : 6, height: 6)
+                    .accessibilityHidden(true)
             }
         }
         .animation(.spring(duration: 0.4), value: step)
+        // Single accessibility element for the whole dot strip so VoiceOver
+        // reads the current progress rather than each individual dot.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Step \(step.rawValue + 1) of \(OnboardingStep.allCases.count)")
     }
 
     // MARK: - Navigation Helpers
@@ -161,6 +181,11 @@ struct OnboardingView: View {
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
             }
+
+            continueButton(label: "Continue") { advance() }
+                .padding(.horizontal, 32)
+                .padding(.bottom, 40)
+                .padding(.top, 8)
         }
     }
 
@@ -211,6 +236,7 @@ struct OnboardingView: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("None\(noneSelected ? ", selected" : "")")
+                    .accessibilityHint(noneSelected ? "Selected" : "Double tap to clear all restrictions")
 
                     ForEach(DietaryRestriction.allCases, id: \.self) { restriction in
                         let selected = selectedRestrictions.contains(restriction)
@@ -237,6 +263,10 @@ struct OnboardingView: View {
                 .padding(.vertical, 8)
             }
 
+            continueButton(label: "Continue") { advance() }
+                .padding(.horizontal, 32)
+                .padding(.bottom, 40)
+                .padding(.top, 8)
         }
     }
 
@@ -400,7 +430,7 @@ struct OnboardingView: View {
         The user spoke a list of pantry ingredients. Extract each individual ingredient name.
         Normalize names (e.g. "some eggs" → "Eggs", "ripe tomatoes" → "Tomatoes", "my tea" → "Tea").
         Also handle removal commands: "remove X", "no X", "without X", "delete X" → mark as remove.
-        Input: "\(transcript)"
+        Input: "\(transcript.sanitizedForAI)"
         Return ONLY a JSON array of objects, no explanation:
         [{"action":"add","name":"Tea"},{"action":"add","name":"Bananas"},{"action":"remove","name":"Olive Oil"}]
         """
