@@ -1025,7 +1025,10 @@ struct GenerateMealPlanSheet: View {
 
             // Find or generate the recipe
             let recipe: Recipe?
-            if suggestion.isNew == true, let description = suggestion.description {
+            // Use description if provided; fall back to recipeTitle so novel meals are
+            // never silently dropped just because the AI omitted the description field.
+            let novelDescription = suggestion.description ?? (suggestion.isNew == true ? suggestion.recipeTitle : nil)
+            if suggestion.isNew == true, let description = novelDescription {
                 do {
                     // Use the generation prompt path (not parse) so the AI receives
                     // a "generate this specific dish" instruction rather than "parse this recipe".
