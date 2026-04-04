@@ -1081,12 +1081,12 @@ struct AddMealView: View {
 
     @State private var selectedMealType: MealType
     @State private var selectedDate: Date
-    @State private var selectedRecipe: Recipe? = nil
-    @State private var customTitle: String = ""
+    @State private var query: String = ""
     @State private var showingGenerator = false
     @State private var showingImport = false
+    @State private var generatorHint: String? = nil
     @State private var lastRecipeCount = 0
-    @State private var searchText = ""
+    @FocusState private var fieldFocused: Bool
 
     init(plan: MealPlan, preselectMealType: MealType = .dinner, preselectDate: Date? = nil) {
         self.plan = plan
@@ -1094,107 +1094,99 @@ struct AddMealView: View {
         _selectedDate = State(initialValue: preselectDate ?? plan.startDate)
     }
 
-    private var canAdd: Bool {
-        selectedRecipe != nil || !customTitle.trimmingCharacters(in: .whitespaces).isEmpty
+    private var trimmed: String { query.trimmingCharacters(in: .whitespaces) }
+
+    /// Library recipes that match what the user is typing.
+    private var libraryMatches: [Recipe] {
+        guard !trimmed.isEmpty else { return [] }
+        return recipes.filter { $0.title.localizedCaseInsensitiveContains(trimmed) }
     }
 
     var body: some View {
         NavigationStack {
-            Form {
-                // Quick freeform entry — for meals without a saved recipe
-                Section {
-                    TextField("e.g. Bacon and eggs", text: $customTitle)
-                        .onChange(of: customTitle) { _, _ in
-                            // Typing a name clears any recipe selection
-                            if !customTitle.isEmpty { selectedRecipe = nil }
-                        }
-                } header: {
-                    Text("Just name it")
-                } footer: {
-                    Text("No recipe needed — just put it on the plan.")
-                }
+            VStack(spacing: 0) {
+                // Single smart input — search library or type anything
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(.secondary)
+                    TextField(
+                        mealTypePlaceholder,
+                        text: $query
+                    )
+                    .focused($fieldFocused)
+                    .autocorrectionDisabled()
+                    .submitLabel(.done)
+                    .onSubmit { addFreeform() }
 
-                Section("Or pick from your recipes") {
-                    Button {
-                        lastRecipeCount = recipes.count
-                        showingGenerator = true
-                    } label: {
-                        Label("Generate a Recipe", systemImage: "sparkles")
-                            .foregroundStyle(Brand.warmTan)
-                    }
-
-                    Button {
-                        lastRecipeCount = recipes.count
-                        showingImport = true
-                    } label: {
-                        Label("Import a Recipe", systemImage: "link")
-                            .foregroundStyle(Brand.warmTan)
-                    }
-
-                    if !recipes.isEmpty {
-                        HStack {
-                            Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                            TextField("Search recipes", text: $searchText)
-                                .autocorrectionDisabled()
-                        }
-                    }
-
-                    if recipes.isEmpty {
-                        Text("No recipes yet — generate or import one above.")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                    } else {
-                        let filtered = searchText.isEmpty
-                            ? recipes
-                            : recipes.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
-                        if filtered.isEmpty {
-                            Text("No recipes match \"\(searchText)\"")
+                    if !query.isEmpty {
+                        Button { query = "" } label: {
+                            Image(systemName: "xmark.circle.fill")
                                 .foregroundStyle(.secondary)
-                                .font(.caption)
-                        } else {
-                            ForEach(filtered) { recipe in
-                                Button {
-                                    if selectedRecipe?.id == recipe.id {
-                                        selectedRecipe = nil
-                                    } else {
-                                        selectedRecipe = recipe
-                                        customTitle = ""  // recipe selection clears freeform name
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text(recipe.title)
-                                        Spacer()
-                                        if selectedRecipe?.id == recipe.id {
-                                            Image(systemName: "checkmark").foregroundStyle(.tint)
-                                        }
-                                    }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Color(.secondarySystemGroupedBackground))
+
+                Divider()
+
+                List {
+                    if trimmed.isEmpty {
+                        // No query — show actions and full library
+                        Section {
+                            actionRow(
+                                label: "Generate a Recipe",
+                                icon: "sparkles",
+                                hint: nil
+                            )
+                            actionRow(
+                                label: "Import a Recipe",
+                                icon: "link",
+                                hint: nil,
+                                isImport: true
+                            )
+                        }
+
+                        if !recipes.isEmpty {
+                            Section("Your recipes") {
+                                ForEach(recipes) { recipe in
+                                    recipeRow(recipe)
                                 }
-                                .foregroundStyle(.primary)
                             }
                         }
+                    } else {
+                        // Query active — library matches first, then smart actions
+                        if !libraryMatches.isEmpty {
+                            Section("From your library") {
+                                ForEach(libraryMatches) { recipe in
+                                    recipeRow(recipe)
+                                }
+                            }
+                        }
+
+                        Section {
+                            // Add freeform — always available when typing
+                            Button {
+                                addFreeform()
+                            } label: {
+                                Label("Add \"\(trimmed)\"", systemImage: "plus.circle")
+                                    .foregroundStyle(.primary)
+                            }
+
+                            // Generate with the typed text as the seed
+                            actionRow(
+                                label: libraryMatches.isEmpty
+                                    ? "Generate a recipe for \"\(trimmed)\""
+                                    : "Generate something like \"\(trimmed)\"",
+                                icon: "sparkles",
+                                hint: trimmed
+                            )
+                        }
                     }
                 }
-            }
-            .sheet(isPresented: $showingGenerator) {
-                QuickGenerateView(mealType: selectedMealType)
-            }
-            .sheet(isPresented: $showingImport) {
-                RecipeImportView()
-            }
-            .onChange(of: recipes.count) { _, newCount in
-                // Auto-add the newest recipe when generated or imported — no extra tap needed
-                if newCount > lastRecipeCount,
-                   let newest = recipes.max(by: { $0.dateCreated < $1.dateCreated }) {
-                    let meal = PlannedMeal(
-                        mealType: selectedMealType,
-                        date: Calendar.current.startOfDay(for: selectedDate),
-                        recipe: newest,
-                        servings: newest.servings
-                    )
-                    modelContext.insert(meal)
-                    plan.meals.append(meal)
-                    dismiss()
-                }
+                .listStyle(.insetGrouped)
             }
             .navigationTitle("Add \(selectedMealType.displayName)")
             .navigationBarTitleDisplayMode(.inline)
@@ -1202,24 +1194,96 @@ struct AddMealView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
-                        let title = customTitle.trimmingCharacters(in: .whitespaces)
-                        let meal = PlannedMeal(
-                            mealType: selectedMealType,
-                            date: Calendar.current.startOfDay(for: selectedDate),
-                            recipe: selectedRecipe,
-                            servings: selectedRecipe?.servings ?? 1,
-                            customTitle: title.isEmpty ? nil : title
-                        )
-                        modelContext.insert(meal)
-                        plan.meals.append(meal)
-                        dismiss()
-                    }
-                    .disabled(!canAdd)
+            }
+            .onAppear { fieldFocused = true }
+            .sheet(isPresented: $showingGenerator) {
+                QuickGenerateView(mealType: selectedMealType, initialDescription: generatorHint)
+            }
+            .sheet(isPresented: $showingImport) {
+                RecipeImportView()
+            }
+            .onChange(of: recipes.count) { _, newCount in
+                // Auto-add the newest recipe when generated or imported
+                if newCount > lastRecipeCount,
+                   let newest = recipes.max(by: { $0.dateCreated < $1.dateCreated }) {
+                    addMeal(recipe: newest)
                 }
             }
         }
+    }
+
+    // MARK: - Row builders
+
+    @ViewBuilder
+    private func recipeRow(_ recipe: Recipe) -> some View {
+        Button { addMeal(recipe: recipe) } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(recipe.title)
+                        .foregroundStyle(.primary)
+                    Text(recipe.formattedDuration)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func actionRow(label: String, icon: String, hint: String?, isImport: Bool = false) -> some View {
+        Button {
+            if isImport {
+                lastRecipeCount = recipes.count
+                showingImport = true
+            } else {
+                generatorHint = hint
+                lastRecipeCount = recipes.count
+                showingGenerator = true
+            }
+        } label: {
+            Label(label, systemImage: icon)
+                .foregroundStyle(Brand.warmTan)
+        }
+    }
+
+    // MARK: - Actions
+
+    private var mealTypePlaceholder: String {
+        switch selectedMealType {
+        case .breakfast: return "e.g. Bacon and eggs"
+        case .lunch:     return "e.g. Chicken salad"
+        case .dinner:    return "e.g. Pasta carbonara"
+        case .snack:     return "e.g. Apple and peanut butter"
+        default:         return "Search or type anything…"
+        }
+    }
+
+    private func addFreeform() {
+        guard !trimmed.isEmpty else { return }
+        let meal = PlannedMeal(
+            mealType: selectedMealType,
+            date: Calendar.current.startOfDay(for: selectedDate),
+            customTitle: trimmed
+        )
+        modelContext.insert(meal)
+        plan.meals.append(meal)
+        dismiss()
+    }
+
+    private func addMeal(recipe: Recipe) {
+        let meal = PlannedMeal(
+            mealType: selectedMealType,
+            date: Calendar.current.startOfDay(for: selectedDate),
+            recipe: recipe,
+            servings: recipe.servings
+        )
+        modelContext.insert(meal)
+        plan.meals.append(meal)
+        dismiss()
     }
 }
 

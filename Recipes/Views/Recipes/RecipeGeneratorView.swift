@@ -524,10 +524,14 @@ struct QuickGenerateView: View {
             description += " Feel free to draw from my favourite cuisines (\(cuisines.map(\.rawValue).joined(separator: ", "))) but variety is welcome."
         }
         if !existingRecipes.isEmpty {
-            // Cap at 20 titles to keep the prompt a reasonable size
-            let titles = existingRecipes.prefix(20).map { $0.title.sanitizedForAI }.joined(separator: ", ")
-            let overflow = existingRecipes.count > 20 ? " (and \(existingRecipes.count - 20) more)" : ""
-            description += " I already have these recipes in my library — please suggest something genuinely different: \(titles)\(overflow)."
+            // Signal variety without listing every title — the AI responds better
+            // to count + dominant cuisines than to a long list it tends to ignore.
+            let topCuisines = Dictionary(grouping: existingRecipes, by: \.cuisine)
+                .sorted { $0.value.count > $1.value.count }
+                .prefix(3)
+                .map { $0.key.rawValue }
+            let cuisineStr = topCuisines.isEmpty ? "" : " My most-cooked cuisines are \(topCuisines.joined(separator: ", "))."
+            description += " I already have \(existingRecipes.count) recipes saved — please suggest something fresh.\(cuisineStr)"
         }
         let skill = profile?.skillLevel ?? .intermediate
         description += recipeSkillConstraint(for: skill)
