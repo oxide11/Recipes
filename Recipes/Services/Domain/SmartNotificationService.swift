@@ -334,7 +334,7 @@ final class SmartNotificationService {
             content.body = "\(highlights[0]) is hitting its peak. Open Mise to see everything in season."
         default:
             let lead = highlights.dropLast().joined(separator: ", ")
-            let last = highlights.last!
+            let last = highlights[highlights.count - 1]
             let remainder = newIngredients.count - highlights.count
             if remainder > 0 {
                 content.body = "\(lead) and \(last) are in season now, along with \(remainder) more. Time to cook fresh."

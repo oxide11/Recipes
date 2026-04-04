@@ -143,6 +143,12 @@ struct DashboardView: View {
                     let today = Date()
                     if let plan = mealPlans.first(where: { $0.startDate <= today && $0.endDate >= today }) {
                         AddMealView(plan: plan, preselectMealType: mealType, preselectDate: today)
+                    } else {
+                        // Plan not yet created — ensurePlanExists() runs on .task so this
+                        // is only reachable on the very first launch before .task fires.
+                        // Show a spinner rather than a blank sheet.
+                        ProgressView("Setting up your meal plan…")
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 case .discoverGenerator(let hint):
                     QuickGenerateView(mealType: currentMealType, initialDescription: hint)

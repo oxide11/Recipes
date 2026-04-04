@@ -8,6 +8,11 @@ import FoundationModels
 @Observable
 final class MealPlanGenerator: Sendable {
 
+    /// Reusable session — allocating a fresh LanguageModelSession costs 10-30 MB
+    /// that isn't freed until the session is released. One session per generator
+    /// instance avoids repeated allocation overhead across plan generations.
+    private nonisolated(unsafe) lazy var session = LanguageModelSession()
+
     /// Generate a meal plan using AI, selecting from the user's existing recipes.
     /// Accepts pre-extracted string data to avoid sending non-Sendable SwiftData models across isolation boundaries.
     func generatePlan(
@@ -18,7 +23,6 @@ final class MealPlanGenerator: Sendable {
         days: Int,
         mealsPerDay: [MealType] = [.breakfast, .lunch, .dinner]
     ) async throws -> GeneratedMealPlan {
-        let session = LanguageModelSession()
 
         let recipeList = recipeDescriptions.map(\.sanitizedForAI).joined(separator: "\n")
         let pantryList = pantryItemNames.map(\.sanitizedForAI).joined(separator: ", ")
@@ -46,6 +50,7 @@ final class MealPlanGenerator: Sendable {
         let response = try await session.respond(to: prompt, generating: GeneratedMealPlan.self)
         return response.content
     }
+
 
     /// Convert an AI-generated plan into PlannedMeal objects.
     func convertToPlannedMeals(

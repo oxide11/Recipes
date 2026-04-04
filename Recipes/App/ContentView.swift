@@ -46,6 +46,9 @@ struct ContentView: View {
         // as data changes or the app returns to the foreground.
         .onAppear {
             scheduleAllNotifications()
+            if profiles.isEmpty {
+                showingOnboarding = true
+            }
         }
         .onChange(of: pantryItems.count) {
             SmartNotificationService.shared.scheduleExpiringPantryAlerts(items: pantryItems)
@@ -58,11 +61,6 @@ struct ContentView: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { scheduleAllNotifications() }
-        }
-        .onAppear {
-            if profiles.isEmpty {
-                showingOnboarding = true
-            }
         }
         .fullScreenCover(isPresented: $showingOnboarding) {
             OnboardingView()
