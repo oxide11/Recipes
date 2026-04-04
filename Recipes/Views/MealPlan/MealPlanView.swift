@@ -967,6 +967,9 @@ struct GenerateMealPlanSheet: View {
         let dietaryRestrictions = profiles.first?.dietaryRestrictions ?? []
         let dietaryNote = dietaryRestrictions.isEmpty ? "" :
             " Dietary needs: \(dietaryRestrictions.map(\.displayName).joined(separator: ", "))."
+        let goalNote = profiles.first.map { p in
+            p.cookingGoal.promptContext.isEmpty ? "" : " \(p.cookingGoal.promptContext)"
+        } ?? ""
 
         return """
         You are a meal planning assistant. Assign meals to the following dates.
@@ -984,7 +987,7 @@ struct GenerateMealPlanSheet: View {
         - Prefer [favorite] recipes where appropriate.
         - Recipes tagged [breakfast], [lunch], or [dinner] must only be assigned to that meal type.
         - Match meal type to recipe suitability (e.g. don't assign a heavy dinner to breakfast).
-        - Include exactly \(novelCount) novel meal suggestion\(novelCount == 1 ? "" : "s") not from the saved list, spread across the plan for variety and discovery.\(dietaryNote) For novel meals set "isNew": true and provide a one-sentence "description". For saved meals omit both fields.
+        - Include exactly \(novelCount) novel meal suggestion\(novelCount == 1 ? "" : "s") not from the saved list, spread across the plan for variety and discovery.\(dietaryNote)\(goalNote) For novel meals set "isNew": true and provide a one-sentence "description". For saved meals omit both fields.
 
         Return ONLY a JSON array with no markdown fences and no commentary:
         [{"date":"YYYY-MM-DD","mealType":"breakfast|lunch|dinner","recipeTitle":"Title","isNew":false}]

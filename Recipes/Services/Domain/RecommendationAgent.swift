@@ -46,22 +46,52 @@ final class RecommendationAgent {
         pantryItems: [PantryItem],
         profile: UserProfile?
     ) async -> [Recommendation] {
+        let goal = profile?.cookingGoal ?? .greatFood
+
+        // Filter the recipe pool based on goal before scoring
+        let filteredRecipes: [Recipe] = recipes.filter { recipe in
+            switch goal {
+            case .eatingHealthier:
+                // Snacks don't belong in a healthier eating recommendation feed
+                return recipe.mealType != .snack
+            case .quickAndEasy:
+                // Only surface recipes that can actually be done in 30 min
+                let minutes = recipe.totalTimeMinutes
+                return minutes == 0 || minutes <= 30
+            default:
+                return true
+            }
+        }
+
         var recommendations: [Recommendation] = []
 
         // 1. "Cook Again" - highly rated recipes not made recently
-        recommendations.append(contentsOf: cookAgainRecommendations(recipes: recipes))
+        recommendations.append(contentsOf: cookAgainRecommendations(recipes: filteredRecipes))
 
         // 2. No Waste - recipes using expiring items
-        recommendations.append(contentsOf: noWasteRecommendations(recipes: recipes, pantryItems: pantryItems))
+        recommendations.append(contentsOf: noWasteRecommendations(recipes: filteredRecipes, pantryItems: pantryItems))
 
         // 3. Seasonal picks
-        recommendations.append(contentsOf: seasonalRecommendations(recipes: recipes))
+        recommendations.append(contentsOf: seasonalRecommendations(recipes: filteredRecipes))
 
-        // 4. Quick meal suggestions
-        recommendations.append(contentsOf: quickMealRecommendations(recipes: recipes, pantryItems: pantryItems))
+        // 4. Quick meal suggestions — extra boost when goal is quickAndEasy
+        var quick = quickMealRecommendations(recipes: filteredRecipes, pantryItems: pantryItems)
+        if goal == .quickAndEasy {
+            quick = quick.map { r in
+                Recommendation(title: r.title, reason: r.reason, category: r.category,
+                               score: r.score + 20, recipeID: r.recipeID)
+            }
+        }
+        recommendations.append(contentsOf: quick)
 
-        // 5. Blind spot detection via AI
-        let blindSpots = await blindSpotRecommendations(recipes: recipes, profile: profile)
+        // 5. Blind spot detection — extra boost when goal is expandingCooking
+        var blindSpots = await blindSpotRecommendations(recipes: filteredRecipes, profile: profile)
+        if goal == .expandingCooking {
+            blindSpots = blindSpots.map { r in
+                Recommendation(title: r.title, reason: r.reason, category: r.category,
+                               score: r.score + 25, cuisineSuggestion: r.cuisineSuggestion, recipeID: r.recipeID)
+            }
+        }
         recommendations.append(contentsOf: blindSpots)
 
         // Sort by score and deduplicate
@@ -265,6 +295,9 @@ final class RecommendationAgent {
                 context += "Dietary restrictions: \(profile.dietaryRestrictions.map(\.rawValue).joined(separator: ", ")). "
             }
             context += "Skill level: \(profile.skillLevel.rawValue). "
+            if !profile.cookingGoal.promptContext.isEmpty {
+                context += profile.cookingGoal.promptContext + " "
+            }
         }
 
         return context

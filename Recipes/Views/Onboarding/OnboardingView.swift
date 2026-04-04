@@ -10,6 +10,7 @@ struct OnboardingView: View {
 
     @State private var step: OnboardingStep = .welcome
     @State private var name = ""
+    @State private var selectedGoal: CookingGoal = .greatFood
     @State private var selectedCuisines: Set<Cuisine> = []
     @State private var selectedRestrictions: Set<DietaryRestriction> = []
     @State private var pantryIngredients: [String] = []
@@ -20,7 +21,7 @@ struct OnboardingView: View {
     @State private var isFinishing = false
 
     private enum OnboardingStep: Int, CaseIterable {
-        case welcome, style, table, kitchen
+        case welcome, goals, style, table, kitchen
     }
 
     /// Cuisines shown in the onboarding picker.
@@ -49,6 +50,7 @@ struct OnboardingView: View {
                 // our own animated capsule dots above.
                 TabView(selection: $step) {
                     welcomeStep.tag(OnboardingStep.welcome)
+                    goalsStep.tag(OnboardingStep.goals)
                     styleStep.tag(OnboardingStep.style)
                     tableStep.tag(OnboardingStep.table)
                     kitchenStep.tag(OnboardingStep.kitchen)
@@ -63,7 +65,8 @@ struct OnboardingView: View {
                     case .decrement:
                         switch step {
                         case .welcome:  break
-                        case .style:    step = .welcome
+                        case .goals:    step = .welcome
+                        case .style:    step = .goals
                         case .table:    step = .style
                         case .kitchen:  step = .table
                         }
@@ -77,6 +80,8 @@ struct OnboardingView: View {
         // Using oldStep == .table means a back-swipe then re-forward-swipe
         // correctly recomputes if cuisine/dietary selections changed.
         .onChange(of: step) { oldStep, newStep in
+            // Pre-populate pantry whenever the user arrives at the kitchen step
+            // (forward or after changing cuisine/dietary selections mid-flow).
             if newStep == .kitchen && oldStep == .table {
                 pantryIngredients = PantryStarterKit.ingredients(
                     for: Array(selectedCuisines),
@@ -108,7 +113,8 @@ struct OnboardingView: View {
 
     private func advance() {
         switch step {
-        case .welcome:  step = .style
+        case .welcome:  step = .goals
+        case .goals:    step = .style
         case .style:    step = .table
         case .table:    step = .kitchen   // side effect handled by onChange(of: step)
         case .kitchen:  finish()
@@ -163,7 +169,68 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Screen 2: Your Style
+    // MARK: - Screen 2: Your Goal
+
+    private var goalsStep: some View {
+        VStack(spacing: 0) {
+            stepHeading(
+                title: "What's your goal?",
+                subtitle: "This shapes what gets suggested to you."
+            )
+
+            ScrollView {
+                VStack(spacing: 10) {
+                    ForEach(CookingGoal.allCases, id: \.self) { goal in
+                        goalCard(goal)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+            }
+
+            continueButton(label: "Continue") { advance() }
+                .padding(.horizontal, 32)
+                .padding(.bottom, 40)
+                .padding(.top, 8)
+        }
+    }
+
+    private func goalCard(_ goal: CookingGoal) -> some View {
+        let selected = selectedGoal == goal
+        return Button {
+            withAnimation(.spring(duration: 0.2)) {
+                selectedGoal = goal
+            }
+        } label: {
+            HStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(goal.title)
+                        .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                        .foregroundStyle(selected ? Brand.midnight : Brand.cream)
+                    Text(goal.description)
+                        .font(.system(.caption, design: .rounded))
+                        .foregroundStyle(selected ? Brand.midnight.opacity(0.7) : Brand.muted)
+                }
+                Spacer()
+                Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(selected ? Brand.midnight : Brand.muted.opacity(0.4))
+                    .font(.system(size: 20))
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 14)
+            .background(selected ? Brand.herbGreen : Brand.surface, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(selected ? Color.clear : Brand.border, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(goal.title). \(goal.description)")
+        .accessibilityHint(selected ? "Selected" : "Double tap to select")
+        .accessibilityAddTraits(selected ? [.isSelected] : [])
+    }
+
+    // MARK: - Screen 3: Your Style
 
     private var styleStep: some View {
         VStack(spacing: 0) {
@@ -538,6 +605,7 @@ struct OnboardingView: View {
             preferredCuisines: Array(selectedCuisines),
             skillLevel: .intermediate
         )
+        profile.cookingGoal = selectedGoal
         modelContext.insert(profile)
 
         // 2. Seed pantry items as staples.
