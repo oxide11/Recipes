@@ -521,20 +521,27 @@ struct QuickGenerateView: View {
                 description += " \(goal.promptContext)"
             }
 
+            let topCuisines = Dictionary(grouping: existingRecipes, by: \.cuisine)
+                .sorted { $0.value.count > $1.value.count }
+                .prefix(3)
+                .map { $0.key.rawValue }
+
             if let mt = mealType {
-                description += " This recipe must be appropriate for \(mt.displayName.lowercased()) — use typical \(mt.displayName.lowercased()) ingredients and portion sizes."
-            }
-            // For "surprise me", use cooking history to encourage variety rather than
-            // repeat the same cuisines. Don't list favourites as suggestions — that
-            // just causes the AI to generate the same cuisines every time.
-            if !existingRecipes.isEmpty {
-                let topCuisines = Dictionary(grouping: existingRecipes, by: \.cuisine)
-                    .sorted { $0.value.count > $1.value.count }
-                    .prefix(3)
-                    .map { $0.key.rawValue }
+                // Meal plan context — user wants something they'll actually make and enjoy.
+                // Lean into their preferred cuisines; this isn't about discovery.
+                description += " This should be a great \(mt.displayName.lowercased())."
+                let preferredCuisines = profile?.preferredCuisines.map(\.rawValue) ?? []
+                if !preferredCuisines.isEmpty {
+                    description += " I enjoy \(preferredCuisines.joined(separator: ", ")) food."
+                }
+                if !existingRecipes.isEmpty {
+                    description += " I already have \(existingRecipes.count) recipes saved — avoid exact duplicates."
+                }
+            } else {
+                // Recipe discovery context — user wants to explore, steer away from the usual.
                 if !topCuisines.isEmpty {
-                    description += " I cook \(topCuisines.joined(separator: ", ")) a lot — surprise me with something from a different cuisine."
-                } else {
+                    description += " I cook \(topCuisines.joined(separator: ", ")) a lot — suggest something from a different cuisine."
+                } else if !existingRecipes.isEmpty {
                     description += " I already have \(existingRecipes.count) recipes saved — please suggest something fresh."
                 }
             }
