@@ -438,10 +438,12 @@ struct PantryItemRow: View {
                     .font(.caption2)
                     .foregroundStyle(Brand.warmTan)
                     .frame(width: 8)
+                    .accessibilityHidden(true)
             } else {
                 Circle()
                     .fill(categoryColor(item.category))
                     .frame(width: 8, height: 8)
+                    .accessibilityHidden(true)
             }
 
             VStack(alignment: .leading, spacing: 2) {
@@ -487,6 +489,7 @@ struct PantryItemRow: View {
                             .font(.caption2)
                             .foregroundStyle(Brand.spiceRed)
                             .help("No expiration date set — consider adding one for fresh proteins")
+                            .accessibilityLabel("No expiration date set")
                     }
                     Text(daysAgoLabel(for: item.dateAdded))
                         .font(.caption2)
@@ -494,6 +497,25 @@ struct PantryItemRow: View {
                 }
             }
         }
+        // Combine into a single accessible element so VoiceOver reads the item
+        // name plus expiry status (including "Expired") in one swipe, rather than
+        // reading each sub-label separately.
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(rowAccessibilityLabel)
+    }
+
+    private var rowAccessibilityLabel: String {
+        var parts = [item.name]
+        if item.isStaple { parts.append("staple") }
+        if SeasonalAwarenessService.isInSeason(item.name) { parts.append("in season") }
+        if item.isExpired {
+            parts.append("expired")
+        } else if let date = item.expirationDate {
+            parts.append("expires \(expiryDateFormatter(for: date).string(from: date))")
+        } else {
+            parts.append(daysAgoLabel(for: item.dateAdded))
+        }
+        return parts.joined(separator: ", ")
     }
 
     private func categoryColor(_ category: IngredientCategory) -> Color {

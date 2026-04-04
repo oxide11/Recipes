@@ -231,11 +231,11 @@ struct RecipeDetailView: View {
                 // TabView(.page) shows system page indicators and handles
                 // gesture conflicts with the parent ScrollView correctly.
                 TabView {
-                    ForEach(photos, id: \.photo.id) { entry in
+                    ForEach(Array(photos.enumerated()), id: \.element.photo.id) { index, entry in
                         RecipePhotoImage(photo: entry.photo)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .clipShape(.rect(cornerRadius: 12))
-                            .accessibilityLabel(entry.isLogPhoto ? "Cooking log photo, photo \(photos.firstIndex(where: { $0.photo.id == entry.photo.id }).map { "\($0 + 1) of \(photos.count)" } ?? "")" : "Recipe photo, photo \(photos.firstIndex(where: { $0.photo.id == entry.photo.id }).map { "\($0 + 1) of \(photos.count)" } ?? "")")
+                            .accessibilityLabel("\(entry.isLogPhoto ? "Cooking log photo" : "Recipe photo"), \(index + 1) of \(photos.count)")
                             .overlay(alignment: .bottomTrailing) {
                                 if entry.isLogPhoto {
                                     Image(systemName: "flame.fill")
@@ -268,6 +268,7 @@ struct RecipeDetailView: View {
                 }
                 .tabViewStyle(.page)
                 .frame(height: 220)
+                .accessibilityLabel("Photo gallery, \(photos.count) photos. Swipe left or right to browse.")
             }
         }
     }
