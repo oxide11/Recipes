@@ -515,8 +515,13 @@ struct QuickGenerateView: View {
         if let restrictions = profile?.dietaryRestrictions, !restrictions.isEmpty {
             description += " Dietary needs: \(restrictions.map(\.displayName).joined(separator: ", "))."
         }
-        if cuisineHint == nil, let cuisines = profile?.preferredCuisines, !cuisines.isEmpty {
-            description += " Preferred cuisines: \(cuisines.map(\.rawValue).joined(separator: ", "))."
+        // Only nudge toward preferred cuisines when the prompt has no specific
+        // direction (no cuisine hint, no initial description, not a quick meal).
+        // Applying it to seasonal or targeted generates causes everything to
+        // skew toward a single cuisine regardless of what was asked for.
+        if cuisineHint == nil, initialDescription == nil, !quickMealMode,
+           let cuisines = profile?.preferredCuisines, !cuisines.isEmpty {
+            description += " Feel free to draw from my favourite cuisines (\(cuisines.map(\.rawValue).joined(separator: ", "))) but variety is welcome."
         }
         if !existingRecipes.isEmpty {
             let titles = existingRecipes.map(\.title).joined(separator: ", ")
