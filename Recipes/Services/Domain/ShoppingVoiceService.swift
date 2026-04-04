@@ -66,6 +66,12 @@ final class ShoppingVoiceService: NSObject {
         self.synthesizer.delegate = self
     }
 
+    deinit {
+        // Break the retain cycle: AVSpeechSynthesizer holds a strong reference
+        // to its delegate, which would prevent this object from deallocating.
+        synthesizer.delegate = nil
+    }
+
     // MARK: - Session Control
 
     func startSession(list: GroceryList, voiceEnabled: Bool) {

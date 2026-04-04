@@ -109,7 +109,8 @@ final class AIServiceRouter {
         // Wrap non-streaming providers in a single-chunk stream.
         // Store the Task so it's cancelled if the stream consumer disposes early.
         return AsyncThrowingStream { continuation in
-            let task = Task { @MainActor in
+            let task = Task { [weak self] @MainActor in
+                guard let self else { continuation.finish(); return }
                 do {
                     let result = try await self.generateText(prompt: prompt, taskType: taskType)
                     continuation.yield(result)
