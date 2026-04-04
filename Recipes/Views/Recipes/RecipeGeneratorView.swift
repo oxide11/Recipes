@@ -317,25 +317,53 @@ struct RecipeGeneratorView: View {
         defer { isGenerating = false }
 
         do {
-            let text: String
-            switch mode {
-            case .photo:    text = try await generateFromPhoto()
-            case .pantry:   text = try await generateFromPantry()
-            case .describe: text = try await generateFromDescription()
-            }
             let service = RecipeIngestionService(aiRouter: aiRouter)
-            do {
-                generatedResult = try await service.ingestFromTextStreaming(text, isGeneration: true) { chunk in
-                    streamingText += chunk
+
+            switch mode {
+            case .photo:
+                // Photo mode: cloud vision generates narrative, then parse it
+                let text = try await generateFromPhoto()
+                do {
+                    generatedResult = try await service.ingestFromTextStreaming(text) { chunk in
+                        streamingText += chunk
+                    }
+                } catch {
+                    showingResult = false
+                    errorMessage = "Couldn't parse the recipe. Try generating again."
                 }
-            } catch {
-                showingResult = false
-                errorMessage = "Couldn't parse the recipe. Try generating again."
+
+            case .pantry, .describe:
+                // Build the full request with preferences and generate in a single pass
+                let request = buildGenerationRequest()
+                do {
+                    generatedResult = try await service.ingestFromTextStreaming(request, isGeneration: true) { chunk in
+                        streamingText += chunk
+                    }
+                } catch {
+                    showingResult = false
+                    errorMessage = "Couldn't generate the recipe. Try again."
+                }
             }
         } catch {
             showingResult = false
             errorMessage = error.localizedDescription
         }
+    }
+
+    /// Build a single request string with all user preferences for one-pass generation.
+    private func buildGenerationRequest() -> String {
+        var request: String
+        switch mode {
+        case .pantry:
+            let names = pantryItems.map(\.name).joined(separator: ", ")
+            request = "Generate a recipe using some or all of these ingredients I have in my pantry: \(names)."
+        case .describe:
+            request = "Generate a detailed recipe for: \(descriptionInput)."
+        case .photo:
+            request = ""
+        }
+        request += preferencesSuffix
+        return request
     }
 
     private func generateFromPhoto() async throws -> String {
@@ -347,21 +375,6 @@ struct RecipeGeneratorView: View {
         var prompt = "This is a photo of a dish. Identify the dish and generate a complete recipe to recreate it at home. Include the dish name, all ingredients with precise measurements, and clear step-by-step cooking instructions."
         prompt += preferencesSuffix
         return try await aiRouter.analyzeImage(imageBase64: base64, prompt: prompt)
-    }
-
-    private func generateFromPantry() async throws -> String {
-        let names = pantryItems.map(\.name).joined(separator: ", ")
-        var prompt = "Generate a recipe using some or all of these ingredients I have in my pantry: \(names)."
-        prompt += preferencesSuffix
-        prompt += " Include precise measurements, clear steps, and estimated nutrition per serving."
-        return try await aiRouter.generateText(prompt: prompt, taskType: .recipeGeneration)
-    }
-
-    private func generateFromDescription() async throws -> String {
-        var prompt = "Generate a detailed recipe for: \(descriptionInput)."
-        prompt += preferencesSuffix
-        prompt += " Include precise measurements, clear steps, and estimated nutrition per serving."
-        return try await aiRouter.generateText(prompt: prompt, taskType: .recipeGeneration)
     }
 
     private var preferencesSuffix: String {

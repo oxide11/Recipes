@@ -134,28 +134,32 @@ final class RecipeIngestionService {
     /// it is a user request like "chicken salad" or "quick Italian dinner".
     private func buildGenerationPrompt(for description: String) -> String {
         """
-        Generate a complete, practical home-cooked recipe based on this request.
-        Return valid JSON with this exact structure:
+        Generate a practical home-cooked recipe based on this request.
+        Return ONLY valid JSON — no text before or after. Use this exact structure:
         {
           "title": "Recipe Name",
           "servings": 4,
           "cuisine": "italian",
           "prepTimeMinutes": 15,
           "cookTimeMinutes": 30,
-          "ingredients": [{"name": "Chicken breast", "amount": "2", "preparation": "diced"}],
+          "ingredients": [{"name": "Chicken breast", "amount": "2 lbs", "preparation": "diced"}],
           "directions": ["Step 1", "Step 2"],
           "dietaryInfo": [],
           "nutritionPerServing": {"calories": 350, "proteinGrams": 12, "carbsGrams": 45, "fatGrams": 14}
         }
 
-        The recipe must match the request closely — if the user asked for chicken salad, \
-        return a chicken salad recipe. Do not substitute a different dish.
-        Keep ingredients to 10 or fewer. Everyday cooking, not restaurant food.
-        If an ingredient is used in different amounts at different stages, list it ONCE \
-        with the total quantity and split the amounts in the directions. \
-        Treat these as the same ingredient: olive oil / extra-virgin olive oil; \
+        Rules:
+        - The recipe MUST match the request — if the user asked for chicken salad, return chicken salad.
+        - Use 10 or fewer everyday ingredients. No exotic or hard-to-find items.
+        - Use precise measurements (cups, tablespoons, ounces, lbs) — never "some", "a little", or "to taste".
+        - Each ingredient appears ONCE with its total amount. If used at different stages, \
+        mention the split in the directions (e.g. "use 2 tbsp oil now, reserve 1 tbsp for finishing").
+        - Treat these as the same ingredient: olive oil / extra-virgin olive oil; \
         salt / kosher salt / sea salt; butter / unsalted butter; onion / onions; \
         flour / all-purpose flour.
+        - Every ingredient MUST be referenced in at least one direction step.
+        - Direction steps should ONLY reference ingredients from the ingredients list.
+        - Directions should be clear and actionable — include temperatures, times, and visual cues.
 
         Request: \(description.sanitizedForAI)
         """
@@ -170,13 +174,14 @@ final class RecipeIngestionService {
         progress = isGeneration ? "Generating recipe…" : "Parsing recipe…"
         defer { isProcessing = false; progress = nil }
 
-        // Try on-device structured parsing first (yields result as single chunk)
+        // Try on-device structured output first (yields result as single chunk)
         let foundationService = aiRouter.foundationModelService
         if await foundationService.isAvailable {
             do {
-                let parsed = try await foundationService.parseRecipeFromText(text)
+                let parsed = isGeneration
+                    ? try await foundationService.generateRecipeFromDescription(text)
+                    : try await foundationService.parseRecipeFromText(text)
                 let result = convertToIngestionResult(parsed)
-                // Emit the parsed title so the UI has something to display
                 onChunk(result.title)
                 return result
             } catch {

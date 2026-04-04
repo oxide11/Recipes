@@ -147,6 +147,35 @@ final class FoundationModelService {
         return try await session.respond(to: prompt, generating: ParsedRecipeFromOCR.self).content
     }
 
+    // MARK: - Recipe Generation from Description
+
+    /// Generate a structured recipe from a user's natural-language request.
+    func generateRecipeFromDescription(_ request: String) async throws -> ParsedRecipeFromOCR {
+        let session = session()
+
+        let prompt = """
+        Generate a practical home-cooked recipe based on this request. \
+        The recipe must match the request closely — if the user asked for chicken salad, \
+        return a chicken salad recipe, not a different dish.
+
+        Rules:
+        - Use 10 or fewer everyday ingredients. No exotic or hard-to-find items.
+        - Use precise measurements (cups, tablespoons, ounces) — never vague amounts like "some" or "a little".
+        - Each ingredient should appear only ONCE in the list with its total amount. \
+          If it's used at different stages, mention the split in the directions.
+        - Treat these as the same ingredient: olive oil / extra-virgin olive oil; \
+          salt / kosher salt / sea salt; butter / unsalted butter; onion / onions; \
+          flour / all-purpose flour.
+        - Write clear, numbered directions that a home cook can follow.
+        - Every ingredient must be used in at least one direction step.
+        - Every direction step should only reference ingredients from the list.
+
+        Request: \(request)
+        """
+
+        return try await session.respond(to: prompt, generating: ParsedRecipeFromOCR.self).content
+    }
+
     // MARK: - Text Recipe Parsing
 
     /// Parse user-provided recipe text (pasted, generated, etc.) into structured recipe data.
@@ -305,7 +334,7 @@ struct BlindSpotSuggestions {
     var recipeIdeas: [String]
 }
 
-// MARK: - OCR Recipe Parsing Types
+// MARK: - Structured Recipe Types
 
 @Generable
 struct ParsedRecipeFromOCR {
@@ -324,22 +353,22 @@ struct ParsedRecipeFromOCR {
     @Guide(description: "Estimated cook time in minutes, or 0 if not specified")
     var cookTimeMinutes: Int
 
-    @Guide(description: "List of ingredients with their names, amounts, and optional preparation notes")
+    @Guide(description: "List of ingredients. Each ingredient appears only once with its total amount needed. Maximum 10 ingredients.")
     var ingredients: [ParsedOCRIngredient]
 
-    @Guide(description: "Ordered list of cooking step instructions")
+    @Guide(description: "Ordered list of clear, actionable cooking step instructions. Each step should reference specific ingredients and include times or temperatures where relevant.")
     var directions: [String]
 
-    @Guide(description: "Dietary labels that apply such as vegetarian, vegan, glutenFree, dairyFree. Empty if none apply")
+    @Guide(description: "Dietary labels that apply such as vegetarian, vegan, glutenFree, dairyFree. Empty if none apply.")
     var dietaryInfo: [String]
 }
 
 @Generable
 struct ParsedOCRIngredient {
-    @Guide(description: "Name of the ingredient")
+    @Guide(description: "Name of the ingredient, e.g. 'chicken breast' or 'olive oil'")
     var name: String
 
-    @Guide(description: "Amount and unit such as '2 cups' or '1 tablespoon'")
+    @Guide(description: "Precise amount with unit, e.g. '2 cups', '1 tablespoon', '1 lb'. Never use vague amounts like 'some' or 'to taste'.")
     var amount: String
 
     @Guide(description: "Preparation instructions such as 'diced' or 'melted', or empty string if none")
