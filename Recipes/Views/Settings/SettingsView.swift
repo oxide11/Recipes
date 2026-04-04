@@ -24,9 +24,7 @@ struct SettingsView: View {
     private var profile: UserProfile? { profiles.first }
 
     @State private var showingClearDataConfirm = false
-    #if DEBUG
     @State private var showingOnboardingPreview = false
-    #endif
 
     private static let commonCurrencies = ["CAD", "USD", "EUR", "GBP", "AUD", "JPY", "MXN", "BRL", "INR"]
 
@@ -41,9 +39,6 @@ struct SettingsView: View {
                 iCloudAndSharingSection
                 profileSection
                 sampleDataSection
-                #if DEBUG
-                debugSection
-                #endif
                 aboutSection
             }
             .navigationTitle("Settings")
@@ -416,16 +411,6 @@ struct SettingsView: View {
             } message: {
                 Text("This will permanently delete all recipes, meal plans, pantry items, shopping lists, journal entries, and your profile. This cannot be undone.")
             }
-        } header: {
-            Label("Developer", systemImage: "hammer")
-        }
-    }
-
-    // MARK: - Debug (DEBUG builds only)
-
-    #if DEBUG
-    private var debugSection: some View {
-        Section {
             Button {
                 showingOnboardingPreview = true
             } label: {
@@ -446,10 +431,9 @@ struct SettingsView: View {
                 OnboardingView()
             }
         } header: {
-            Label("Debug", systemImage: "ladybug")
+            Label("Developer", systemImage: "hammer")
         }
     }
-    #endif
 
     // MARK: - About
 
