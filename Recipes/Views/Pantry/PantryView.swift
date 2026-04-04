@@ -152,8 +152,8 @@ struct PantryView: View {
             .init(title: "Protein",           items: merged(.protein)),
             .init(title: "Dairy",             items: merged(.dairy)),
             .init(title: "Dry Goods",         items: merged(.grain, .legume, .nut)),
-            .init(title: "Baking",            items: merged(.baking, .sweetener)),
             .init(title: "Condiments & Oils", items: merged(.oil, .condiment, .liquid)),
+            .init(title: "Baking",            items: merged(.baking, .sweetener)),
             .init(title: "Spice Rack",        items: merged(.spice, .herb)),
             .init(title: "Other",             items: merged(.other)),
         ]
