@@ -89,8 +89,7 @@ enum IngredientCategory: String, Codable, CaseIterable, Sendable {
         case .vegetable, .fruit:   return "Produce"
         case .grain, .legume, .nut:return "Dry Goods"
         case .dairy:               return "Dairy"
-        case .baking:              return "Baking"
-        case .sweetener:           return "Sweetener"
+        case .baking, .sweetener:  return "Baking"
         case .spice, .herb:        return "Spice Rack"
         case .oil, .condiment,
              .liquid:              return "Condiments & Oils"
@@ -105,8 +104,7 @@ enum IngredientCategory: String, Codable, CaseIterable, Sendable {
         case .vegetable, .fruit:   return "carrot"
         case .grain, .legume, .nut:return "bag.fill"
         case .dairy:               return "drop.fill"
-        case .baking:              return "birthday.cake"
-        case .sweetener:           return "cube.fill"
+        case .baking, .sweetener:  return "birthday.cake"
         case .spice, .herb:        return "leaf"
         case .oil, .condiment,
              .liquid:              return "cylinder"

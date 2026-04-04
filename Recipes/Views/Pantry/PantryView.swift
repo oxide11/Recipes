@@ -150,13 +150,12 @@ struct PantryView: View {
         }
         return [
             .init(title: "Spice Rack",       icon: "leaf",            items: merged(.spice, .herb)),
-            .init(title: "Baking",           icon: "birthday.cake",   items: merged(.baking)),
+            .init(title: "Baking",           icon: "birthday.cake",   items: merged(.baking, .sweetener)),
             .init(title: "Protein",          icon: "flame",           items: merged(.protein)),
             .init(title: "Produce",          icon: "carrot",          items: merged(.vegetable, .fruit)),
             .init(title: "Dairy",            icon: "drop.fill",       items: merged(.dairy)),
             .init(title: "Dry Goods",        icon: "bag.fill",        items: merged(.grain, .legume, .nut)),
             .init(title: "Condiments & Oils",icon: "cylinder",        items: merged(.oil, .condiment, .liquid)),
-            .init(title: "Sweetener",        icon: "cube.fill",       items: merged(.sweetener)),
             .init(title: "Other",            icon: "archivebox",      items: merged(.other)),
         ]
     }
