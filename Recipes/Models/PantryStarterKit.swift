@@ -21,7 +21,7 @@ enum PantryStarterKit {
         .init(name: "Black pepper",      category: .spice,     unit: .tablespoon, quantity: 2),
         .init(name: "Olive oil",         category: .oil,       unit: .cup,        quantity: 1),
         .init(name: "Neutral oil",       category: .oil,       unit: .cup,        quantity: 1),
-        .init(name: "White wine vinegar",category: .condiment, unit: .cup,        quantity: 0.5),
+        .init(name: "White vinegar",     category: .condiment, unit: .cup,        quantity: 0.5),
         .init(name: "Garlic",            category: .vegetable, unit: .whole,      quantity: 1),
         .init(name: "Yellow onion",      category: .vegetable, unit: .whole,      quantity: 2),
         .init(name: "Butter",            category: .dairy,     unit: .ounce,      quantity: 8),
