@@ -60,6 +60,9 @@ final class AIServiceRouter {
 
     var preferredProvider: AIProvider = .hybrid
 
+    /// The most recent prompt sent to any AI provider. Useful for debugging.
+    var lastPrompt: String? = nil
+
     /// Route a text generation request to the best available provider.
     /// Pass `preferFast: true` for structured/mechanical tasks where speed matters more than quality.
     func generateText(
@@ -68,6 +71,7 @@ final class AIServiceRouter {
         provider: AIProvider? = nil,
         preferFast: Bool = false
     ) async throws -> String {
+        lastPrompt = prompt
         let target = provider ?? preferredProvider
         let claudeModel = preferFast ? "claude-haiku-4-5-20251001" : "claude-sonnet-4-6"
 
@@ -95,6 +99,7 @@ final class AIServiceRouter {
         prompt: String,
         taskType: AITaskType
     ) -> AsyncThrowingStream<String, Error> {
+        lastPrompt = prompt
         if claudeService.isConfigured {
             return claudeService.sendMessageStreaming(
                 messages: [ClaudeMessage(role: .user, content: prompt)],

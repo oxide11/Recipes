@@ -39,6 +39,7 @@ struct SettingsView: View {
                 iCloudAndSharingSection
                 profileSection
                 sampleDataSection
+                debugSection
                 aboutSection
             }
             .navigationTitle("Settings")
@@ -436,6 +437,52 @@ struct SettingsView: View {
     }
 
     // MARK: - About
+
+    // MARK: - Debug
+
+    @State private var showingLastPrompt = false
+
+    private var debugSection: some View {
+        Section {
+            if let prompt = aiRouter.lastPrompt {
+                Button {
+                    showingLastPrompt = true
+                } label: {
+                    Label("View Last AI Prompt", systemImage: "text.quote")
+                }
+                .sheet(isPresented: $showingLastPrompt) {
+                    NavigationStack {
+                        ScrollView {
+                            Text(prompt)
+                                .font(.system(.caption, design: .monospaced))
+                                .foregroundStyle(.primary)
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .navigationTitle("Last AI Prompt")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button("Copy") {
+                                    UIPasteboard.general.string = prompt
+                                }
+                            }
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Done") { showingLastPrompt = false }
+                            }
+                        }
+                    }
+                }
+            } else {
+                Text("No prompt sent yet this session")
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("Debug")
+        } footer: {
+            Text("Shows the most recent prompt sent to the AI. Resets on app launch.")
+        }
+    }
 
     private var aboutSection: some View {
         Section("About") {
