@@ -8,7 +8,10 @@ private let logger = Logger(subsystem: "com.recipes", category: "Notifications")
 // MARK: - Smart Notification Service
 
 /// Schedules local notifications for expiring pantry items, upcoming meals, and cooking streaks.
-actor SmartNotificationService {
+/// Isolated to @MainActor so SwiftData model objects can be passed directly from SwiftUI views
+/// without crossing an actor boundary (which would require Sendable conformance).
+@MainActor
+final class SmartNotificationService {
 
     static let shared = SmartNotificationService()
 
@@ -17,17 +20,21 @@ actor SmartNotificationService {
     // MARK: - Notification Category Identifiers
 
     private enum Category {
-        static let pantryExpiry = "PANTRY_EXPIRY"
-        static let mealReminder = "MEAL_REMINDER"
-        static let cookingStreak = "COOKING_STREAK"
+        static let pantryExpiry   = "PANTRY_EXPIRY"
+        static let mealReminder   = "MEAL_REMINDER"
+        static let cookingStreak  = "COOKING_STREAK"
+        static let weeklyPlanning = "WEEKLY_PLANNING"
+        static let seasonChange   = "SEASON_CHANGE"
     }
 
     // MARK: - UserDefaults Keys
 
     enum SettingsKey {
-        static let pantryAlerts = "notification_pantryAlerts"
-        static let mealReminders = "notification_mealReminders"
+        static let pantryAlerts    = "notification_pantryAlerts"
+        static let mealReminders   = "notification_mealReminders"
         static let streakReminders = "notification_streakReminders"
+        static let weeklyPlanning  = "notification_weeklyPlanning"
+        static let seasonChange    = "notification_seasonChange"
     }
 
     private init() {}
@@ -200,6 +207,151 @@ actor SmartNotificationService {
         center.add(request)
     }
 
+    // MARK: - Weekly Meal Planning Reminder
+
+    /// Schedules a Saturday-morning nudge to plan next week's dinners.
+    ///
+    /// Rules:
+    /// - Fires the coming Saturday at 9:00 AM.
+    /// - Only fires when fewer than 3 dinners are planned for next week
+    ///   (Mon–Sun of the week following that Saturday).
+    /// - Cancelled automatically if the user plans enough dinners before Saturday.
+    /// - Safe to call repeatedly — always replaces the existing pending request.
+    func scheduleWeeklyPlanningReminder(mealPlans: [MealPlan]) {
+        guard UserDefaults.standard.bool(forKey: SettingsKey.weeklyPlanning) else { return }
+
+        let identifier = "\(Category.weeklyPlanning)_saturday"
+        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+
+        let calendar = Calendar.current
+        let now = Date.now
+
+        // Find the next Saturday at 9:00 AM.
+        // If today is Saturday before 9 AM, this resolves to today.
+        // If today is Saturday after 9 AM, this resolves to next Saturday.
+        var satComponents = DateComponents()
+        satComponents.weekday = 7  // Saturday (Gregorian: 1 = Sun … 7 = Sat)
+        satComponents.hour   = 9
+        satComponents.minute = 0
+
+        guard let nextSaturday = calendar.nextDate(
+            after: now,
+            matching: satComponents,
+            matchingPolicy: .nextTime
+        ) else { return }
+
+        // "Next week" from that Saturday = Mon–Sun of the immediately following week.
+        // Saturday + 2 days = Monday, Monday + 6 days = Sunday.
+        guard
+            let nextMonday  = calendar.date(byAdding: .day, value: 2, to: calendar.startOfDay(for: nextSaturday)),
+            let nextSunday  = calendar.date(byAdding: .day, value: 6, to: nextMonday),
+            let weekEnd     = calendar.date(byAdding: .day, value: 1, to: nextSunday)   // exclusive upper bound
+        else { return }
+
+        // Count dinners planned across all meal plans that fall in next week.
+        let dinnerCount = mealPlans
+            .flatMap(\.meals)
+            .filter { $0.mealType == .dinner && $0.date >= nextMonday && $0.date < weekEnd }
+            .count
+
+        // Well-prepared users (3+ dinners) don't need the nudge.
+        guard dinnerCount < 3 else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = "Plan Your Week"
+        content.sound = .default
+        content.categoryIdentifier = Category.weeklyPlanning
+
+        switch dinnerCount {
+        case 0:
+            content.body = "Next week's dinners aren't planned yet. A few minutes this weekend will make the whole week easier."
+        case 1:
+            content.body = "Just 1 dinner planned for next week. Fill out the rest while you have time."
+        default: // 2
+            content.body = "2 dinners planned for next week — a couple more and you'll be set."
+        }
+
+        let triggerComponents = calendar.dateComponents(
+            [.year, .month, .day, .hour, .minute],
+            from: nextSaturday
+        )
+        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        center.add(request) { error in
+            if let error { logger.error("Failed to schedule weekly planning reminder: \(error)") }
+        }
+
+        logger.info("Weekly planning reminder scheduled for \(nextSaturday, privacy: .public) — \(dinnerCount) dinners planned")
+    }
+
+    // MARK: - Season Change Notification
+
+    /// Schedules a notification for the first day of the next season at 9 AM,
+    /// listing ingredients that are newly in season (not carried over from the
+    /// previous season). Safe to call repeatedly — always replaces the pending request.
+    func scheduleSeasonChangeNotification(hemisphere: Hemisphere) {
+        guard UserDefaults.standard.bool(forKey: SettingsKey.seasonChange) else { return }
+
+        let calendar = Calendar.current
+        let now = Date.now
+
+        let currentSeason = Season.current(for: hemisphere)
+        let nextSeason = currentSeason.next
+        let startMonth = nextSeason.startMonth(for: hemisphere)
+
+        // Build the fire date: 1st of the next season's start month at 9 AM.
+        // If that month is earlier than today's month the season rolls into next year.
+        var year = calendar.component(.year, from: now)
+        let currentMonth = calendar.component(.month, from: now)
+        if startMonth <= currentMonth { year += 1 }
+
+        var fireComponents = DateComponents()
+        fireComponents.year   = year
+        fireComponents.month  = startMonth
+        fireComponents.day    = 1
+        fireComponents.hour   = 9
+        fireComponents.minute = 0
+
+        // Ingredients that are genuinely new — not carried over from the previous season.
+        let newIngredients = SeasonalAwarenessService.newIngredients(for: nextSeason, hemisphere: hemisphere)
+
+        let identifier = "\(Category.seasonChange)_\(nextSeason.rawValue)_\(year)"
+        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+
+        let content = UNMutableNotificationContent()
+        content.sound = .default
+        content.categoryIdentifier = Category.seasonChange
+
+        let seasonName = nextSeason.rawValue.capitalized
+        content.title = "\(seasonName) Produce Is Here"
+
+        // Name up to 3 headline ingredients in the body.
+        let highlights = newIngredients.prefix(3).map { $0.name.capitalized }
+        switch highlights.count {
+        case 0:
+            content.body = "A new season means fresh ingredients at the market. See what's in season now."
+        case 1:
+            content.body = "\(highlights[0]) is hitting its peak. Open Mise to see everything in season."
+        default:
+            let lead = highlights.dropLast().joined(separator: ", ")
+            let last = highlights.last!
+            let remainder = newIngredients.count - highlights.count
+            if remainder > 0 {
+                content.body = "\(lead) and \(last) are in season now, along with \(remainder) more. Time to cook fresh."
+            } else {
+                content.body = "\(lead) and \(last) are hitting their peak. Time to cook fresh."
+            }
+        }
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: fireComponents, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        center.add(request) { error in
+            if let error { logger.error("Failed to schedule season change notification: \(error)") }
+        }
+
+        logger.info("Season change notification scheduled: \(nextSeason.rawValue) \(year, privacy: .public)")
+    }
+
     // MARK: - Cancel All
 
     /// Removes all pending notifications managed by this service.
@@ -222,6 +374,12 @@ struct NotificationSettingsView: View {
     @AppStorage(SmartNotificationService.SettingsKey.streakReminders)
     private var streakReminders = true
 
+    @AppStorage(SmartNotificationService.SettingsKey.weeklyPlanning)
+    private var weeklyPlanning = true
+
+    @AppStorage(SmartNotificationService.SettingsKey.seasonChange)
+    private var seasonChange = true
+
     @State private var permissionGranted: Bool?
 
     var body: some View {
@@ -241,6 +399,12 @@ struct NotificationSettingsView: View {
 
                 Toggle("Cooking Streak Encouragement", systemImage: "flame", isOn: $streakReminders)
                     .tint(.red)
+
+                Toggle("Weekend Meal Planning", systemImage: "calendar", isOn: $weeklyPlanning)
+                    .tint(.green)
+
+                Toggle("New Season Highlights", systemImage: "leaf", isOn: $seasonChange)
+                    .tint(.mint)
             } header: {
                 Text("Notification Types")
             } footer: {

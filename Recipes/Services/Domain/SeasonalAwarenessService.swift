@@ -127,6 +127,18 @@ enum SeasonalAwarenessService {
         seasonalData.filter { $0.peakSeasons.contains(season) }
     }
 
+    /// Ingredients that are newly in season — present in `season` but absent in
+    /// the preceding season. This is what's actually *new* at the market vs what
+    /// was already available and simply continues into the new season.
+    static func newIngredients(for season: Season, hemisphere: Hemisphere = .northern) -> [SeasonalIngredient] {
+        let previous = season.next.next.next  // three nexts = one back
+        return seasonalData.filter { ingredient in
+            !ingredient.availableAllYear &&
+            ingredient.peakSeasons.contains(season) &&
+            !ingredient.peakSeasons.contains(previous)
+        }
+    }
+
     /// Score a recipe based on how seasonal its ingredients are.
     /// Only considers ingredients that exist in the seasonal database — pantry staples
     /// and unknown ingredients are ignored so they don't inflate the score.

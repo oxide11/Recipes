@@ -5,20 +5,16 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(TimerDeepLink.self) private var timerDeepLink
     @State private var selectedTab: AppTab = .mise
     @State private var planAndShopSegment: PlanAndShopSegment = .mealPlan
     @State private var showingOnboarding = false
     @Query private var profiles: [UserProfile]
-
-    // Pre-warm the SwiftData store so tab views load instantly on first visit.
-    // These queries fire when ContentView appears, caching data before any tab
-    // is tapped. Without this, each tab cold-starts SwiftData on first navigation.
-    @Query private var _recipes: [Recipe]
-    @Query private var _pantryItems: [PantryItem]
-    @Query private var _plannedMeals: [PlannedMeal]
-    @Query private var _groceryLists: [GroceryList]
-    @Query private var _mealPlans: [MealPlan]
+    @Query private var mealPlans: [MealPlan]
+    @Query private var plannedMeals: [PlannedMeal]  // granular change tracking
+    @Query private var pantryItems: [PantryItem]
+    @Query(sort: \CookingLogEntry.date, order: .reverse) private var cookingLogs: [CookingLogEntry]
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -46,6 +42,23 @@ struct ContentView: View {
         .onChange(of: timerDeepLink.pendingRecipeID) { _, newID in
             if newID != nil { selectedTab = .recipes }
         }
+        // Schedule all smart notifications on launch and keep them current
+        // as data changes or the app returns to the foreground.
+        .onAppear {
+            scheduleAllNotifications()
+        }
+        .onChange(of: pantryItems.count) {
+            SmartNotificationService.shared.scheduleExpiringPantryAlerts(items: pantryItems)
+        }
+        .onChange(of: cookingLogs.count) {
+            SmartNotificationService.shared.scheduleCookingStreakReminder(lastCookDate: cookingLogs.first?.date)
+        }
+        .onChange(of: plannedMeals.count) {
+            SmartNotificationService.shared.scheduleWeeklyPlanningReminder(mealPlans: mealPlans)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { scheduleAllNotifications() }
+        }
         .onAppear {
             if profiles.isEmpty {
                 showingOnboarding = true
@@ -54,6 +67,14 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showingOnboarding) {
             OnboardingView()
         }
+    }
+
+    private func scheduleAllNotifications() {
+        let hemisphere = profiles.first?.hemisphere ?? .northern
+        SmartNotificationService.shared.scheduleExpiringPantryAlerts(items: pantryItems)
+        SmartNotificationService.shared.scheduleCookingStreakReminder(lastCookDate: cookingLogs.first?.date)
+        SmartNotificationService.shared.scheduleWeeklyPlanningReminder(mealPlans: mealPlans)
+        SmartNotificationService.shared.scheduleSeasonChangeNotification(hemisphere: hemisphere)
     }
 }
 

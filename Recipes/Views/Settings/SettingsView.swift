@@ -43,6 +43,9 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .toolbarBackground(.automatic, for: .navigationBar)
+            .sheet(isPresented: $showingProfileEditor) {
+                ProfileEditorView(profile: profile)
+            }
             .task {
                 loadSettings()
                 onDeviceAvailable = await aiRouter.foundationModelService.isAvailable
@@ -343,9 +346,6 @@ struct SettingsView: View {
                     }
                 }
             }
-        }
-        .sheet(isPresented: $showingProfileEditor) {
-            ProfileEditorView(profile: profile)
         }
     }
 

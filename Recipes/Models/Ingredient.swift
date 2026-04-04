@@ -135,17 +135,47 @@ enum Season: String, Codable, CaseIterable, Sendable {
         switch hemisphere {
         case .northern:
             switch month {
-            case 3...5:  return .spring
-            case 6...8:  return .summer
-            case 9...11: return .autumn
-            default:     return .winter
+            case 4...6:  return .spring   // Apr–Jun: produce arrives ~Apr 1
+            case 7...9:  return .summer
+            case 10...11: return .autumn
+            default:     return .winter   // Dec–Mar
             }
         case .southern:
             switch month {
-            case 3...5:  return .autumn
-            case 6...8:  return .winter
-            case 9...11: return .spring
-            default:     return .summer
+            case 4...6:  return .autumn
+            case 7...9:  return .winter
+            case 10...11: return .spring
+            default:     return .summer   // Dec–Mar
+            }
+        }
+    }
+
+    /// The season that follows this one.
+    var next: Season {
+        switch self {
+        case .spring: return .summer
+        case .summer: return .autumn
+        case .autumn: return .winter
+        case .winter: return .spring
+        }
+    }
+
+    /// The calendar month (1-based) on which this season starts for a given hemisphere.
+    func startMonth(for hemisphere: Hemisphere) -> Int {
+        switch hemisphere {
+        case .northern:
+            switch self {
+            case .spring: return 4   // Apr 1 — when spring produce actually arrives
+            case .summer: return 7
+            case .autumn: return 10
+            case .winter: return 12
+            }
+        case .southern:
+            switch self {
+            case .spring: return 10
+            case .summer: return 1
+            case .autumn: return 4
+            case .winter: return 7
             }
         }
     }
