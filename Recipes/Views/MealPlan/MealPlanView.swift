@@ -461,7 +461,7 @@ struct MealCard: View {
 
     private var titleRow: some View {
         HStack(spacing: 6) {
-            Text(meal.recipe?.title ?? "Unassigned")
+            Text(meal.displayTitle)
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(Brand.cream)
 
@@ -747,7 +747,7 @@ struct WeekMealView: View {
                                         .font(.caption)
                                         .foregroundStyle(Brand.warmTan)
                                         .frame(width: 16)
-                                    Text(meal.recipe?.title ?? "Unassigned")
+                                    Text(meal.displayTitle)
                                         .font(.footnote)
                                         .foregroundStyle(Brand.cream)
                                     Spacer()
@@ -1078,7 +1078,9 @@ struct AddMealView: View {
     @State private var selectedMealType: MealType
     @State private var selectedDate: Date
     @State private var selectedRecipe: Recipe? = nil
+    @State private var customTitle: String = ""
     @State private var showingGenerator = false
+    @State private var showingImport = false
     @State private var lastRecipeCount = 0
     @State private var searchText = ""
 
@@ -1088,15 +1090,40 @@ struct AddMealView: View {
         _selectedDate = State(initialValue: preselectDate ?? plan.startDate)
     }
 
+    private var canAdd: Bool {
+        selectedRecipe != nil || !customTitle.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
     var body: some View {
         NavigationStack {
             Form {
-                Section("Recipe") {
+                // Quick freeform entry — for meals without a saved recipe
+                Section {
+                    TextField("e.g. Bacon and eggs", text: $customTitle)
+                        .onChange(of: customTitle) { _, _ in
+                            // Typing a name clears any recipe selection
+                            if !customTitle.isEmpty { selectedRecipe = nil }
+                        }
+                } header: {
+                    Text("Just name it")
+                } footer: {
+                    Text("No recipe needed — just put it on the plan.")
+                }
+
+                Section("Or pick from your recipes") {
                     Button {
                         lastRecipeCount = recipes.count
                         showingGenerator = true
                     } label: {
                         Label("Generate a Recipe", systemImage: "sparkles")
+                            .foregroundStyle(Brand.warmTan)
+                    }
+
+                    Button {
+                        lastRecipeCount = recipes.count
+                        showingImport = true
+                    } label: {
+                        Label("Import a Recipe", systemImage: "link")
                             .foregroundStyle(Brand.warmTan)
                     }
 
@@ -1109,7 +1136,7 @@ struct AddMealView: View {
                     }
 
                     if recipes.isEmpty {
-                        Text("No recipes yet — generate one above or add some in the Recipes tab.")
+                        Text("No recipes yet — generate or import one above.")
                             .foregroundStyle(.secondary)
                             .font(.caption)
                     } else {
@@ -1123,7 +1150,12 @@ struct AddMealView: View {
                         } else {
                             ForEach(filtered) { recipe in
                                 Button {
-                                    selectedRecipe = (selectedRecipe?.id == recipe.id) ? nil : recipe
+                                    if selectedRecipe?.id == recipe.id {
+                                        selectedRecipe = nil
+                                    } else {
+                                        selectedRecipe = recipe
+                                        customTitle = ""  // recipe selection clears freeform name
+                                    }
                                 } label: {
                                     HStack {
                                         Text(recipe.title)
@@ -1142,8 +1174,11 @@ struct AddMealView: View {
             .sheet(isPresented: $showingGenerator) {
                 QuickGenerateView(mealType: selectedMealType)
             }
+            .sheet(isPresented: $showingImport) {
+                RecipeImportView()
+            }
             .onChange(of: recipes.count) { _, newCount in
-                // Auto-add the generated recipe immediately — no need to tap "Add" separately
+                // Auto-add the newest recipe when generated or imported — no extra tap needed
                 if newCount > lastRecipeCount,
                    let newest = recipes.max(by: { $0.dateCreated < $1.dateCreated }) {
                     let meal = PlannedMeal(
@@ -1165,17 +1200,19 @@ struct AddMealView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
+                        let title = customTitle.trimmingCharacters(in: .whitespaces)
                         let meal = PlannedMeal(
                             mealType: selectedMealType,
                             date: Calendar.current.startOfDay(for: selectedDate),
                             recipe: selectedRecipe,
-                            servings: selectedRecipe?.servings ?? 1
+                            servings: selectedRecipe?.servings ?? 1,
+                            customTitle: title.isEmpty ? nil : title
                         )
                         modelContext.insert(meal)
                         plan.meals.append(meal)
                         dismiss()
                     }
-                    .disabled(selectedRecipe == nil)
+                    .disabled(!canAdd)
                 }
             }
         }
