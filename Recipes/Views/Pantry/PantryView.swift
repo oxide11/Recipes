@@ -136,7 +136,6 @@ struct PantryView: View {
 
     private struct PantryDisplaySection {
         let title: String
-        let icon: String
         let items: [PantryItem]
     }
 
@@ -149,14 +148,14 @@ struct PantryView: View {
                 .sorted { $0.name.localizedCompare($1.name) == .orderedAscending }
         }
         return [
-            .init(title: "Spice Rack",       icon: "leaf",            items: merged(.spice, .herb)),
-            .init(title: "Baking",           icon: "birthday.cake",   items: merged(.baking, .sweetener)),
-            .init(title: "Protein",          icon: "flame",           items: merged(.protein)),
-            .init(title: "Produce",          icon: "carrot",          items: merged(.vegetable, .fruit)),
-            .init(title: "Dairy",            icon: "drop.fill",       items: merged(.dairy)),
-            .init(title: "Dry Goods",        icon: "bag.fill",        items: merged(.grain, .legume, .nut)),
-            .init(title: "Condiments & Oils",icon: "cylinder",        items: merged(.oil, .condiment, .liquid)),
-            .init(title: "Other",            icon: "archivebox",      items: merged(.other)),
+            .init(title: "Produce",           items: merged(.vegetable, .fruit)),
+            .init(title: "Protein",           items: merged(.protein)),
+            .init(title: "Dairy",             items: merged(.dairy)),
+            .init(title: "Dry Goods",         items: merged(.grain, .legume, .nut)),
+            .init(title: "Baking",            items: merged(.baking, .sweetener)),
+            .init(title: "Condiments & Oils", items: merged(.oil, .condiment, .liquid)),
+            .init(title: "Spice Rack",        items: merged(.spice, .herb)),
+            .init(title: "Other",             items: merged(.other)),
         ]
     }
 
@@ -276,17 +275,15 @@ struct PantryView: View {
                     }
                 }
 
-                // Render merged display sections in logical kitchen order.
+                // Render merged display sections in grocery-store order.
                 // Multiple IngredientCategory values can share a display section;
                 // deduplication is handled by pantrySections below.
                 ForEach(pantrySections, id: \.title) { sec in
                     if !sec.items.isEmpty {
-                        Section {
+                        Section(sec.title) {
                             ForEach(sec.items) { item in
                                 pantryItemRow(item)
                             }
-                        } header: {
-                            Label(sec.title, systemImage: sec.icon)
                         }
                     }
                 }

@@ -97,20 +97,6 @@ enum IngredientCategory: String, Codable, CaseIterable, Sendable {
         }
     }
 
-    /// SF Symbol name for the pantry section header.
-    var pantrySectionIcon: String {
-        switch self {
-        case .protein:             return "flame"
-        case .vegetable, .fruit:   return "carrot"
-        case .grain, .legume, .nut:return "bag.fill"
-        case .dairy:               return "drop.fill"
-        case .baking, .sweetener:  return "birthday.cake"
-        case .spice, .herb:        return "leaf"
-        case .oil, .condiment,
-             .liquid:              return "cylinder"
-        case .other:               return "archivebox"
-        }
-    }
 }
 
 enum IngredientColor: String, Codable, Sendable {
