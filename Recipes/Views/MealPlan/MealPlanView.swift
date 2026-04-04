@@ -968,7 +968,8 @@ struct GenerateMealPlanSheet: View {
         let dietaryNote = dietaryRestrictions.isEmpty ? "" :
             " Dietary needs: \(dietaryRestrictions.map(\.displayName).joined(separator: ", "))."
         let goalNote = profiles.first.map { p in
-            p.cookingGoal.promptContext.isEmpty ? "" : " \(p.cookingGoal.promptContext)"
+            let goal = p.cookingGoal ?? .greatFood
+            return goal.promptContext.isEmpty ? "" : " \(goal.promptContext)"
         } ?? ""
 
         return """

@@ -102,7 +102,8 @@ final class UserProfile {
     var hemisphere: Hemisphere
 
     // Pantry
-    var cookingGoal: CookingGoal
+    /// nil for profiles created before this field existed — treated as .greatFood everywhere.
+    var cookingGoal: CookingGoal?
     var autoDeductPantry: Bool
 
     // iCloud & Sharing (stubs for future CloudKit)
@@ -183,7 +184,7 @@ final class UserProfile {
         self.preferredAIProvider = preferredAIProvider
         self.enableOnDeviceAI = true
         self.hemisphere = .northern
-        self.cookingGoal = .greatFood
+        self.cookingGoal = nil  // set during onboarding; nil = .greatFood behaviour
         self.autoDeductPantry = true
         self.iCloudSyncEnabled = false
         self.shareRecipesEnabled = false

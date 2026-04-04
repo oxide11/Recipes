@@ -295,8 +295,9 @@ final class RecommendationAgent {
                 context += "Dietary restrictions: \(profile.dietaryRestrictions.map(\.rawValue).joined(separator: ", ")). "
             }
             context += "Skill level: \(profile.skillLevel.rawValue). "
-            if !profile.cookingGoal.promptContext.isEmpty {
-                context += profile.cookingGoal.promptContext + " "
+            let goal = profile.cookingGoal ?? .greatFood
+            if !goal.promptContext.isEmpty {
+                context += goal.promptContext + " "
             }
         }
 

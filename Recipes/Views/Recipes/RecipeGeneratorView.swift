@@ -524,8 +524,10 @@ struct QuickGenerateView: View {
             description += " Feel free to draw from my favourite cuisines (\(cuisines.map(\.rawValue).joined(separator: ", "))) but variety is welcome."
         }
         if !existingRecipes.isEmpty {
-            let titles = existingRecipes.map(\.title).joined(separator: ", ")
-            description += " I already have these recipes in my library — please suggest something genuinely different: \(titles)."
+            // Cap at 20 titles to keep the prompt a reasonable size
+            let titles = existingRecipes.prefix(20).map { $0.title.sanitizedForAI }.joined(separator: ", ")
+            let overflow = existingRecipes.count > 20 ? " (and \(existingRecipes.count - 20) more)" : ""
+            description += " I already have these recipes in my library — please suggest something genuinely different: \(titles)\(overflow)."
         }
         let skill = profile?.skillLevel ?? .intermediate
         description += recipeSkillConstraint(for: skill)
