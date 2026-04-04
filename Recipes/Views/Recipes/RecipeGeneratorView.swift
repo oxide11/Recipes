@@ -516,6 +516,13 @@ struct QuickGenerateView: View {
         // honey butter, not a chef's elevated interpretation of it.
         let isSpecificRequest = initialDescription != nil || cuisineHint != nil
         if !isSpecificRequest {
+            // Cooking goal shapes open-ended generation — not applied to specific requests
+            // where the user has already said exactly what they want.
+            let goal = profile?.cookingGoal ?? .greatFood
+            if !goal.promptContext.isEmpty {
+                description += " \(goal.promptContext)"
+            }
+
             if let mt = mealType {
                 description += " This recipe must be appropriate for \(mt.displayName.lowercased()) — use typical \(mt.displayName.lowercased()) ingredients and portion sizes."
             }
