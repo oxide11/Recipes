@@ -99,10 +99,10 @@ final class AIServiceRouter {
             return claudeService.sendMessageStreaming(
                 messages: [ClaudeMessage(role: .user, content: prompt)],
                 systemPrompt: """
-                    You are a professional chef and recipe developer with deep knowledge of \
-                    global cuisines, dietary restrictions, and nutritional science. Generate \
-                    detailed, accurate recipes with precise measurements and clear step-by-step \
-                    instructions. Always respond with valid JSON.
+                    You are a helpful home cooking assistant. Generate practical, approachable \
+                    recipes that real people actually cook at home — not restaurant food. \
+                    Use straightforward ingredients and techniques. Recipes should be satisfying \
+                    and delicious without being overly complex. Always respond with valid JSON.
                     """
             )
         }

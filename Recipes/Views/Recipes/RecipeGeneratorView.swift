@@ -481,11 +481,9 @@ struct QuickGenerateView: View {
         } else if let cuisine = cuisineHint {
             // Cuisine-specific auto-generate: pick a well-known dish from that cuisine
             let staples = pantryItems.filter(\.isStaple).map(\.name)
-            let onHand  = pantryItems.filter { !$0.isStaple }.prefix(15).map(\.name)
             var parts: [String] = ["Surprise me with a classic, delicious \(cuisine) recipe — something iconic and worth trying for the first time."]
-            if !onHand.isEmpty  { parts.append("I currently have: \(onHand.joined(separator: ", ")).") }
-            if !staples.isEmpty { parts.append("I almost always keep: \(staples.joined(separator: ", ")).") }
-            parts.append("Use pantry items where they fit, but feel free to call for other ingredients — shopping is fine.")
+            if !staples.isEmpty { parts.append("I always have the basics: \(staples.joined(separator: ", ")).") }
+            parts.append("Keep it simple and approachable — 10 ingredients or fewer. Shopping for other ingredients is fine.")
             description = parts.joined(separator: " ")
         } else if quickMealMode {
             // Quick meal: use pantry + staples — no shopping trip needed
@@ -500,14 +498,12 @@ struct QuickGenerateView: View {
                 description = "Generate a quick meal ready in 30 minutes or less. \(parts.joined(separator: ". ")). Use these ingredients where possible — no shopping trip."
             }
         } else {
-            // General recipe: not pantry-constrained — shopping is fine
+            // General recipe: not pantry-constrained — shopping is fine.
+            // Only mention staples (salt, oil, etc.) — listing specific pantry items
+            // causes the AI to combine them creatively, resulting in complex dishes.
             let staples = pantryItems.filter(\.isStaple).map(\.name)
-            let usedNames = pantryItems.filter { !$0.isStaple && $0.lastUsed != nil }.prefix(10).map(\.name)
-            var hints: [String] = []
-            if !staples.isEmpty  { hints.append("I almost always have: \(staples.joined(separator: ", "))") }
-            if !usedNames.isEmpty { hints.append("I often have: \(usedNames.joined(separator: ", "))") }
-            let hint = hints.isEmpty ? "" : " \(hints.joined(separator: ". ")). Feel free to use these but don't feel constrained."
-            description = "Surprise me with a delicious recipe.\(hint)"
+            let stapleHint = staples.isEmpty ? "" : " I always have the basics: \(staples.joined(separator: ", "))."
+            description = "Surprise me with a simple, delicious home-cooked recipe.\(stapleHint) Aim for 10 ingredients or fewer — everyday cooking, not restaurant food."
         }
         // Dietary restrictions are a hard requirement — always included.
         if let restrictions = profile?.dietaryRestrictions, !restrictions.isEmpty {
