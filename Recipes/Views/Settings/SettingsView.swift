@@ -24,6 +24,9 @@ struct SettingsView: View {
     private var profile: UserProfile? { profiles.first }
 
     @State private var showingClearDataConfirm = false
+    #if DEBUG
+    @State private var showingOnboardingPreview = false
+    #endif
 
     private static let commonCurrencies = ["CAD", "USD", "EUR", "GBP", "AUD", "JPY", "MXN", "BRL", "INR"]
 
@@ -38,6 +41,9 @@ struct SettingsView: View {
                 iCloudAndSharingSection
                 profileSection
                 sampleDataSection
+                #if DEBUG
+                debugSection
+                #endif
                 aboutSection
             }
             .navigationTitle("Settings")
@@ -414,6 +420,36 @@ struct SettingsView: View {
             Label("Developer", systemImage: "hammer")
         }
     }
+
+    // MARK: - Debug (DEBUG builds only)
+
+    #if DEBUG
+    private var debugSection: some View {
+        Section {
+            Button {
+                showingOnboardingPreview = true
+            } label: {
+                Label {
+                    VStack(alignment: .leading) {
+                        Text("Preview Onboarding")
+                            .fontWeight(.medium)
+                        Text("Runs the full onboarding flow without deleting your data")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } icon: {
+                    Image(systemName: "wand.and.sparkles")
+                        .foregroundStyle(Brand.herbGreen)
+                }
+            }
+            .fullScreenCover(isPresented: $showingOnboardingPreview) {
+                OnboardingView()
+            }
+        } header: {
+            Label("Debug", systemImage: "ladybug")
+        }
+    }
+    #endif
 
     // MARK: - About
 
