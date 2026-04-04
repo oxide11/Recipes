@@ -20,7 +20,12 @@ private func expiryDateFormatter(for date: Date) -> DateFormatter {
 }
 
 private func daysAgoLabel(for date: Date) -> String {
-    let days = Calendar.current.dateComponents([.day], from: date, to: .now).day ?? 0
+    // Compare calendar-day starts, not raw 24-hour elapsed time, so something
+    // added at 8 PM yesterday shows "Added yesterday" at 9 AM today.
+    let cal = Calendar.current
+    let days = cal.dateComponents([.day],
+                                   from: cal.startOfDay(for: date),
+                                   to:   cal.startOfDay(for: .now)).day ?? 0
     if days <= 0 { return "Added today" }
     if days == 1 { return "Added yesterday" }
     return "Added \(days)d ago"
@@ -41,6 +46,7 @@ struct PantryView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var items: [PantryItem]
     @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
+    @Query private var profiles: [UserProfile]
 
     @State private var showingScanner = false
     @State private var showingAddItem = false
@@ -50,6 +56,7 @@ struct PantryView: View {
     @State private var showingNoWasteResults = false
     @State private var searchText = ""
     @State private var editingItem: PantryItem?
+    @State private var jumpTarget: String? = nil
 
     private var filteredItems: [PantryItem] {
         if searchText.isEmpty { return items }
@@ -68,7 +75,10 @@ struct PantryView: View {
         items.filter { item in
             guard !item.isExpiringSoon, !item.isStaple else { return false }
             let reference = item.lastUsed ?? item.dateAdded
-            let days = Calendar.current.dateComponents([.day], from: reference, to: .now).day ?? 0
+            let cal = Calendar.current
+            let days = cal.dateComponents([.day],
+                                          from: cal.startOfDay(for: reference),
+                                          to:   cal.startOfDay(for: .now)).day ?? 0
             return days > shelfLifeDays(for: item)
         }
     }
@@ -159,8 +169,42 @@ struct PantryView: View {
         ]
     }
 
+    /// Horizontal strip of tappable section-jump pills.
+    @ViewBuilder
+    private var sectionJumpBar: some View {
+        let nonEmpty = pantrySections.filter { !$0.items.isEmpty }
+        if !nonEmpty.isEmpty {
+            VStack(spacing: 0) {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(nonEmpty, id: \.title) { sec in
+                            Button {
+                                jumpTarget = sec.title
+                            } label: {
+                                Text(sec.title)
+                                    .font(.caption.weight(.medium))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color(.systemGray5), in: Capsule())
+                                    .foregroundStyle(.primary)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Jump to \(sec.title)")
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                }
+                Divider()
+            }
+        }
+    }
+
     var body: some View {
         NavigationStack {
+        VStack(spacing: 0) {
+        if searchText.isEmpty { sectionJumpBar }
+        ScrollViewReader { proxy in
         List {
                 // "Use It Up" section for expiring items
                 if !expiringItems.isEmpty {
@@ -262,7 +306,10 @@ struct PantryView: View {
                                 VStack(alignment: .leading) {
                                     Text("Recommended Staples")
                                         .fontWeight(.medium)
-                                    let missing = RecommendedStaplesService.missingStaples(pantryItems: items)
+                                    let missing = RecommendedStaplesService.missingStaples(
+                                        pantryItems: items,
+                                        dietaryRestrictions: Set(profiles.first?.dietaryRestrictions ?? [])
+                                    )
                                     Text("\(missing.count) suggested items to stock")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
@@ -285,6 +332,7 @@ struct PantryView: View {
                                 pantryItemRow(item)
                             }
                         }
+                        .id(sec.title)
                     }
                 }
 
@@ -302,6 +350,15 @@ struct PantryView: View {
                     )
                 }
             }
+            .onChange(of: jumpTarget) { _, target in
+                guard let target else { return }
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    proxy.scrollTo(target, anchor: .top)
+                }
+                jumpTarget = nil
+            }
+        } // ScrollViewReader
+        } // VStack
             .navigationTitle("Pantry")
             .searchable(text: $searchText, prompt: "Search pantry...")
             .onAppear { if startWithAddSheet { showingAddItem = true } }
@@ -329,6 +386,7 @@ struct PantryView: View {
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .accessibilityLabel("Add pantry item")
                 }
             }
             .sheet(isPresented: $showingScanner) {
@@ -396,6 +454,7 @@ struct PantryItemRow: View {
                         Image(systemName: "barcode")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
                     }
 
                     if SeasonalAwarenessService.isInSeason(item.name) {
@@ -419,7 +478,10 @@ struct PantryItemRow: View {
                 }
             } else {
                 VStack(alignment: .trailing, spacing: 2) {
-                    let daysInPantry = Calendar.current.dateComponents([.day], from: item.dateAdded, to: Date()).day ?? 0
+                    let cal2 = Calendar.current
+                    let daysInPantry = cal2.dateComponents([.day],
+                                                           from: cal2.startOfDay(for: item.dateAdded),
+                                                           to:   cal2.startOfDay(for: .now)).day ?? 0
                     if item.category == .protein && !item.isFrozen && daysInPantry >= 3 {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.caption2)

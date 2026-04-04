@@ -145,7 +145,7 @@ enum IngredientNormalizer {
     /// Groups of interchangeable ingredients. Shared between NoWasteMatchingEngine and ShoppingListGenerator.
     static let substitutionGroups: [[String]] = [
         // Cooking oils — generally interchangeable for sautéing/roasting
-        ["olive oil", "vegetable oil", "canola oil", "sunflower oil", "grapeseed oil", "avocado oil"],
+        ["olive oil", "vegetable oil", "canola oil", "sunflower oil", "grapeseed oil", "avocado oil", "neutral oil"],
         // Acid / brightness
         ["lemon juice", "lime juice", "white wine vinegar", "apple cider vinegar"],
         ["lemon", "lime"],
@@ -160,8 +160,10 @@ enum IngredientNormalizer {
         // Sweeteners
         ["honey", "maple syrup", "agave", "agave syrup"],
         ["sugar", "brown sugar"],
-        // Broth — chicken and vegetable are swappable in most recipes
-        ["chicken broth", "vegetable broth"],
+        // Broth / stock / bouillon — all interchangeable as a liquid base
+        ["chicken broth", "chicken stock", "chicken bouillon",
+         "vegetable broth", "vegetable stock", "vegetable bouillon",
+         "stock cube", "stock cubes", "bouillon cube", "bouillon cubes"],
         // Hard Italian cheeses
         ["parmesan", "pecorino"],
         // Alliums

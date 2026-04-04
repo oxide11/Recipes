@@ -10,12 +10,20 @@ struct RecommendedStaplesView: View {
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
     @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
     @Query(sort: \GroceryList.dateCreated, order: .reverse) private var groceryLists: [GroceryList]
+    @Query private var profiles: [UserProfile]
     @State private var addedStaples: Set<String> = []
 
     @State private var selectedTab = 0
 
+    private var dietaryRestrictions: Set<DietaryRestriction> {
+        Set(profiles.first?.dietaryRestrictions ?? [])
+    }
+
     private var missingUniversal: [RecommendedStaplesService.Staple] {
-        RecommendedStaplesService.missingStaples(pantryItems: pantryItems)
+        RecommendedStaplesService.missingStaples(
+            pantryItems: pantryItems,
+            dietaryRestrictions: dietaryRestrictions
+        )
     }
 
     private var personalized: [RecommendedStaplesService.Staple] {
