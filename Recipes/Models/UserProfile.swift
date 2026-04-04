@@ -17,6 +17,52 @@ enum MealPrepMode: String, Codable, CaseIterable, Sendable {
     case weekly  // Shop Saturday, prep Sunday for the whole week
 }
 
+// MARK: - Cooking Goal
+
+enum CookingGoal: String, Codable, CaseIterable, Sendable {
+    case quickAndEasy      = "quickAndEasy"
+    case eatingHealthier   = "eatingHealthier"
+    case highProtein       = "highProtein"
+    case expandingCooking  = "expandingCooking"
+    case greatFood         = "greatFood"
+
+    var title: String {
+        switch self {
+        case .quickAndEasy:     return "Quick & easy"
+        case .eatingHealthier:  return "Eating healthier"
+        case .highProtein:      return "High protein"
+        case .expandingCooking: return "Expanding my cooking"
+        case .greatFood:        return "Just cook great food"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .quickAndEasy:     return "30 minutes or less, minimal steps"
+        case .eatingHealthier:  return "Balanced, whole ingredients, lighter meals"
+        case .highProtein:      return "Muscle building, filling meals"
+        case .expandingCooking: return "More interesting techniques and ingredients"
+        case .greatFood:        return "No specific goal — show me everything"
+        }
+    }
+
+    /// Short context string injected into AI prompts.
+    var promptContext: String {
+        switch self {
+        case .quickAndEasy:
+            return "The user prioritises speed — prefer recipes under 30 minutes with minimal steps and few dishes."
+        case .eatingHealthier:
+            return "The user wants to eat healthier — prefer balanced, whole-ingredient meals; avoid heavy or highly processed dishes."
+        case .highProtein:
+            return "The user is focused on high-protein meals — prioritise protein-rich ingredients and filling, muscle-building recipes."
+        case .expandingCooking:
+            return "The user wants to grow their skills — suggest recipes with interesting techniques, less familiar ingredients, or higher complexity."
+        case .greatFood:
+            return ""  // No constraint — show everything
+        }
+    }
+}
+
 // MARK: - User Profile
 
 @Model
@@ -56,6 +102,8 @@ final class UserProfile {
     var hemisphere: Hemisphere
 
     // Pantry
+    /// nil for profiles created before this field existed — treated as .greatFood everywhere.
+    var cookingGoal: CookingGoal?
     var autoDeductPantry: Bool
 
     // iCloud & Sharing (stubs for future CloudKit)
@@ -136,6 +184,7 @@ final class UserProfile {
         self.preferredAIProvider = preferredAIProvider
         self.enableOnDeviceAI = true
         self.hemisphere = .northern
+        self.cookingGoal = nil  // set during onboarding; nil = .greatFood behaviour
         self.autoDeductPantry = true
         self.iCloudSyncEnabled = false
         self.shareRecipesEnabled = false

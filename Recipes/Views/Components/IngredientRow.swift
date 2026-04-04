@@ -56,13 +56,6 @@ struct IngredientRow: View {
                         .foregroundStyle(.tertiary)
                 }
 
-                if !SeasonalAwarenessService.isInSeason(ingredient.name) {
-                    Image(systemName: "leaf.arrow.triangle.circlepath")
-                        .font(.caption2)
-                        .foregroundStyle(.orange)
-                        .help("Not in season")
-                        .accessibilityHidden(true)
-                }
             }
         }
         .buttonStyle(.plain)
@@ -71,7 +64,6 @@ struct IngredientRow: View {
         .accessibilityLabel({
             var parts = ["\(ingredient.name), \(scaledAmount.displayString)"]
             if ingredient.isOptional { parts.append("optional") }
-            if !SeasonalAwarenessService.isInSeason(ingredient.name) { parts.append("not in season") }
             if onToggle != nil { parts.append(isChecked ? "Checked" : "Unchecked") }
             return parts.joined(separator: ", ")
         }())

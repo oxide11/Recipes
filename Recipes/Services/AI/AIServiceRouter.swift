@@ -65,6 +65,9 @@ final class AIServiceRouter {
         claudeService.isConfigured || openAIService.isConfigured
     }
 
+    /// The most recent prompt sent to any AI provider. Useful for debugging.
+    var lastPrompt: String? = nil
+
     /// Route a text generation request to the best available provider.
     /// Pass `preferFast: true` for structured/mechanical tasks where speed matters more than quality.
     func generateText(
@@ -73,6 +76,7 @@ final class AIServiceRouter {
         provider: AIProvider? = nil,
         preferFast: Bool = false
     ) async throws -> String {
+        lastPrompt = prompt
         let target = provider ?? preferredProvider
         let claudeModel = preferFast ? "claude-haiku-4-5-20251001" : "claude-sonnet-4-6"
 
@@ -100,6 +104,7 @@ final class AIServiceRouter {
         prompt: String,
         taskType: AITaskType
     ) -> AsyncThrowingStream<String, Error> {
+        lastPrompt = prompt
         // Try on-device first for suitable tasks when in hybrid or onDevice mode
         let useOnDeviceForTask = !Self.largeContextTasks.contains(taskType)
         if useOnDeviceForTask && (preferredProvider == .hybrid || preferredProvider == .onDevice) {
@@ -123,10 +128,10 @@ final class AIServiceRouter {
                             let stream = self.claudeService.sendMessageStreaming(
                                 messages: [ClaudeMessage(role: .user, content: prompt)],
                                 systemPrompt: """
-                                    You are a professional chef and recipe developer with deep knowledge of \
-                                    global cuisines, dietary restrictions, and nutritional science. Generate \
-                                    detailed, accurate recipes with precise measurements and clear step-by-step \
-                                    instructions. Always respond with valid JSON.
+                                    You are a helpful home cooking assistant. Generate practical, approachable \
+                                    recipes that real people actually cook at home — not restaurant food. \
+                                    Use straightforward ingredients and techniques. Recipes should be satisfying \
+                                    and delicious without being overly complex. Always respond with valid JSON.
                                     """
                             )
                             for try await chunk in stream {
@@ -155,10 +160,10 @@ final class AIServiceRouter {
             return claudeService.sendMessageStreaming(
                 messages: [ClaudeMessage(role: .user, content: prompt)],
                 systemPrompt: """
-                    You are a professional chef and recipe developer with deep knowledge of \
-                    global cuisines, dietary restrictions, and nutritional science. Generate \
-                    detailed, accurate recipes with precise measurements and clear step-by-step \
-                    instructions. Always respond with valid JSON.
+                    You are a helpful home cooking assistant. Generate practical, approachable \
+                    recipes that real people actually cook at home — not restaurant food. \
+                    Use straightforward ingredients and techniques. Recipes should be satisfying \
+                    and delicious without being overly complex. Always respond with valid JSON.
                     """
             )
         }

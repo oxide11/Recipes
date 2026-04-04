@@ -57,9 +57,10 @@ final class OpenAIService {
     func generateRecipe(prompt: String) async throws -> String {
         let messages = [
             ChatMessage(role: .system, content: """
-                You are a professional chef and recipe developer. Generate detailed, \
-                accurate recipes with precise measurements, clear instructions, and \
-                helpful tips. Include nutritional estimates when asked.
+                You are a helpful home cooking assistant. Generate practical, approachable \
+                recipes that real people actually cook at home — not restaurant food. \
+                Use straightforward ingredients and techniques. Recipes should be satisfying \
+                and delicious without being overly complex. Include nutritional estimates when asked.
                 """),
             ChatMessage(role: .user, content: prompt)
         ]

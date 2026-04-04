@@ -325,7 +325,7 @@ struct RecipeGeneratorView: View {
             }
             let service = RecipeIngestionService(aiRouter: aiRouter)
             do {
-                generatedResult = try await service.ingestFromTextStreaming(text) { chunk in
+                generatedResult = try await service.ingestFromTextStreaming(text, isGeneration: true) { chunk in
                     streamingText += chunk
                 }
             } catch {
@@ -481,11 +481,9 @@ struct QuickGenerateView: View {
         } else if let cuisine = cuisineHint {
             // Cuisine-specific auto-generate: pick a well-known dish from that cuisine
             let staples = pantryItems.filter(\.isStaple).map(\.name)
-            let onHand  = pantryItems.filter { !$0.isStaple }.prefix(15).map(\.name)
             var parts: [String] = ["Surprise me with a classic, delicious \(cuisine) recipe — something iconic and worth trying for the first time."]
-            if !onHand.isEmpty  { parts.append("I currently have: \(onHand.joined(separator: ", ")).") }
-            if !staples.isEmpty { parts.append("I almost always keep: \(staples.joined(separator: ", ")).") }
-            parts.append("Use pantry items where they fit, but feel free to call for other ingredients — shopping is fine.")
+            if !staples.isEmpty { parts.append("I always have the basics: \(staples.joined(separator: ", ")).") }
+            parts.append("Keep it simple and approachable — 10 ingredients or fewer. Shopping for other ingredients is fine.")
             description = parts.joined(separator: " ")
         } else if quickMealMode {
             // Quick meal: use pantry + staples — no shopping trip needed
@@ -500,40 +498,63 @@ struct QuickGenerateView: View {
                 description = "Generate a quick meal ready in 30 minutes or less. \(parts.joined(separator: ". ")). Use these ingredients where possible — no shopping trip."
             }
         } else {
-            // General recipe: not pantry-constrained — shopping is fine
-            let staples = pantryItems.filter(\.isStaple).map(\.name)
-            let usedNames = pantryItems.filter { !$0.isStaple && $0.lastUsed != nil }.prefix(10).map(\.name)
-            var hints: [String] = []
-            if !staples.isEmpty  { hints.append("I almost always have: \(staples.joined(separator: ", "))") }
-            if !usedNames.isEmpty { hints.append("I often have: \(usedNames.joined(separator: ", "))") }
-            let hint = hints.isEmpty ? "" : " \(hints.joined(separator: ". ")). Feel free to use these but don't feel constrained."
-            description = "Surprise me with a delicious recipe.\(hint)"
+            // General recipe: don't mention pantry at all. Even "staples" can include
+            // highly specific ingredients (jalapeños, chipotle, masa harina) that bias
+            // the AI toward one cuisine. Let the AI choose freely what fits the dish.
+            description = "Surprise me with a simple, delicious home-cooked recipe. Aim for 10 ingredients or fewer — everyday cooking, not restaurant food."
         }
-        if let mt = mealType {
-            description += " This recipe must be appropriate for \(mt.displayName.lowercased()) — use typical \(mt.displayName.lowercased()) ingredients and portion sizes."
-        }
+        // Dietary restrictions are a hard requirement — always included.
         if let restrictions = profile?.dietaryRestrictions, !restrictions.isEmpty {
             description += " Dietary needs: \(restrictions.map(\.displayName).joined(separator: ", "))."
         }
-        // Only nudge toward preferred cuisines when the prompt has no specific
-        // direction (no cuisine hint, no initial description, not a quick meal).
-        // Applying it to seasonal or targeted generates causes everything to
-        // skew toward a single cuisine regardless of what was asked for.
-        if cuisineHint == nil, initialDescription == nil, !quickMealMode,
-           let cuisines = profile?.preferredCuisines, !cuisines.isEmpty {
-            description += " Feel free to draw from my favourite cuisines (\(cuisines.map(\.rawValue).joined(separator: ", "))) but variety is welcome."
+
+        // When the user asked for something specific (initialDescription set, or a named
+        // cuisine), keep the prompt tight — variety signals, skill constraints, and cuisine
+        // nudges just muddle a specific request. "Just make honey butter" should produce
+        // honey butter, not a chef's elevated interpretation of it.
+        let isSpecificRequest = initialDescription != nil || cuisineHint != nil
+        if !isSpecificRequest {
+            // Cooking goal shapes open-ended generation — not applied to specific requests
+            // where the user has already said exactly what they want.
+            let goal = profile?.cookingGoal ?? .greatFood
+            if !goal.promptContext.isEmpty {
+                description += " \(goal.promptContext)"
+            }
+
+            let topCuisines = Dictionary(grouping: existingRecipes, by: \.cuisine)
+                .sorted { $0.value.count > $1.value.count }
+                .prefix(3)
+                .map { $0.key.rawValue }
+
+            if let mt = mealType {
+                // Meal plan context — user wants something they'll actually make and enjoy.
+                // Lean into their preferred cuisines; this isn't about discovery.
+                description += " This should be a great \(mt.displayName.lowercased())."
+                let preferredCuisines = profile?.preferredCuisines.map(\.rawValue) ?? []
+                if !preferredCuisines.isEmpty {
+                    description += " I enjoy \(preferredCuisines.joined(separator: ", ")) food."
+                }
+                if !existingRecipes.isEmpty {
+                    description += " I already have \(existingRecipes.count) recipes saved — avoid exact duplicates."
+                }
+            } else {
+                // Recipe discovery context — user wants to explore, steer away from the usual.
+                if !topCuisines.isEmpty {
+                    description += " I cook \(topCuisines.joined(separator: ", ")) a lot — suggest something from a different cuisine."
+                } else if !existingRecipes.isEmpty {
+                    description += " I already have \(existingRecipes.count) recipes saved — please suggest something fresh."
+                }
+            }
+            let skill = profile?.skillLevel ?? .intermediate
+            description += recipeSkillConstraint(for: skill)
         }
-        if !existingRecipes.isEmpty {
-            let titles = existingRecipes.map(\.title).joined(separator: ", ")
-            description += " I already have these recipes in my library — please suggest something genuinely different: \(titles)."
-        }
-        let skill = profile?.skillLevel ?? .intermediate
-        description += recipeSkillConstraint(for: skill)
-        description += " If an ingredient is used in different amounts at different stages, list it ONCE with the total and split amounts in the directions. Treat these as the same ingredient: olive oil / extra-virgin olive oil; salt / kosher salt / sea salt; butter / unsalted butter; onion / onions; flour / all-purpose flour."
+
+        // Note: ingredient deduplication instructions are baked into buildGenerationPrompt
+        // so they don't clutter the user's request string.
 
         streamingText = ""
         do {
-            generatedResult = try await service.ingestFromTextStreaming(description) { chunk in
+            generatedResult = try await service.ingestFromTextStreaming(description, isGeneration: true) { chunk in
                 streamingText += chunk
             }
         } catch {

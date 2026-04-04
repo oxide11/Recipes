@@ -461,7 +461,7 @@ struct MealCard: View {
 
     private var titleRow: some View {
         HStack(spacing: 6) {
-            Text(meal.recipe?.title ?? "Unassigned")
+            Text(meal.displayTitle)
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(Brand.cream)
 
@@ -530,26 +530,8 @@ struct MealCard: View {
                     }
                     .buttonStyle(.plain)
                 } else {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(meal.mealType.displayName)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Text("No recipe assigned")
-                                .font(.subheadline)
-                                .foregroundStyle(.tertiary)
-                        }
-                        Spacer()
-                        Button(role: .destructive) {
-                            modelContext.delete(meal)
-                        } label: {
-                            Image(systemName: "trash")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Remove meal")
-                    }
+                    // Freeform meal (no linked recipe) — show its custom title
+                    titleRow
                 }
             }
 
@@ -747,7 +729,7 @@ struct WeekMealView: View {
                                         .font(.caption)
                                         .foregroundStyle(Brand.warmTan)
                                         .frame(width: 16)
-                                    Text(meal.recipe?.title ?? "Unassigned")
+                                    Text(meal.displayTitle)
                                         .font(.footnote)
                                         .foregroundStyle(Brand.cream)
                                     Spacer()
@@ -967,6 +949,10 @@ struct GenerateMealPlanSheet: View {
         let dietaryRestrictions = profiles.first?.dietaryRestrictions ?? []
         let dietaryNote = dietaryRestrictions.isEmpty ? "" :
             " Dietary needs: \(dietaryRestrictions.map(\.displayName).joined(separator: ", "))."
+        let goalNote = profiles.first.map { p in
+            let goal = p.cookingGoal ?? .greatFood
+            return goal.promptContext.isEmpty ? "" : " \(goal.promptContext)"
+        } ?? ""
 
         return """
         You are a meal planning assistant. Assign meals to the following dates.
@@ -984,10 +970,11 @@ struct GenerateMealPlanSheet: View {
         - Prefer [favorite] recipes where appropriate.
         - Recipes tagged [breakfast], [lunch], or [dinner] must only be assigned to that meal type.
         - Match meal type to recipe suitability (e.g. don't assign a heavy dinner to breakfast).
-        - Include exactly \(novelCount) novel meal suggestion\(novelCount == 1 ? "" : "s") not from the saved list, spread across the plan for variety and discovery.\(dietaryNote) For novel meals set "isNew": true and provide a one-sentence "description". For saved meals omit both fields.
+        - Include exactly \(novelCount) novel meal suggestion\(novelCount == 1 ? "" : "s") not from the saved list, spread across the plan for variety and discovery. Novel meals must vary in cuisine and style — do not suggest multiple dishes with the same ingredient base or flavour theme. Choose simple, classic, universally appealing dishes appropriate to the meal type (e.g. breakfast novel meals should be breakfast food).\(dietaryNote)\(goalNote) For novel meals set "isNew": true and provide a short "description" naming the dish. For saved meals omit both fields.
 
-        Return ONLY a JSON array with no markdown fences and no commentary:
-        [{"date":"YYYY-MM-DD","mealType":"breakfast|lunch|dinner","recipeTitle":"Title","isNew":false}]
+        Return ONLY a JSON array with no markdown fences and no commentary.
+        Saved meal example: {"date":"2025-01-01","mealType":"dinner","recipeTitle":"Exact Recipe Title"}
+        Novel meal example: {"date":"2025-01-02","mealType":"breakfast","recipeTitle":"Scrambled Eggs","isNew":true,"description":"Scrambled eggs"}
         """
     }
 
@@ -1038,11 +1025,14 @@ struct GenerateMealPlanSheet: View {
 
             // Find or generate the recipe
             let recipe: Recipe?
-            if suggestion.isNew == true, let description = suggestion.description {
-                let prompt = "Generate a complete recipe for: \(description.sanitizedForAI). Include title, ingredients with measurements, and step-by-step instructions."
+            // Use description if provided; fall back to recipeTitle so novel meals are
+            // never silently dropped just because the AI omitted the description field.
+            let novelDescription = suggestion.description ?? (suggestion.isNew == true ? suggestion.recipeTitle : nil)
+            if suggestion.isNew == true, let description = novelDescription {
                 do {
-                    let text = try await aiRouter.generateText(prompt: prompt, taskType: .recipeGeneration)
-                    let result = try await ingestionService.ingestFromText(text)
+                    // Use the generation prompt path (not parse) so the AI receives
+                    // a "generate this specific dish" instruction rather than "parse this recipe".
+                    let result = try await ingestionService.ingestFromTextStreaming(description, isGeneration: true) { _ in }
                     let generated = await ingestionService.convertToRecipe(result)
                     modelContext.insert(generated)
                     recipe = generated
@@ -1077,10 +1067,12 @@ struct AddMealView: View {
 
     @State private var selectedMealType: MealType
     @State private var selectedDate: Date
-    @State private var selectedRecipe: Recipe? = nil
+    @State private var query: String = ""
     @State private var showingGenerator = false
+    @State private var showingImport = false
+    @State private var generatorHint: String? = nil
     @State private var lastRecipeCount = 0
-    @State private var searchText = ""
+    @FocusState private var fieldFocused: Bool
 
     init(plan: MealPlan, preselectMealType: MealType = .dinner, preselectDate: Date? = nil) {
         self.plan = plan
@@ -1088,74 +1080,171 @@ struct AddMealView: View {
         _selectedDate = State(initialValue: preselectDate ?? plan.startDate)
     }
 
+    private var trimmed: String { query.trimmingCharacters(in: .whitespaces) }
+
+    // MARK: - Query intent detection
+
+    private enum QueryIntent {
+        case cuisine(Cuisine)   // "italian", "thai", etc.
+        case quick              // "quick", "fast", "easy", "30 min"
+        case title              // plain text — match recipe titles
+    }
+
+    private var queryIntent: QueryIntent {
+        let lower = trimmed.lowercased()
+        // Cuisine: check if any cuisine name is contained in (or equals) the query
+        if let match = Cuisine.allCases.first(where: {
+            let name = $0.rawValue.lowercased()
+            return lower == name || lower.contains(name) || name.contains(lower)
+        }) {
+            return .cuisine(match)
+        }
+        // Speed keywords
+        let quickWords = ["quick", "fast", "easy", "simple", "30 min", "30min", "speedy"]
+        if quickWords.contains(where: { lower.contains($0) }) {
+            return .quick
+        }
+        return .title
+    }
+
+    /// Library recipes that match what the user is typing.
+    private var libraryMatches: [Recipe] {
+        guard !trimmed.isEmpty else { return [] }
+        switch queryIntent {
+        case .cuisine(let cuisine):
+            return recipes.filter { $0.cuisine == cuisine }
+        case .quick:
+            return recipes.filter { $0.totalTimeMinutes > 0 && $0.totalTimeMinutes <= 30 }
+        case .title:
+            return recipes.filter { $0.title.localizedCaseInsensitiveContains(trimmed) }
+        }
+    }
+
+    /// Human-readable section header for library matches.
+    private var libraryMatchesHeader: String {
+        switch queryIntent {
+        case .cuisine(let cuisine): return "\(cuisine.rawValue.capitalized) recipes"
+        case .quick:                return "Under 30 minutes"
+        case .title:                return "From your library"
+        }
+    }
+
+    /// Hint passed to the recipe generator when the user taps Generate.
+    private var generateHint: String {
+        switch queryIntent {
+        case .cuisine(let cuisine):
+            return "\(cuisine.rawValue.capitalized) \(selectedMealType.displayName.lowercased())"
+        case .quick:
+            return "quick \(selectedMealType.displayName.lowercased())"
+        case .title:
+            return trimmed
+        }
+    }
+
+    /// Label for the generate action row.
+    private var generateLabel: String {
+        switch queryIntent {
+        case .cuisine(let cuisine):
+            return libraryMatches.isEmpty
+                ? "Generate a \(cuisine.rawValue.capitalized) recipe"
+                : "Generate another \(cuisine.rawValue.capitalized) recipe"
+        case .quick:
+            return libraryMatches.isEmpty
+                ? "Generate a quick meal"
+                : "Generate another quick meal"
+        case .title:
+            return libraryMatches.isEmpty
+                ? "Generate a recipe for \"\(trimmed)\""
+                : "Generate something like \"\(trimmed)\""
+        }
+    }
+
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Recipe") {
-                    Button {
-                        lastRecipeCount = recipes.count
-                        showingGenerator = true
-                    } label: {
-                        Label("Generate a Recipe", systemImage: "sparkles")
-                            .foregroundStyle(Brand.warmTan)
-                    }
+            VStack(spacing: 0) {
+                // Single smart input — search library or type anything
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(.secondary)
+                    TextField(
+                        mealTypePlaceholder,
+                        text: $query
+                    )
+                    .focused($fieldFocused)
+                    .autocorrectionDisabled()
+                    .submitLabel(.done)
+                    .onSubmit { addFreeform() }
 
-                    if !recipes.isEmpty {
-                        HStack {
-                            Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                            TextField("Search recipes", text: $searchText)
-                                .autocorrectionDisabled()
-                        }
-                    }
-
-                    if recipes.isEmpty {
-                        Text("No recipes yet — generate one above or add some in the Recipes tab.")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                    } else {
-                        let filtered = searchText.isEmpty
-                            ? recipes
-                            : recipes.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
-                        if filtered.isEmpty {
-                            Text("No recipes match \"\(searchText)\"")
+                    if !query.isEmpty {
+                        Button { query = "" } label: {
+                            Image(systemName: "xmark.circle.fill")
                                 .foregroundStyle(.secondary)
-                                .font(.caption)
-                        } else {
-                            ForEach(filtered) { recipe in
-                                Button {
-                                    selectedRecipe = (selectedRecipe?.id == recipe.id) ? nil : recipe
-                                } label: {
-                                    HStack {
-                                        Text(recipe.title)
-                                        Spacer()
-                                        if selectedRecipe?.id == recipe.id {
-                                            Image(systemName: "checkmark").foregroundStyle(.tint)
-                                        }
-                                    }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Color(.secondarySystemGroupedBackground))
+
+                Divider()
+
+                List {
+                    if trimmed.isEmpty {
+                        // No query — show actions and full library
+                        Section {
+                            actionRow(
+                                label: "Generate a Recipe",
+                                icon: "sparkles",
+                                hint: nil
+                            )
+                            actionRow(
+                                label: "Import a Recipe",
+                                icon: "link",
+                                hint: nil,
+                                isImport: true
+                            )
+                        }
+
+                        if !recipes.isEmpty {
+                            Section("Your recipes") {
+                                ForEach(recipes) { recipe in
+                                    recipeRow(recipe)
                                 }
-                                .foregroundStyle(.primary)
                             }
                         }
+                    } else {
+                        // Query active — library matches first, then smart actions
+                        if !libraryMatches.isEmpty {
+                            Section(libraryMatchesHeader) {
+                                ForEach(libraryMatches) { recipe in
+                                    recipeRow(recipe)
+                                }
+                            }
+                        }
+
+                        Section {
+                            // Add freeform — always available when typing
+                            // (skip for cuisine/quick intents — doesn't make sense to add "italian" as a meal name)
+                            if case .title = queryIntent {
+                                Button {
+                                    addFreeform()
+                                } label: {
+                                    Label("Add \"\(trimmed)\"", systemImage: "plus.circle")
+                                        .foregroundStyle(.primary)
+                                }
+                            }
+
+                            // Generate — label and hint are intent-aware
+                            actionRow(
+                                label: generateLabel,
+                                icon: "sparkles",
+                                hint: generateHint
+                            )
+                        }
                     }
                 }
-            }
-            .sheet(isPresented: $showingGenerator) {
-                QuickGenerateView(mealType: selectedMealType)
-            }
-            .onChange(of: recipes.count) { _, newCount in
-                // Auto-add the generated recipe immediately — no need to tap "Add" separately
-                if newCount > lastRecipeCount,
-                   let newest = recipes.max(by: { $0.dateCreated < $1.dateCreated }) {
-                    let meal = PlannedMeal(
-                        mealType: selectedMealType,
-                        date: Calendar.current.startOfDay(for: selectedDate),
-                        recipe: newest,
-                        servings: newest.servings
-                    )
-                    modelContext.insert(meal)
-                    plan.meals.append(meal)
-                    dismiss()
-                }
+                .listStyle(.insetGrouped)
             }
             .navigationTitle("Add \(selectedMealType.displayName)")
             .navigationBarTitleDisplayMode(.inline)
@@ -1163,22 +1252,96 @@ struct AddMealView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
-                        let meal = PlannedMeal(
-                            mealType: selectedMealType,
-                            date: Calendar.current.startOfDay(for: selectedDate),
-                            recipe: selectedRecipe,
-                            servings: selectedRecipe?.servings ?? 1
-                        )
-                        modelContext.insert(meal)
-                        plan.meals.append(meal)
-                        dismiss()
-                    }
-                    .disabled(selectedRecipe == nil)
+            }
+            .onAppear { fieldFocused = true }
+            .sheet(isPresented: $showingGenerator) {
+                QuickGenerateView(mealType: selectedMealType, initialDescription: generatorHint)
+            }
+            .sheet(isPresented: $showingImport) {
+                RecipeImportView()
+            }
+            .onChange(of: recipes.count) { _, newCount in
+                // Auto-add the newest recipe when generated or imported
+                if newCount > lastRecipeCount,
+                   let newest = recipes.max(by: { $0.dateCreated < $1.dateCreated }) {
+                    addMeal(recipe: newest)
                 }
             }
         }
+    }
+
+    // MARK: - Row builders
+
+    @ViewBuilder
+    private func recipeRow(_ recipe: Recipe) -> some View {
+        Button { addMeal(recipe: recipe) } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(recipe.title)
+                        .foregroundStyle(.primary)
+                    Text(recipe.formattedDuration)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func actionRow(label: String, icon: String, hint: String?, isImport: Bool = false) -> some View {
+        Button {
+            if isImport {
+                lastRecipeCount = recipes.count
+                showingImport = true
+            } else {
+                generatorHint = hint
+                lastRecipeCount = recipes.count
+                showingGenerator = true
+            }
+        } label: {
+            Label(label, systemImage: icon)
+                .foregroundStyle(Brand.warmTan)
+        }
+    }
+
+    // MARK: - Actions
+
+    private var mealTypePlaceholder: String {
+        switch selectedMealType {
+        case .breakfast: return "e.g. Bacon and eggs"
+        case .lunch:     return "e.g. Chicken salad"
+        case .dinner:    return "e.g. Pasta carbonara"
+        case .snack:     return "e.g. Apple and peanut butter"
+        default:         return "Search or type anything…"
+        }
+    }
+
+    private func addFreeform() {
+        guard !trimmed.isEmpty else { return }
+        let meal = PlannedMeal(
+            mealType: selectedMealType,
+            date: Calendar.current.startOfDay(for: selectedDate),
+            customTitle: trimmed
+        )
+        modelContext.insert(meal)
+        plan.meals.append(meal)
+        dismiss()
+    }
+
+    private func addMeal(recipe: Recipe) {
+        let meal = PlannedMeal(
+            mealType: selectedMealType,
+            date: Calendar.current.startOfDay(for: selectedDate),
+            recipe: recipe,
+            servings: recipe.servings
+        )
+        modelContext.insert(meal)
+        plan.meals.append(meal)
+        dismiss()
     }
 }
 

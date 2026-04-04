@@ -104,6 +104,7 @@ final class RecipeIngestionService {
         return try parseIngestionResponse(response, source: "text")
     }
 
+    /// Prompt for parsing existing recipe text (copy-paste, URL scrape, etc.)
     private func buildIngestionPrompt(for text: String) -> String {
         """
         Parse this recipe and extract structured data. Return valid JSON with this structure:
@@ -128,11 +129,45 @@ final class RecipeIngestionService {
         """
     }
 
+    /// Prompt for generating a new recipe from a description or request.
+    /// Distinct from `buildIngestionPrompt` — the input here is not existing recipe text;
+    /// it is a user request like "chicken salad" or "quick Italian dinner".
+    private func buildGenerationPrompt(for description: String) -> String {
+        """
+        Generate a complete, practical home-cooked recipe based on this request.
+        Return valid JSON with this exact structure:
+        {
+          "title": "Recipe Name",
+          "servings": 4,
+          "cuisine": "italian",
+          "prepTimeMinutes": 15,
+          "cookTimeMinutes": 30,
+          "ingredients": [{"name": "Chicken breast", "amount": "2", "preparation": "diced"}],
+          "directions": ["Step 1", "Step 2"],
+          "dietaryInfo": [],
+          "nutritionPerServing": {"calories": 350, "proteinGrams": 12, "carbsGrams": 45, "fatGrams": 14}
+        }
+
+        The recipe must match the request closely — if the user asked for chicken salad, \
+        return a chicken salad recipe. Do not substitute a different dish.
+        Keep ingredients to 10 or fewer. Everyday cooking, not restaurant food.
+        If an ingredient is used in different amounts at different stages, list it ONCE \
+        with the total quantity and split the amounts in the directions. \
+        Treat these as the same ingredient: olive oil / extra-virgin olive oil; \
+        salt / kosher salt / sea salt; butter / unsalted butter; onion / onions; \
+        flour / all-purpose flour.
+
+        Request: \(description.sanitizedForAI)
+        """
+    }
+
     /// Streaming variant — calls `onChunk` with each text fragment as it arrives,
     /// then returns the fully parsed result. Use this to show live progress in the UI.
-    func ingestFromTextStreaming(_ text: String, onChunk: @escaping (String) -> Void) async throws -> RecipeIngestionResult {
+    /// - Parameter isGeneration: `true` when the input is a user description/request
+    ///   (generates a new recipe); `false` when parsing existing recipe text.
+    func ingestFromTextStreaming(_ text: String, isGeneration: Bool = false, onChunk: @escaping (String) -> Void) async throws -> RecipeIngestionResult {
         isProcessing = true
-        progress = "Generating recipe…"
+        progress = isGeneration ? "Generating recipe…" : "Parsing recipe…"
         defer { isProcessing = false; progress = nil }
 
         // Try on-device structured parsing first (yields result as single chunk)
@@ -149,13 +184,13 @@ final class RecipeIngestionService {
             }
         }
 
-        let prompt = buildIngestionPrompt(for: text)
+        let prompt = isGeneration ? buildGenerationPrompt(for: text) : buildIngestionPrompt(for: text)
         var accumulated = ""
         for try await chunk in aiRouter.generateTextStreaming(prompt: prompt, taskType: .recipeIngestion) {
             accumulated += chunk
             onChunk(chunk)
         }
-        return try parseIngestionResponse(accumulated, source: "ai-generate")
+        return try parseIngestionResponse(accumulated, source: isGeneration ? "ai-generate" : "text")
     }
 
     // MARK: - Image Compression

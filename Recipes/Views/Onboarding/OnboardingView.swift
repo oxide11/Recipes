@@ -10,6 +10,7 @@ struct OnboardingView: View {
 
     @State private var step: OnboardingStep = .welcome
     @State private var name = ""
+    @State private var selectedGoal: CookingGoal = .greatFood
     @State private var selectedCuisines: Set<Cuisine> = []
     @State private var selectedRestrictions: Set<DietaryRestriction> = []
     @State private var pantryIngredients: [String] = []
@@ -20,7 +21,7 @@ struct OnboardingView: View {
     @State private var isFinishing = false
 
     private enum OnboardingStep: Int, CaseIterable {
-        case welcome, style, table, kitchen
+        case welcome, goals, style, table, kitchen
     }
 
     /// Cuisines shown in the onboarding picker.
@@ -49,6 +50,7 @@ struct OnboardingView: View {
                 // our own animated capsule dots above.
                 TabView(selection: $step) {
                     welcomeStep.tag(OnboardingStep.welcome)
+                    goalsStep.tag(OnboardingStep.goals)
                     styleStep.tag(OnboardingStep.style)
                     tableStep.tag(OnboardingStep.table)
                     kitchenStep.tag(OnboardingStep.kitchen)
@@ -63,7 +65,8 @@ struct OnboardingView: View {
                     case .decrement:
                         switch step {
                         case .welcome:  break
-                        case .style:    step = .welcome
+                        case .goals:    step = .welcome
+                        case .style:    step = .goals
                         case .table:    step = .style
                         case .kitchen:  step = .table
                         }
@@ -77,6 +80,8 @@ struct OnboardingView: View {
         // Using oldStep == .table means a back-swipe then re-forward-swipe
         // correctly recomputes if cuisine/dietary selections changed.
         .onChange(of: step) { oldStep, newStep in
+            // Pre-populate pantry whenever the user arrives at the kitchen step
+            // (forward or after changing cuisine/dietary selections mid-flow).
             if newStep == .kitchen && oldStep == .table {
                 pantryIngredients = PantryStarterKit.ingredients(
                     for: Array(selectedCuisines),
@@ -108,7 +113,8 @@ struct OnboardingView: View {
 
     private func advance() {
         switch step {
-        case .welcome:  step = .style
+        case .welcome:  step = .goals
+        case .goals:    step = .style
         case .style:    step = .table
         case .table:    step = .kitchen   // side effect handled by onChange(of: step)
         case .kitchen:  finish()
@@ -122,7 +128,7 @@ struct OnboardingView: View {
             Spacer()
 
             VStack(spacing: 24) {
-                Image(systemName: "sparkles")
+                Image(systemName: "house")
                     .font(.system(size: 56))
                     .foregroundStyle(Brand.herbGreen)
                     .accessibilityHidden(true)
@@ -163,7 +169,68 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Screen 2: Your Style
+    // MARK: - Screen 2: Your Goal
+
+    private var goalsStep: some View {
+        VStack(spacing: 0) {
+            stepHeading(
+                title: "What's your goal?",
+                subtitle: "This shapes what gets suggested to you."
+            )
+
+            ScrollView {
+                VStack(spacing: 10) {
+                    ForEach(CookingGoal.allCases, id: \.self) { goal in
+                        goalCard(goal)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+            }
+
+            continueButton(label: "Continue") { advance() }
+                .padding(.horizontal, 32)
+                .padding(.bottom, 40)
+                .padding(.top, 8)
+        }
+    }
+
+    private func goalCard(_ goal: CookingGoal) -> some View {
+        let selected = selectedGoal == goal
+        return Button {
+            withAnimation(.spring(duration: 0.2)) {
+                selectedGoal = goal
+            }
+        } label: {
+            HStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(goal.title)
+                        .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                        .foregroundStyle(selected ? Brand.midnight : Brand.cream)
+                    Text(goal.description)
+                        .font(.system(.caption, design: .rounded))
+                        .foregroundStyle(selected ? Brand.midnight.opacity(0.7) : Brand.muted)
+                }
+                Spacer()
+                Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(selected ? Brand.midnight : Brand.muted.opacity(0.4))
+                    .font(.system(size: 20))
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 14)
+            .background(selected ? Brand.herbGreen : Brand.surface, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(selected ? Color.clear : Brand.border, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(goal.title). \(goal.description)")
+        .accessibilityHint(selected ? "Selected" : "Double tap to select")
+        .accessibilityAddTraits(selected ? [.isSelected] : [])
+    }
+
+    // MARK: - Screen 3: Your Style
 
     private var styleStep: some View {
         VStack(spacing: 0) {
@@ -210,6 +277,17 @@ struct OnboardingView: View {
         .accessibilityHint(selected ? "Double tap to deselect" : "Double tap to select")
     }
 
+    // Common intolerances and beliefs — shown by default
+    private static let commonRestrictions: [DietaryRestriction] = [
+        .vegetarian, .vegan, .pescatarian, .glutenFree, .dairyFree, .nutFree, .halal, .kosher
+    ]
+    // Lifestyle/protocol diets — hidden under "More options"
+    private static let lifestyleRestrictions: [DietaryRestriction] = [
+        .keto, .paleo, .whole30, .fodmap, .lowCarb, .lowSodium
+    ]
+
+    @State private var showMoreRestrictions = false
+
     // MARK: - Screen 3: Your Table
 
     private var tableStep: some View {
@@ -220,43 +298,55 @@ struct OnboardingView: View {
             )
 
             ScrollView {
-                FlowLayout(spacing: 10) {
-                    // "None" chip — prominent if nothing is selected
-                    let noneSelected = selectedRestrictions.isEmpty
-                    Button {
-                        withAnimation { selectedRestrictions.removeAll() }
-                    } label: {
-                        Text("None")
-                            .font(.system(.subheadline, design: .rounded, weight: .medium))
-                            .foregroundStyle(noneSelected ? Brand.midnight : Brand.cream)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(noneSelected ? Brand.herbGreen : Brand.surface, in: Capsule())
-                            .overlay(Capsule().stroke(noneSelected ? Color.clear : Brand.border, lineWidth: 1))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("None\(noneSelected ? ", selected" : "")")
-                    .accessibilityHint(noneSelected ? "Selected" : "Double tap to clear all restrictions")
-
-                    ForEach(DietaryRestriction.allCases, id: \.self) { restriction in
-                        let selected = selectedRestrictions.contains(restriction)
+                VStack(alignment: .leading, spacing: 16) {
+                    FlowLayout(spacing: 10) {
+                        // "None" chip — prominent if nothing is selected
+                        let noneSelected = selectedRestrictions.isEmpty
                         Button {
-                            withAnimation {
-                                if selected { selectedRestrictions.remove(restriction) }
-                                else { selectedRestrictions.insert(restriction) }
-                            }
+                            withAnimation { selectedRestrictions.removeAll() }
                         } label: {
-                            Text(restriction.displayName)
+                            Text("None")
                                 .font(.system(.subheadline, design: .rounded, weight: .medium))
-                                .foregroundStyle(selected ? Brand.midnight : Brand.cream)
+                                .foregroundStyle(noneSelected ? Brand.midnight : Brand.cream)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 10)
-                                .background(selected ? Brand.herbGreen : Brand.surface, in: Capsule())
-                                .overlay(Capsule().stroke(selected ? Color.clear : Brand.border, lineWidth: 1))
+                                .background(noneSelected ? Brand.herbGreen : Brand.surface, in: Capsule())
+                                .overlay(Capsule().stroke(noneSelected ? Color.clear : Brand.border, lineWidth: 1))
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("\(restriction.displayName)\(selected ? ", selected" : "")")
-                        .accessibilityHint(selected ? "Double tap to deselect" : "Double tap to select")
+                        .accessibilityLabel("None\(noneSelected ? ", selected" : "")")
+                        .accessibilityHint(noneSelected ? "Selected" : "Double tap to clear all restrictions")
+
+                        ForEach(Self.commonRestrictions, id: \.self) { restriction in
+                            dietaryChip(restriction)
+                        }
+                    }
+
+                    // "More options" expander for lifestyle/protocol diets
+                    VStack(alignment: .leading, spacing: 10) {
+                        Button {
+                            withAnimation(.spring(duration: 0.3)) { showMoreRestrictions.toggle() }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text(showMoreRestrictions ? "Fewer options" : "More options")
+                                    .font(.system(.subheadline, design: .rounded, weight: .medium))
+                                    .foregroundStyle(Brand.muted)
+                                Image(systemName: showMoreRestrictions ? "chevron.up" : "chevron.down")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(Brand.muted)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint(showMoreRestrictions ? "Double tap to collapse" : "Double tap to show keto, paleo, and more")
+
+                        if showMoreRestrictions {
+                            FlowLayout(spacing: 10) {
+                                ForEach(Self.lifestyleRestrictions, id: \.self) { restriction in
+                                    dietaryChip(restriction)
+                                }
+                            }
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
                     }
                 }
                 .padding(.horizontal, 24)
@@ -268,6 +358,27 @@ struct OnboardingView: View {
                 .padding(.bottom, 40)
                 .padding(.top, 8)
         }
+    }
+
+    private func dietaryChip(_ restriction: DietaryRestriction) -> some View {
+        let selected = selectedRestrictions.contains(restriction)
+        return Button {
+            withAnimation {
+                if selected { selectedRestrictions.remove(restriction) }
+                else { selectedRestrictions.insert(restriction) }
+            }
+        } label: {
+            Text(restriction.displayName)
+                .font(.system(.subheadline, design: .rounded, weight: .medium))
+                .foregroundStyle(selected ? Brand.midnight : Brand.cream)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(selected ? Brand.herbGreen : Brand.surface, in: Capsule())
+                .overlay(Capsule().stroke(selected ? Color.clear : Brand.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(restriction.displayName)\(selected ? ", selected" : "")")
+        .accessibilityHint(selected ? "Double tap to deselect" : "Double tap to select")
     }
 
     // MARK: - Screen 4: Your Kitchen
@@ -538,6 +649,7 @@ struct OnboardingView: View {
             preferredCuisines: Array(selectedCuisines),
             skillLevel: .intermediate
         )
+        profile.cookingGoal = selectedGoal
         modelContext.insert(profile)
 
         // 2. Seed pantry items as staples.
@@ -602,7 +714,7 @@ struct OnboardingView: View {
             Include precise measurements, clear steps, and estimated nutrition per serving.\(dietaryClause)
             """
             do {
-                let result = try await service.ingestFromTextStreaming(prompt) { _ in }
+                let result = try await service.ingestFromTextStreaming(prompt, isGeneration: true) { _ in }
                 let recipe = await service.convertToRecipe(result)
                 modelContext.insert(recipe)
             } catch {

@@ -1,27 +1,24 @@
 import SwiftUI
 
-// MARK: - Plan & Shop Segments
+// MARK: - Cook Segments (Recipes ↔ Meal Plan)
 
-enum PlanAndShopSegment: String, CaseIterable {
-    case pantry   = "Pantry"
+enum CookSegment: String, CaseIterable {
+    case recipes  = "Recipes"
     case mealPlan = "Meal Plan"
-    case shopping = "Shopping"
 }
 
-// MARK: - Plan & Shop View
+// MARK: - Cook View
 
-/// Combined tab: Pantry → Meal Plan → Shopping.
-/// All three sub-views are kept alive simultaneously (opacity swap) so their
+/// Combined tab: Recipes ↔ Meal Plan.
+/// Both sub-views are kept alive simultaneously (opacity swap) so their
 /// @Query properties stay warm — no cold-start stutter when switching segments.
-struct PlanAndShopView: View {
-    /// Lifted to ContentView so the dashboard can jump directly to a segment.
-    @Binding var segment: PlanAndShopSegment
+struct CookView: View {
+    @Binding var segment: CookSegment
 
     var body: some View {
         VStack(spacing: 0) {
-            // Segmented picker
             Picker("Section", selection: $segment) {
-                ForEach(PlanAndShopSegment.allCases, id: \.self) { s in
+                ForEach(CookSegment.allCases, id: \.self) { s in
                     Text(s.rawValue).tag(s)
                 }
             }
@@ -30,25 +27,60 @@ struct PlanAndShopView: View {
             .padding(.top, 8)
             .padding(.bottom, 4)
 
-            // All three views rendered at once — only the active one is visible.
-            // This keeps @Query caches warm so segment switches are instant.
-            // Inactive views get .ignoresSafeArea(.keyboard) so they don't
-            // participate in keyboard-avoidance layout when another segment
-            // has a focused text field.
+            ZStack {
+                RecipeListView()
+                    .opacity(segment == .recipes ? 1 : 0)
+                    .allowsHitTesting(segment == .recipes)
+                    .ignoresSafeArea(segment == .recipes ? [] : .keyboard)
+                MealPlanView()
+                    .opacity(segment == .mealPlan ? 1 : 0)
+                    .allowsHitTesting(segment == .mealPlan)
+                    .ignoresSafeArea(segment == .mealPlan ? [] : .keyboard)
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
+
+// MARK: - Pantry & Shop Segments (Pantry ↔ Shopping)
+
+enum PantryShopSegment: String, CaseIterable {
+    case pantry   = "Pantry"
+    case shopping = "Shopping"
+}
+
+// MARK: - Pantry & Shop View
+
+/// Combined tab: Pantry ↔ Shopping list.
+/// Both sub-views are kept alive simultaneously (opacity swap) so their
+/// @Query properties stay warm — no cold-start stutter when switching segments.
+struct PantryShopView: View {
+    @Binding var segment: PantryShopSegment
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Picker("Section", selection: $segment) {
+                ForEach(PantryShopSegment.allCases, id: \.self) { s in
+                    Text(s.rawValue).tag(s)
+                }
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+            .padding(.top, 8)
+            .padding(.bottom, 4)
+
             ZStack {
                 PantryView()
                     .opacity(segment == .pantry ? 1 : 0)
                     .allowsHitTesting(segment == .pantry)
                     .ignoresSafeArea(segment == .pantry ? [] : .keyboard)
-                MealPlanView()
-                    .opacity(segment == .mealPlan ? 1 : 0)
-                    .allowsHitTesting(segment == .mealPlan)
-                    .ignoresSafeArea(segment == .mealPlan ? [] : .keyboard)
                 ShoppingListView()
                     .opacity(segment == .shopping ? 1 : 0)
                     .allowsHitTesting(segment == .shopping)
                     .ignoresSafeArea(segment == .shopping ? [] : .keyboard)
             }
         }
+        .accessibilityElement(children: .contain)
     }
 }
+

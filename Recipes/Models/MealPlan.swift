@@ -63,6 +63,13 @@ final class PlannedMeal {
     var servings: Int
     var notes: String?
     var isAISuggested: Bool
+    /// Free-text name for meals that don't have a saved recipe (e.g. "Bacon and eggs")
+    var customTitle: String?
+
+    /// The name to display for this meal regardless of whether it has a recipe.
+    var displayTitle: String {
+        customTitle ?? recipe?.title ?? "Unnamed meal"
+    }
 
     /// True when the recipe has a cooking log entry on this meal's date.
     /// Derived — not persisted by SwiftData.
@@ -80,7 +87,8 @@ final class PlannedMeal {
         variation: RecipeVariation? = nil,
         servings: Int = 1,
         notes: String? = nil,
-        isAISuggested: Bool = false
+        isAISuggested: Bool = false,
+        customTitle: String? = nil
     ) {
         self.id = UUID()
         self.mealType = mealType
@@ -90,6 +98,7 @@ final class PlannedMeal {
         self.servings = servings
         self.notes = notes
         self.isAISuggested = isAISuggested
+        self.customTitle = customTitle
     }
 }
 
