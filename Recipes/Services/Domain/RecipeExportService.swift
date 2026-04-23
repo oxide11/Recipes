@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import PDFKit
 
 // MARK: - Recipe Export Service
 
@@ -14,6 +15,16 @@ enum RecipeExportService {
         let pageHeight: CGFloat = 792
         let margin: CGFloat = 50
         let contentWidth = pageWidth - margin * 2
+
+        // PDFs render on a white background, but dynamic colors like UIColor.label
+        // resolve to white in dark mode — which makes every text element invisible.
+        // Resolve once to light-mode variants so the doc is legible regardless of
+        // the app's current appearance.
+        let lightTraits = UITraitCollection(userInterfaceStyle: .light)
+        let labelColor = UIColor.label.resolvedColor(with: lightTraits)
+        let secondaryColor = UIColor.secondaryLabel.resolvedColor(with: lightTraits)
+        let tertiaryColor = UIColor.tertiaryLabel.resolvedColor(with: lightTraits)
+        let separatorColor = UIColor.separator.resolvedColor(with: lightTraits)
 
         let renderer = UIGraphicsPDFRenderer(
             bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
@@ -33,7 +44,7 @@ enum RecipeExportService {
                 let path = UIBezierPath()
                 path.move(to: CGPoint(x: margin, y: cursorY))
                 path.addLine(to: CGPoint(x: pageWidth - margin, y: cursorY))
-                UIColor.separator.setStroke()
+                separatorColor.setStroke()
                 path.lineWidth = 0.5
                 path.stroke()
                 cursorY += 12
@@ -46,7 +57,7 @@ enum RecipeExportService {
             // Title
             let titleAttrs: [NSAttributedString.Key: Any] = [
                 .font: UIFont.systemFont(ofSize: 28, weight: .bold),
-                .foregroundColor: UIColor.label
+                .foregroundColor: labelColor
             ]
             let titleRect = CGRect(x: margin, y: cursorY, width: contentWidth, height: 40)
             (recipe.title as NSString).draw(in: titleRect, withAttributes: titleAttrs)
@@ -56,7 +67,7 @@ enum RecipeExportService {
             if let summary = recipe.summary, !summary.isEmpty {
                 let summaryAttrs: [NSAttributedString.Key: Any] = [
                     .font: UIFont.systemFont(ofSize: 13, weight: .regular),
-                    .foregroundColor: UIColor.secondaryLabel
+                    .foregroundColor: secondaryColor
                 ]
                 let summarySize = (summary as NSString).boundingRect(
                     with: CGSize(width: contentWidth, height: .greatestFiniteMagnitude),
@@ -74,7 +85,7 @@ enum RecipeExportService {
             // Metadata row
             let metaAttrs: [NSAttributedString.Key: Any] = [
                 .font: UIFont.systemFont(ofSize: 11, weight: .medium),
-                .foregroundColor: UIColor.secondaryLabel
+                .foregroundColor: secondaryColor
             ]
             let metaText = [
                 "Cuisine: \(recipe.cuisine.rawValue.capitalized)",
@@ -93,11 +104,11 @@ enum RecipeExportService {
             // Section header helper
             let sectionAttrs: [NSAttributedString.Key: Any] = [
                 .font: UIFont.systemFont(ofSize: 18, weight: .semibold),
-                .foregroundColor: UIColor.label
+                .foregroundColor: labelColor
             ]
             let bodyAttrs: [NSAttributedString.Key: Any] = [
                 .font: UIFont.systemFont(ofSize: 12, weight: .regular),
-                .foregroundColor: UIColor.label
+                .foregroundColor: labelColor
             ]
 
             func drawSectionHeader(_ text: String) {
@@ -181,7 +192,7 @@ enum RecipeExportService {
             cursorY += 12
             let footerAttrs: [NSAttributedString.Key: Any] = [
                 .font: UIFont.systemFont(ofSize: 9, weight: .light),
-                .foregroundColor: UIColor.tertiaryLabel
+                .foregroundColor: tertiaryColor
             ]
             let footerText = "Exported from Recipes on \(Self.formattedDate())"
             let footerRect = CGRect(x: margin, y: cursorY, width: contentWidth, height: 14)
@@ -536,9 +547,9 @@ struct RecipeExportView: View {
 
     @State private var selectedFormat: RecipeExportFormat = .pdf
     @State private var previewImage: UIImage?
+    @State private var previewPDFDocument: PDFDocument?
     @State private var plainTextPreview: String = ""
-    @State private var shareActivityItems: [Any] = []
-    @State private var showShareSheet = false
+    @State private var exportPayload: ExportPayload?
     @State private var isGenerating = false
 
     var body: some View {
@@ -561,10 +572,8 @@ struct RecipeExportView: View {
             .onAppear {
                 updatePreview()
             }
-            .sheet(isPresented: $showShareSheet) {
-                if !shareActivityItems.isEmpty {
-                    ShareSheet(activityItems: shareActivityItems)
-                }
+            .sheet(item: $exportPayload) { payload in
+                ShareSheet(activityItems: payload.items)
             }
         }
     }
@@ -621,19 +630,18 @@ struct RecipeExportView: View {
     }
 
     private var pdfPreview: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "doc.richtext")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text("PDF Document")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Text(recipe.title)
-                .font(.caption)
-                .foregroundStyle(.tertiary)
+        Group {
+            if let document = previewPDFDocument {
+                PDFPreviewView(document: document)
+                    .frame(minHeight: 360)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .padding(8)
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, minHeight: 200)
+                    .padding()
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding()
     }
 
     private var cardImagePreview: some View {
@@ -690,33 +698,43 @@ struct RecipeExportView: View {
         case .pdf:
             previewImage = nil
             plainTextPreview = ""
+            let data = RecipeExportService.generatePDF(from: recipe)
+            previewPDFDocument = PDFDocument(data: data)
         case .cardImage:
             previewImage = RecipeExportService.generateCardImage(from: recipe)
+            previewPDFDocument = nil
             plainTextPreview = ""
         case .plainText:
             previewImage = nil
+            previewPDFDocument = nil
             plainTextPreview = RecipeExportService.generatePlainText(from: recipe)
         }
     }
 
     private func performExport() {
         isGenerating = true
+        let items: [Any]
         switch selectedFormat {
         case .pdf:
-            let data = RecipeExportService.generatePDF(from: recipe)
-            shareActivityItems = [data]
+            items = [RecipeExportService.generatePDF(from: recipe)]
         case .cardImage:
-            let image = previewImage ?? RecipeExportService.generateCardImage(from: recipe)
-            shareActivityItems = [image]
+            items = [previewImage ?? RecipeExportService.generateCardImage(from: recipe)]
         case .plainText:
             let text = plainTextPreview.isEmpty
                 ? RecipeExportService.generatePlainText(from: recipe)
                 : plainTextPreview
-            shareActivityItems = [text]
+            items = [text]
         }
         isGenerating = false
-        showShareSheet = true
+        exportPayload = ExportPayload(items: items)
     }
+}
+
+// MARK: - Export Payload
+
+private struct ExportPayload: Identifiable {
+    let id = UUID()
+    let items: [Any]
 }
 
 // MARK: - Share Sheet (UIKit Bridge)
@@ -729,4 +747,23 @@ private struct ShareSheet: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+// MARK: - PDF Preview (PDFKit Bridge)
+
+private struct PDFPreviewView: UIViewRepresentable {
+    let document: PDFDocument
+
+    func makeUIView(context: Context) -> PDFView {
+        let view = PDFView()
+        view.autoScales = true
+        view.displayMode = .singlePageContinuous
+        view.backgroundColor = .systemBackground
+        view.document = document
+        return view
+    }
+
+    func updateUIView(_ view: PDFView, context: Context) {
+        view.document = document
+    }
 }

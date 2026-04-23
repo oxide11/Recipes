@@ -491,16 +491,31 @@ final class RecipeIngestionService {
             $0.rawValue.lowercased() == result.cuisine?.lowercased()
         } ?? .other
 
-        let ingredients = result.ingredients.map { parsed in
+        let ingredients: [Ingredient] = result.ingredients.flatMap { parsed -> [Ingredient] in
             let amount = parseAmount(parsed.amount)
+            // If the AI combined assumed staples into one line ("salt and
+            // black ground pepper"), split them into separate Ingredient
+            // entries so each can be matched and styled independently.
+            let lowerName = parsed.name.lowercased()
+            let hasCompoundSeparator = lowerName.contains(" and ") ||
+                                       parsed.name.contains(",") ||
+                                       parsed.name.contains("&")
+            if hasCompoundSeparator,
+               IngredientNormalizer.isAssumedStaple(parsed.name) {
+                return splitStapleCompound(
+                    parsed.name,
+                    amount: amount,
+                    preparation: parsed.preparation
+                )
+            }
             let name = parsed.name.prefix(1).uppercased() + parsed.name.dropFirst()
-            let category = inferIngredientCategory(name)
-            return Ingredient(
-                name: name,
+            let category = inferIngredientCategory(String(name))
+            return [Ingredient(
+                name: String(name),
                 category: category,
                 amount: amount,
                 notes: parsed.preparation
-            )
+            )]
         }
 
         var seenIngredients = Set<String>()
@@ -1049,6 +1064,32 @@ final class RecipeIngestionService {
         }
 
         return IngredientAmount(quantity: total, unit: unit)
+    }
+
+    /// Split a compound assumed-staple string like "salt and black ground
+    /// pepper" into a separate Ingredient per component. Only called when
+    /// IngredientNormalizer.isAssumedStaple confirms every part is a staple,
+    /// so this can't accidentally split "cream of mushroom and chicken".
+    private func splitStapleCompound(
+        _ name: String,
+        amount: IngredientAmount,
+        preparation: String?
+    ) -> [Ingredient] {
+        let parts = name.lowercased()
+            .components(separatedBy: CharacterSet(charactersIn: ",&"))
+            .flatMap { $0.components(separatedBy: " and ") }
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+        return parts.map { part in
+            let display = part.prefix(1).uppercased() + part.dropFirst()
+            let category = inferIngredientCategory(String(display))
+            return Ingredient(
+                name: String(display),
+                category: category,
+                amount: amount,
+                notes: preparation
+            )
+        }
     }
 
     private func parseAmount(_ amountString: String) -> IngredientAmount {

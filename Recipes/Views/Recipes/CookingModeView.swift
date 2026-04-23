@@ -21,7 +21,7 @@ struct CookingModeView: View {
     @State private var stepTimerTasks: [Int: Task<Void, Never>] = [:]
     @State private var stepLiveActivities: [Int: CookingTimerLiveActivityManager] = [:]
     @State private var checkedIngredients: [Int: Set<String>] = [:]  // stepIndex → ingredient names
-    @State private var isVoiceEnabled = true
+    @AppStorage("cookingModeVoiceEnabled") private var isVoiceEnabled = true
     @State private var showingTutorial = false
     @State private var selectedConversion: DirectionIngredientRef?
     @AppStorage("hasSeenCookingModeTutorial") private var hasSeenTutorial = false
@@ -442,7 +442,17 @@ struct CookingModeView: View {
             Button {
                 isVoiceEnabled.toggle()
                 if !isVoiceEnabled {
+                    // Stop any active utterance and tear down the audio session so a
+                    // queued-but-not-yet-playing utterance can't sneak through.
+                    // Audio session deactivation can take ~100ms — run it off-main
+                    // so the button state flips visually without waiting.
                     synthesizer.stopSpeaking(at: .immediate)
+                    Task.detached {
+                        try? AVAudioSession.sharedInstance().setActive(
+                            false,
+                            options: .notifyOthersOnDeactivation
+                        )
+                    }
                 }
             } label: {
                 Image(systemName: isVoiceEnabled ? "speaker.wave.3.fill" : "speaker.slash.fill")
@@ -519,6 +529,8 @@ struct CookingModeView: View {
     }
 
     private func speakStep(_ step: RecipeDirection) {
+        guard isVoiceEnabled else { return }
+
         // Override mute switch so cooking guidance plays like navigation audio
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .voicePrompt, options: .duckOthers)
         try? AVAudioSession.sharedInstance().setActive(true)

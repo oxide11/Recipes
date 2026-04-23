@@ -13,11 +13,111 @@ enum IngredientNormalizer {
     }
 
     /// Normalize and collapse known synonym forms to a single canonical name.
-    /// "extra-virgin olive oil" → "olive oil", "kosher salt" → "salt", etc.
+    /// Pipeline: lowercase/trim → strip leading size adjective → singularize
+    /// → apply synonymMap. So "2 Medium Onions" arrives as "onion", which also
+    /// matches "yellow onion", "red onion", and friends from the synonym map.
     static func canonicalize(_ name: String) -> String {
-        let normalized = normalize(name)
-        return synonymMap[normalized] ?? normalized
+        var working = normalize(name)
+        working = stripLeadingSize(working)
+        working = singularize(working)
+        return synonymMap[working] ?? working
     }
+
+    // MARK: - Assumed Staples
+
+    /// Basic pantry items assumed to always be on hand. Shopping list
+    /// generation should skip these rather than asking the user to "buy salt."
+    static let assumedStaples: Set<String> = [
+        "water", "ice", "ice water", "cold water", "boiling water", "hot water",
+        "salt", "kosher salt", "sea salt", "table salt", "coarse salt", "fine salt",
+        "pepper", "black pepper", "white pepper",
+        "ground pepper", "ground black pepper", "ground white pepper",
+        "cracked pepper", "cracked black pepper", "freshly ground pepper",
+        "freshly ground black pepper",
+        "salt and pepper", "salt & pepper",
+    ]
+
+    /// Returns true if the ingredient is a basic staple (or a compound like
+    /// "salt and pepper" where every component is a staple). Handles common
+    /// recipe shorthand like "salt, pepper, water to taste".
+    static func isAssumedStaple(_ name: String) -> Bool {
+        let normalized = normalize(name)
+        if assumedStaples.contains(normalized) { return true }
+        if assumedStaples.contains(canonicalize(name)) { return true }
+
+        // Split compound ingredients on commas, ampersands, or " and "
+        let parts = normalized
+            .components(separatedBy: CharacterSet(charactersIn: ",&"))
+            .flatMap { $0.components(separatedBy: " and ") }
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+        guard parts.count > 1 else { return false }
+        return parts.allSatisfy {
+            assumedStaples.contains($0) || assumedStaples.contains(canonicalize($0))
+        }
+    }
+
+    // MARK: - Size / Plural Normalization
+
+    /// Strip leading size adjectives ("medium onion" → "onion"). Only leading —
+    /// we don't want to strip "large" from names where it's actually part of
+    /// the ingredient ("large-leaf spinach" is unusual but plausible).
+    private static func stripLeadingSize(_ name: String) -> String {
+        let sizePrefixes = [
+            "extra-large ", "extra large ",
+            "extra-small ", "extra small ",
+            "jumbo ", "large ", "medium ", "small ", "baby "
+        ]
+        for prefix in sizePrefixes where name.hasPrefix(prefix) {
+            return String(name.dropFirst(prefix.count))
+        }
+        return name
+    }
+
+    /// Convert plural → singular using a hybrid rule:
+    /// 1. Irregular plurals table (tomatoes → tomato, leaves → leaf)
+    /// 2. Non-plural allowlist (lettuce, asparagus — don't strip trailing s)
+    /// 3. `-ies` → `-y` (berries → berry)
+    /// 4. Naïve trailing `s` drop, guarded on length and `-ss` endings
+    static func singularize(_ name: String) -> String {
+        if let irregular = irregularPlurals[name] { return irregular }
+        if nonPlurals.contains(name) { return name }
+
+        if name.hasSuffix("ies") && name.count > 4 {
+            return String(name.dropLast(3)) + "y"
+        }
+        if name.hasSuffix("s") && !name.hasSuffix("ss") && name.count > 3 {
+            return String(name.dropLast())
+        }
+        return name
+    }
+
+    /// Irregular plural forms common in cooking. Add entries here rather than
+    /// overloading the synonymMap — these are pure grammatical variants.
+    private static let irregularPlurals: [String: String] = [
+        "tomatoes": "tomato",
+        "potatoes": "potato",
+        "avocados": "avocado",
+        "mangoes": "mango",
+        "leaves": "leaf",
+        "loaves": "loaf",
+        "halves": "half",
+        "knives": "knife",
+        "shelves": "shelf",
+        "lives": "life",
+        "wolves": "wolf",
+        "geese": "goose",
+        "mice": "mouse",
+        "children": "child",
+    ]
+
+    /// Words that end in `s` but are singular or mass nouns. Never strip.
+    private static let nonPlurals: Set<String> = [
+        "lettuce", "asparagus", "molasses", "couscous", "hummus", "focaccia",
+        "watercress", "cress", "iris",
+        "bus", "gas", "plus", "minus", "pious",
+        "swiss", "brussels",  // brussels sprouts handled at synonym layer
+    ]
 
     // Maps every variant spelling/qualifier to one canonical ingredient name.
     static let synonymMap: [String: String] = [

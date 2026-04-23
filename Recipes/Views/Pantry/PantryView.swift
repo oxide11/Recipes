@@ -45,7 +45,6 @@ struct PantryView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var items: [PantryItem]
-    @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
     @Query private var profiles: [UserProfile]
 
     @State private var showingScanner = false
@@ -283,7 +282,7 @@ struct PantryView: View {
                 if !items.isEmpty {
                     Section {
                         NavigationLink {
-                            NoWasteResultsView(recipes: recipes, pantryItems: items)
+                            NoWasteSheetContent(pantryItems: items, expiringOnly: false)
                         } label: {
                             Label {
                                 VStack(alignment: .leading) {
@@ -360,7 +359,7 @@ struct PantryView: View {
         } // ScrollViewReader
         } // VStack
             .navigationTitle("Pantry")
-            .searchable(text: $searchText, prompt: "Search pantry...")
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search pantry...")
             .onAppear { if startWithAddSheet { showingAddItem = true } }
             .toolbarBackground(.automatic, for: .navigationBar)
             .toolbar {
@@ -409,19 +408,34 @@ struct PantryView: View {
             }
             .sheet(isPresented: $showingNoWasteResults) {
                 NavigationStack {
-                    NoWasteResultsView(
-                        recipes: recipes,
-                        pantryItems: items,
-                        expiringOnly: true
-                    )
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Close") { showingNoWasteResults = false }
+                    NoWasteSheetContent(pantryItems: items, expiringOnly: true)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Close") { showingNoWasteResults = false }
+                            }
                         }
-                    }
                 }
         }
         }
+    }
+}
+
+// MARK: - No Waste Sheet Content
+
+/// Wraps NoWasteResultsView with its own @Query for recipes so the fetch
+/// doesn't happen on initial PantryView load — only when the user actually
+/// opens "What Can I Make" or the expiring-items sheet.
+private struct NoWasteSheetContent: View {
+    @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
+    let pantryItems: [PantryItem]
+    let expiringOnly: Bool
+
+    var body: some View {
+        NoWasteResultsView(
+            recipes: recipes,
+            pantryItems: pantryItems,
+            expiringOnly: expiringOnly
+        )
     }
 }
 

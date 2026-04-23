@@ -7,6 +7,7 @@ import SwiftData
 /// essentials and personalized analysis of their recipe collection.
 struct RecommendedStaplesView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(RemindersSync.self) private var remindersSync
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
     @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
     @Query(sort: \GroceryList.dateCreated, order: .reverse) private var groceryLists: [GroceryList]
@@ -174,6 +175,7 @@ struct RecommendedStaplesView: View {
         item.notes = staple.reason
         list.items.append(item)
         modelContext.insert(item)
+        remindersSync.pushAdd(item)
         addedStaples.insert(staple.name)
     }
 

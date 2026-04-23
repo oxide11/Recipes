@@ -439,12 +439,16 @@ struct MealSlotSection: View {
 
 struct MealCard: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(RemindersSync.self) private var remindersSync
     @Query(sort: \GroceryList.dateCreated, order: .reverse) private var groceryLists: [GroceryList]
+    /// Observed directly so that item-level changes (add/delete) trigger a
+    /// re-render — @Query on GroceryList alone doesn't always observe changes
+    /// inside the `.items` relationship.
+    @Query private var allShoppingItems: [GroceryItem]
 
     let meal: PlannedMeal
     let pantryItems: [PantryItem]
 
-    @State private var addedToCart = false
     @State private var showingQuickLog = false
     @State private var cachedPantryCanonicals: Set<String> = []
     @State private var cachedTrulyMissing: [Ingredient] = []
@@ -493,6 +497,26 @@ struct MealCard: View {
     private var trulyMissingIngredients: [Ingredient] { cachedTrulyMissing }
     private var substitutableIngredients: [(recipeName: String, substituteName: String)] { cachedSubstitutable }
 
+    /// Live check — which of the truly-missing ingredients are NOT already
+    /// on the shopping list, *and still active* (not checked off). Purchased
+    /// items get hidden from the shopping list and moved to the pantry via
+    /// PantryIngestionService, so treating them as "still on the list" would
+    /// mislead the user.
+    private var missingFromShoppingList: [Ingredient] {
+        let activeListCanonicals = Set(
+            allShoppingItems
+                .filter { !$0.isPurchased }
+                .map { IngredientNormalizer.canonicalize($0.name) }
+        )
+        return cachedTrulyMissing.filter {
+            !activeListCanonicals.contains(IngredientNormalizer.canonicalize($0.name))
+        }
+    }
+
+    private var allMissingOnShoppingList: Bool {
+        !cachedTrulyMissing.isEmpty && missingFromShoppingList.isEmpty
+    }
+
     private var allInPantry: Bool {
         guard let recipe = meal.recipe, !recipe.ingredients.isEmpty else { return false }
         return cachedTrulyMissing.isEmpty && cachedSubstitutable.isEmpty
@@ -508,6 +532,9 @@ struct MealCard: View {
         var missing: [Ingredient] = []
         var substitutable: [(recipeName: String, substituteName: String)] = []
         for ingredient in recipe.ingredients where !ingredient.isOptional {
+            // Salt, pepper, water, and compounds like "salt and pepper" are
+            // assumed to already be on hand — don't add them to the shopping list.
+            if IngredientNormalizer.isAssumedStaple(ingredient.name) { continue }
             let canonical = IngredientNormalizer.canonicalize(ingredient.name)
             if cachedPantryCanonicals.contains(canonical) { continue }
             if let sub = IngredientNormalizer.findSubstitute(for: canonical, inPantryCanonicals: cachedPantryCanonicals) {
@@ -545,16 +572,19 @@ struct MealCard: View {
                             .font(.miseMeta)
                     }
                     .foregroundStyle(Brand.herbGreen)
-                } else if addedToCart {
-                    // User has added this meal's ingredients in this session
+                } else if allMissingOnShoppingList {
+                    // Everything missing is already on the shopping list. Show
+                    // the count so the user knows they still need to shop for
+                    // this meal — not just that they "completed" something.
+                    let onListCount = cachedTrulyMissing.count
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(spacing: 4) {
-                            Image(systemName: "checkmark.circle.fill")
+                            Image(systemName: "cart")
                                 .font(.caption2)
-                            Text("Added for this meal")
+                            Text("\(onListCount) on shopping list")
                                 .font(.miseMeta)
                         }
-                        .foregroundStyle(Brand.herbGreen)
+                        .foregroundStyle(Brand.muted)
                         if !substitutableIngredients.isEmpty {
                             Text(substitutableIngredients.map { "~\($0.substituteName) for \($0.recipeName)" }.joined(separator: ", "))
                                 .font(.caption2)
@@ -562,24 +592,33 @@ struct MealCard: View {
                                 .lineLimit(2)
                         }
                     }
+                } else if cachedTrulyMissing.isEmpty {
+                    // Nothing truly missing (only substitutions available) — no
+                    // shopping action needed, just confirm it's cookable.
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle")
+                            .font(.caption2)
+                        Text("Ready to cook (substitutions available)")
+                            .font(.miseMeta)
+                    }
+                    .foregroundStyle(Brand.warmTan)
                 } else {
                     // Needs shopping — show what to buy and what can be substituted
+                    let missingCount = missingFromShoppingList.count
                     VStack(alignment: .leading, spacing: 2) {
                         Button {
                             addMissingToShopping()
                         } label: {
                             HStack(spacing: 5) {
-                                Image(systemName: trulyMissingIngredients.isEmpty ? "checkmark.circle" : "cart.badge.plus")
+                                Image(systemName: "cart.badge.plus")
                                     .font(.caption2)
-                                Text(trulyMissingIngredients.isEmpty
-                                     ? "Ready to cook (substitutions available)"
-                                     : "Add \(trulyMissingIngredients.count) ingredient\(trulyMissingIngredients.count == 1 ? "" : "s") to shopping list")
+                                Text("Add \(missingCount) ingredient\(missingCount == 1 ? "" : "s") to shopping list")
                                     .font(.miseMeta)
                             }
                             .foregroundStyle(Brand.warmTan)
                         }
                         .buttonStyle(.plain)
-                        .sensoryFeedback(.success, trigger: addedToCart)
+                        .sensoryFeedback(.success, trigger: allMissingOnShoppingList)
 
                         if !substitutableIngredients.isEmpty {
                             Text(substitutableIngredients.map { "~\($0.substituteName) for \($0.recipeName)" }.joined(separator: ", "))
@@ -633,15 +672,28 @@ struct MealCard: View {
 
         // If nothing to buy (all covered by pantry + substitutions), just mark done
         guard !trulyMissingIngredients.isEmpty else {
-            withAnimation { addedToCart = true }
-            return
+                return
         }
 
+        var newItems: [GroceryItem] = []
         for ingredient in trulyMissingIngredients {
-            let name = ingredient.name.lowercased()
-            if let existing = list.items.first(where: { $0.name.lowercased() == name }) {
-                // Item already on the list — accumulate quantity when units match
-                // so duplicate meal plan entries don't get silently ignored
+            // Match on canonical name so "medium onion", "yellow onion", and
+            // "onions" all resolve to the same bucket instead of creating
+            // three separate entries on the shopping list.
+            let canonical = IngredientNormalizer.canonicalize(ingredient.name)
+            if let existing = list.items.first(where: {
+                IngredientNormalizer.canonicalize($0.name) == canonical
+            }) {
+                // If the existing item was checked off, re-activate it — the
+                // user needs it again. Drop the pantry link so the next tap
+                // adds a fresh pantry entry instead of resurrecting the old one.
+                if existing.isPurchased {
+                    existing.isPurchased = false
+                    existing.linkedPantryItemID = nil
+                    remindersSync.pushCompletion(for: existing)
+                }
+                // Accumulate quantity when units match so duplicate meal plan
+                // entries don't get silently ignored.
                 if existing.unit == ingredient.amount.unit {
                     existing.quantity += ingredient.amount.quantity
                 }
@@ -655,10 +707,13 @@ struct MealCard: View {
                 )
                 modelContext.insert(item)
                 list.items.append(item)
+                newItems.append(item)
             }
         }
 
-        withAnimation { addedToCart = true }
+        // Batch push — one EventKit commit for the whole set instead of one per item.
+        remindersSync.pushAdd(newItems)
+
     }
 
     private func storeSection(for category: IngredientCategory) -> StoreSection {
@@ -1097,19 +1152,29 @@ struct AddMealView: View {
     @Query(sort: \Recipe.title) private var recipes: [Recipe]
 
     let plan: MealPlan
+    /// When set, the view edits this existing meal instead of creating a new
+    /// one. Used from the dashboard when tapping a freeform meal row.
+    let editingMeal: PlannedMeal?
 
     @State private var selectedMealType: MealType
     @State private var selectedDate: Date
-    @State private var query: String = ""
+    @State private var query: String
     @State private var generatorRequest: GeneratorRequest? = nil
     @State private var showingImport = false
     @State private var lastRecipeCount = 0
     @FocusState private var fieldFocused: Bool
 
-    init(plan: MealPlan, preselectMealType: MealType = .dinner, preselectDate: Date? = nil) {
+    init(
+        plan: MealPlan,
+        preselectMealType: MealType = .dinner,
+        preselectDate: Date? = nil,
+        editingMeal: PlannedMeal? = nil
+    ) {
         self.plan = plan
-        _selectedMealType = State(initialValue: preselectMealType)
-        _selectedDate = State(initialValue: preselectDate ?? plan.startDate)
+        self.editingMeal = editingMeal
+        _selectedMealType = State(initialValue: editingMeal?.mealType ?? preselectMealType)
+        _selectedDate = State(initialValue: editingMeal?.date ?? preselectDate ?? plan.startDate)
+        _query = State(initialValue: editingMeal?.customTitle ?? "")
     }
 
     private var trimmed: String { query.trimmingCharacters(in: .whitespaces) }
@@ -1356,25 +1421,45 @@ struct AddMealView: View {
 
     private func addFreeform() {
         guard !trimmed.isEmpty else { return }
-        let meal = PlannedMeal(
-            mealType: selectedMealType,
-            date: Calendar.current.startOfDay(for: selectedDate),
-            customTitle: trimmed
-        )
-        modelContext.insert(meal)
-        plan.meals.append(meal)
+        let dayStart = Calendar.current.startOfDay(for: selectedDate)
+        if let editingMeal {
+            // Update in place — keeps the meal's identity so SwiftData observers
+            // don't see a churn of delete+insert.
+            editingMeal.mealType = selectedMealType
+            editingMeal.date = dayStart
+            editingMeal.customTitle = trimmed
+            editingMeal.recipe = nil
+        } else {
+            let meal = PlannedMeal(
+                mealType: selectedMealType,
+                date: dayStart,
+                customTitle: trimmed
+            )
+            modelContext.insert(meal)
+            plan.meals.append(meal)
+        }
         dismiss()
     }
 
     private func addMeal(recipe: Recipe) {
-        let meal = PlannedMeal(
-            mealType: selectedMealType,
-            date: Calendar.current.startOfDay(for: selectedDate),
-            recipe: recipe,
-            servings: recipe.servings
-        )
-        modelContext.insert(meal)
-        plan.meals.append(meal)
+        let dayStart = Calendar.current.startOfDay(for: selectedDate)
+        if let editingMeal {
+            // Swap the freeform title for a real recipe, in place.
+            editingMeal.mealType = selectedMealType
+            editingMeal.date = dayStart
+            editingMeal.recipe = recipe
+            editingMeal.servings = recipe.servings
+            editingMeal.customTitle = nil
+        } else {
+            let meal = PlannedMeal(
+                mealType: selectedMealType,
+                date: dayStart,
+                recipe: recipe,
+                servings: recipe.servings
+            )
+            modelContext.insert(meal)
+            plan.meals.append(meal)
+        }
         dismiss()
     }
 }

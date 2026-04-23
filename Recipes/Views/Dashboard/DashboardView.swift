@@ -37,6 +37,7 @@ struct DashboardView: View {
 
     @State private var activeSheet: DashboardSheet? = nil
     @State private var startCookingRecipe: Recipe? = nil
+    @State private var editingMeal: PlannedMeal? = nil
     @State private var cachedTodaysMeals: [PlannedMeal] = []
     @State private var cachedCookingStreak = 0
     @State private var suggestions: [DiscoverSuggestion] = []
@@ -133,6 +134,11 @@ struct DashboardView: View {
             }
             .navigationDestination(item: $startCookingRecipe) { recipe in
                 RecipeDetailView(recipe: recipe)
+            }
+            .sheet(item: $editingMeal) { meal in
+                if let plan = mealPlans.first(where: { $0.meals.contains(where: { $0.id == meal.id }) }) ?? mealPlans.first {
+                    AddMealView(plan: plan, editingMeal: meal)
+                }
             }
             .sheet(item: $activeSheet) { sheet in
                 switch sheet {
@@ -431,7 +437,9 @@ struct DashboardView: View {
     private var todaysMealsHeroCard: some View {
         VStack(spacing: 0) {
             ForEach(Array(primaryMealTypes.enumerated()), id: \.element) { index, mealType in
-                let meal = todaysMeals.first { $0.mealType == mealType }
+                let meal = todaysMeals.first {
+                    $0.mealType == mealType && ($0.recipe != nil || $0.customTitle != nil)
+                }
                 if let meal {
                     mealHeroRow(meal)
                 } else {
@@ -477,6 +485,7 @@ struct DashboardView: View {
                     .foregroundStyle(Brand.muted.opacity(0.5))
                     .accessibilityHidden(true)
             }
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(mealType.displayName): nothing planned")
@@ -485,6 +494,7 @@ struct DashboardView: View {
 
     private func mealHeroRow(_ meal: PlannedMeal) -> some View {
         let tappable = meal.recipe != nil && !meal.isCompleted
+        let isFreeform = meal.recipe == nil
         let content = HStack(spacing: 14) {
             Image(systemName: meal.mealType.systemImageName)
                 .font(.title3)
@@ -497,8 +507,9 @@ struct DashboardView: View {
                 Text(meal.mealType.displayName)
                     .font(.miseMeta)
                     .foregroundStyle(Brand.muted)
-                Text(meal.recipe?.title ?? "No recipe assigned")
+                Text(meal.displayTitle)
                     .font(.system(.body, design: .rounded).weight(.medium))
+                    .italic(isFreeform)
                     .foregroundStyle(meal.isCompleted ? Brand.muted : Brand.cream)
                     .lineLimit(2)
                     .strikethrough(meal.isCompleted)
@@ -515,7 +526,7 @@ struct DashboardView: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.title3)
                     .foregroundStyle(Brand.herbGreen)
-            } else if tappable {
+            } else if tappable || isFreeform {
                 Image(systemName: "chevron.right")
                     .font(.caption)
                     .foregroundStyle(Brand.muted)
@@ -524,16 +535,27 @@ struct DashboardView: View {
 
         return Group {
             if tappable, let recipe = meal.recipe {
-                Button { startCookingRecipe = recipe } label: { content }
+                Button { startCookingRecipe = recipe } label: {
+                    content.contentShape(Rectangle())
+                }
                     .buttonStyle(.plain)
                     .accessibilityLabel("\(meal.mealType.displayName): \(recipe.title)")
                     .accessibilityHint("Tap to start cooking")
+            } else if isFreeform, !meal.isCompleted {
+                Button {
+                    editingMeal = meal
+                } label: {
+                    content.contentShape(Rectangle())
+                }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("\(meal.mealType.displayName): \(meal.displayTitle), custom meal")
+                    .accessibilityHint("Tap to edit this meal")
             } else {
                 content
                     .accessibilityElement(children: .combine)
                     .accessibilityLabel(meal.isCompleted
-                        ? "\(meal.mealType.displayName): \(meal.recipe?.title ?? "no recipe"), cooked"
-                        : "\(meal.mealType.displayName): \(meal.recipe?.title ?? "no recipe assigned")")
+                        ? "\(meal.mealType.displayName): \(meal.displayTitle), cooked"
+                        : "\(meal.mealType.displayName): \(meal.displayTitle)")
             }
         }
     }

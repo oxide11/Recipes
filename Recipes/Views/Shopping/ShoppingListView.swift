@@ -59,10 +59,17 @@ struct ShoppingListView: View {
         }
         .onAppear {
             ensureListExists()
-            // Sync on first appear only — foreground notification handles subsequent syncs
+            // Only sync on first appear per view lifetime. Tab switches don't
+            // need to resync — foreground notification handles external
+            // Reminders changes, and pushAdd handles in-app additions.
             if lastSyncDate == .distantPast {
                 triggerSync()
             }
+        }
+        .onChange(of: allItems.count) { _, _ in
+            // New additions from non-Shopping paths (meal-plan generation,
+            // receipt OCR) still trigger a sync so they push to Reminders.
+            triggerSync()
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             triggerSync()
@@ -263,29 +270,11 @@ struct ShoppingListView: View {
     // MARK: - Helpers
 
     private func addToPantryIfNeeded(_ item: GroceryItem) {
-        guard let category = item.storeSection.pantryCategory else { return }
-        guard item.linkedPantryItemID == nil else { return }
-        let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
-        // Item already in pantry from another source — don't duplicate it.
-        guard !pantryItems.contains(where: {
-            $0.name.lowercased().trimmingCharacters(in: .whitespaces) == key
-        }) else { return }
-        let pantryItem = PantryItem(
-            name: item.name,
-            category: category,
-            quantity: item.quantity,
-            unit: item.unit
-        )
-        modelContext.insert(pantryItem)
-        item.linkedPantryItemID = pantryItem.id
+        PantryIngestionService.addToPantryIfNeeded(item, existingPantryItems: pantryItems, context: modelContext)
     }
 
     private func removeFromPantryIfPresent(_ item: GroceryItem) {
-        guard let linkedID = item.linkedPantryItemID else { return }
-        if let pantryItem = pantryItems.first(where: { $0.id == linkedID }) {
-            modelContext.delete(pantryItem)
-        }
-        item.linkedPantryItemID = nil
+        PantryIngestionService.removeFromPantryIfPresent(item, existingPantryItems: pantryItems, context: modelContext)
     }
 
     private func ensureListExists() {
@@ -391,6 +380,7 @@ struct ShoppingItemRow: View {
 struct AddShoppingItemView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(RemindersSync.self) private var remindersSync
     var list: GroceryList
 
     @State private var name = ""
@@ -448,9 +438,12 @@ struct AddShoppingItemView: View {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
 
-        // Skip duplicates
-        let key = trimmed.lowercased()
-        guard !list.items.contains(where: { $0.name.lowercased() == key }) else {
+        // Canonical dedup so "onions" already on the list blocks adding
+        // "medium onion" (both canonicalize to "onion").
+        let canonical = IngredientNormalizer.canonicalize(trimmed)
+        guard !list.items.contains(where: {
+            IngredientNormalizer.canonicalize($0.name) == canonical
+        }) else {
             name = ""
             return
         }
@@ -458,6 +451,10 @@ struct AddShoppingItemView: View {
         let item = GroceryItem(name: trimmed, quantity: 1, unit: .piece, storeSection: section)
         modelContext.insert(item)
         list.items.append(item)
+
+        // Push directly to Reminders so the user sees it without waiting for the
+        // throttled full sync or a tab switch.
+        remindersSync.pushAdd(item)
 
         recentlyAdded.insert(trimmed, at: 0)
         name = ""

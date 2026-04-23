@@ -2,6 +2,56 @@ import EventKit
 import SwiftData
 import SwiftUI
 
+// MARK: - Pantry Ingestion Service
+
+/// Shared logic for turning a purchased GroceryItem into a PantryItem (and
+/// reversing it when an item is un-checked). Called from both the Mise UI
+/// checkbox path and the Reminders sync pull path so the "checked off → lives
+/// in pantry" loop holds regardless of where the check happened.
+enum PantryIngestionService {
+
+    /// Create a linked PantryItem for a purchased GroceryItem, unless one
+    /// already exists (either linked or matched by canonical name).
+    static func addToPantryIfNeeded(
+        _ item: GroceryItem,
+        existingPantryItems: [PantryItem],
+        context: ModelContext
+    ) {
+        guard let category = item.storeSection.pantryCategory else { return }
+        guard item.linkedPantryItemID == nil else { return }
+
+        // Canonical match so "onions" and "medium onion" are treated as the
+        // same pantry entry rather than duplicating it.
+        let canonical = IngredientNormalizer.canonicalize(item.name)
+        guard !existingPantryItems.contains(where: {
+            IngredientNormalizer.canonicalize($0.name) == canonical
+        }) else { return }
+
+        let pantryItem = PantryItem(
+            name: item.name,
+            category: category,
+            quantity: item.quantity,
+            unit: item.unit
+        )
+        context.insert(pantryItem)
+        item.linkedPantryItemID = pantryItem.id
+    }
+
+    /// Reverse the link when a user un-checks an item — removes the pantry
+    /// entry that was auto-created from the grocery row.
+    static func removeFromPantryIfPresent(
+        _ item: GroceryItem,
+        existingPantryItems: [PantryItem],
+        context: ModelContext
+    ) {
+        guard let linkedID = item.linkedPantryItemID else { return }
+        if let pantryItem = existingPantryItems.first(where: { $0.id == linkedID }) {
+            context.delete(pantryItem)
+        }
+        item.linkedPantryItemID = nil
+    }
+}
+
 // MARK: - Reminders Sync
 
 /// Bidirectional sync between the app's single GroceryList and a chosen
@@ -157,6 +207,10 @@ final class RemindersSync {
             }
         }
 
+        // Fetch pantry once for ingestion cross-reference. Cheaper than fetching
+        // per item, and we re-read the context's live objects (no snapshot drift).
+        let pantryItems = (try? context.fetch(FetchDescriptor<PantryItem>())) ?? []
+
         // ── Pull: Reminders → GroceryList ───────────────────────────────────
         for reminder in reminders {
             guard let title = reminder.title, !title.isEmpty else { continue }
@@ -167,6 +221,21 @@ final class RemindersSync {
                 // Already linked — sync completion state both ways (Reminders wins for pulls)
                 if reminder.isCompleted != item.isPurchased {
                     item.isPurchased = reminder.isCompleted
+                    // Mirror the Mise UI checkbox behaviour so checking off in the
+                    // Reminders app also flows through to the pantry.
+                    if reminder.isCompleted {
+                        PantryIngestionService.addToPantryIfNeeded(
+                            item,
+                            existingPantryItems: pantryItems,
+                            context: context
+                        )
+                    } else {
+                        PantryIngestionService.removeFromPantryIfPresent(
+                            item,
+                            existingPantryItems: pantryItems,
+                            context: context
+                        )
+                    }
                 }
             } else if !reminder.isCompleted,
                       !groceryList.items.contains(where: { $0.name.lowercased() == key }) {
@@ -213,6 +282,39 @@ final class RemindersSync {
         }
 
         try? store.commit()
+    }
+
+    /// Create a Reminders entry for a newly-added GroceryItem immediately, without
+    /// waiting for the next throttled sync. Call this from any add-item code path
+    /// (AddShoppingItemView, meal-plan "add missing to shopping," recommended
+    /// staples, receipt OCR). Idempotent — skips items already linked.
+    func pushAdd(_ item: GroceryItem) {
+        pushAdd([item])
+    }
+
+    /// Bulk variant for callers that add many items at once (e.g. generating a
+    /// shopping list from a meal plan's missing ingredients). Uses a single
+    /// EventKit commit for the entire batch instead of one-per-item.
+    func pushAdd(_ items: [GroceryItem]) {
+        guard isLinked,
+              let calendar = linkedCalendar,
+              authorizationStatus == .fullAccess else { return }
+
+        var saved = false
+        for item in items where item.remindersIdentifier == nil {
+            let reminder = EKReminder(eventStore: store)
+            reminder.title = item.name
+            reminder.calendar = calendar
+            reminder.isCompleted = item.isPurchased
+            do {
+                try store.save(reminder, commit: false)
+                item.remindersIdentifier = reminder.calendarItemIdentifier
+                saved = true
+            } catch {
+                // Continue with remaining items; next full sync will retry this one.
+            }
+        }
+        if saved { try? store.commit() }
     }
 
     /// Push the current isPurchased state to Reminders immediately when the user
