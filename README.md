@@ -88,7 +88,6 @@ Recipes/
 │   ├── GroceryList.swift         # Shopping lists, items, receipts
 │   ├── RestaurantJournal.swift   # Restaurant visits and want-to-try
 │   ├── UserProfile.swift         # User preferences and stats
-│   ├── RecipeAsCode.swift        # Declarative recipe definitions
 │   └── CookingMetrics.swift      # Aggregated cooking statistics
 ├── Services/
 │   ├── AI/                       # AI provider integrations

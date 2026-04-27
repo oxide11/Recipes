@@ -20,6 +20,7 @@ private struct EditableDirection: Identifiable {
     let id = UUID()
     var instruction: String = ""
     var timerSeconds: Int? = nil
+    var ingredients: [DirectionIngredientRef] = []
 }
 
 // MARK: - Recipe Editor View
@@ -47,6 +48,7 @@ struct RecipeEditorView: View {
     @State private var tagText = ""
     @State private var tags: [String] = []
     @State private var selectedRestrictions: Set<DietaryRestriction> = []
+    @State private var selectedConversion: DirectionIngredientRef?
 
     var body: some View {
         NavigationStack {
@@ -187,6 +189,57 @@ struct RecipeEditorView: View {
                             .keyboardType(.numberPad)
                             .frame(width: 80)
                     }
+
+                    // Ingredient chips
+                    if !direction.ingredients.isEmpty {
+                        WrappingLayout(itemSpacing: 6, rowSpacing: 6) {
+                            ForEach(direction.ingredients) { ref in
+                                Button {
+                                    selectedConversion = ref
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Text("\(ref.amount.displayString) \(ref.ingredientName)")
+                                            .font(.caption)
+                                        Button {
+                                            direction.ingredients.removeAll { $0.id == ref.id }
+                                        } label: {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .font(.caption2)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.accentColor.opacity(0.12), in: .capsule)
+                                    .foregroundStyle(.accent)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+
+                    // Add ingredient to step
+                    let availableIngredients = ingredients.filter { ing in
+                        !ing.name.trimmingCharacters(in: .whitespaces).isEmpty &&
+                        !direction.ingredients.contains { $0.ingredientName.lowercased() == ing.name.lowercased() }
+                    }
+                    if !availableIngredients.isEmpty {
+                        Menu {
+                            ForEach(availableIngredients) { ing in
+                                Button("\(ing.name) (\(IngredientAmount(quantity: ing.quantity, unit: ing.unit).displayString))") {
+                                    let ref = DirectionIngredientRef(
+                                        ingredientName: ing.name,
+                                        amount: IngredientAmount(quantity: ing.quantity, unit: ing.unit)
+                                    )
+                                    direction.ingredients.append(ref)
+                                }
+                            }
+                        } label: {
+                            Label("Add Ingredient", systemImage: "plus.circle")
+                                .font(.caption)
+                                .foregroundStyle(.accent)
+                        }
+                    }
                 }
                 .padding(.vertical, 4)
             }
@@ -204,6 +257,10 @@ struct RecipeEditorView: View {
             }
         } header: {
             Text("Directions")
+        }
+        .popover(item: $selectedConversion) { ref in
+            IngredientConversionPopover(ref: ref)
+                .presentationCompactAdaptation(.popover)
         }
     }
 
@@ -301,7 +358,8 @@ struct RecipeEditorView: View {
             return RecipeDirection(
                 stepNumber: index + 1,
                 instruction: editable.instruction,
-                timer: timer
+                timer: timer,
+                ingredients: editable.ingredients
             )
         }
 
