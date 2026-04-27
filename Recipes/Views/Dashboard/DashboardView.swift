@@ -1249,11 +1249,11 @@ struct FlowLayout: Layout {
 #Preview("Dashboard - iPhone") {
     DashboardView(selectedTab: .constant(.mise), cookSegment: .constant(.mealPlan), pantryShopSegment: .constant(.pantry))
         .modelContainer(for: Recipe.self, inMemory: true)
-        .environment(AIServiceRouter())
+        .environment(\.aiRouter, AIServiceRouter())
 }
 
 #Preview("Dashboard - iPad") {
     DashboardView(selectedTab: .constant(.mise), cookSegment: .constant(.mealPlan), pantryShopSegment: .constant(.pantry))
         .modelContainer(for: Recipe.self, inMemory: true)
-        .environment(AIServiceRouter())
+        .environment(\.aiRouter, AIServiceRouter())
 }

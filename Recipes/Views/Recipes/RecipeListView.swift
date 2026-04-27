@@ -5,7 +5,7 @@ import SwiftData
 
 struct RecipeListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Query(sort: \Recipe.title) private var recipes: [Recipe]
 
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]

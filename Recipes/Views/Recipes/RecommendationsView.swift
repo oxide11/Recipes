@@ -6,7 +6,7 @@ import SwiftData
 /// Personalized recipe recommendations powered by cooking history analysis,
 /// pantry state, seasonal awareness, and AI blind-spot detection.
 struct RecommendationsView: View {
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Query(sort: \Recipe.dateModified, order: .reverse) private var recipes: [Recipe]
     @Query(sort: \PantryItem.dateAdded, order: .reverse) private var pantryItems: [PantryItem]
     @Query private var profiles: [UserProfile]

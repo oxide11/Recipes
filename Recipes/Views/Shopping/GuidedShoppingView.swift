@@ -10,7 +10,7 @@ struct GuidedShoppingView: View {
     @Bindable var list: GroceryList
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @Query private var pantryItems: [PantryItem]
@@ -407,7 +407,7 @@ struct SubstitutionSheetView: View {
     let item: GroceryItem
     @Bindable var list: GroceryList
     @Environment(\.dismiss) private var dismiss
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @State private var aiSubstitutions: [SubstitutionEngine.Substitution] = []
     @State private var isLoadingAI = false
     @State private var aiError: String?

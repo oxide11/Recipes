@@ -8,7 +8,7 @@ struct RecipeDetailView: View {
     @Bindable var recipe: Recipe
     @Environment(\.modelContext) private var modelContext
 
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showingVariations = false
     @State private var showingQuickLog = false

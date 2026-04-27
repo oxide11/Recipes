@@ -5,7 +5,7 @@ import SwiftUI
 /// Full end-to-end Recipe-as-Code experience: edit definition, preview parsed
 /// ingredients and outcomes, trigger AI step inference, and review generated recipe.
 struct RecipeAsCodePreviewView: View {
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 

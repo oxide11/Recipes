@@ -854,7 +854,7 @@ struct WeekMealView: View {
 struct GenerateMealPlanSheet: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
 
     @Query(sort: \Recipe.title) private var recipes: [Recipe]
     @Query private var pantryItems: [PantryItem]

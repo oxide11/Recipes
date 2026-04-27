@@ -95,12 +95,12 @@ enum AppTab: String, Hashable {
 #Preview("Empty") {
     ContentView()
         .modelContainer(for: Recipe.self, inMemory: true)
-        .environment(AIServiceRouter())
+        .environment(\.aiRouter, AIServiceRouter())
 }
 
 #Preview("With Sample Data") {
     ContentView()
-        .environment(AIServiceRouter())
+        .environment(\.aiRouter, AIServiceRouter())
         .modelContainer(previewContainer)
 }
 

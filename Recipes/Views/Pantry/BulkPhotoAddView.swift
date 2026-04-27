@@ -33,7 +33,7 @@ private struct IdentifiedItem: Identifiable {
 struct BulkPhotoAddView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
 
     @State private var mode: AddMode = .photo
     @State private var selectedPhotoItem: PhotosPickerItem?

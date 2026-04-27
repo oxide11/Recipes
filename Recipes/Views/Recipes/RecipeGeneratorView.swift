@@ -7,7 +7,7 @@ import PhotosUI
 struct RecipeGeneratorView: View {
     var initialCuisine: Cuisine? = nil
 
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -411,7 +411,7 @@ struct QuickGenerateView: View {
     /// When set, overrides the generated description entirely (used for dish recreations, etc.).
     var initialDescription: String? = nil
 
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
@@ -584,7 +584,7 @@ struct GeneratedRecipePreviewSheet: View {
     var onSave: () -> Void
 
     @Environment(\.modelContext) private var modelContext
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Environment(\.dismiss) private var dismiss
 
     @State private var isSaving = false

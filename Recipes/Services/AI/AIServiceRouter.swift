@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 // MARK: - AI Service Error
 
@@ -305,6 +306,17 @@ enum AIInputSanitizer {
             result = String(result[..<index]) + "…"
         }
         return result
+    }
+}
+
+private struct AIRouterKey: @preconcurrency EnvironmentKey {
+    @MainActor static let defaultValue = AIServiceRouter()
+}
+
+extension EnvironmentValues {
+    var aiRouter: AIServiceRouter {
+        get { self[AIRouterKey.self] }
+        set { self[AIRouterKey.self] = newValue }
     }
 }
 

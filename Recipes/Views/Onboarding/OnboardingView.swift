@@ -6,7 +6,7 @@ import SwiftData
 struct OnboardingView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
 
     @State private var step: OnboardingStep = .welcome
     @State private var name = ""
@@ -798,5 +798,5 @@ private extension Cuisine {
 #Preview {
     OnboardingView()
         .modelContainer(for: [UserProfile.self, PantryItem.self, Recipe.self], inMemory: true)
-        .environment(AIServiceRouter())
+        .environment(\.aiRouter, AIServiceRouter())
 }

@@ -8,7 +8,7 @@ import SwiftData
 struct VoicePantryEditView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Query(sort: \PantryItem.name) private var pantryItems: [PantryItem]
 
     @State private var recognizer = SpeechRecognizer()

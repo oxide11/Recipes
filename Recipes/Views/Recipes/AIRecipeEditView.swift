@@ -10,7 +10,7 @@ struct AIRecipeEditView: View {
     /// Called when the user taps "Apply Changes" — passes the AI result back.
     let onApply: (RecipeIngestionResult) -> Void
 
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Environment(\.dismiss) private var dismiss
 
     @State private var instruction = ""

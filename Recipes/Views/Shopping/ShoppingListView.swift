@@ -5,7 +5,7 @@ import SwiftData
 
 struct ShoppingListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Environment(RemindersSync.self) private var remindersSync
     @Query(sort: \GroceryList.dateCreated, order: .reverse) private var lists: [GroceryList]
     @Query private var profiles: [UserProfile]

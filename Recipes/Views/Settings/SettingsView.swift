@@ -6,7 +6,7 @@ import FoundationModels
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Query private var profiles: [UserProfile]
 
     @State private var openAIKey = ""
@@ -484,11 +484,18 @@ struct SettingsView: View {
         }
     }
 
+    private var appVersion: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        return "\(version) (\(build))"
+    }
+
     private var aboutSection: some View {
         Section("About") {
-            LabeledContent("Version", value: "1.0.0")
+            LabeledContent("Version", value: appVersion)
             LabeledContent("Platform", value: "iOS 26")
             LabeledContent("Built with", value: "SwiftUI, SwiftData, FoundationModels")
+            LabeledContent("Authors", value: "Nicole Bendrich & Moussa Noun")
         }
     }
 

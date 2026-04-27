@@ -9,7 +9,7 @@ import UIKit
 struct IngredientLookupView: View {
     let ingredientName: String
     let category: IngredientCategory
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Environment(\.dismiss) private var dismiss
 
     @State private var lookupResult: IngredientLookupResult?

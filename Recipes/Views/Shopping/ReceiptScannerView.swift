@@ -184,7 +184,7 @@ struct ReceiptScannerRepresentable: UIViewControllerRepresentable {
 struct ReceiptScannerView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
 
     var groceryList: GroceryList?
 
@@ -658,6 +658,6 @@ struct ReceiptScannerView: View {
 
 #Preview {
     ReceiptScannerView()
-        .environment(AIServiceRouter())
+        .environment(\.aiRouter, AIServiceRouter())
         .modelContainer(for: GroceryReceipt.self, inMemory: true)
 }

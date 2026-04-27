@@ -12,7 +12,7 @@ struct BrowserDestination: Identifiable {
 /// Unified recipe import interface supporting URL, text, photo, and Recipe-as-Code.
 struct RecipeImportView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(AIServiceRouter.self) private var aiRouter
+    @Environment(\.aiRouter) private var aiRouter
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedTab: ImportSource = .url

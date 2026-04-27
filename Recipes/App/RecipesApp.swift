@@ -76,7 +76,7 @@ struct RecipesApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(aiRouter)
+                .environment(\.aiRouter, aiRouter)
                 .environment(timerDeepLink)
                 .environment(remindersSync)
                 .preferredColorScheme(.dark)
