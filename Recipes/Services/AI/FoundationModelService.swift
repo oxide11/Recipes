@@ -96,35 +96,6 @@ final class FoundationModelService {
         return try await session.respond(to: prompt, generating: SubstitutionSuggestions.self).content
     }
 
-    // MARK: - Recipe Step Inference (Recipe as Code)
-
-    /// Infer cooking steps from a declarative recipe definition.
-    func inferSteps(from definition: RecipeDefinition) async throws -> InferredRecipeSteps {
-        let session = session()
-
-        let ingredientList = definition.ingredients
-            .map { "\($0.name): \($0.amount)\($0.preparation.map { ", \($0)" } ?? "")" }
-            .joined(separator: "\n  - ")
-
-        let outcomeList = definition.outcomes.joined(separator: "\n  - ")
-
-        let prompt = """
-        Given this recipe definition, infer the detailed cooking steps:
-
-        Title: \(definition.title)
-        Servings: \(definition.servings ?? 4)
-        Ingredients:
-          - \(ingredientList)
-        Desired outcomes:
-          - \(outcomeList)
-        \(definition.equipment.map { "Equipment: \($0.joined(separator: ", "))" } ?? "")
-
-        Provide step-by-step cooking instructions that achieve all the desired outcomes.
-        """
-
-        return try await session.respond(to: prompt, generating: InferredRecipeSteps.self).content
-    }
-
     // MARK: - OCR Text to Recipe Parsing
 
     /// Parse OCR-extracted text from a recipe image into structured recipe data.

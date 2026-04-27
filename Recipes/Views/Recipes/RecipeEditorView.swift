@@ -36,8 +36,6 @@ struct RecipeEditorView: View {
     @State private var servings = 4
     @State private var prepTime = 15
     @State private var cookTime = 30
-    @State private var sourceMarkdown = ""
-    @State private var showingRecipeAsCode = false
 
     // Ingredients
     @State private var ingredients: [EditableIngredient] = []
@@ -59,7 +57,6 @@ struct RecipeEditorView: View {
                 directionsSection
                 tagsSection
                 dietaryRestrictionsSection
-                recipeAsCodeSection
             }
             .navigationTitle("New Recipe")
             .navigationBarTitleDisplayMode(.inline)
@@ -72,9 +69,8 @@ struct RecipeEditorView: View {
                         .disabled(title.isEmpty)
                 }
             }
-            .sheet(isPresented: $showingRecipeAsCode) {
-                RecipeAsCodeEditorView(sourceText: $sourceMarkdown)
-            }
+
+
         }
     }
 
@@ -277,21 +273,6 @@ struct RecipeEditorView: View {
         }
     }
 
-    // MARK: - Recipe as Code
-
-    private var recipeAsCodeSection: some View {
-        Section("Recipe as Code") {
-            Button("Import from Recipe Definition") {
-                showingRecipeAsCode = true
-            }
-
-            if !sourceMarkdown.isEmpty {
-                Text("Source loaded")
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-
     // MARK: - Actions
 
     private func addTag() {
@@ -336,49 +317,12 @@ struct RecipeEditorView: View {
             directions: recipeDirections,
             mealType: mealType,
             dietaryRestrictions: Array(selectedRestrictions),
-            tags: tags,
-            sourceMarkdown: sourceMarkdown.isEmpty ? nil : sourceMarkdown
+            tags: tags
         )
         modelContext.insert(recipe)
         dismiss()
     }
 }
 
-// MARK: - Recipe as Code Editor
 
-struct RecipeAsCodeEditorView: View {
-    @Binding var sourceText: String
-    @Environment(\.dismiss) private var dismiss
 
-    @State private var editorText = ""
-
-    var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Define your recipe declaratively. Specify ingredients and desired outcomes — the app will infer the steps.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal)
-
-                TextEditor(text: $editorText)
-                    .font(.system(.body, design: .monospaced))
-                    .padding(4)
-                    .glassCard(cornerRadius: 8)
-                    .padding(.horizontal)
-            }
-            .navigationTitle("Recipe as Code")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Import") {
-                        sourceText = editorText
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}

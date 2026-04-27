@@ -23,7 +23,7 @@ struct RecipeListView: View {
     @State private var showingAddRecipe = false
     @State private var showingRecipeGenerator = false
     @State private var showingImport = false
-    @State private var showingRecipeAsCode = false
+
     @State private var showingFilters = false
     @State private var showingTagManagement = false
     @State private var cachedNoWasteMatches: [NoWasteMatchingEngine.MatchResult] = []
@@ -152,9 +152,7 @@ struct RecipeListView: View {
                         Button("Import Recipe", systemImage: "arrow.down.doc") {
                             showingImport = true
                         }
-                        Button("Recipe as Code", systemImage: "chevron.left.forwardslash.chevron.right") {
-                            showingRecipeAsCode = true
-                        }
+
                         Button("Manage Tags", systemImage: "tag") {
                             showingTagManagement = true
                         }
@@ -174,9 +172,7 @@ struct RecipeListView: View {
             .sheet(isPresented: $showingImport) {
                 RecipeImportView()
             }
-            .sheet(isPresented: $showingRecipeAsCode) {
-                RecipeAsCodePreviewView()
-            }
+
             .sheet(isPresented: $showingTagManagement) {
                 NavigationStack {
                     TagManagementView()

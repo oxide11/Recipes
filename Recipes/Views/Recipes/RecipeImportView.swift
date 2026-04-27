@@ -18,7 +18,7 @@ struct RecipeImportView: View {
     @State private var selectedTab: ImportSource = .url
     @State private var urlString = ""
     @State private var pastedText = ""
-    @State private var recipeCodeText = ""
+
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var photoData: Data?
     @State private var showingCamera = false
@@ -40,7 +40,6 @@ struct RecipeImportView: View {
         case url = "URL"
         case text = "Text"
         case photo = "Photo"
-        case code = "Code"
     }
 
     var body: some View {
@@ -134,7 +133,6 @@ struct RecipeImportView: View {
         case .url:   urlInputSection
         case .text:  textInputSection
         case .photo: photoInputSection
-        case .code:  recipeCodeSection
         }
     }
 
@@ -322,27 +320,6 @@ struct RecipeImportView: View {
         }
     }
 
-    private var recipeCodeSection: some View {
-        Section("Recipe as Code") {
-            TextEditor(text: $recipeCodeText)
-                .font(.system(.body, design: .monospaced))
-                .frame(minHeight: 200)
-
-            Text("""
-                Define ingredients and outcomes — AI infers the steps.
-                Example:
-                  title: "Pasta Aglio e Olio"
-                  ingredients:
-                    - spaghetti: 400g
-                    - garlic: 6 cloves, sliced
-                  outcomes:
-                    - pasta is al dente
-                    - garlic is golden
-                """)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-    }
 
     // MARK: - Preview
 
@@ -445,7 +422,6 @@ struct RecipeImportView: View {
                 urlString = ""
                 pastedText = ""
                 photoData = nil
-                recipeCodeText = ""
             }
             .frame(maxWidth: .infinity)
             .foregroundStyle(.secondary)
@@ -480,7 +456,6 @@ struct RecipeImportView: View {
         case .url:   return !urlString.isEmpty
         case .text:  return !pastedText.isEmpty
         case .photo: return photoData != nil
-        case .code:  return !recipeCodeText.isEmpty
         }
     }
 
@@ -508,9 +483,6 @@ struct RecipeImportView: View {
             case .photo:
                 guard let data = photoData else { return }
                 result = try await service.ingestFromImage(data)
-
-            case .code:
-                result = try await service.ingestFromRecipeCode(recipeCodeText)
             }
         } catch {
             errorMessage = error.localizedDescription

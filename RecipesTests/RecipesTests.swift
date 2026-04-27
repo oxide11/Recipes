@@ -124,36 +124,6 @@ struct SafeCookingTemperatureTests {
     }
 }
 
-// MARK: - Recipe as Code Parser Tests
-
-@Suite("Recipe as Code Parser")
-struct RecipeAsCodeParserTests {
-
-    @Test("Parse basic recipe definition")
-    func parseBasic() throws {
-        let input = """
-        title: "Test Pasta"
-        servings: 4
-        cuisine: italian
-
-        ingredients:
-          - pasta: 400g
-          - garlic: 4 cloves, minced
-          - olive oil: 2 tbsp
-
-        outcomes:
-          - pasta is al dente
-          - garlic is golden
-        """
-
-        let definition = try RecipeDefinitionParser.parse(from: input)
-        #expect(definition.title == "Test Pasta")
-        #expect(definition.servings == 4)
-        #expect(definition.ingredients.count == 3)
-        #expect(definition.outcomes.count == 2)
-    }
-}
-
 // MARK: - Nutritional Info Tests
 
 @Suite("Nutritional Info")
@@ -229,71 +199,6 @@ struct RecommendedStaplesTests {
         let names = essentials.map { $0.name.lowercased() }
         #expect(names.contains("salt"))
         #expect(names.contains("olive oil"))
-    }
-}
-
-// MARK: - Recipe as Code Parser Extended Tests
-
-@Suite("Recipe as Code Parser - Extended")
-struct RecipeAsCodeParserExtendedTests {
-
-    @Test("Parse recipe with equipment")
-    func parseWithEquipment() throws {
-        let input = """
-        title: "Stir Fry"
-        servings: 2
-
-        ingredients:
-          - tofu: 200g, cubed
-          - soy sauce: 2 tbsp
-
-        outcomes:
-          - tofu is crispy
-
-        equipment:
-          - wok
-          - spatula
-        """
-
-        let definition = try RecipeDefinitionParser.parse(from: input)
-        #expect(definition.title == "Stir Fry")
-        #expect(definition.equipment?.count == 2)
-        #expect(definition.ingredients[0].preparation == "cubed")
-    }
-
-    @Test("Parse ingredient without amount defaults to 'to taste'")
-    func ingredientWithoutAmount() throws {
-        let input = """
-        title: "Simple"
-
-        ingredients:
-          - salt
-
-        outcomes:
-          - seasoned well
-        """
-
-        let definition = try RecipeDefinitionParser.parse(from: input)
-        #expect(definition.ingredients.first?.amount == "to taste")
-    }
-
-    @Test("Comments are ignored")
-    func commentsIgnored() throws {
-        let input = """
-        # This is a comment
-        title: "Test"
-        # Another comment
-
-        ingredients:
-          - water: 1 cup
-
-        outcomes:
-          - boiled
-        """
-
-        let definition = try RecipeDefinitionParser.parse(from: input)
-        #expect(definition.title == "Test")
-        #expect(definition.ingredients.count == 1)
     }
 }
 

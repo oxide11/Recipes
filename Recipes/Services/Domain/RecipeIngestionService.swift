@@ -6,7 +6,7 @@ import Vision
 // MARK: - Recipe Ingestion Service
 
 /// Full pipeline for importing recipes from various sources:
-/// URLs, plain text, markdown, images, photos, and Recipe-as-Code definitions.
+/// URLs, plain text, markdown, images, and photos.
 /// Handles HTML stripping, JSON-LD recipe extraction, and AI-powered parsing.
 @Observable
 @MainActor
@@ -327,38 +327,6 @@ final class RecipeIngestionService {
         return try parseIngestionResponse(response, source: "image")
     }
 
-    // MARK: - Ingest from Recipe-as-Code
-
-    func ingestFromRecipeCode(_ text: String) async throws -> RecipeIngestionResult {
-        isProcessing = true
-        progress = "Parsing recipe definition..."
-        defer { isProcessing = false; progress = nil }
-
-        let definition = try RecipeDefinitionParser.parse(from: text)
-
-        progress = "Inferring cooking steps with AI..."
-        let foundationService = aiRouter.foundationModelService
-        let isOnDevice = await foundationService.isAvailable
-
-        var steps: InferredRecipeSteps?
-        if isOnDevice {
-            steps = try await foundationService.inferSteps(from: definition)
-        }
-
-        return RecipeIngestionResult(
-            title: definition.title,
-            servings: definition.servings ?? 4,
-            cuisine: definition.cuisine,
-            ingredients: definition.ingredients.map {
-                .init(name: $0.name, amount: $0.amount, preparation: $0.preparation)
-            },
-            directions: steps?.steps.map { $0.instruction } ?? [],
-            prepTimeMinutes: steps?.estimatedPrepMinutes,
-            cookTimeMinutes: steps?.estimatedCookMinutes,
-            source: "recipe-as-code"
-        )
-    }
-
     // MARK: - AI Recipe Edit
 
     /// Re-run AI over an existing recipe with a natural-language modification request.
@@ -578,9 +546,6 @@ final class RecipeIngestionService {
         case "text":
             sourceURL = nil
             sourceName = "Text Import"
-        case "recipe-as-code":
-            sourceURL = nil
-            sourceName = "Recipe Code"
         default:
             sourceURL = nil
             sourceName = nil
