@@ -21,6 +21,7 @@ enum APIClient {
     ) async throws -> Data {
         var request = URLRequest(url: url)
         request.httpMethod = method
+        request.timeoutInterval = 60
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         for (key, value) in headers {
             request.setValue(value, forHTTPHeaderField: key)

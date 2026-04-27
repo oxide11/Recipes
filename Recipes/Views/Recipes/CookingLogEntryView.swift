@@ -195,8 +195,9 @@ struct CookingLogEntryView: View {
             if let data = photoData {
                 let id = UUID()
                 if let filename = try? PhotoStorageService.save(data, id: id) {
-                    photo = RecipePhoto(id: id, imageFilename: filename)
-                    modelContext.insert(photo!)
+                    let saved = RecipePhoto(id: id, imageFilename: filename)
+                    modelContext.insert(saved)
+                    photo = saved
                 }
             }
 

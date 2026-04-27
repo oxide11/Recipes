@@ -59,15 +59,9 @@ struct ContentView: View {
                 showingOnboarding = true
             }
         }
-        .onChange(of: pantryItems.count) {
-            SmartNotificationService.shared.scheduleExpiringPantryAlerts(items: pantryItems)
-        }
-        .onChange(of: cookingLogs.count) {
-            SmartNotificationService.shared.scheduleCookingStreakReminder(lastCookDate: cookingLogs.first?.date)
-        }
-        .onChange(of: plannedMeals.count) {
-            SmartNotificationService.shared.scheduleWeeklyPlanningReminder(mealPlans: mealPlans)
-        }
+        .onChange(of: pantryItems.count) { scheduleAllNotifications() }
+        .onChange(of: cookingLogs.count) { scheduleAllNotifications() }
+        .onChange(of: plannedMeals.count) { scheduleAllNotifications() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { scheduleAllNotifications() }
         }
@@ -115,7 +109,11 @@ let previewContainer: ModelContainer = {
         UserProfile.self,
     ])
     let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: schema, configurations: [config])
-    SampleData.populate(container.mainContext)
-    return container
+    do {
+        let container = try ModelContainer(for: schema, configurations: [config])
+        SampleData.populate(container.mainContext)
+        return container
+    } catch {
+        fatalError("Preview ModelContainer creation failed: \(error)")
+    }
 }()

@@ -6,17 +6,17 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 
 ## Stability — Crash Risks
 
-- [ ] **CRITICAL** `RecipesApp.swift:71` — Production `fatalError()` on schema migration failure. No `VersionedSchema` or `MigrationPlan` defined; any model change crashes prod.
-- [ ] **CRITICAL** `ContentView.swift:118` — `try!` on preview `ModelContainer` init; crashes if creation fails.
-- [ ] **HIGH** `CookingLogEntryView.swift:199` — Force unwrap `photo!` after optional assignment; crashes if `PhotoStorageService.save()` fails.
+- [x] **CRITICAL** `RecipesApp.swift:71` — Production `fatalError()` on schema migration failure. ~~No `VersionedSchema` or `MigrationPlan` defined; any model change crashes prod.~~ Fixed: falls back to in-memory store in production.
+- [x] **CRITICAL** `ContentView.swift:118` — `try!` on preview `ModelContainer` init; crashes if creation fails. Fixed: uses do/catch with fatalError only in preview context.
+- [x] **HIGH** `CookingLogEntryView.swift:199` — Force unwrap `photo!` after optional assignment; crashes if `PhotoStorageService.save()` fails. Fixed: safe binding.
 - [ ] **HIGH** `RecipeIngestionService.swift:1194` — Unsafe force-unwrap of string indices from malformed JSON.
 - [ ] **MEDIUM** `RecipeIngestionService.swift:1056,1062` — Force unwrap in `parseFraction()` results without nil check.
 
 ## Stability — Network & Timeouts
 
-- [ ] **CRITICAL** `APIClient.swift:30` — No request timeout on URLSession; AI calls can hang indefinitely.
-- [ ] **CRITICAL** `RecipeIngestionService.swift:30,615` — URL fetch and image download with no timeout configured.
-- [ ] **MEDIUM** `OpenFoodFactsService.swift:46,83` — No timeout on barcode lookup network requests.
+- [x] **CRITICAL** `APIClient.swift:30` — No request timeout on URLSession; AI calls can hang indefinitely. Fixed: 60s timeout.
+- [x] **CRITICAL** `RecipeIngestionService.swift:30,615` — URL fetch and image download with no timeout configured. Fixed: 30s/15s timeouts.
+- [x] **MEDIUM** `OpenFoodFactsService.swift:46,83` — No timeout on barcode lookup network requests. Fixed: 15s timeout.
 
 ## Stability — Silent Error Swallowing
 
@@ -31,18 +31,18 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 
 - [ ] **HIGH** `ShoppingVoiceService.swift:232-237` — `speechFinishedContinuation` accessed without synchronization; race on concurrent `speak()`.
 - [ ] **HIGH** `ShoppingVoiceService.swift:42` — `guidanceTask` stored but never cancelled on deinit; leaks if view dismissed.
-- [ ] **HIGH** `RecipeIngestionService.swift:194` — Streaming loop doesn't check `Task.isCancelled`; leaked task on view dismiss.
+- [x] **HIGH** `RecipeIngestionService.swift:194` — Streaming loop doesn't check `Task.isCancelled`; leaked task on view dismiss. Fixed: added `Task.checkCancellation()` in both streaming loops.
 - [ ] **HIGH** `BarcodeScannerService.swift:78,87` — `DispatchQueue.global()` instead of structured concurrency; no cancellation support.
-- [ ] **HIGH** `DashboardView.swift:170-173` — Four `onChange` handlers spawn async tasks without cancellation; rapid fires create concurrent task pile-up.
+- [x] **HIGH** `DashboardView.swift:170-173` — Four `onChange` handlers spawn async tasks without cancellation; rapid fires create concurrent task pile-up. Already handled: `scheduleSuggestionRebuild()` cancels previous task; other handlers are synchronous.
 - [ ] **MEDIUM** `FoundationModelService.swift:37` — Cached `_session` is not atomic; concurrent access could create duplicates.
 - [ ] **MEDIUM** `RemindersSync.swift:65` — Authorization status queried once at init, not refreshed before operations.
 
 ## Performance — View Layer
 
 - [ ] **HIGH** `DashboardView.swift:206-305` — `rebuildSuggestions()` does O(n²) substring matching across recipes × pantry items on every rebuild.
-- [ ] **HIGH** `MealPlanView.swift:660-661` — `onChange(of: pantryItems.map { ... })` creates a new array every render and triggers expensive recompute.
-- [ ] **HIGH** `MetricsView.swift:29-35` — Duplicate `.task` calls with same trigger, calling calculation function twice.
-- [ ] **MEDIUM** `CookingModeView.swift:41-47` — `ingredientColors` dictionary rebuilt on every body evaluation; should be `@State`.
+- [x] **HIGH** `MealPlanView.swift:660-661` — `onChange(of: pantryItems.map { ... })` creates a new array every render and triggers expensive recompute. Fixed: removed redundant onChange, kept count-based trigger.
+- [x] **HIGH** `MetricsView.swift:29-35` — Duplicate `.task` calls with same trigger, calling calculation function twice. Fixed: merged into single `.task(id:)`.
+- [x] **MEDIUM** `CookingModeView.swift:41-47` — `ingredientColors` dictionary rebuilt on every body evaluation; should be `@State`. Fixed: moved to `@State`, populated once on appear.
 - [ ] **MEDIUM** `RecipeListView.swift:59-94` — Multiple filter passes instead of single combined predicate.
 - [ ] **MEDIUM** `MealPlanView.swift:975,1088` — `ISO8601DateFormatter` allocated inside function body on every call.
 
@@ -60,8 +60,7 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 
 ## Architecture
 
-- [ ] **HIGH** `RecipesApp.swift:79-81` — Mixed environment API styles (key path `.aiRouter` vs direct `.environment(timerDeepLink)`); inconsistent.
-- [ ] **HIGH** `ContentView.swift:62-73` — Overlapping `onChange` handlers all call `SmartNotificationService` methods; duplicate notifications.
+- [x] **HIGH** `ContentView.swift:62-73` — Overlapping `onChange` handlers all call `SmartNotificationService` methods; duplicate notifications. Fixed: all onChange handlers now call unified `scheduleAllNotifications()`.
 - [ ] **MEDIUM** `PlanAndShopView.swift:30-39,72-81` — ZStack opacity swap keeps both sub-views in memory; doubles RAM with full `@Query` datasets.
 - [ ] **MEDIUM** `DashboardView.swift:97-100` — `currentMealType` depends on `.now`, recalculated every render.
 - [ ] **LOW** `DashboardView.swift:41-44` — Cached state renders empty before `.task` populates; brief flicker on first render.

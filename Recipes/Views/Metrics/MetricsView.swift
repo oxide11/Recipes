@@ -26,10 +26,7 @@ struct MetricsView: View {
             }
             .navigationTitle("Cooking Metrics")
             .toolbarBackground(.automatic, for: .navigationBar)
-            .task(id: recipes.count) {
-                metrics = MetricsCalculator.calculate(recipes: recipes, receipts: receipts, restaurantEntries: restaurantEntries)
-            }
-            .task(id: receipts.count) {
+            .task(id: recipes.count + receipts.count + restaurantEntries.count) {
                 metrics = MetricsCalculator.calculate(recipes: recipes, receipts: receipts, restaurantEntries: restaurantEntries)
             }
         }

@@ -658,7 +658,6 @@ struct MealCard: View {
         }
         .onAppear { Task { rebuildIngredientCaches() } }
         .onChange(of: pantryItems.count) { rebuildIngredientCaches() }
-        .onChange(of: pantryItems.map { $0.name + $0.id.uuidString }) { rebuildIngredientCaches() }
     }
 
     private func addMissingToShopping() {

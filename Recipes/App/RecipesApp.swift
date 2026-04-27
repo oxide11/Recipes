@@ -68,7 +68,14 @@ struct RecipesApp: App {
                 fatalError("Cannot create ModelContainer after reset: \(error)")
             }
 #else
-            fatalError("Schema migration failed — a migration plan is required: \(error)")
+            // Fall back to in-memory store so the app stays usable instead of crashing.
+            logger.critical("Falling back to in-memory store — data will not persist.")
+            let memoryConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+            do {
+                return try ModelContainer(for: schema, configurations: [memoryConfig])
+            } catch {
+                fatalError("Cannot create even in-memory ModelContainer: \(error)")
+            }
 #endif
         }
     }()

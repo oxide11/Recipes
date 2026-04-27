@@ -27,7 +27,9 @@ final class RecipeIngestionService {
         progress = "Fetching recipe page..."
         defer { isProcessing = false; progress = nil }
 
-        let (data, _) = try await URLSession.shared.data(from: url)
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 30
+        let (data, _) = try await URLSession.shared.data(for: request)
         guard let html = String(data: data, encoding: .utf8) else {
             throw IngestionError.invalidContent
         }
@@ -192,6 +194,7 @@ final class RecipeIngestionService {
         let prompt = isGeneration ? buildGenerationPrompt(for: text) : buildIngestionPrompt(for: text)
         var accumulated = ""
         for try await chunk in aiRouter.generateTextStreaming(prompt: prompt, taskType: .recipeIngestion) {
+            try Task.checkCancellation()
             accumulated += chunk
             onChunk(chunk)
         }
@@ -385,6 +388,7 @@ final class RecipeIngestionService {
         let prompt = buildEditPrompt(recipe: recipe, instruction: instruction)
         var accumulated = ""
         for try await chunk in aiRouter.generateTextStreaming(prompt: prompt, taskType: .recipeIngestion) {
+            try Task.checkCancellation()
             accumulated += chunk
             onChunk(chunk)
         }
@@ -576,13 +580,16 @@ final class RecipeIngestionService {
 
         // Fetch and attach the recipe image if one was found
         if let imageURLString = result.imageURL,
-           let imageURL = URL(string: imageURLString),
-           let (imageData, _) = try? await URLSession.shared.data(from: imageURL),
-           !imageData.isEmpty {
-            let id = UUID()
-            if let filename = try? PhotoStorageService.save(imageData, id: id) {
-                let photo = RecipePhoto(id: id, imageFilename: filename)
-                recipe.photos.append(photo)
+           let imageURL = URL(string: imageURLString) {
+            var imageRequest = URLRequest(url: imageURL)
+            imageRequest.timeoutInterval = 15
+            if let (imageData, _) = try? await URLSession.shared.data(for: imageRequest),
+               !imageData.isEmpty {
+                let id = UUID()
+                if let filename = try? PhotoStorageService.save(imageData, id: id) {
+                    let photo = RecipePhoto(id: id, imageFilename: filename)
+                    recipe.photos.append(photo)
+                }
             }
         }
 

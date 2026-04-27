@@ -41,6 +41,7 @@ enum OpenFoodFactsService {
         guard let url = components.url else { return nil }
 
         var request = URLRequest(url: url)
+        request.timeoutInterval = 15
         request.setValue("RecipesApp/1.0 iOS", forHTTPHeaderField: "User-Agent")
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -78,6 +79,7 @@ enum OpenFoodFactsService {
         guard let url = components.url else { return [] }
 
         var request = URLRequest(url: url)
+        request.timeoutInterval = 15
         request.setValue("RecipesApp/1.0 iOS", forHTTPHeaderField: "User-Agent")
 
         let (data, _) = try await URLSession.shared.data(for: request)

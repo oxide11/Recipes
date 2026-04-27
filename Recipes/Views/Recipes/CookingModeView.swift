@@ -37,14 +37,7 @@ struct CookingModeView: View {
     @State private var logRating: Int? = nil
     @State private var logNotes = ""
 
-    /// Maps lowercased ingredient names to their category color for syntax-style highlighting.
-    private var ingredientColors: [String: Color] {
-        var map: [String: Color] = [:]
-        for ingredient in recipe.ingredients {
-            map[ingredient.name.lowercased()] = ingredient.category.displayColor.swiftUIColor
-        }
-        return map
-    }
+    @State private var ingredientColors: [String: Color] = [:]
 
     /// Directions sorted by stepNumber so they always appear in the correct order
     /// regardless of how SwiftData returns them.
@@ -109,6 +102,11 @@ struct CookingModeView: View {
         .persistentSystemOverlays(.hidden)
         .onAppear {
             UIApplication.shared.isIdleTimerDisabled = true
+            var map: [String: Color] = [:]
+            for ingredient in recipe.ingredients {
+                map[ingredient.name.lowercased()] = ingredient.category.displayColor.swiftUIColor
+            }
+            ingredientColors = map
             if !hasSeenTutorial {
                 showingTutorial = true
             } else if isVoiceEnabled, let step = currentStep {
