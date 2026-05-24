@@ -128,10 +128,24 @@ Recipes/
 
 ## Setup
 
-1. Clone the repository
-2. Open `Recipes/` in Xcode 26
-3. Create a new iOS App project targeting iOS 26 and add the source files
-4. Build and run on a device or simulator
+The Xcode project is generated from [`project.yml`](project.yml) with
+[XcodeGen](https://github.com/yonaskolb/XcodeGen) — `Recipes.xcodeproj/` is
+not checked in.
+
+1. Clone the repository.
+2. Install XcodeGen (one-time): `brew install xcodegen`
+3. Create your local signing overrides:
+   ```sh
+   cp Configs/Local.xcconfig.example Configs/Local.xcconfig
+   # then edit Configs/Local.xcconfig and set DEVELOPMENT_TEAM + BUNDLE_ID_PREFIX
+   ```
+   This file is gitignored, so each collaborator keeps their own.
+4. Generate the project: `xcodegen`
+5. `open Recipes.xcodeproj` and build/run on a device or simulator.
+
+Re-run `xcodegen` any time `project.yml` changes or after adding/removing
+source files. New files placed under `Recipes/`, `RecipesTests/`, or
+`RecipesWidgets/` are picked up automatically by directory scanning.
 
 ### API Keys (Optional)
 
