@@ -851,6 +851,15 @@ struct WeekMealView: View {
 // MARK: - Generate Meal Plan Sheet
 
 struct GenerateMealPlanSheet: View {
+
+    /// Full-date ISO formatter shared by prompt building and response parsing.
+    /// Cached because both paths run per-day/per-suggestion in a loop, and
+    /// formatter construction dominates the cost of the formatting itself.
+    private static let isoDateFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate]
+        return formatter
+    }()
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(\.aiRouter) private var aiRouter
@@ -971,10 +980,8 @@ struct GenerateMealPlanSheet: View {
         let cal = Calendar.current
         var dates: [String] = []
         var cursor = rangeStart
-        let isoFormatter = ISO8601DateFormatter()
-        isoFormatter.formatOptions = [.withFullDate]
         while cursor <= rangeEnd {
-            dates.append(isoFormatter.string(from: cursor))
+            dates.append(Self.isoDateFormatter.string(from: cursor))
             cursor = cal.date(byAdding: .day, value: 1, to: cursor) ?? rangeEnd.addingTimeInterval(1)
         }
 
@@ -1084,13 +1091,11 @@ struct GenerateMealPlanSheet: View {
         let recipeMap = Dictionary(
             uniqueKeysWithValues: recipeSnapshot.map { ($0.title.lowercased(), $0) }
         )
-        let isoFormatter = ISO8601DateFormatter()
-        isoFormatter.formatOptions = [.withFullDate]
         let ingestionService = RecipeIngestionService(aiRouter: aiRouter)
 
         for suggestion in suggestions {
             guard
-                let date = isoFormatter.date(from: suggestion.date),
+                let date = Self.isoDateFormatter.date(from: suggestion.date),
                 let mealType = MealType(rawValue: suggestion.mealType.lowercased())
             else { continue }
 

@@ -1,4 +1,7 @@
 import UIKit
+import OSLog
+
+private let logger = Logger(subsystem: "com.recipes", category: "PhotoStorage")
 
 // MARK: - Photo Storage Service
 
@@ -13,7 +16,13 @@ enum PhotoStorageService {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let dir = docs.appendingPathComponent("RecipePhotos", isDirectory: true)
         if !FileManager.default.fileExists(atPath: dir.path) {
-            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            do {
+                try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            } catch {
+                // Subsequent writes into this directory will throw and surface to the
+                // caller, but log here so the root cause isn't lost behind that error.
+                logger.error("Failed to create photos directory: \(error.localizedDescription)")
+            }
         }
         return dir
     }
@@ -49,9 +58,19 @@ enum PhotoStorageService {
 
     // MARK: - Delete
 
-    /// Removes the photo file from disk. Silent no-op if the file is missing.
+    /// Removes the photo file from disk. No-op if the file is already missing.
     static func delete(filename: String) {
-        try? FileManager.default.removeItem(at: url(for: filename))
+        let fileURL = url(for: filename)
+        // An already-missing file is the expected outcome of a retried delete,
+        // not an error worth logging — check first so the log stays signal.
+        guard FileManager.default.fileExists(atPath: fileURL.path) else { return }
+        do {
+            try FileManager.default.removeItem(at: fileURL)
+        } catch {
+            // The SwiftData record is deleted regardless, so a failure here leaks
+            // the file. Log it so orphaned photos are diagnosable.
+            logger.error("Failed to delete photo \(filename, privacy: .public): \(error.localizedDescription)")
+        }
     }
 }
 

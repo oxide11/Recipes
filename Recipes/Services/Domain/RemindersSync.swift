@@ -1,6 +1,9 @@
 import EventKit
 import SwiftData
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "com.recipes", category: "RemindersSync")
 
 // MARK: - Pantry Ingestion Service
 
@@ -154,8 +157,9 @@ final class RemindersSync {
                 let reminder = EKReminder(eventStore: store)
                 reminder.title = item.name
                 reminder.calendar = calendar
-                try? store.save(reminder, commit: false)
-                item.remindersIdentifier = reminder.calendarItemIdentifier
+                if save(reminder, commit: false, operation: "link") {
+                    item.remindersIdentifier = reminder.calendarItemIdentifier
+                }
             }
         }
 
@@ -177,7 +181,7 @@ final class RemindersSync {
             groceryList.items.append(item)
         }
 
-        try? store.commit()
+        commitPendingWrites(operation: "link")
     }
 
     // MARK: - Sync
@@ -263,7 +267,7 @@ final class RemindersSync {
                 if item.isPurchased != reminder.isCompleted {
                     reminder.isCompleted = item.isPurchased
                     if item.isPurchased { reminder.completionDate = .now }
-                    try? store.save(reminder, commit: false)
+                    save(reminder, commit: false, operation: "sync push completion")
                 }
             } else {
                 // Not linked yet — match by name or create new reminder
@@ -275,13 +279,14 @@ final class RemindersSync {
                     reminder.title = item.name
                     reminder.calendar = calendar
                     reminder.isCompleted = item.isPurchased
-                    try? store.save(reminder, commit: false)
-                    item.remindersIdentifier = reminder.calendarItemIdentifier
+                    if save(reminder, commit: false, operation: "sync push create") {
+                        item.remindersIdentifier = reminder.calendarItemIdentifier
+                    }
                 }
             }
         }
 
-        try? store.commit()
+        commitPendingWrites(operation: "sync")
     }
 
     /// Create a Reminders entry for a newly-added GroceryItem immediately, without
@@ -306,15 +311,13 @@ final class RemindersSync {
             reminder.title = item.name
             reminder.calendar = calendar
             reminder.isCompleted = item.isPurchased
-            do {
-                try store.save(reminder, commit: false)
+            // Continue with remaining items on failure; the next full sync retries.
+            if save(reminder, commit: false, operation: "pushAdd") {
                 item.remindersIdentifier = reminder.calendarItemIdentifier
                 saved = true
-            } catch {
-                // Continue with remaining items; next full sync will retry this one.
             }
         }
-        if saved { try? store.commit() }
+        if saved { commitPendingWrites(operation: "pushAdd") }
     }
 
     /// Push the current isPurchased state to Reminders immediately when the user
@@ -326,7 +329,7 @@ final class RemindersSync {
               let reminder = store.calendarItem(withIdentifier: rid) as? EKReminder else { return }
         reminder.isCompleted = item.isPurchased
         if item.isPurchased { reminder.completionDate = .now } else { reminder.completionDate = nil }
-        try? store.save(reminder, commit: true)
+        save(reminder, commit: true, operation: "pushCompletion")
     }
 
     /// When an item is removed from Mise, mark the corresponding reminder as completed
@@ -344,7 +347,35 @@ final class RemindersSync {
               let reminder = store.calendarItem(withIdentifier: rid) as? EKReminder else { return }
         reminder.isCompleted = true
         reminder.completionDate = .now
-        try? store.save(reminder, commit: true)
+        save(reminder, commit: true, operation: "completeReminder")
+    }
+
+    // MARK: - EventKit Writes
+
+    /// Saves a reminder, logging instead of swallowing the failure.
+    /// Returns whether the write succeeded so callers can skip dependent work
+    /// such as linking a `remindersIdentifier` to a reminder that was never stored.
+    @discardableResult
+    private func save(_ reminder: EKReminder, commit: Bool, operation: String) -> Bool {
+        do {
+            try store.save(reminder, commit: commit)
+            return true
+        } catch {
+            logger.error("Reminders save failed during \(operation, privacy: .public): \(error.localizedDescription)")
+            return false
+        }
+    }
+
+    /// Commits pending EventKit writes, logging instead of swallowing the failure.
+    @discardableResult
+    private func commitPendingWrites(operation: String) -> Bool {
+        do {
+            try store.commit()
+            return true
+        } catch {
+            logger.error("Reminders commit failed during \(operation, privacy: .public): \(error.localizedDescription)")
+            return false
+        }
     }
 
     // MARK: - Helpers

@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Fixed
+- Surfaced previously invisible EventKit failures in `RemindersSync` — all 8 `store.save`/`store.commit` sites now route through logged helpers instead of bare `try?`
+- Fixed a latent linking bug in `RemindersSync`: a failed `store.save` no longer assigns `remindersIdentifier` from a reminder that was never persisted (the link, sync-push and `pushAdd` paths now agree on this)
+- Surfaced silent filesystem failures in `PhotoStorageService` — directory creation and photo deletion now log via OSLog; deletion treats a missing file as a legitimate no-op rather than lumping it in with real errors
+- `SampleData.clearAll()` now logs per-model deletion failures instead of swallowing them, so a partial wipe is distinguishable from a clean one
 - Fixed main actor-isolated property warning in `RecipeGeneratorView` where `selectedImage` was referenced from a Sendable closure (line 182)
 - Fixed identical main actor-isolated property warning in `BulkPhotoAddView` (line 46)
 - Added missing `IngredientNormalizer.swift` to Xcode project (file existed on disk but wasn't in project navigator)
@@ -42,6 +46,7 @@
 - Date string uses `Date.formatted()` instead of manually created `DateFormatter`
 
 ### Improved
+- Cached `ISO8601DateFormatter` as a static instance on `GenerateMealPlanSheet` instead of allocating one per call in `buildPrompt()` and `applyMeals()`
 - Optimized O(n²) pantry matching in `NoWasteMatchingEngine` with word-level O(1) lookup before substring fallback, capped at 200 entries
 - Cached `LanguageModelSession` in `FoundationModelService` to avoid per-call recreation
 - Added `syncTotalTime()` to `Recipe` to keep stored `totalTimeMinutes` in sync with prep+cook
@@ -50,6 +55,12 @@
 - Added O(1) dictionary lookup in `SeasonalAwarenessService.isInSeason` replacing linear scan
 - Cached expensive `matches` computation in `NoWasteResultsView` via `@State` + `.task` instead of recomputing on every render
 - Cached `MetricsView.metrics` and `NutritionTrackingView.trackedDays/totals` via `@State` + `.task`
+
+### Documentation
+- Removed the "Recipe as Code" feature from the README — it was deleted in 553e5ed and has no remaining trace in the sources
+- Corrected the README Setup steps, which told readers to create a new Xcode project and add the source files despite the repo shipping `Recipes.xcodeproj`; documented the test plan and the `scripts/use-*-team.sh` signing swap
+- Filled in the README architecture tree: `Views/Dashboard`, `Views/Activity`, `Views/Onboarding`, `Views/PlanAndShop`, `Utilities/`, `Preview/`, and the widget and test targets were all missing
+- Reconciled `backlog.md` against the code — 10 items were already fixed but never checked off, and are now closed with the evidence that resolved them
 
 ### Removed
 - Deleted non-functional `inferStepsViaCloud` from `RecipeIngestionService` — always returned nil

@@ -7,8 +7,7 @@ Built with SwiftUI, SwiftData, and Apple's FoundationModels framework. Designed 
 ## Features
 
 ### Recipe Management
-- **Recipe as Code** — Define recipes declaratively with ingredients and desired outcomes. AI infers the cooking steps automatically.
-- **Recipe Ingestion Pipeline** — Import recipes from URLs (with JSON-LD/schema.org extraction), plain text, markdown, photos, and Recipe-as-Code definitions.
+- **Recipe Ingestion Pipeline** — Import recipes from URLs (with JSON-LD/schema.org extraction), plain text, markdown, and photos (Vision OCR).
 - **Recipe Variations** — Stack multiple variations under a single recipe card (e.g., vegan version, gluten-free version).
 - **Colour-Coded Ingredients** — 14 ingredient categories, each with a distinct colour for quick visual scanning.
 - **Inline Timers** — Directions include built-in countdown timers and ingredient measurements directly in step text.
@@ -108,16 +107,28 @@ Recipes/
 │       ├── SafeCookingTemperatureService.swift  # USDA safe temps
 │       ├── MeasurementConversion.swift      # Unit conversion
 │       └── ShoppingVoiceService.swift       # Voice-guided shopping
+├── Utilities/                    # IngredientNormalizer, time formatting
+├── Preview/                      # DemoData for SwiftUI previews
 └── Views/
+    ├── Dashboard/                # "Mise" home tab
     ├── Components/               # Reusable UI components
     ├── Recipes/                  # Recipe list, detail, editor, generator
     ├── Pantry/                   # Pantry management and barcode scanning
-    ├── MealPlan/                 # Meal planning interface
+    ├── MealPlan/                 # Meal planning and meal prep
+    ├── PlanAndShop/              # Cook / Pantry & Shop segmented containers
     ├── Shopping/                 # Shopping lists and guided shopping
     ├── Journal/                  # Restaurant journal
-    ├── Metrics/                  # Cooking statistics dashboard
+    ├── Metrics/                  # Cooking statistics and nutrition tracking
+    ├── Activity/                 # Activity tab
+    ├── Onboarding/               # First-run setup
     └── Settings/                 # API keys and preferences
+
+RecipesWidgets/                   # Widget extension
+RecipesTests/                     # Unit tests (swift-testing + XCTest)
 ```
+
+The root `ContentView` is a five-tab `TabView`: **Mise** (dashboard), **Cook**,
+**Pantry & Shop**, **Activity**, and **Settings**.
 
 ## Requirements
 
@@ -129,9 +140,23 @@ Recipes/
 ## Setup
 
 1. Clone the repository
-2. Open `Recipes/` in Xcode 26
-3. Create a new iOS App project targeting iOS 26 and add the source files
-4. Build and run on a device or simulator
+2. Open `Recipes.xcodeproj` in Xcode 26
+3. Select the `Recipes` scheme and build/run on a device or simulator
+
+Tests run from the `Recipes.xctestplan` test plan (⌘U).
+
+### Code Signing
+
+`project.pbxproj` carries a committed `DEVELOPMENT_TEAM` and bundle-ID prefix.
+Two helper scripts swap them for local signing:
+
+```bash
+scripts/use-personal-team.sh   # at session start, to sign locally
+scripts/use-moussa-team.sh     # before pushing, to restore the committed values
+```
+
+Both use BSD `sed -i ''` and are macOS-only. Do not commit the swapped
+`project.pbxproj`.
 
 ### API Keys (Optional)
 

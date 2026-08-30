@@ -1,5 +1,8 @@
 import Foundation
 import SwiftData
+import OSLog
+
+private let logger = Logger(subsystem: "com.recipes", category: "SampleData")
 
 // MARK: - Sample Data
 
@@ -10,20 +13,31 @@ enum SampleData {
 
     @MainActor
     static func clearAll(_ context: ModelContext) {
-        try? context.delete(model: Recipe.self)
-        try? context.delete(model: Ingredient.self)
-        try? context.delete(model: PantryItem.self)
-        try? context.delete(model: MealPlan.self)
-        try? context.delete(model: PlannedMeal.self)
-        try? context.delete(model: GroceryList.self)
-        try? context.delete(model: GroceryItem.self)
-        try? context.delete(model: GroceryReceipt.self)
-        try? context.delete(model: RecipePhoto.self)
-        try? context.delete(model: CookingLogEntry.self)
-        try? context.delete(model: RecipeVariation.self)
-        try? context.delete(model: RestaurantJournalEntry.self)
-        try? context.delete(model: RestaurantWantToTry.self)
-        try? context.delete(model: UserProfile.self)
+        // Each model is deleted independently so one failure doesn't abandon the
+        // rest of the wipe, but failures are logged rather than swallowed — a
+        // partial clear otherwise looks identical to a successful one.
+        func delete<T: PersistentModel>(_ model: T.Type) {
+            do {
+                try context.delete(model: model)
+            } catch {
+                logger.error("clearAll failed to delete \(String(describing: model), privacy: .public): \(error.localizedDescription)")
+            }
+        }
+
+        delete(Recipe.self)
+        delete(Ingredient.self)
+        delete(PantryItem.self)
+        delete(MealPlan.self)
+        delete(PlannedMeal.self)
+        delete(GroceryList.self)
+        delete(GroceryItem.self)
+        delete(GroceryReceipt.self)
+        delete(RecipePhoto.self)
+        delete(CookingLogEntry.self)
+        delete(RecipeVariation.self)
+        delete(RestaurantJournalEntry.self)
+        delete(RestaurantWantToTry.self)
+        delete(UserProfile.self)
     }
 
     // MARK: - Public Entry Point
