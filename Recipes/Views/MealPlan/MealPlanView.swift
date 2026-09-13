@@ -22,6 +22,7 @@ struct MealPlanView: View {
     @State private var selectedDate = Calendar.current.startOfDay(for: Date())
     @State private var viewMode: MealPlanViewMode = .day
     @State private var showingGenerate = false
+    @State private var generation: MealPlanGenerationState = .idle
     @State private var didInitViewMode = false
     @State private var swipeForward = true
 
@@ -148,11 +149,48 @@ struct MealPlanView: View {
                     Button("Generate", systemImage: "sparkles") {
                         showingGenerate = true
                     }
+                    .disabled(generation == .generating)
+                }
+            }
+            // The generate sheet dismisses immediately so the user isn't stuck
+            // waiting on the AI; this inset keeps them informed of what's
+            // happening in the background and surfaces any failure.
+            .safeAreaInset(edge: .bottom) {
+                if generation == .generating {
+                    HStack(spacing: 10) {
+                        ProgressView()
+                        Text("Planning your meals…")
+                            .font(.miseMeta)
+                            .foregroundStyle(Brand.cream)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .padding(.bottom, 8)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: generation)
+            .alert(
+                "Couldn't generate meal plan",
+                isPresented: Binding(
+                    get: { if case .failed = generation { true } else { false } },
+                    set: { if !$0 { generation = .idle } }
+                )
+            ) {
+                Button("Try Again") {
+                    generation = .idle
+                    showingGenerate = true
+                }
+                Button("OK", role: .cancel) { generation = .idle }
+            } message: {
+                if case .failed(let reason) = generation {
+                    Text(reason)
                 }
             }
             .sheet(isPresented: $showingGenerate) {
                 if let plan = activePlan {
-                    GenerateMealPlanSheet(plan: plan)
+                    GenerateMealPlanSheet(plan: plan, generation: $generation)
                 } else {
                     ProgressView("Setting up your meal plan…")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -656,8 +694,10 @@ struct MealCard: View {
                 Label("Remove from Plan", systemImage: "trash")
             }
         }
-        .onAppear { Task { rebuildIngredientCaches() } }
-        .onChange(of: pantryItems.count) { rebuildIngredientCaches() }
+        .onAppear { rebuildIngredientCaches() }
+        // Names, not just count: renaming a pantry item ("tomatos" -> "tomatoes")
+        // changes what matches without changing how many items there are.
+        .onChange(of: pantryItems.map(\.name)) { rebuildIngredientCaches() }
     }
 
     private func addMissingToShopping() {
@@ -850,7 +890,24 @@ struct WeekMealView: View {
 
 // MARK: - Generate Meal Plan Sheet
 
+// MARK: - Generation State
+
+/// Progress of a background meal-plan generation, owned by MealPlanView so it
+/// outlives the sheet that kicked it off.
+enum MealPlanGenerationState: Equatable {
+    case idle
+    case generating
+    case failed(String)
+}
+
 struct GenerateMealPlanSheet: View {
+    /// Built once; `ISO8601DateFormatter` is expensive to allocate per call.
+    @MainActor private static let fullDateFormatter: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withFullDate]
+        return f
+    }()
+
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(\.aiRouter) private var aiRouter
@@ -860,6 +917,7 @@ struct GenerateMealPlanSheet: View {
     @Query private var profiles: [UserProfile]
 
     let plan: MealPlan
+    @Binding var generation: MealPlanGenerationState
 
     @State private var rangeStart: Date
     @State private var rangeEnd: Date
@@ -869,8 +927,9 @@ struct GenerateMealPlanSheet: View {
     @State private var prioritisePantry = true
     @State private var errorMessage: String?
 
-    init(plan: MealPlan) {
+    init(plan: MealPlan, generation: Binding<MealPlanGenerationState>) {
         self.plan = plan
+        self._generation = generation
         let today = Calendar.current.startOfDay(for: Date())
         _rangeStart = State(initialValue: max(plan.startDate, today))
         _rangeEnd = State(initialValue: min(
@@ -955,15 +1014,24 @@ struct GenerateMealPlanSheet: View {
         let prompt = buildPrompt()
         let recipeSnapshot = Array(recipes)
 
-        // Dismiss immediately so the user isn't blocked on a long AI call
+        // Dismiss immediately so the user isn't blocked on a long AI call;
+        // the parent view shows progress and any failure via `generation`.
+        generation = .generating
         dismiss()
 
         do {
             let response = try await aiRouter.generateText(prompt: prompt, taskType: .mealPlanGeneration)
             let suggestions = try parseSuggestions(from: response)
-            await applyMeals(suggestions, recipeSnapshot: recipeSnapshot)
+            let added = await applyMeals(suggestions, recipeSnapshot: recipeSnapshot)
+            if added == 0 {
+                generation = .failed("No new meals could be added for the selected days. Try a wider date range or different meal types.")
+            } else {
+                generation = .idle
+            }
+        } catch is CancellationError {
+            generation = .idle
         } catch {
-            // Generation failed after dismiss — user can retry via the Generate button
+            generation = .failed(error.localizedDescription)
         }
     }
 
@@ -971,8 +1039,7 @@ struct GenerateMealPlanSheet: View {
         let cal = Calendar.current
         var dates: [String] = []
         var cursor = rangeStart
-        let isoFormatter = ISO8601DateFormatter()
-        isoFormatter.formatOptions = [.withFullDate]
+        let isoFormatter = Self.fullDateFormatter
         while cursor <= rangeEnd {
             dates.append(isoFormatter.string(from: cursor))
             cursor = cal.date(byAdding: .day, value: 1, to: cursor) ?? rangeEnd.addingTimeInterval(1)
@@ -1079,14 +1146,19 @@ struct GenerateMealPlanSheet: View {
         return try JSONDecoder().decode([MealSuggestion].self, from: data)
     }
 
+    /// Inserts the suggested meals into the plan. Returns how many were added.
     @MainActor
-    private func applyMeals(_ suggestions: [MealSuggestion], recipeSnapshot: [Recipe]) async {
+    @discardableResult
+    private func applyMeals(_ suggestions: [MealSuggestion], recipeSnapshot: [Recipe]) async -> Int {
+        // Titles can collide case-insensitively ("Pancakes" / "pancakes");
+        // `uniqueKeysWithValues:` would trap on the duplicate.
         let recipeMap = Dictionary(
-            uniqueKeysWithValues: recipeSnapshot.map { ($0.title.lowercased(), $0) }
+            recipeSnapshot.map { ($0.title.lowercased(), $0) },
+            uniquingKeysWith: { first, _ in first }
         )
-        let isoFormatter = ISO8601DateFormatter()
-        isoFormatter.formatOptions = [.withFullDate]
+        let isoFormatter = Self.fullDateFormatter
         let ingestionService = RecipeIngestionService(aiRouter: aiRouter)
+        var added = 0
 
         for suggestion in suggestions {
             guard
@@ -1129,7 +1201,9 @@ struct GenerateMealPlanSheet: View {
             )
             modelContext.insert(meal)
             plan.meals.append(meal)
+            added += 1
         }
+        return added
     }
 }
 

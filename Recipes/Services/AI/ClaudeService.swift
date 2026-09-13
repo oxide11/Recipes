@@ -174,7 +174,7 @@ final class ClaudeService {
                 request.setValue(self.apiVersion, forHTTPHeaderField: "anthropic-version")
 
                 do {
-                    let (bytes, response) = try await URLSession.shared.bytes(for: request)
+                    let (bytes, response) = try await NetworkSession.ai.bytes(for: request)
                     if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
                         continuation.finish(throwing: AIServiceError.invalidResponse)
                         return

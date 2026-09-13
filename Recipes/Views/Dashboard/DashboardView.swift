@@ -239,7 +239,10 @@ struct DashboardView: View {
                 for s in seasonalNames { if ings.contains(where: { $0.contains(s) || s.contains($0) }) { score += 2; if reason.isEmpty { reason = "In season now" }; break } }
                 ranked.append((score, recipe, reason.isEmpty ? "From your library" : reason))
             }
-            ranked.sort { $0.score != $1.score ? $0.score > $1.score : Bool.random() }
+            // Shuffle first, then a stable sort by score: a comparator that
+            // returns Bool.random() on ties isn't a valid ordering.
+            ranked.shuffle()
+            ranked.sort { $0.score > $1.score }
             if let top = ranked.first {
                 result.append(DiscoverSuggestion(mode: .libraryPick(reason: top.reason), recipe: top.recipe))
             }

@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var cookSegment: CookSegment = .mealPlan
     @State private var pantryShopSegment: PantryShopSegment = .pantry
     @State private var showingOnboarding = false
+    @State private var showingStorageAlert = false
     @Query private var profiles: [UserProfile]
     @Query private var mealPlans: [MealPlan]
     @Query private var plannedMeals: [PlannedMeal]  // granular change tracking
@@ -44,6 +45,16 @@ struct ContentView: View {
             }
         }
         .tabViewStyle(.sidebarAdaptable)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if RecipesApp.isUsingEphemeralStore {
+                storageWarningBanner
+            }
+        }
+        .alert("Your data couldn't be opened", isPresented: $showingStorageAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Recipes is running in a temporary mode. Your saved recipes, pantry, and plans are still on this device, but nothing you add now will be kept after you close the app. Please update the app or contact support.")
+        }
         .onChange(of: timerDeepLink.pendingRecipeID) { _, newID in
             // Deep-link into the Recipes segment of the Cook tab
             if newID != nil {
@@ -55,7 +66,10 @@ struct ContentView: View {
         // as data changes or the app returns to the foreground.
         .onAppear {
             scheduleAllNotifications()
-            if profiles.isEmpty {
+            if RecipesApp.isUsingEphemeralStore {
+                // Don't stack onboarding on top of a data-loss warning.
+                showingStorageAlert = true
+            } else if profiles.isEmpty {
                 showingOnboarding = true
             }
         }
@@ -68,6 +82,22 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showingOnboarding) {
             OnboardingView()
         }
+    }
+
+    private var storageWarningBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "exclamationmark.triangle.fill")
+            Text("Temporary mode: changes won't be saved")
+                .font(.caption.weight(.semibold))
+            Spacer()
+            Button("Details") { showingStorageAlert = true }
+                .font(.caption.weight(.semibold))
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .foregroundStyle(.black)
+        .background(.yellow)
+        .accessibilityElement(children: .combine)
     }
 
     private func scheduleAllNotifications() {

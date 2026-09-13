@@ -1,5 +1,8 @@
 import SwiftUI
+import OSLog
 import SwiftData
+
+private let onboardingLogger = Logger(subsystem: "com.recipes", category: "Onboarding")
 
 // MARK: - Onboarding View
 
@@ -718,7 +721,8 @@ struct OnboardingView: View {
                 let recipe = await service.convertToRecipe(result)
                 modelContext.insert(recipe)
             } catch {
-                // Silent failure — user can generate recipes manually from the Recipes tab
+                // Non-blocking: the user can generate recipes manually from the Recipes tab.
+                onboardingLogger.error("Starter recipe generation failed for \(cuisine.displayName): \(error)")
             }
         }
     }

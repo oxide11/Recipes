@@ -41,10 +41,9 @@ enum OpenFoodFactsService {
         guard let url = components.url else { return nil }
 
         var request = URLRequest(url: url)
-        request.timeoutInterval = 15
         request.setValue("RecipesApp/1.0 iOS", forHTTPHeaderField: "User-Agent")
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await NetworkSession.standard.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200 else {
@@ -79,10 +78,9 @@ enum OpenFoodFactsService {
         guard let url = components.url else { return [] }
 
         var request = URLRequest(url: url)
-        request.timeoutInterval = 15
         request.setValue("RecipesApp/1.0 iOS", forHTTPHeaderField: "User-Agent")
 
-        let (data, _) = try await URLSession.shared.data(for: request)
+        let (data, _) = try await NetworkSession.standard.data(for: request)
 
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         guard let products = json?["products"] as? [[String: Any]] else {

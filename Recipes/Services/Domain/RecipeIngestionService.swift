@@ -27,9 +27,7 @@ final class RecipeIngestionService {
         progress = "Fetching recipe page..."
         defer { isProcessing = false; progress = nil }
 
-        var request = URLRequest(url: url)
-        request.timeoutInterval = 30
-        let (data, _) = try await URLSession.shared.data(for: request)
+        let (data, _) = try await NetworkSession.standard.data(from: url)
         guard let html = String(data: data, encoding: .utf8) else {
             throw IngestionError.invalidContent
         }
@@ -581,9 +579,7 @@ final class RecipeIngestionService {
         // Fetch and attach the recipe image if one was found
         if let imageURLString = result.imageURL,
            let imageURL = URL(string: imageURLString) {
-            var imageRequest = URLRequest(url: imageURL)
-            imageRequest.timeoutInterval = 15
-            if let (imageData, _) = try? await URLSession.shared.data(for: imageRequest),
+            if let (imageData, _) = try? await NetworkSession.standard.data(from: imageURL),
                !imageData.isEmpty {
                 let id = UUID()
                 if let filename = try? PhotoStorageService.save(imageData, id: id) {

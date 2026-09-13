@@ -20,7 +20,10 @@ private struct EditableDirection: Identifiable {
     let id = UUID()
     var instruction: String = ""
     var timerSeconds: Int? = nil
-    var ingredients: [DirectionIngredientRef] = []
+    /// IDs of `EditableIngredient`s used in this step. Stored by reference so
+    /// renaming or re-measuring an ingredient row is reflected in every step
+    /// that uses it; resolved to `DirectionIngredientRef` values on save.
+    var ingredientIDs: [UUID] = []
 }
 
 // MARK: - Recipe Editor View
@@ -48,7 +51,6 @@ struct RecipeEditorView: View {
     @State private var tagText = ""
     @State private var tags: [String] = []
     @State private var selectedRestrictions: Set<DietaryRestriction> = []
-    @State private var selectedConversion: DirectionIngredientRef?
 
     var body: some View {
         NavigationStack {
@@ -170,78 +172,11 @@ struct RecipeEditorView: View {
     private var directionsSection: some View {
         Section {
             ForEach(Array($directions.enumerated()), id: \.element.id) { index, $direction in
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(alignment: .top) {
-                        Text("\(index + 1).")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 28, alignment: .leading)
-
-                        TextField("Step instruction", text: $direction.instruction, axis: .vertical)
-                            .lineLimit(2...5)
-                    }
-
-                    HStack {
-                        Text("Timer (seconds)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        TextField("Optional", value: $direction.timerSeconds, format: .number)
-                            .keyboardType(.numberPad)
-                            .frame(width: 80)
-                    }
-
-                    // Ingredient chips
-                    if !direction.ingredients.isEmpty {
-                        WrappingLayout(itemSpacing: 6, rowSpacing: 6) {
-                            ForEach(direction.ingredients) { ref in
-                                Button {
-                                    selectedConversion = ref
-                                } label: {
-                                    HStack(spacing: 4) {
-                                        Text("\(ref.amount.displayString) \(ref.ingredientName)")
-                                            .font(.caption)
-                                        Button {
-                                            direction.ingredients.removeAll { $0.id == ref.id }
-                                        } label: {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .font(.caption2)
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color.accentColor.opacity(0.12), in: .capsule)
-                                    .foregroundStyle(.accent)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                    }
-
-                    // Add ingredient to step
-                    let availableIngredients = ingredients.filter { ing in
-                        !ing.name.trimmingCharacters(in: .whitespaces).isEmpty &&
-                        !direction.ingredients.contains { $0.ingredientName.lowercased() == ing.name.lowercased() }
-                    }
-                    if !availableIngredients.isEmpty {
-                        Menu {
-                            ForEach(availableIngredients) { ing in
-                                Button("\(ing.name) (\(IngredientAmount(quantity: ing.quantity, unit: ing.unit).displayString))") {
-                                    let ref = DirectionIngredientRef(
-                                        ingredientName: ing.name,
-                                        amount: IngredientAmount(quantity: ing.quantity, unit: ing.unit)
-                                    )
-                                    direction.ingredients.append(ref)
-                                }
-                            }
-                        } label: {
-                            Label("Add Ingredient", systemImage: "plus.circle")
-                                .font(.caption)
-                                .foregroundStyle(.accent)
-                        }
-                    }
-                }
-                .padding(.vertical, 4)
+                DirectionEditorRow(
+                    index: index,
+                    direction: $direction,
+                    ingredients: ingredients
+                )
             }
             .onDelete { offsets in
                 directions.remove(atOffsets: offsets)
@@ -257,10 +192,6 @@ struct RecipeEditorView: View {
             }
         } header: {
             Text("Directions")
-        }
-        .popover(item: $selectedConversion) { ref in
-            IngredientConversionPopover(ref: ref)
-                .presentationCompactAdaptation(.popover)
         }
     }
 
@@ -355,11 +286,21 @@ struct RecipeEditorView: View {
             let timer: TimerStep? = editable.timerSeconds.map {
                 TimerStep(durationSeconds: $0, label: "Step \(index + 1)")
             }
+            // Resolve by ID at save time so the saved refs always match the
+            // final ingredient list; ingredients deleted from the recipe drop out.
+            let refs = editable.ingredientIDs.compactMap { id -> DirectionIngredientRef? in
+                guard let ing = ingredients.first(where: { $0.id == id }),
+                      !ing.name.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
+                return DirectionIngredientRef(
+                    ingredientName: ing.name,
+                    amount: IngredientAmount(quantity: ing.quantity, unit: ing.unit)
+                )
+            }
             return RecipeDirection(
                 stepNumber: index + 1,
                 instruction: editable.instruction,
                 timer: timer,
-                ingredients: editable.ingredients
+                ingredients: refs
             )
         }
 
@@ -382,5 +323,104 @@ struct RecipeEditorView: View {
     }
 }
 
+// MARK: - Direction Editor Row
 
+/// One editable step. Owns its own popover state so tapping a chip presents a
+/// single popover anchored to this row (a modifier on the enclosing `Section`
+/// would be applied to every row in the Form).
+private struct DirectionEditorRow: View {
+    let index: Int
+    @Binding var direction: EditableDirection
+    let ingredients: [EditableIngredient]
 
+    @State private var selectedConversion: DirectionIngredientRef?
+
+    /// Ingredients referenced by this step, in step order, skipping any that
+    /// were deleted from the recipe or still have no name.
+    private var stepIngredients: [EditableIngredient] {
+        direction.ingredientIDs.compactMap { id in
+            ingredients.first { $0.id == id && !$0.name.trimmingCharacters(in: .whitespaces).isEmpty }
+        }
+    }
+
+    /// Named ingredients not yet attached to this step.
+    private var availableIngredients: [EditableIngredient] {
+        ingredients.filter { ing in
+            !ing.name.trimmingCharacters(in: .whitespaces).isEmpty &&
+            !direction.ingredientIDs.contains(ing.id)
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top) {
+                Text("\(index + 1).")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 28, alignment: .leading)
+
+                TextField("Step instruction", text: $direction.instruction, axis: .vertical)
+                    .lineLimit(2...5)
+            }
+
+            HStack {
+                Text("Timer (seconds)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                TextField("Optional", value: $direction.timerSeconds, format: .number)
+                    .keyboardType(.numberPad)
+                    .frame(width: 80)
+            }
+
+            // Ingredient chips — live values from the Ingredients section
+            let chips = stepIngredients
+            if !chips.isEmpty {
+                WrappingLayout(itemSpacing: 6, rowSpacing: 6) {
+                    ForEach(chips) { ing in
+                        let ref = DirectionIngredientRef(
+                            ingredientName: ing.name,
+                            amount: IngredientAmount(quantity: ing.quantity, unit: ing.unit)
+                        )
+                        Button {
+                            selectedConversion = ref
+                        } label: {
+                            IngredientChipLabel(ref: ref, color: ing.category.displayColor.swiftUIColor) {
+                                Button {
+                                    direction.ingredientIDs.removeAll { $0 == ing.id }
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.caption2)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Remove \(ing.name) from step")
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+
+            // Add ingredient to step
+            let available = availableIngredients
+            if !available.isEmpty {
+                Menu {
+                    ForEach(available) { ing in
+                        let amount = IngredientAmount(quantity: ing.quantity, unit: ing.unit)
+                        Button("\(ing.name) (\(amount.displayString))") {
+                            direction.ingredientIDs.append(ing.id)
+                        }
+                    }
+                } label: {
+                    Label("Add Ingredient", systemImage: "plus.circle")
+                        .font(.caption)
+                        .foregroundStyle(.accent)
+                }
+            }
+        }
+        .padding(.vertical, 4)
+        .popover(item: $selectedConversion) { ref in
+            IngredientConversionPopover(ref: ref)
+                .presentationCompactAdaptation(.popover)
+        }
+    }
+}
