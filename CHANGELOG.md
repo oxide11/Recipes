@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Fixed
+- Fixed a stale-metrics bug in `MetricsView`: the `.task(id:)` trigger summed three collection counts, so adding a recipe while deleting a receipt left the id unchanged and the displayed metrics never recalculated
+- Removed a `Bool.random()` sort comparator in `DashboardView.rebuildSuggestions()` that violated strict weak ordering, leaving `sort` free to return an arbitrary arrangement rather than the intended random tie-break
 - Surfaced previously invisible EventKit failures in `RemindersSync` — all 8 `store.save`/`store.commit` sites now route through logged helpers instead of bare `try?`
 - Fixed a latent linking bug in `RemindersSync`: a failed `store.save` no longer assigns `remindersIdentifier` from a reminder that was never persisted (the link, sync-push and `pushAdd` paths now agree on this)
 - Surfaced silent filesystem failures in `PhotoStorageService` — directory creation and photo deletion now log via OSLog; deletion treats a missing file as a legitimate no-op rather than lumping it in with real errors
@@ -46,6 +48,9 @@
 - Date string uses `Date.formatted()` instead of manually created `DateFormatter`
 
 ### Improved
+- Replaced the O(recipes × ingredients × pantry) substring scan in `DashboardView.rebuildSuggestions()` with an `IngredientMatchIndex` built once per rebuild — lookups are now a bounded set of dictionary hits. Keys are canonicalised and plural-varied through `IngredientNormalizer` (the approach `NoWasteMatchingEngine` already uses), which also drops the false positives raw substring matching produced, such as "ham" matching "graham flour"
+- Narrowed `MetricsView`'s recipe fetch to recipes with a non-empty cooking log. Behaviour-preserving: `cookCount` is `cookingLog.count` and every recipe-derived metric already skips zero-count recipes
+- Picked the top-scoring dashboard suggestion with a single `shuffled().max(by:)` pass instead of sorting the whole ranked array to read only its first element
 - Cached `ISO8601DateFormatter` as a static instance on `GenerateMealPlanSheet` instead of allocating one per call in `buildPrompt()` and `applyMeals()`
 - Optimized O(n²) pantry matching in `NoWasteMatchingEngine` with word-level O(1) lookup before substring fallback, capped at 200 entries
 - Cached `LanguageModelSession` in `FoundationModelService` to avoid per-call recreation
@@ -61,6 +66,7 @@
 - Corrected the README Setup steps, which told readers to create a new Xcode project and add the source files despite the repo shipping `Recipes.xcodeproj`; documented the test plan and the `scripts/use-*-team.sh` signing swap
 - Filled in the README architecture tree: `Views/Dashboard`, `Views/Activity`, `Views/Onboarding`, `Views/PlanAndShop`, `Utilities/`, `Preview/`, and the widget and test targets were all missing
 - Reconciled `backlog.md` against the code — 10 items were already fixed but never checked off, and are now closed with the evidence that resolved them
+- Re-assessed the remaining data-layer items: the `RecipeGeneratorView` and `MealPlanView` "unfiltered @Query" items are downgraded from HIGH with the reasoning recorded, since their fetches are load-bearing (whole-library aggregates and client-side picker filtering) and no predicate preserves behaviour
 
 ### Removed
 - Deleted non-functional `inferStepsViaCloud` from `RecipeIngestionService` — always returned nil

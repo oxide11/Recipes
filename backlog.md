@@ -43,7 +43,7 @@ Items are grouped by category and sorted by severity within each group.
 
 ## Performance — View Layer
 
-- [ ] **HIGH** `DashboardView.swift:206-305` — `rebuildSuggestions()` does O(n²) substring matching across recipes × pantry items on every rebuild.
+- [x] **HIGH** `DashboardView.swift` — ~~`rebuildSuggestions()` does O(n²) substring matching across recipes × pantry items on every rebuild.~~ Fixed 2026-09-19: pantry, expiring and seasonal names are now built into a file-private `IngredientMatchIndex` once per rebuild (canonicalised + plural-varied via `IngredientNormalizer`, mirroring `NoWasteMatchingEngine`), so each ingredient lookup is a bounded set of dictionary hits instead of a scan. Also removed a `Bool.random()` sort comparator that violated strict weak ordering — only the top-scoring recipe is used, so it is now picked with `shuffled().max(by:)` in one pass.
 - [x] **HIGH** `MealPlanView.swift:660-661` — `onChange(of: pantryItems.map { ... })` creates a new array every render and triggers expensive recompute. Fixed: removed redundant onChange, kept count-based trigger.
 - [x] **HIGH** `MetricsView.swift:29-35` — Duplicate `.task` calls with same trigger, calling calculation function twice. Fixed: merged into single `.task(id:)`.
 - [x] **MEDIUM** `CookingModeView.swift:41-47` — `ingredientColors` dictionary rebuilt on every body evaluation; should be `@State`. Fixed: moved to `@State`, populated once on appear.
@@ -52,9 +52,10 @@ Items are grouped by category and sorted by severity within each group.
 
 ## Performance — Data Layer
 
-- [ ] **HIGH** `MetricsView.swift:8-10` — `@Query` fetches ALL Recipes, Receipts, and JournalEntries without predicates; loads entire tables.
-- [ ] **HIGH** `RecipeGeneratorView.swift:418-420` — Multiple unfiltered `@Query` for pantry, recipes, profiles.
-- [ ] **HIGH** `MealPlanView.swift:16-18` — Child views declare duplicate `@Query` for PantryItems and UserProfile.
+- [x] **HIGH** `MetricsView.swift` — ~~`@Query` fetches ALL Recipes, Receipts, and JournalEntries without predicates; loads entire tables.~~ Partly fixed 2026-09-19: `recipes` now filters on `!$0.cookingLog.isEmpty`. This is behaviour-preserving, not an approximation — `Recipe.cookCount` *is* `cookingLog.count`, and every recipe-derived metric skips zero-count recipes, so an uncooked recipe cannot affect the output. `receipts` and `restaurantEntries` are genuine whole-table aggregates (total spend, every visit) and are left unfiltered by design. **Needs a runtime smoke test** — a SwiftData predicate over a to-many relationship fails at fetch time, not compile time, if it can't be translated.
+- [x] **MEDIUM** `MetricsView.swift` — `.task(id:)` summed three counts, so adding one recipe while deleting one receipt left the id unchanged and the metrics silently stale. Fixed 2026-09-19: the id is now an array, compared element-wise.
+- [ ] **LOW** `RecipeGeneratorView.swift:418-420` — Multiple unfiltered `@Query` for pantry, recipes, profiles. Re-assessed 2026-09-19 and downgraded from HIGH: `existingRecipes` feeds whole-library aggregates (cuisine histogram at :527, total count in the prompt at :539-547), so no predicate preserves behaviour. Reducing this means fetching a count/aggregate instead of the objects, or moving prompt assembly behind a `FetchDescriptor` with `propertiesToFetch` — a real change, not a predicate.
+- [ ] **LOW** `MealPlanView.swift:16-18` — Child views declare duplicate `@Query` for PantryItems and UserProfile. Re-assessed 2026-09-19 and downgraded from HIGH: the item is mis-scoped. `MealPlanView` never queries `PantryItem`, so `DayMealView:277` is the only fetch of it rather than a duplicate; the genuine duplication is `UserProfile`, which is a single row in practice. Threading it down through `DayMealView`/`GenerateMealPlanSheet` initialisers would churn several call sites for no measurable gain. The unfiltered `Recipe` fetches in `GenerateMealPlanSheet:867` and `AddMealView:1156` are the real cost here, and both are load-bearing — `AddMealView` filters the full library client-side for its picker (:1211-1220).
 - [ ] **MEDIUM** `All models` — No `@Index` attributes defined; queries do full table scans. Recommended indexes: Recipe.dateModified, PantryItem.dateAdded, PlannedMeal.date, GroceryList.dateCreated.
 - [ ] **MEDIUM** `PantryView.swift:47-48` — Loads entire pantry inventory on view load; no pagination.
 - [ ] **MEDIUM** `DashboardView.swift:27-36` — Eight `@Query` properties fetched simultaneously with no predicate filtering.
@@ -71,4 +72,4 @@ Items are grouped by category and sorted by severity within each group.
 
 ---
 
-*Last updated: 2026-08-30*
+*Last updated: 2026-09-19*

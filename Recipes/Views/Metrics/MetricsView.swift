@@ -5,7 +5,15 @@ import Charts
 // MARK: - Metrics View
 
 struct MetricsView: View {
-    @Query private var recipes: [Recipe]
+    /// Every figure `MetricsCalculator` produces from recipes is derived from the
+    /// cooking log — `cookCount` *is* `cookingLog.count`, and the ingredient,
+    /// cuisine and top-recipe tallies all skip recipes with a zero count. So an
+    /// uncooked recipe cannot affect the result, and filtering them out in the
+    /// fetch is behaviour-preserving rather than an approximation.
+    ///
+    /// `receipts` and `restaurantEntries` are genuine whole-table aggregates
+    /// (total spend, every visit) and cannot be narrowed the same way.
+    @Query(filter: #Predicate<Recipe> { !$0.cookingLog.isEmpty }) private var recipes: [Recipe]
     @Query private var receipts: [GroceryReceipt]
     @Query private var restaurantEntries: [RestaurantJournalEntry]
 
@@ -26,7 +34,7 @@ struct MetricsView: View {
             }
             .navigationTitle("Cooking Metrics")
             .toolbarBackground(.automatic, for: .navigationBar)
-            .task(id: recipes.count + receipts.count + restaurantEntries.count) {
+            .task(id: [recipes.count, receipts.count, restaurantEntries.count]) {
                 metrics = MetricsCalculator.calculate(recipes: recipes, receipts: receipts, restaurantEntries: restaurantEntries)
             }
         }

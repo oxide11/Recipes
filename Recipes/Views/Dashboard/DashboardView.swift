@@ -16,6 +16,70 @@ private enum DashboardStyle {
     )
 }
 
+// MARK: - Ingredient Match Index
+
+/// Hashed name index used to score recipes against the pantry.
+///
+/// The naive version of `rebuildSuggestions()` compared every recipe ingredient
+/// against every pantry/expiring/seasonal name with bidirectional `contains`,
+/// i.e. O(recipes x ingredients x names) substring work on each rebuild. This
+/// builds the name side once and turns each lookup into a small, bounded number
+/// of dictionary hits.
+///
+/// Keys are canonicalised and singular/plural-varied through
+/// `IngredientNormalizer` — the same approach `NoWasteMatchingEngine` uses — so
+/// "extra-virgin olive oil" in a recipe still matches "olive oil" in the pantry,
+/// while avoiding the false positives raw substring matching produced
+/// ("ham" matching "graham flour").
+private struct IngredientMatchIndex {
+
+    /// Single words shorter than this are too ambiguous to index on their own.
+    /// Three keeps "oil", "egg" and "ham" usable while dropping "of" and "a".
+    private static let minimumWordLength = 3
+
+    /// Lookup key -> the original display name that produced it.
+    private var namesByKey: [String: String] = [:]
+
+    var isEmpty: Bool { namesByKey.isEmpty }
+
+    init(names: [String]) {
+        // Whole-name keys go in first and are never displaced, so a full-name
+        // match always beats a single-word match.
+        for name in names {
+            let canonical = IngredientNormalizer.canonicalize(name)
+            guard !canonical.isEmpty else { continue }
+            namesByKey[canonical] = name
+            for variant in IngredientNormalizer.variants(of: canonical) {
+                namesByKey[variant] = name
+            }
+        }
+        for name in names {
+            let canonical = IngredientNormalizer.canonicalize(name)
+            for word in canonical.components(separatedBy: CharacterSet.whitespaces)
+            where word.count >= Self.minimumWordLength {
+                if namesByKey[word] == nil { namesByKey[word] = name }
+            }
+        }
+    }
+
+    /// The indexed display name matching `ingredientName`, or nil if none does.
+    func match(_ ingredientName: String) -> String? {
+        let canonical = IngredientNormalizer.canonicalize(ingredientName)
+        guard !canonical.isEmpty else { return nil }
+        if let hit = namesByKey[canonical] { return hit }
+        for variant in IngredientNormalizer.variants(of: canonical) {
+            if let hit = namesByKey[variant] { return hit }
+        }
+        for word in canonical.components(separatedBy: CharacterSet.whitespaces)
+        where word.count >= Self.minimumWordLength {
+            if let hit = namesByKey[word] { return hit }
+        }
+        return nil
+    }
+
+    func contains(_ ingredientName: String) -> Bool { match(ingredientName) != nil }
+}
+
 // MARK: - Dashboard View
 
 struct DashboardView: View {
@@ -205,9 +269,7 @@ struct DashboardView: View {
     @MainActor
     private func rebuildSuggestions() async {
         let hemisphere = profiles.first?.hemisphere ?? .northern
-        let pantryNames = pantryItems.map { $0.name.lowercased() }
         let expiringItems = self.expiringItems
-        let expiringNames = expiringItems.map { $0.name.lowercased() }
         let seasonalItems = SeasonalAwarenessService.currentlyInSeason(hemisphere: hemisphere)
             .filter { !$0.availableAllYear }
 
@@ -216,31 +278,43 @@ struct DashboardView: View {
         // 1. Library pick — scored
         if !recipes.isEmpty {
             let targetMealType = currentMealType
-            let seasonalNames = seasonalItems.map { $0.name.lowercased() }
+            // Built once for the whole pass rather than rescanned per recipe.
+            let pantryIndex = IngredientMatchIndex(names: pantryItems.map(\.name))
+            let expiringIndex = IngredientMatchIndex(names: expiringItems.map(\.name))
+            let seasonalIndex = IngredientMatchIndex(names: seasonalItems.map(\.name))
+
             var ranked: [(score: Int, recipe: Recipe, reason: String)] = []
             for recipe in recipes {
-                var score = 0; var reason = ""
-                let ings = recipe.ingredients.map { $0.name.lowercased() }
-                for exp in expiringNames {
-                    if ings.contains(where: { $0.contains(exp) || exp.contains($0) }) {
-                        score += 10
-                        if reason.isEmpty {
-                            reason = "Uses \(expiringItems.first { $0.name.lowercased() == exp }?.name ?? exp) expiring soon"
-                        }
-                        break
+                var score = 0
+                var reason = ""
+                let ings = recipe.ingredients.map(\.name)
+
+                // Non-lazy: `compactMap` on an Array returns an Array, so `.first` is
+                // unambiguous. An ingredient list is a handful of entries.
+                if let expiringName = ings.compactMap({ expiringIndex.match($0) }).first {
+                    score += 10
+                    if reason.isEmpty { reason = "Uses \(expiringName) expiring soon" }
+                }
+                if !pantryIndex.isEmpty {
+                    let covered = Double(ings.filter { pantryIndex.contains($0) }.count)
+                    let coverage = covered / Double(max(ings.count, 1))
+                    if coverage >= 0.4 {
+                        score += Int(coverage * 5)
+                        if reason.isEmpty { reason = "You have \(Int(coverage * 100))% of the ingredients" }
                     }
                 }
-                if !pantryNames.isEmpty {
-                    let covered = Double(ings.filter { ing in pantryNames.contains(where: { ing.contains($0) || $0.contains(ing) }) }.count)
-                    let coverage = covered / Double(max(ings.count, 1))
-                    if coverage >= 0.4 { score += Int(coverage * 5); if reason.isEmpty { reason = "You have \(Int(coverage * 100))% of the ingredients" } }
-                }
                 if recipe.mealType == targetMealType { score += 3 }
-                for s in seasonalNames { if ings.contains(where: { $0.contains(s) || s.contains($0) }) { score += 2; if reason.isEmpty { reason = "In season now" }; break } }
+                if ings.contains(where: { seasonalIndex.contains($0) }) {
+                    score += 2
+                    if reason.isEmpty { reason = "In season now" }
+                }
                 ranked.append((score, recipe, reason.isEmpty ? "From your library" : reason))
             }
-            ranked.sort { $0.score != $1.score ? $0.score > $1.score : Bool.random() }
-            if let top = ranked.first {
+            // Only the winner is used, so pick it in one pass. Shuffling first
+            // keeps the random tie-break the old comparator intended, without
+            // the `Bool.random()` comparator that violated strict weak ordering
+            // and left `sort` free to return an arbitrary arrangement.
+            if let top = ranked.shuffled().max(by: { $0.score < $1.score }) {
                 result.append(DiscoverSuggestion(mode: .libraryPick(reason: top.reason), recipe: top.recipe))
             }
         }
