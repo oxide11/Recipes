@@ -3,6 +3,17 @@
 ## Unreleased
 
 ### Fixed
+- Recipe editor: step ingredient chips now reference the ingredient row by ID, so renaming or re-measuring an ingredient updates every step that uses it and the saved directions always match the ingredient list
+- Recipe editor: the unit-conversion popover is owned per step row instead of being attached to the Form section (which presented it on every row at once)
+- Meal plan generation now shows a progress indicator after the sheet dismisses and an alert with "Try Again" if the AI call fails or no meals could be added, instead of failing silently
+- Fixed a crash in meal plan generation when two recipes shared a title in different letter case
+- Meal cards now refresh their missing/substitutable ingredient lists when a pantry item is renamed, not only when the item count changes
+- Metrics recompute correctly when one record is added and another removed in the same session
+- Network timeouts are now real total-duration caps via shared `NetworkSession` configurations; the previous `URLRequest.timeoutInterval = 60` matched the system default and only bounded idle time
+- When the persistent store can't be opened and the app falls back to an in-memory store, a persistent "Temporary mode" banner and an explanatory alert tell the user that changes won't be saved
+- Guided shopping stops voice guidance and speech recognition when the sheet is swiped away without tapping Done
+- Dashboard library-pick ranking uses shuffle-then-stable-sort instead of a random tie-break comparator
+- Starter recipe generation failures during onboarding are logged instead of dropped
 - Fixed main actor-isolated property warning in `RecipeGeneratorView` where `selectedImage` was referenced from a Sendable closure (line 182)
 - Fixed identical main actor-isolated property warning in `BulkPhotoAddView` (line 46)
 - Added missing `IngredientNormalizer.swift` to Xcode project (file existed on disk but wasn't in project navigator)

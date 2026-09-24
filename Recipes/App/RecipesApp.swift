@@ -48,6 +48,11 @@ struct RecipesApp: App {
         UserProfile.self,
     ])
 
+    /// True when the persistent store could not be opened and the app is running
+    /// on a throw-away in-memory store. ContentView surfaces this to the user so
+    /// they know nothing entered this session will survive a relaunch.
+    private(set) static var isUsingEphemeralStore = false
+
     private static var container: ModelContainer = {
         do {
             let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
@@ -70,6 +75,7 @@ struct RecipesApp: App {
 #else
             // Fall back to in-memory store so the app stays usable instead of crashing.
             logger.critical("Falling back to in-memory store — data will not persist.")
+            isUsingEphemeralStore = true
             let memoryConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
             do {
                 return try ModelContainer(for: schema, configurations: [memoryConfig])

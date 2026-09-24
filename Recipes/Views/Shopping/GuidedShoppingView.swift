@@ -53,6 +53,9 @@ struct GuidedShoppingView: View {
                     SubstitutionSheetView(item: item, list: list)
                 }
             }
+            // Swiping the sheet away skips the Done button; make sure the
+            // voice guidance and speech recognizer don't keep running.
+            .onDisappear { voiceService.stopSession() }
         }
     }
 

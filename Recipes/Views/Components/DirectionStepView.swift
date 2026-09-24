@@ -2,6 +2,40 @@ import SwiftUI
 import ActivityKit
 import UserNotifications
 
+// MARK: - Ingredient Chip Label
+
+/// The capsule used for ingredient references in a direction step.
+/// Shared by the read-only step view and the recipe editor so the two never drift.
+struct IngredientChipLabel<Trailing: View>: View {
+    let ref: DirectionIngredientRef
+    var color: Color = .accentColor
+    @ViewBuilder var trailing: () -> Trailing
+
+    init(ref: DirectionIngredientRef, color: Color = .accentColor, @ViewBuilder trailing: @escaping () -> Trailing) {
+        self.ref = ref
+        self.color = color
+        self.trailing = trailing
+    }
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Text("\(ref.amount.displayString) \(ref.ingredientName)")
+                .font(.caption)
+            trailing()
+        }
+        .foregroundStyle(color)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(color.opacity(0.12), in: .capsule)
+    }
+}
+
+extension IngredientChipLabel where Trailing == EmptyView {
+    init(ref: DirectionIngredientRef, color: Color = .accentColor) {
+        self.init(ref: ref, color: color) { EmptyView() }
+    }
+}
+
 // MARK: - Direction Step View
 
 /// Displays a single recipe direction with inline measurements,
@@ -41,12 +75,7 @@ struct DirectionStepView: View {
                             Button {
                                 selectedConversion = ref
                             } label: {
-                                Text("\(ref.amount.displayString) \(ref.ingredientName)")
-                                    .font(.caption)
-                                    .foregroundStyle(color)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(color.opacity(0.12), in: .capsule)
+                                IngredientChipLabel(ref: ref, color: color)
                             }
                             .buttonStyle(.plain)
                             .contextMenu {
