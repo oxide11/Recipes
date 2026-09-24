@@ -1,0 +1,10 @@
+// Copy this file to Configs/Local.xcconfig (which is gitignored) and fill in
+// your own values, then run `xcodegen` to regenerate Recipes.xcodeproj.
+//
+// DEVELOPMENT_TEAM     Your Apple Developer team ID (10-char string).
+//                      Find it at developer.apple.com → Membership.
+// BUNDLE_ID_PREFIX     The base bundle identifier for the app. The widget
+//                      extension uses "${BUNDLE_ID_PREFIX}.RecipesWidgets".
+
+DEVELOPMENT_TEAM = YOUR_TEAM_ID_HERE
+BUNDLE_ID_PREFIX = com.yourcompany.mise

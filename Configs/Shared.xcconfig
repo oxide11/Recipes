@@ -1,0 +1,8 @@
+// Shared build settings, applied at the project level via project.yml.
+//
+// Per-developer values (signing team, bundle ID prefix) live in a gitignored
+// Configs/Local.xcconfig. Copy Configs/Local.xcconfig.example to get started.
+// The `?` makes the include optional so the project still generates if the
+// local file is missing (builds will fail at signing time with a clear error).
+
+#include? "Local.xcconfig"
