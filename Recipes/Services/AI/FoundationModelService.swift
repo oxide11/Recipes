@@ -13,11 +13,33 @@ final class FoundationModelService {
     /// Reusable session to avoid repeated allocation overhead.
     private var cachedSession: LanguageModelSession?
 
+    /// Every request appends to the session transcript. Unrelated tasks (parse a recipe,
+    /// estimate nutrition, classify pantry speech) would otherwise share one ever-growing
+    /// context until it overflowed, so the session is recycled once it has done this much.
+    private static let maxTranscriptEntries = 12
+
     private func session() -> LanguageModelSession {
-        if let cachedSession { return cachedSession }
+        if let cachedSession {
+            // A session can only serve one request at a time; a concurrent caller gets
+            // its own throwaway session instead of a "session is responding" error.
+            if cachedSession.isResponding { return LanguageModelSession() }
+            if cachedSession.transcript.count < Self.maxTranscriptEntries { return cachedSession }
+        }
         let newSession = LanguageModelSession()
         cachedSession = newSession
         return newSession
+    }
+
+    /// Runs a structured request, recycling the session and retrying once if the
+    /// context window overflowed mid-request.
+    private func generate<T: Generable>(_ prompt: String, as type: T.Type) async throws -> T {
+        do {
+            return try await session().respond(to: prompt, generating: type).content
+        } catch let error as LanguageModelSession.GenerationError {
+            guard case .exceededContextWindowSize = error else { throw error }
+            cachedSession = nil
+            return try await session().respond(to: prompt, generating: type).content
+        }
     }
 
     /// Check device eligibility for on-device foundation models.
@@ -34,9 +56,13 @@ final class FoundationModelService {
     /// Use this instead of creating a new LanguageModelSession() at the call site —
     /// each new session allocates 10-30 MB and is never freed until the session is deallocated.
     func respond(to prompt: String) async throws -> String {
-        let session = session()
-        let response = try await session.respond(to: prompt)
-        return response.content
+        do {
+            return try await session().respond(to: prompt).content
+        } catch let error as LanguageModelSession.GenerationError {
+            guard case .exceededContextWindowSize = error else { throw error }
+            cachedSession = nil
+            return try await session().respond(to: prompt).content
+        }
     }
 
     // MARK: - Recipe Generation
@@ -48,7 +74,6 @@ final class FoundationModelService {
         maxTimeMinutes: Int? = nil,
         dietaryRestrictions: [DietaryRestriction] = []
     ) async throws -> GeneratedRecipe {
-        let session = session()
 
         var prompt = "Generate a recipe using these ingredients: \(ingredients.joined(separator: ", "))."
         if let cuisine { prompt += " Cuisine style: \(cuisine.rawValue)." }
@@ -57,8 +82,7 @@ final class FoundationModelService {
             prompt += " Dietary restrictions: \(dietaryRestrictions.map(\.rawValue).joined(separator: ", "))."
         }
 
-        let response = try await session.respond(to: prompt, generating: GeneratedRecipe.self)
-        return response.content
+        return try await generate(prompt, as: GeneratedRecipe.self)
     }
 
     // MARK: - Nutritional Estimation
@@ -68,14 +92,13 @@ final class FoundationModelService {
         ingredients: [String],
         servings: Int
     ) async throws -> NutritionalEstimate {
-        let session = session()
 
         let prompt = """
         Estimate the nutritional information per serving for a recipe with \(servings) servings \
         using these ingredients: \(ingredients.joined(separator: ", ")).
         """
 
-        return try await session.respond(to: prompt, generating: NutritionalEstimate.self).content
+        return try await generate(prompt, as: NutritionalEstimate.self)
     }
 
     // MARK: - Ingredient Substitution
@@ -86,21 +109,19 @@ final class FoundationModelService {
         reason: String,
         context: String
     ) async throws -> SubstitutionSuggestions {
-        let session = session()
 
         let prompt = """
         Suggest substitutions for "\(ingredient)" in the context of: \(context). \
         Reason for substitution: \(reason).
         """
 
-        return try await session.respond(to: prompt, generating: SubstitutionSuggestions.self).content
+        return try await generate(prompt, as: SubstitutionSuggestions.self)
     }
 
     // MARK: - OCR Text to Recipe Parsing
 
     /// Parse OCR-extracted text from a recipe image into structured recipe data.
     func parseRecipeFromOCRText(_ ocrText: String) async throws -> ParsedRecipeFromOCR {
-        let session = session()
 
         let prompt = """
         Parse this text extracted from a recipe image (via OCR) into a structured recipe. \
@@ -115,14 +136,13 @@ final class FoundationModelService {
         \(ocrText)
         """
 
-        return try await session.respond(to: prompt, generating: ParsedRecipeFromOCR.self).content
+        return try await generate(prompt, as: ParsedRecipeFromOCR.self)
     }
 
     // MARK: - Recipe Generation from Description
 
     /// Generate a structured recipe from a user's natural-language request.
     func generateRecipeFromDescription(_ request: String) async throws -> ParsedRecipeFromOCR {
-        let session = session()
 
         let prompt = """
         Generate a practical home-cooked recipe based on this request. \
@@ -144,14 +164,13 @@ final class FoundationModelService {
         Request: \(request)
         """
 
-        return try await session.respond(to: prompt, generating: ParsedRecipeFromOCR.self).content
+        return try await generate(prompt, as: ParsedRecipeFromOCR.self)
     }
 
     // MARK: - Text Recipe Parsing
 
     /// Parse user-provided recipe text (pasted, generated, etc.) into structured recipe data.
     func parseRecipeFromText(_ text: String) async throws -> ParsedRecipeFromOCR {
-        let session = session()
 
         let prompt = """
         Parse this recipe text into a structured recipe. Extract the title, servings, \
@@ -165,14 +184,13 @@ final class FoundationModelService {
         \(text)
         """
 
-        return try await session.respond(to: prompt, generating: ParsedRecipeFromOCR.self).content
+        return try await generate(prompt, as: ParsedRecipeFromOCR.self)
     }
 
     // MARK: - Recipe Editing
 
     /// Apply a natural-language modification to a recipe on-device.
     func editRecipeOnDevice(recipeText: String, instruction: String) async throws -> ParsedRecipeFromOCR {
-        let session = session()
 
         let prompt = """
         Modify the following recipe based on the user's request. \
@@ -186,7 +204,7 @@ final class FoundationModelService {
         Return the complete updated recipe with all fields.
         """
 
-        return try await session.respond(to: prompt, generating: ParsedRecipeFromOCR.self).content
+        return try await generate(prompt, as: ParsedRecipeFromOCR.self)
     }
 
     // MARK: - Recipe Classification & Recommendation
@@ -197,7 +215,6 @@ final class FoundationModelService {
         ingredients: [String],
         userHistory: String
     ) async throws -> RecipeClassification {
-        let session = session()
 
         let prompt = """
         Classify this recipe for personalized recommendations.
@@ -206,7 +223,7 @@ final class FoundationModelService {
         User cooking history summary: \(userHistory)
         """
 
-        return try await session.respond(to: prompt, generating: RecipeClassification.self).content
+        return try await generate(prompt, as: RecipeClassification.self)
     }
 
     // MARK: - Blind Spot Detection
@@ -217,7 +234,6 @@ final class FoundationModelService {
         cookedIngredients: [String],
         preferences: String
     ) async throws -> BlindSpotSuggestions {
-        let session = session()
 
         let prompt = """
         The user frequently cooks: \(cookedCuisines.joined(separator: ", ")).
@@ -227,7 +243,7 @@ final class FoundationModelService {
         Suggest cuisines, techniques, and recipes they haven't explored yet.
         """
 
-        return try await session.respond(to: prompt, generating: BlindSpotSuggestions.self).content
+        return try await generate(prompt, as: BlindSpotSuggestions.self)
     }
 }
 
@@ -324,7 +340,7 @@ struct ParsedRecipeFromOCR {
     @Guide(description: "Estimated cook time in minutes, or 0 if not specified")
     var cookTimeMinutes: Int
 
-    @Guide(description: "List of ingredients. Each ingredient appears only once with its total amount needed. Maximum 10 ingredients.")
+    @Guide(description: "Complete list of ingredients. Each ingredient appears only once with its total amount needed. Include every ingredient the recipe calls for.")
     var ingredients: [ParsedOCRIngredient]
 
     @Guide(description: "Ordered list of clear, actionable cooking step instructions. Each step should reference specific ingredients and include times or temperatures where relevant.")

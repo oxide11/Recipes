@@ -66,7 +66,7 @@ final class RecipeIngestionService {
         Never use the ounce count as the ingredient quantity.
 
         Webpage content:
-        \(truncated.sanitizedForAI)
+        \(truncated.sanitizedForAI(maxLength: 6_000))
         """
 
         let response = try await aiRouter.generateText(
@@ -1161,12 +1161,12 @@ final class RecipeIngestionService {
         // Extract the JSON object even if the model wraps it in prose or explanation
         guard let start = stripped.firstIndex(of: "{"),
               let end   = stripped.lastIndex(of: "}") else {
-            throw IngestionError.parsingFailed
+            throw IngestionError.parsingFailed()
         }
         let jsonString = String(stripped[start...end])
 
         guard let data = jsonString.data(using: .utf8) else {
-            throw IngestionError.parsingFailed
+            throw IngestionError.parsingFailed()
         }
 
         do {
@@ -1174,7 +1174,20 @@ final class RecipeIngestionService {
             result.source = source
             return result
         } catch {
-            throw IngestionError.parsingFailed
+            throw IngestionError.parsingFailed(detail: Self.describe(decodingError: error))
+        }
+    }
+
+    /// Human-readable reason for a decode failure, so the user (and the Debug prompt
+    /// view) can tell "the model returned prose" from "servings came back as a range".
+    private static func describe(decodingError error: Error) -> String {
+        guard let decoding = error as? DecodingError else { return error.localizedDescription }
+        switch decoding {
+        case .keyNotFound(let key, _):        return "missing \"\(key.stringValue)\""
+        case .typeMismatch(_, let ctx):       return "unexpected type at \(ctx.codingPath.map(\.stringValue).joined(separator: "."))"
+        case .valueNotFound(_, let ctx):      return "null at \(ctx.codingPath.map(\.stringValue).joined(separator: "."))"
+        case .dataCorrupted(let ctx):         return ctx.debugDescription
+        @unknown default:                     return error.localizedDescription
         }
     }
 }
@@ -1194,10 +1207,72 @@ struct RecipeIngestionResult: Codable {
     var dietaryInfo: [String]?
     var nutritionPerServing: ParsedNutrition?
 
+    init(title: String, servings: Int? = nil, cuisine: String? = nil,
+         ingredients: [ParsedIngredient], directions: [String],
+         prepTimeMinutes: Int? = nil, cookTimeMinutes: Int? = nil,
+         source: String? = nil, imageURL: String? = nil,
+         dietaryInfo: [String]? = nil, nutritionPerServing: ParsedNutrition? = nil) {
+        self.title = title
+        self.servings = servings
+        self.cuisine = cuisine
+        self.ingredients = ingredients
+        self.directions = directions
+        self.prepTimeMinutes = prepTimeMinutes
+        self.cookTimeMinutes = cookTimeMinutes
+        self.source = source
+        self.imageURL = imageURL
+        self.dietaryInfo = dietaryInfo
+        self.nutritionPerServing = nutritionPerServing
+    }
+
+    /// Models drift from the requested schema in predictable ways: "4-6" servings,
+    /// "30 min" times, a numeric amount, a lone direction string. Accept those
+    /// instead of failing the whole import.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        title = try c.decodeIfPresent(String.self, forKey: .title) ?? "Untitled Recipe"
+        servings = LenientJSON.int(c, .servings)
+        cuisine = try c.decodeIfPresent(String.self, forKey: .cuisine)
+        ingredients = try c.decodeIfPresent([ParsedIngredient].self, forKey: .ingredients) ?? []
+        if let list = try? c.decode([String].self, forKey: .directions) {
+            directions = list
+        } else if let single = try? c.decode(String.self, forKey: .directions) {
+            directions = single.components(separatedBy: .newlines).map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        } else {
+            directions = []
+        }
+        prepTimeMinutes = LenientJSON.int(c, .prepTimeMinutes)
+        cookTimeMinutes = LenientJSON.int(c, .cookTimeMinutes)
+        source = try c.decodeIfPresent(String.self, forKey: .source)
+        imageURL = try c.decodeIfPresent(String.self, forKey: .imageURL)
+        dietaryInfo = try c.decodeIfPresent([String].self, forKey: .dietaryInfo)
+        nutritionPerServing = try c.decodeIfPresent(ParsedNutrition.self, forKey: .nutritionPerServing)
+    }
+
     struct ParsedIngredient: Codable {
         var name: String
         var amount: String
         var preparation: String?
+
+        init(name: String, amount: String, preparation: String? = nil) {
+            self.name = name
+            self.amount = amount
+            self.preparation = preparation
+        }
+
+        init(from decoder: Decoder) throws {
+            // Tolerate a bare string element ("2 cups flour") as well as an object.
+            if let single = try? decoder.singleValueContainer(), let line = try? single.decode(String.self) {
+                name = line
+                amount = ""
+                preparation = nil
+                return
+            }
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
+            amount = LenientJSON.string(c, .amount) ?? ""
+            preparation = try c.decodeIfPresent(String.self, forKey: .preparation)
+        }
     }
 
     struct ParsedNutrition: Codable {
@@ -1205,6 +1280,44 @@ struct RecipeIngestionResult: Codable {
         var proteinGrams: Int?
         var carbsGrams: Int?
         var fatGrams: Int?
+
+        init(calories: Int? = nil, proteinGrams: Int? = nil, carbsGrams: Int? = nil, fatGrams: Int? = nil) {
+            self.calories = calories
+            self.proteinGrams = proteinGrams
+            self.carbsGrams = carbsGrams
+            self.fatGrams = fatGrams
+        }
+
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            calories = LenientJSON.int(c, .calories)
+            proteinGrams = LenientJSON.int(c, .proteinGrams)
+            carbsGrams = LenientJSON.int(c, .carbsGrams)
+            fatGrams = LenientJSON.int(c, .fatGrams)
+        }
+    }
+}
+
+/// Decoding helpers that accept the number/string drift LLM output produces.
+enum LenientJSON {
+    /// Int from an Int, a Double (12.5 → 12), or a String ("4", "4-6", "30 min", "about 20").
+    static func int<K: CodingKey>(_ c: KeyedDecodingContainer<K>, _ key: K) -> Int? {
+        if let v = try? c.decodeIfPresent(Int.self, forKey: key) { return v }
+        if let v = try? c.decodeIfPresent(Double.self, forKey: key) { return Int(v.rounded()) }
+        if let s = try? c.decodeIfPresent(String.self, forKey: key) {
+            let digits = s.drop { !$0.isNumber }.prefix { $0.isNumber }
+            return Int(digits)
+        }
+        return nil
+    }
+
+    /// String from a String or a number.
+    static func string<K: CodingKey>(_ c: KeyedDecodingContainer<K>, _ key: K) -> String? {
+        if let s = try? c.decodeIfPresent(String.self, forKey: key) { return s }
+        if let d = try? c.decodeIfPresent(Double.self, forKey: key) {
+            return d == d.rounded() ? String(Int(d)) : String(d)
+        }
+        return nil
     }
 }
 
@@ -1212,14 +1325,16 @@ struct RecipeIngestionResult: Codable {
 
 enum IngestionError: LocalizedError {
     case invalidContent
-    case parsingFailed
+    case parsingFailed(detail: String? = nil)
     case unsupportedFormat
     case networkError(Error)
 
     var errorDescription: String? {
         switch self {
         case .invalidContent:       return "Unable to read the recipe content."
-        case .parsingFailed:        return "Failed to parse the recipe data."
+        case .parsingFailed(let detail):
+            if let detail, !detail.isEmpty { return "Couldn't read the recipe the AI returned (\(detail)). Try again." }
+            return "Couldn't read the recipe the AI returned. Try again."
         case .unsupportedFormat:    return "This recipe format is not supported."
         case .networkError(let e):  return "Network error: \(e.localizedDescription)"
         }

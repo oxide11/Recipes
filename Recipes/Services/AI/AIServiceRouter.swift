@@ -135,6 +135,9 @@ final class AIServiceRouter {
                     if await self.foundationModelService.isAvailable {
                         do {
                             let result = try await self.foundationModelService.respond(to: prompt)
+                            if Self.jsonTasks.contains(taskType), !Self.looksLikeJSON(result) {
+                                throw AIServiceError.invalidResponse
+                            }
                             continuation.yield(result)
                             continuation.finish()
                             return
@@ -268,6 +271,35 @@ final class AIServiceRouter {
         .mealPlanGeneration // complex JSON schema; on-device returns prose
     ]
 
+    /// Tasks whose callers parse the reply as JSON. An on-device answer that isn't
+    /// JSON is treated as a failure so Hybrid mode can fall through to the cloud
+    /// instead of handing prose to a JSON decoder.
+    private static let jsonTasks: Set<AITaskType> = [
+        .recipeIngestion, .classification, .nutritionalEstimation,
+        .ingredientLookup, .mealPlanGeneration, .cookingOptimization,
+    ]
+
+    /// True when `text` contains a JSON object or array that actually parses.
+    static func looksLikeJSON(_ text: String) -> Bool {
+        let stripped = text
+            .replacingOccurrences(of: "```json", with: "")
+            .replacingOccurrences(of: "```", with: "")
+        guard let start = stripped.firstIndex(where: { $0 == "{" || $0 == "[" }) else { return false }
+        let closer: Character = stripped[start] == "{" ? "}" : "]"
+        guard let end = stripped.lastIndex(of: closer), end > start,
+              let data = String(stripped[start...end]).data(using: .utf8) else { return false }
+        return (try? JSONSerialization.jsonObject(with: data)) != nil
+    }
+
+    /// On-device call that fails when a JSON task gets a non-JSON answer.
+    private func useOnDeviceValidated(prompt: String, taskType: AITaskType) async throws -> String {
+        let result = try await useOnDevice(prompt: prompt, taskType: taskType)
+        if Self.jsonTasks.contains(taskType), !Self.looksLikeJSON(result) {
+            throw AIServiceError.invalidResponse
+        }
+        return result
+    }
+
     /// Try on-device first, fall back to cloud providers.
     private func hybridGeneration(prompt: String, taskType: AITaskType, preferFast: Bool = false) async throws -> String {
         var errors: [Error] = []
@@ -277,7 +309,7 @@ final class AIServiceRouter {
         let useOnDeviceForTask = !Self.largeContextTasks.contains(taskType)
         if useOnDeviceForTask, await foundationModelService.isAvailable {
             do {
-                return try await useOnDevice(prompt: prompt, taskType: taskType)
+                return try await useOnDeviceValidated(prompt: prompt, taskType: taskType)
             } catch {
                 errors.append(error)
             }
@@ -317,7 +349,8 @@ import FoundationModels
 /// preventing prompt-injection attacks where user input overrides system instructions.
 enum AIInputSanitizer {
 
-    private static let maxLength = 2_000
+    /// Default cap for user-typed text. Callers embedding scraped pages pass a larger limit.
+    static let defaultMaxLength = 2_000
 
     private static let injectionPatterns: [String] = [
         "ignore previous instructions", "ignore all previous",
@@ -328,15 +361,13 @@ enum AIInputSanitizer {
         "override instructions",
     ]
 
-    static func sanitize(_ input: String) -> String {
+    static func sanitize(_ input: String, maxLength: Int = defaultMaxLength) -> String {
         var result = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        let lines = result.components(separatedBy: .newlines)
-        result = lines
-            .filter { line in
-                let lower = line.lowercased()
-                return !injectionPatterns.contains(where: { lower.contains($0) })
-            }
-            .joined(separator: "\n")
+        // Neutralise the phrase, not the whole line: a recipe step like
+        // "once you are now ready, drain the pasta" must survive.
+        for pattern in injectionPatterns {
+            result = result.replacingOccurrences(of: pattern, with: "[…]", options: [.caseInsensitive])
+        }
         if result.count > maxLength {
             let index = result.index(result.startIndex, offsetBy: maxLength)
             result = String(result[..<index]) + "…"
@@ -359,4 +390,7 @@ extension EnvironmentValues {
 extension String {
     /// Returns this string sanitized for safe embedding in an AI prompt.
     var sanitizedForAI: String { AIInputSanitizer.sanitize(self) }
+
+    /// Sanitized with an explicit length cap, for long scraped content.
+    func sanitizedForAI(maxLength: Int) -> String { AIInputSanitizer.sanitize(self, maxLength: maxLength) }
 }
