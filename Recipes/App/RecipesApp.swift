@@ -31,22 +31,9 @@ struct RecipesApp: App {
     @State private var timerDeepLink = TimerDeepLink()
     @State private var remindersSync = RemindersSync()
 
-    private static let schema = Schema([
-        Recipe.self,
-        Ingredient.self,
-        PantryItem.self,
-        MealPlan.self,
-        PlannedMeal.self,
-        GroceryList.self,
-        GroceryItem.self,
-        GroceryReceipt.self,
-        RecipePhoto.self,
-        CookingLogEntry.self,
-        RecipeVariation.self,
-        RestaurantJournalEntry.self,
-        RestaurantWantToTry.self,
-        UserProfile.self,
-    ])
+    /// Model list lives in RecipesSchemaV1 so that future changes go through
+    /// RecipesMigrationPlan instead of tripping the in-memory fallback below.
+    private static let schema = Schema(versionedSchema: RecipesSchemaV1.self)
 
     /// True when the persistent store could not be opened and the app is running
     /// on a throw-away in-memory store. ContentView surfaces this to the user so
@@ -56,7 +43,7 @@ struct RecipesApp: App {
     private static var container: ModelContainer = {
         do {
             let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-            return try ModelContainer(for: schema, configurations: [config])
+            return try ModelContainer(for: schema, migrationPlan: RecipesMigrationPlan.self, configurations: [config])
         } catch {
             logger.error("Schema migration failed: \(error)")
 #if DEBUG
@@ -68,7 +55,7 @@ struct RecipesApp: App {
                 try? FileManager.default.removeItem(at: storeURL)
                 try? FileManager.default.removeItem(at: storeURL.appendingPathExtension("shm"))
                 try? FileManager.default.removeItem(at: storeURL.appendingPathExtension("wal"))
-                return try ModelContainer(for: schema, configurations: [config])
+                return try ModelContainer(for: schema, migrationPlan: RecipesMigrationPlan.self, configurations: [config])
             } catch {
                 fatalError("Cannot create ModelContainer after reset: \(error)")
             }
@@ -85,6 +72,10 @@ struct RecipesApp: App {
 #endif
         }
     }()
+
+    init() {
+        SmartNotificationService.registerDefaults()
+    }
 
     var body: some Scene {
         WindowGroup {

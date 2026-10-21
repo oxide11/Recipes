@@ -106,6 +106,39 @@ final class UserProfile {
     var cookingGoal: CookingGoal?
     var autoDeductPantry: Bool
 
+    // MARK: - AI Prompt Constraints
+
+    /// Hard constraints every recipe-producing prompt must carry. Dietary labels,
+    /// allergens and disliked ingredients are entered in the profile editor; without
+    /// this clause nothing downstream ever read them.
+    var aiConstraintClause: String {
+        var parts: [String] = []
+        if !dietaryRestrictions.isEmpty {
+            parts.append("Dietary needs: \(dietaryRestrictions.map(\.displayName).joined(separator: ", ")).")
+        }
+        let limits = aiHardLimitsClause
+        if !limits.isEmpty { parts.append(limits.trimmingCharacters(in: .whitespaces)) }
+        return parts.isEmpty ? "" : " " + parts.joined(separator: " ")
+    }
+
+    /// Allergens, disliked ingredients and max cook time only. Use when the caller
+    /// already states dietary labels from its own selection.
+    var aiHardLimitsClause: String {
+        var parts: [String] = []
+        let cleanAllergens = allergens.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        if !cleanAllergens.isEmpty {
+            parts.append("ALLERGENS — the recipe must not contain \(cleanAllergens.joined(separator: ", ")) in any form, including derivatives, and must not suggest them as substitutions.")
+        }
+        let cleanDislikes = dislikedIngredients.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        if !cleanDislikes.isEmpty {
+            parts.append("Avoid these ingredients: \(cleanDislikes.joined(separator: ", ")).")
+        }
+        if let maxCookTimeMinutes, maxCookTimeMinutes > 0 {
+            parts.append("Total time must be \(maxCookTimeMinutes) minutes or less.")
+        }
+        return parts.isEmpty ? "" : " " + parts.joined(separator: " ")
+    }
+
     // iCloud & Sharing (stubs for future CloudKit)
     var iCloudSyncEnabled: Bool
     var shareRecipesEnabled: Bool

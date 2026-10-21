@@ -1067,9 +1067,8 @@ struct GenerateMealPlanSheet: View {
         let totalSlots = dates.count * selectedMealTypes.count
         let novelCount = filteredRecipes.count < totalSlots ? max(totalSlots - filteredRecipes.count, 2) : 2
 
-        let dietaryRestrictions = profiles.first?.dietaryRestrictions ?? []
-        let dietaryNote = dietaryRestrictions.isEmpty ? "" :
-            " Dietary needs: \(dietaryRestrictions.map(\.displayName).joined(separator: ", "))."
+        // Dietary labels, allergens, disliked ingredients and max cook time from the profile.
+        let dietaryNote = profiles.first?.aiConstraintClause ?? ""
         let goalNote = profiles.first.map { p in
             let goal = p.cookingGoal ?? .greatFood
             return goal.promptContext.isEmpty ? "" : " \(goal.promptContext)"
