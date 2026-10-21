@@ -513,7 +513,11 @@ struct OnboardingView: View {
                 ) { advance() }
 
                 if !pantryIngredients.isEmpty {
-                    skipLink { finish() }
+                    // Skip means skip: finish without seeding any pantry items.
+                    skipLink {
+                        pantryIngredients.removeAll()
+                        finish()
+                    }
                 }
             }
             .padding(.horizontal, 32)
@@ -674,6 +678,7 @@ struct OnboardingView: View {
             for: Array(selectedCuisines),
             dietaryRestrictions: selectedRestrictions
         )
+        var inserted = Set<String>()
         for item in starter
             where wantedNames.contains(item.name.lowercased())
                && !existingNames.contains(item.name.lowercased()) {
@@ -685,6 +690,23 @@ struct OnboardingView: View {
             )
             pantryItem.isStaple = true
             modelContext.insert(pantryItem)
+            inserted.insert(item.name.lowercased())
+        }
+
+        // Anything the user typed or spoke that isn't in the starter kit still
+        // belongs in their pantry. Infer a category from the name.
+        for name in pantryIngredients {
+            let key = name.lowercased()
+            guard !inserted.contains(key), !existingNames.contains(key) else { continue }
+            let pantryItem = PantryItem(
+                name: name,
+                category: IngredientNormalizer.inferCategory(fromName: name),
+                quantity: 1,
+                unit: .piece
+            )
+            pantryItem.isStaple = true
+            modelContext.insert(pantryItem)
+            inserted.insert(key)
         }
 
         // 3. Dismiss the cover first so the user lands in the app immediately

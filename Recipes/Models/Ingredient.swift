@@ -128,7 +128,12 @@ enum IngredientColor: String, Codable, Sendable {
 enum Season: String, Codable, CaseIterable, Sendable {
     case spring, summer, autumn, winter
 
-    static var current: Season { current(for: .northern) }
+    /// Hemisphere the app is currently reasoning in. Set from the user's profile
+    /// by ContentView; every `Season.current` caller (badges, seasonal filters,
+    /// recommendation scoring) follows it. Defaults to northern until a profile loads.
+    nonisolated(unsafe) static var activeHemisphere: Hemisphere = .northern
+
+    static var current: Season { current(for: activeHemisphere) }
 
     static func current(for hemisphere: Hemisphere) -> Season {
         let month = Calendar.current.component(.month, from: .now)

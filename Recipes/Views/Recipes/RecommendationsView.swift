@@ -58,7 +58,10 @@ struct RecommendationsView: View {
                                 .padding(.horizontal)
 
                             ForEach(recs) { rec in
-                                RecommendationCard(recommendation: rec)
+                                RecommendationCard(
+                                    recommendation: rec,
+                                    recipe: rec.recipeID.flatMap { id in recipes.first { $0.id == id } }
+                                )
                             }
                         }
                     }
@@ -135,7 +138,11 @@ struct RecommendationsView: View {
 
 struct RecommendationCard: View {
     let recommendation: RecommendationAgent.Recommendation
+    /// The saved recipe this card refers to (Cook Again, Use It Up, Seasonal).
+    /// Nil for cards that propose something new, which open the generator instead.
+    var recipe: Recipe? = nil
     @State private var showingGenerator = false
+    @State private var showingRecipe = false
 
     private var cuisineMatch: Cuisine? {
         guard let suggestion = recommendation.cuisineSuggestion else { return nil }
@@ -147,12 +154,12 @@ struct RecommendationCard: View {
     /// Any card with a cuisine suggestion auto-generates via QuickGenerateView.
     /// Cards without one open the full generator form for manual specification.
     private var hasCuisineHint: Bool {
-        recommendation.cuisineSuggestion != nil || cuisineMatch != nil
+        recipe == nil && (recommendation.cuisineSuggestion != nil || cuisineMatch != nil)
     }
 
     var body: some View {
         Button {
-            showingGenerator = true
+            if recipe != nil { showingRecipe = true } else { showingGenerator = true }
         } label: {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
@@ -190,6 +197,11 @@ struct RecommendationCard: View {
                 QuickGenerateView(cuisineHint: recommendation.cuisineSuggestion ?? cuisineMatch?.rawValue)
             } else {
                 RecipeGeneratorView()
+            }
+        }
+        .sheet(isPresented: $showingRecipe) {
+            if let recipe {
+                NavigationStack { RecipeDetailView(recipe: recipe) }
             }
         }
     }

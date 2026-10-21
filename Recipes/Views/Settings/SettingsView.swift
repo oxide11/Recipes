@@ -36,10 +36,11 @@ struct SettingsView: View {
                 currencySection
                 mealPrepSection
                 notificationsSection
-                iCloudAndSharingSection
                 profileSection
+#if DEBUG
                 sampleDataSection
                 debugSection
+#endif
                 aboutSection
             }
             .navigationTitle("Settings")
@@ -213,66 +214,6 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - iCloud & Sharing
-
-    private var iCloudAndSharingSection: some View {
-        Section {
-            if let profile {
-                Toggle(isOn: Bindable(profile).iCloudSyncEnabled) {
-                    VStack(alignment: .leading) {
-                        HStack {
-                            Text("iCloud Sync")
-                            Text("(todo)")
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
-                        }
-                        Text("Sync recipes, meal plans, and pantry across devices")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .disabled(true)
-
-                Toggle(isOn: Bindable(profile).shareRecipesEnabled) {
-                    HStack {
-                        Text("Share Recipes")
-                        Text("(todo)")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-                .disabled(true)
-
-                Toggle(isOn: Bindable(profile).shareStatsEnabled) {
-                    HStack {
-                        Text("Share Cooking Stats")
-                        Text("(todo)")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-                .disabled(true)
-
-                Toggle(isOn: Bindable(profile).shareJournalEnabled) {
-                    HStack {
-                        Text("Share Restaurant Journal")
-                        Text("(todo)")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-                .disabled(true)
-            } else {
-                Text("Create a profile to configure sharing")
-                    .foregroundStyle(.secondary)
-            }
-        } header: {
-            Label("iCloud & Sharing", systemImage: "icloud")
-        } footer: {
-            Text("These features are coming soon.")
-        }
-    }
-
     // MARK: - Notifications
 
     private var notificationsSection: some View {
@@ -303,6 +244,9 @@ struct SettingsView: View {
             Picker("System", selection: $measurementSystem) {
                 Text("Imperial (cups, oz, °F)").tag(MeasurementSystem.imperial)
                 Text("Metric (ml, g, °C)").tag(MeasurementSystem.metric)
+            }
+            .onChange(of: measurementSystem) {
+                profile?.measurementSystem = measurementSystem
             }
         }
     }

@@ -36,7 +36,11 @@ struct TagManagementView: View {
 
     private var recipesForSelectedTag: [Recipe] {
         guard let tag = selectedTag else { return [] }
-        return recipes.filter { $0.tags.contains(tag.name) }
+        return recipesForTag(tag.name)
+    }
+
+    private static func matches(_ stored: String, _ tag: String) -> Bool {
+        stored.lowercased().trimmingCharacters(in: .whitespaces) == tag.lowercased().trimmingCharacters(in: .whitespaces)
     }
 
     var body: some View {
@@ -170,12 +174,13 @@ struct TagManagementView: View {
 
     private func removeTagFromAll(_ tag: String) {
         for recipe in recipes {
-            recipe.tags.removeAll { $0 == tag }
+            recipe.tags.removeAll { Self.matches($0, tag) }
         }
+        rebuildAllTags()
     }
 
     private func recipesForTag(_ tag: String) -> [Recipe] {
-        recipes.filter { $0.tags.contains(tag) }
+        recipes.filter { $0.tags.contains { Self.matches($0, tag) } }
     }
 
     private var suggestedTags: [String] {

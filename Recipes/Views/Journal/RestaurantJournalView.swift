@@ -1097,6 +1097,9 @@ struct AddDishView: View {
     @State private var wantToRecreate: Bool
     @State private var existingPhotoFilename: String?
     @State private var photoData: Data?
+    /// Photo the user removed in this editing session. Deleted on Save, not on tap,
+    /// so Cancel leaves the dish exactly as it was.
+    @State private var photoFilenameToDelete: String?
     @State private var selectedItem: PhotosPickerItem?
     @State private var cameraImage: UIImage?
     @State private var showingCamera = false
@@ -1134,7 +1137,7 @@ struct AddDishView: View {
                     }
                     if hasPhoto {
                         Button("Remove Photo", systemImage: "trash", role: .destructive) {
-                            if let old = existingPhotoFilename { PhotoStorageService.delete(filename: old) }
+                            photoFilenameToDelete = existingPhotoFilename
                             existingPhotoFilename = nil
                             photoData = nil
                         }
@@ -1212,6 +1215,9 @@ struct AddDishView: View {
                                 }
                                 filename = saved
                             }
+                        }
+                        if let doomed = photoFilenameToDelete, doomed != filename {
+                            PhotoStorageService.delete(filename: doomed)
                         }
                         var dish = editing ?? DishEntry(name: name, wouldOrderAgain: false, wantToRecreate: wantToRecreate)
                         dish.name = name

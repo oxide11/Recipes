@@ -115,11 +115,21 @@ enum SeasonalAwarenessService {
     /// Check if a specific ingredient is in season.
     static func isInSeason(_ ingredientName: String) -> Bool {
         let current = Season.current
-        let name = ingredientName.lowercased()
-        guard let ingredient = seasonalLookup[name], !ingredient.availableAllYear else {
+        guard let ingredient = lookup(ingredientName), !ingredient.availableAllYear else {
             return false // Unknown ingredients and year-round staples don't get the badge
         }
         return ingredient.peakSeasons.contains(current)
+    }
+
+    /// Exact match first, then the canonical form so "Tomatoes", "cherry tomatoes"
+    /// and "tomato" all resolve to the same entry.
+    private static func lookup(_ ingredientName: String) -> SeasonalIngredient? {
+        let name = ingredientName.lowercased()
+        if let hit = seasonalLookup[name] { return hit }
+        let canonical = IngredientNormalizer.canonicalize(ingredientName)
+        if let hit = seasonalLookup[canonical] { return hit }
+        // Last resort: the table entry is a word inside the ingredient name ("roma tomato").
+        return seasonalLookup.first { name.split(separator: " ").contains(Substring($0.key)) }?.value
     }
 
     /// Get seasonal recommendations for a given season.
@@ -143,7 +153,7 @@ enum SeasonalAwarenessService {
     /// Only considers ingredients that exist in the seasonal database — pantry staples
     /// and unknown ingredients are ignored so they don't inflate the score.
     static func seasonalityScore(ingredientNames: [String]) -> Double {
-        let known = ingredientNames.filter { seasonalLookup[$0.lowercased()] != nil }
+        let known = ingredientNames.filter { lookup($0) != nil }
         guard !known.isEmpty else { return 0 }
         let inSeasonCount = known.filter { isInSeason($0) }.count
         return Double(inSeasonCount) / Double(known.count)

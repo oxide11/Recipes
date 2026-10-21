@@ -65,6 +65,7 @@ struct ContentView: View {
         // Schedule all smart notifications on launch and keep them current
         // as data changes or the app returns to the foreground.
         .onAppear {
+            Season.activeHemisphere = profiles.first?.hemisphere ?? .northern
             scheduleAllNotifications()
             if RecipesApp.isUsingEphemeralStore {
                 // Don't stack onboarding on top of a data-loss warning.
@@ -72,6 +73,10 @@ struct ContentView: View {
             } else if profiles.isEmpty {
                 showingOnboarding = true
             }
+        }
+        .onChange(of: profiles.first?.hemisphere) { _, hemisphere in
+            Season.activeHemisphere = hemisphere ?? .northern
+            scheduleAllNotifications()
         }
         .onChange(of: pantryItems.count) { scheduleAllNotifications() }
         .onChange(of: cookingLogs.count) { scheduleAllNotifications() }
