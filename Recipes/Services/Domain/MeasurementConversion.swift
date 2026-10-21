@@ -78,6 +78,13 @@ enum MeasurementConversionService {
         }
     }
 
+    /// Convert a single amount into the unit the user's measurement system prefers.
+    /// Returns the original amount when no conversion exists (counts, pinches, "as needed").
+    static func convert(amount: IngredientAmount, toSystem system: MeasurementSystem) -> IngredientAmount {
+        let target = preferredUnit(for: amount.unit, system: system)
+        return convert(amount: amount, to: target) ?? amount
+    }
+
     /// Scale a recipe's ingredient amounts by a multiplier.
     static func scale(amount: IngredientAmount, by multiplier: Double) -> IngredientAmount {
         guard amount.unit != .asNeeded else { return amount }

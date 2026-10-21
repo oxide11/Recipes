@@ -14,6 +14,7 @@ struct ShoppingListView: View {
     @State private var showingAddItem = false
     @State private var showingGuidedShopping = false
     @State private var showingRemindersSetup = false
+    @State private var showingReceiptScanner = false
     @State private var lastSyncDate: Date = .distantPast
     @AppStorage("shoppingHideCompleted") private var hideCompleted = true
 
@@ -55,6 +56,9 @@ struct ShoppingListView: View {
             }
             .sheet(isPresented: $showingRemindersSetup) {
                 RemindersSetupView(sync: remindersSync, groceryList: list)
+            }
+            .sheet(isPresented: $showingReceiptScanner) {
+                ReceiptScannerView(groceryList: list)
             }
         }
         .onAppear {
@@ -171,6 +175,24 @@ struct ShoppingListView: View {
                                 .font(.title2)
                                 .foregroundStyle(Brand.herbGreen)
                         }
+                    }
+                }
+
+                Button {
+                    showingReceiptScanner = true
+                } label: {
+                    Label {
+                        VStack(alignment: .leading) {
+                            Text("Scan a Receipt")
+                                .fontWeight(.medium)
+                            Text("Record what you paid and move bought items to the pantry")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "doc.text.viewfinder")
+                            .font(.title2)
+                            .foregroundStyle(Brand.warmTan)
                     }
                 }
             }

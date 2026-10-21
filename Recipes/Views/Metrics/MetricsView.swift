@@ -8,6 +8,9 @@ struct MetricsView: View {
     @Query private var recipes: [Recipe]
     @Query private var receipts: [GroceryReceipt]
     @Query private var restaurantEntries: [RestaurantJournalEntry]
+    @Query private var profiles: [UserProfile]
+
+    private var currencyCode: String { profiles.first?.preferredCurrencyCode ?? "CAD" }
 
     @State private var metrics = CookingMetrics()
 
@@ -58,7 +61,7 @@ struct MetricsView: View {
             )
             MetricCard(
                 title: "Grocery Spend",
-                value: "$\(Int(metrics.totalGrocerySpend))",
+                value: metrics.totalGrocerySpend.formatted(.currency(code: currencyCode).precision(.fractionLength(0))),
                 icon: "cart",
                 color: Brand.ingredientSeasoning
             )
@@ -191,7 +194,7 @@ struct MetricsView: View {
                     Text("By cooking at home")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text("$\(Int(metrics.estimatedDiningOutSavings))")
+                    Text(metrics.estimatedDiningOutSavings, format: .currency(code: currencyCode).precision(.fractionLength(0)))
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundStyle(Brand.herbGreen)

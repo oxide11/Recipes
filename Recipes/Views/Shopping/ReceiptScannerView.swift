@@ -185,8 +185,13 @@ struct ReceiptScannerView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(\.aiRouter) private var aiRouter
+    @Environment(RemindersSync.self) private var remindersSync
+    @Query private var pantryItems: [PantryItem]
+    @Query private var profiles: [UserProfile]
 
     var groceryList: GroceryList?
+
+    private var currencyCode: String { profiles.first?.preferredCurrencyCode ?? "CAD" }
 
     @State private var scannedText = ""
     @State private var isScanning = true
@@ -257,7 +262,7 @@ struct ReceiptScannerView: View {
                             Text(matchResults[index].receiptItem.name)
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                            Text(matchResults[index].receiptItem.price, format: .currency(code: "CAD"))
+                            Text(matchResults[index].receiptItem.price, format: .currency(code: currencyCode))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -625,6 +630,13 @@ struct ReceiptScannerView: View {
     private func applyConfirmedMatches() {
         let confirmed = matchResults.filter { $0.isConfirmed && $0.groceryItem != nil }
         ReceiptMatchingService.applyMatches(confirmed)
+        // A matched receipt line means the item was bought: it goes to the pantry
+        // and its Reminders entry closes, same as ticking it off in the list.
+        for match in confirmed {
+            guard let item = match.groceryItem else { continue }
+            PantryIngestionService.addToPantryIfNeeded(item, existingPantryItems: pantryItems, context: modelContext)
+            remindersSync.pushCompletion(for: item)
+        }
         matchResults = []
         showingMatchPreview = false
         didSaveReceipt = true

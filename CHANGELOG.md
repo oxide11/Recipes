@@ -2,7 +2,24 @@
 
 ## Unreleased
 
+### Added
+- Pantry items have editable quantities and units in every manual add/edit form
+- Auto-Deduct Pantry now works: logging a cook reduces pantry quantities (scaled to servings cooked, with unit conversion) and offers to remove items that ran out
+- Shopping list has a "Scan a Receipt" entry; matched receipt lines record actual prices, move items to the pantry and close their Reminders entries
+- Profile allergens, disliked ingredients and max cook time are enforced in recipe generation and meal plan prompts
+
 ### Fixed
+- Seasonal badges, filters and picks follow the profile's hemisphere; plural and qualified ingredient names match the seasonal table
+- Recommendation cards for saved recipes open the recipe instead of the AI generator
+- Onboarding "Skip pantry setup" no longer seeds the pantry; typed or spoken ingredients outside the starter kit are kept
+- Settings: removed disabled "(todo)" iCloud toggles, Developer/Debug tools are DEBUG-only, Measurements picker persists and is applied to ingredient rows and step chips
+- Currency from the profile replaces hard-coded "$"/"CAD" in Metrics, Bulk Photo Add and receipt matching
+- Reminders deleted in the Reminders app are no longer recreated on sync; guided shopping, substitutions and receipt matches push completion so sync doesn't revert them
+- On-device AI session is recycled before its transcript overflows and retried once on context-window errors; the parsing schema no longer drops ingredients past the tenth
+- Hybrid AI mode falls back to the cloud when the on-device model answers in prose for a JSON task
+- Recipe import tolerates ranges, "30 min" times, numeric amounts and other schema drift from AI output, and reports the decode reason on failure
+- URL imports without structured data send up to 6,000 characters of page text instead of 2,000
+- Tag filter/delete match case-insensitively; removing a dish photo in the journal waits for Save
 - Removed a duplicate `AIRecipeEditView` declaration under Views/Components that broke the build after the XcodeGen migration
 - Widget extension now keeps its `NSExtensionPointIdentifier` Info.plist entry so WidgetKit recognises it
 - Introduced `RecipesSchemaV1` and `RecipesMigrationPlan`; future model changes migrate instead of falling back to an in-memory store

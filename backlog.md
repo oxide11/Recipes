@@ -26,6 +26,8 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 - [x] **MEDIUM** `RecipeEditorView.swift` — Step ingredient chips snapshotted name/amount, so editing the ingredient row left chips and saved directions stale; `.popover` on the `Section` presented on every row. Fixed: chips reference ingredients by ID and resolve on save; each step row owns its popover.
 
 - [ ] **HIGH** `RemindersSync.swift:157,266,278,309` — Bare `try?` on EventKit operations; sync failures are invisible.
+- [x] **HIGH** `RemindersSync.sync` — a reminder deleted in the Reminders app was recreated on every sync. Fixed: linked items whose reminder vanished are deleted (guarded on a non-empty fetch).
+- [x] **HIGH** Guided shopping, substitutions and receipt matching set `isPurchased` without `pushCompletion`, so the next pull reverted them. Fixed: all three push; substitutions and receipt matches also ingest into the pantry.
 - [ ] **HIGH** `PhotoStorageService.swift:15,54` — Silent `try?` on directory creation and file deletion; orphaned files accumulate.
 - [ ] **HIGH** `RecipeIngestionService.swift:277,301` — Vision OCR errors silently ignored.
 - [ ] **MEDIUM** `ClaudeService.swift:164` — `try?` swallows JSON serialization error in streaming request.
@@ -75,11 +77,27 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 - [x] **HIGH** `AIServiceRouter.preferredProvider` — in-memory only; reset to Hybrid every launch. Fixed: persisted in UserDefaults (`ai_preferredProvider`). `UserProfile.preferredAIProvider` / `enableOnDeviceAI` remain dead fields to remove.
 - [x] **HIGH** `AIServiceRouter` — "On-Device Only" still sent images and streaming prompts to Claude/OpenAI. Fixed: images throw `cloudRequiredForImages` with guidance; streaming surfaces the on-device error instead of falling back.
 - [x] **HIGH** Prompts ignored `UserProfile.allergens`, `dislikedIngredients`, `maxCookTimeMinutes`. Fixed: `UserProfile.aiConstraintClause` / `aiHardLimitsClause` appended in RecipeGeneratorView (both builders) and MealPlanView generation.
-- [ ] **HIGH** `FoundationModelService` — one cached `LanguageModelSession` shared across every task; transcript grows, concurrent calls throw.
-- [ ] **HIGH** `FoundationModelService:327` — `ParsedRecipeFromOCR` capped at 10 ingredients but used for real parsing.
-- [ ] **HIGH** `AIServiceRouter.hybridGeneration` — accepts on-device prose as success so JSON parse fails with no cloud retry.
-- [ ] **HIGH** `RecipeIngestionService:284` — URL imports without JSON-LD truncated to ~2000 chars by the sanitizer.
-- [ ] **MEDIUM** `RecipeIngestionService.parseIngestionResponse` — strict Decodable fails on `servings: "4-6"`, numeric amounts, float nutrition.
+- [x] **HIGH** `FoundationModelService` — one cached `LanguageModelSession` shared across every task; transcript grows, concurrent calls throw. Fixed: recycled after 12 transcript entries, throwaway session while responding, retry on context overflow.
+- [x] **HIGH** `FoundationModelService:327` — `ParsedRecipeFromOCR` capped at 10 ingredients but used for real parsing. Fixed: cap moved to the generation prompt only.
+- [x] **HIGH** `AIServiceRouter.hybridGeneration` — accepts on-device prose as success so JSON parse fails with no cloud retry. Fixed: JSON tasks validate on-device output and fall through.
+- [x] **HIGH** `RecipeIngestionService:284` — URL imports without JSON-LD truncated to ~2000 chars by the sanitizer. Fixed: 6,000 for page content; injection phrases neutralised in place instead of dropping lines.
+- [x] **MEDIUM** `RecipeIngestionService.parseIngestionResponse` — strict Decodable fails on `servings: "4-6"`, numeric amounts, float nutrition. Fixed: lenient `init(from:)` and a decode reason in `parsingFailed`.
+
+## Features Completed From the Inventory
+
+- [x] Pantry quantities: Add, Edit and barcode manual-add take quantity + unit (`PantryQuantityRow`).
+- [x] Auto-deduct pantry: `PantryDeductionService` (canonical names, unit conversion) runs from the full log, quick log and Cooking Mode when `autoDeductPantry` is on.
+- [x] Seasonality follows the profile hemisphere (`Season.activeHemisphere`); seasonal lookup matches canonical names.
+- [x] Recommendations referencing a saved recipe open it instead of the generator.
+- [x] Onboarding: Skip pantry setup skips; custom ingredients are kept.
+- [x] Settings: "(todo)" iCloud toggles removed; Developer/Debug sections DEBUG-only; Measurements picker saves to profile.
+- [x] Measurement system applied to recipe-detail ingredient rows and step chips.
+- [x] Currency from the profile used in Metrics, Bulk Photo Add, receipt matching and the budget placeholder.
+- [x] Receipt scanner reaches a grocery list (Dashboard and a new Shopping row), records actual prices, moves matched items to the pantry and closes their reminders.
+- [x] Tag management case-insensitive; journal dish photo removal deferred to Save.
+- [ ] Receipt scanner "Photo OCR" still builds a Vision request it never runs (`captureWithVisionOCR`). Live text scan + regex parse is the working path.
+- [ ] Meal plan reminders need a meal time on `PlannedMeal` before `scheduleMealPlanReminders` can be wired.
+- [ ] `ShoppingListGenerator`, `SafeCookingTemperatureService`, `MultiRecipeCookingService`, `MealPlanGenerator` remain orphaned; variations have no create UI; widget timeline still returns placeholder data.
 
 ## Architecture
 

@@ -218,7 +218,7 @@ struct ProfileEditorView: View {
                 .keyboardType(.numberPad)
             TextField("Daily protein (grams)", text: $dailyProtein)
                 .keyboardType(.numberPad)
-            TextField("Weekly grocery budget ($)", text: $weeklyBudget)
+            TextField("Weekly grocery budget (\(existingProfile?.preferredCurrencyCode ?? "CAD"))", text: $weeklyBudget)
                 .keyboardType(.decimalPad)
         }
     }

@@ -12,6 +12,7 @@ struct GuidedShoppingView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.aiRouter) private var aiRouter
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(RemindersSync.self) private var remindersSync
 
     @Query private var pantryItems: [PantryItem]
 
@@ -349,6 +350,9 @@ struct GuidedShoppingView: View {
 
     private func markFound(_ item: GroceryItem) {
         voiceService.markFound()
+        // Without this the next Reminders pull sees the reminder still open and
+        // flips the item back to unpurchased.
+        remindersSync.pushCompletion(for: item)
     }
 
     private func skipItem() {
@@ -411,6 +415,9 @@ struct SubstitutionSheetView: View {
     @Bindable var list: GroceryList
     @Environment(\.dismiss) private var dismiss
     @Environment(\.aiRouter) private var aiRouter
+    @Environment(\.modelContext) private var modelContext
+    @Environment(RemindersSync.self) private var remindersSync
+    @Query private var pantryItems: [PantryItem]
     @State private var aiSubstitutions: [SubstitutionEngine.Substitution] = []
     @State private var isLoadingAI = false
     @State private var aiError: String?
@@ -472,7 +479,8 @@ struct SubstitutionSheetView: View {
                             }
                         }
                         Button("Skip Item") {
-                            item.isPurchased = true
+                            // Skip means "couldn't get it": leave it on the list for next time.
+                            voiceSkip()
                             dismiss()
                         }
                         .foregroundStyle(.orange)
@@ -513,7 +521,17 @@ struct SubstitutionSheetView: View {
         item.substituteFor = item.name
         item.name = sub.replacement
         item.notes = "Substituted: \(sub.notes)"
+        // The substitute is now in the basket: it belongs in the pantry and the
+        // Reminders entry should close like any other purchase.
+        PantryIngestionService.addToPantryIfNeeded(item, existingPantryItems: pantryItems, context: modelContext)
+        remindersSync.pushCompletion(for: item)
         dismiss()
+    }
+
+    /// Skipping an item in the substitution sheet leaves it unpurchased; the
+    /// guided session simply moves on to the next item.
+    private func voiceSkip() {
+        item.notes = (item.notes.map { $0 + " · " } ?? "") + "Couldn't find in store"
     }
 
     private func fetchAISubstitutions() async {

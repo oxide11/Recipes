@@ -6,14 +6,18 @@ struct IngredientRow: View {
     let ingredient: Ingredient
     var servingMultiplier: Double = 1.0
     var isChecked: Bool = false
+    /// Profile measurement system (Settings › Measurements). Nil shows the recipe's own units.
+    var measurementSystem: MeasurementSystem? = nil
     var onToggle: (() -> Void)? = nil
     @State private var showingLookup = false
 
     private var scaledAmount: IngredientAmount {
-        MeasurementConversionService.scale(
+        let scaled = MeasurementConversionService.scale(
             amount: ingredient.amount,
             by: servingMultiplier
         )
+        guard let measurementSystem else { return scaled }
+        return MeasurementConversionService.convert(amount: scaled, toSystem: measurementSystem)
     }
 
     var body: some View {

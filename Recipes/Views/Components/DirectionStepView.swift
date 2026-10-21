@@ -44,6 +44,16 @@ struct DirectionStepView: View {
     let direction: RecipeDirection
     var ingredientColorMap: [String: Color] = [:]
     var ingredientCategoryMap: [String: IngredientCategory] = [:]
+    /// Profile measurement system; converts chip amounts when set.
+    var measurementSystem: MeasurementSystem? = nil
+
+    /// A ref whose amount is shown in the user's preferred units.
+    private func displayRef(_ ref: DirectionIngredientRef) -> DirectionIngredientRef {
+        guard let measurementSystem else { return ref }
+        var converted = ref
+        converted.amount = MeasurementConversionService.convert(amount: ref.amount, toSystem: measurementSystem)
+        return converted
+    }
 
     @State private var timerActive = false
     @State private var isPaused = false
@@ -75,7 +85,7 @@ struct DirectionStepView: View {
                             Button {
                                 selectedConversion = ref
                             } label: {
-                                IngredientChipLabel(ref: ref, color: color)
+                                IngredientChipLabel(ref: displayRef(ref), color: color)
                             }
                             .buttonStyle(.plain)
                             .contextMenu {

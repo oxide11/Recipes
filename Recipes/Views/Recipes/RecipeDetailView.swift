@@ -7,6 +7,7 @@ import PhotosUI
 struct RecipeDetailView: View {
     @Bindable var recipe: Recipe
     @Environment(\.modelContext) private var modelContext
+    @Query private var profiles: [UserProfile]
 
     @Environment(\.aiRouter) private var aiRouter
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -463,6 +464,7 @@ struct RecipeDetailView: View {
                         ingredient: ingredient,
                         servingMultiplier: servingMultiplier,
                         isChecked: checkedIngredients.contains(ingredient.id),
+                        measurementSystem: profiles.first?.measurementSystem,
                         onToggle: {
                             withAnimation(.snappy(duration: 0.2)) {
                                 if checkedIngredients.contains(ingredient.id) {
@@ -524,6 +526,7 @@ struct RecipeDetailView: View {
                         direction: direction,
                         ingredientColorMap: ingredientColors,
                         ingredientCategoryMap: ingredientCategories,
+                        measurementSystem: profiles.first?.measurementSystem,
                         recipeTitle: recipe.title,
                         recipeID: recipe.id,
                         totalSteps: recipe.directions.count

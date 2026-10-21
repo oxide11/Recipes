@@ -34,6 +34,9 @@ struct BulkPhotoAddView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(\.aiRouter) private var aiRouter
+    @Query private var profiles: [UserProfile]
+
+    private var currencyCode: String { profiles.first?.preferredCurrencyCode ?? "CAD" }
 
     @State private var mode: AddMode = .photo
     @State private var selectedPhotoItem: PhotosPickerItem?
@@ -149,7 +152,7 @@ struct BulkPhotoAddView: View {
                                             }
                                         }
                                         if let price = item.price {
-                                            Text("$\(price, specifier: "%.2f")")
+                                            Text(price, format: .currency(code: currencyCode))
                                                 .font(.caption)
                                                 .foregroundStyle(.secondary)
                                         }
@@ -178,7 +181,7 @@ struct BulkPhotoAddView: View {
                         }
                     } footer: {
                         if mode == .receipt, let total = receiptTotal {
-                            Text("Selected total: $\(total, specifier: "%.2f")")
+                            Text("Selected total: \(total, format: .currency(code: currencyCode))")
                         } else {
                             Text("Tap the circle to include or exclude an item. Edit names or categories as needed.")
                         }

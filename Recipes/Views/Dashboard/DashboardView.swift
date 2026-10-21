@@ -34,6 +34,7 @@ struct DashboardView: View {
     /// Scalar-only — relationship access only allowed inside rebuildSuggestion().
     @Query private var recipes: [Recipe]
     @Query private var shoppingItems: [GroceryItem]
+    @Query(sort: \GroceryList.dateCreated, order: .reverse) private var groceryLists: [GroceryList]
 
     @State private var activeSheet: DashboardSheet? = nil
     @State private var startCookingRecipe: Recipe? = nil
@@ -143,7 +144,9 @@ struct DashboardView: View {
             .sheet(item: $activeSheet) { sheet in
                 switch sheet {
                 case .receiptScanner:
-                    ReceiptScannerView()
+                    // Pass the list so receipt lines can be matched to shopping items
+                    // and their actual prices recorded.
+                    ReceiptScannerView(groceryList: groceryLists.first)
                 case .logVisit:
                     RestaurantJournalView(initialTab: .journal)
                 case .addMeal(let mealType):

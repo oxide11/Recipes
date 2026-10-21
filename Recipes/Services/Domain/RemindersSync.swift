@@ -265,6 +265,11 @@ final class RemindersSync {
                     if item.isPurchased { reminder.completionDate = .now }
                     try? store.save(reminder, commit: false)
                 }
+            } else if item.remindersIdentifier != nil, !reminders.isEmpty {
+                // Linked reminder no longer exists: the user deleted it in the Reminders
+                // app. Mirror the deletion instead of recreating it on every sync.
+                // Guarded on a non-empty fetch so a failed or empty fetch can't wipe the list.
+                context.delete(item)
             } else {
                 // Not linked yet — match by name or create new reminder
                 let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
