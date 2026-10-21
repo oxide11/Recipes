@@ -16,20 +16,46 @@ enum ShoppingListGenerator {
     ) -> GroceryList {
         let listName = name ?? "Shopping — \(plan.name)"
         let list = GroceryList(name: listName, mealPlan: plan)
+        list.items = generateItems(from: plan, pantryItems: pantryItems)
+        return list
+    }
 
+    /// Grocery items needed for the plan's meals, merged by canonical ingredient and
+    /// net of pantry stock. The app keeps one persistent shopping list, so callers
+    /// append these to it rather than creating a new list.
+    ///
+    /// - Parameters:
+    ///   - dateRange: Only meals on these days are included (nil = whole plan).
+    ///   - existingItems: Unpurchased items already on the list; their ingredients are skipped.
+    static func generateItems(
+        from plan: MealPlan,
+        dateRange: ClosedRange<Date>? = nil,
+        pantryItems: [PantryItem] = [],
+        existingItems: [GroceryItem] = []
+    ) -> [GroceryItem] {
         // Build canonical pantry index for fast lookup
         let pantryCanonicals = Set(pantryItems.map { IngredientNormalizer.canonicalize($0.name) })
+        let alreadyListed = Set(existingItems.filter { !$0.isPurchased }.map { IngredientNormalizer.canonicalize($0.name) })
 
         // Aggregate all ingredients across meals, keyed by canonical name
         var aggregated: [String: AggregatedIngredient] = [:]
 
-        for meal in plan.meals {
+        let calendar = Calendar.current
+        let meals = plan.meals.filter { meal in
+            guard let dateRange else { return true }
+            let day = calendar.startOfDay(for: meal.date)
+            return dateRange.contains(day)
+        }
+
+        for meal in meals {
             guard let recipe = meal.recipe, recipe.servings > 0 else { continue }
             let servingScale = Double(meal.servings) / Double(recipe.servings)
 
             for ingredient in recipe.ingredients where !ingredient.isOptional {
                 let canonical = IngredientNormalizer.canonicalize(ingredient.name)
                 guard !assumedStaples.contains(canonical) else { continue }
+                guard !IngredientNormalizer.isAssumedStaple(ingredient.name) else { continue }
+                if alreadyListed.contains(canonical) { continue }
 
                 // Skip if pantry already has this (or its canonical form)
                 if pantryCanonicals.contains(canonical) { continue }
@@ -92,18 +118,17 @@ enum ShoppingListGenerator {
         }
 
         // Convert to GroceryItems (skip items fully covered by pantry)
-        for (_, agg) in aggregated where agg.quantity > 0 {
-            let section = storeSectionForCategory(agg.category)
-            let item = GroceryItem(
-                name: agg.name,
-                quantity: agg.quantity,
-                unit: agg.unit,
-                storeSection: section
-            )
-            list.items.append(item)
-        }
-
-        return list
+        return aggregated.values
+            .filter { $0.quantity > 0 }
+            .sorted { $0.name < $1.name }
+            .map { agg in
+                GroceryItem(
+                    name: agg.name,
+                    quantity: (agg.quantity * 100).rounded() / 100,
+                    unit: agg.unit,
+                    storeSection: storeSectionForCategory(agg.category)
+                )
+            }
     }
 
     // MARK: - Helpers

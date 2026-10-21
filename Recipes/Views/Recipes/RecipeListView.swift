@@ -507,8 +507,6 @@ struct RecipeListView: View {
     }
 }
 
-// MARK: - Cuisine Filter Sheet
-
 // MARK: - Tag Chip Grid
 
 struct TagChipGrid: View {
@@ -595,71 +593,6 @@ struct DietaryChipGrid: View {
             }
         }
         .padding(.vertical, 4)
-    }
-}
-
-struct CuisineFilterSheet: View {
-    @Binding var selectedCuisine: Cuisine?
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            List {
-                // "All Cuisines" row
-                Button {
-                    selectedCuisine = nil
-                    dismiss()
-                } label: {
-                    HStack {
-                        Text("All Cuisines")
-                            .foregroundStyle(.primary)
-                        Spacer()
-                        if selectedCuisine == nil {
-                            Image(systemName: "checkmark")
-                                .foregroundStyle(.tint)
-                                .fontWeight(.semibold)
-                        }
-                    }
-                }
-
-                // One row per cuisine
-                ForEach(Cuisine.allCases, id: \.self) { cuisine in
-                    Button {
-                        selectedCuisine = cuisine
-                        dismiss()
-                    } label: {
-                        HStack {
-                            Text(cuisine.rawValue.capitalized)
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            if selectedCuisine == cuisine {
-                                Image(systemName: "checkmark")
-                                    .foregroundStyle(.tint)
-                                    .fontWeight(.semibold)
-                            }
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Filter by Cuisine")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-                if selectedCuisine != nil {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Clear") {
-                            selectedCuisine = nil
-                            dismiss()
-                        }
-                    }
-                }
-            }
-        }
-        .presentationDetents([.large])
-        .presentationDragIndicator(.visible)
-        .presentationCompactAdaptation(.none)
     }
 }
 

@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- Shopping list can add this week's meal plan ingredients in one tap, merged by ingredient and net of pantry stock and items already listed
+- Imported and generated recipes get USDA safe cooking temperatures for their proteins, shown on the step where the protein is cooked
 - Pantry items have editable quantities and units in every manual add/edit form
 - Auto-Deduct Pantry now works: logging a cook reduces pantry quantities (scaled to servings cooked, with unit conversion) and offers to remove items that ran out
 - Shopping list has a "Scan a Receipt" entry; matched receipt lines record actual prices, move items to the pantry and close their Reminders entries
@@ -20,6 +22,11 @@
 - Recipe import tolerates ranges, "30 min" times, numeric amounts and other schema drift from AI output, and reports the decode reason on failure
 - URL imports without structured data send up to 6,000 characters of page text instead of 2,000
 - Tag filter/delete match case-insensitively; removing a dish photo in the journal waits for Save
+- Substitution lookup matches canonical ingredient names ("unsalted butter", "eggs", "whole milk")
+
+### Removed
+- Receipt scanner "Photo OCR" button, which never ran its Vision request
+- Unreachable views and types: SeasonalRecipesView, QuickMealsView, IngredientFilter, CuisineFilterSheet, ImportPhotoPickerButton, the unused MealPlanGenerator class and four unused AITaskType cases
 - Removed a duplicate `AIRecipeEditView` declaration under Views/Components that broke the build after the XcodeGen migration
 - Widget extension now keeps its `NSExtensionPointIdentifier` Info.plist entry so WidgetKit recognises it
 - Introduced `RecipesSchemaV1` and `RecipesMigrationPlan`; future model changes migrate instead of falling back to an in-memory store

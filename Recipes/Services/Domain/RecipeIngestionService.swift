@@ -489,7 +489,7 @@ final class RecipeIngestionService {
         }
 
         var seenIngredients = Set<String>()
-        let directions = result.directions.enumerated().map { index, instruction -> RecipeDirection in
+        var directions = result.directions.enumerated().map { index, instruction -> RecipeDirection in
             let lower = instruction.lowercased()
             var seenInStep = Set<String>()   // per-step dedup
             let refs = ingredients.compactMap { ingredient -> DirectionIngredientRef? in
@@ -512,6 +512,27 @@ final class RecipeIngestionService {
             }
             let timer = parseTimerFromInstruction(instruction, stepNumber: index + 1)
             return RecipeDirection(stepNumber: index + 1, instruction: instruction, timer: timer, ingredients: refs)
+        }
+
+        // Attach USDA safe temperatures for any protein the recipe uses, and badge the
+        // step where that protein is actually cooked (or the last step that mentions it).
+        var safeTemperatures: [SafeTemperature] = []
+        for ingredient in ingredients where ingredient.category == .protein {
+            guard let temp = SafeCookingTemperatureService.safeTemperature(forIngredientNamed: ingredient.name),
+                  !safeTemperatures.contains(temp) else { continue }
+            safeTemperatures.append(temp)
+            let mentioning = directions.indices.filter { i in
+                directions[i].ingredients.contains { $0.ingredientName == ingredient.name }
+                || directions[i].instruction.lowercased().contains(ingredient.name.lowercased())
+            }
+            let cookingVerbs = ["cook", "roast", "bake", "grill", "sear", "fry", "simmer", "broil", "poach", "until", "internal"]
+            let target = mentioning.last { i in
+                let text = directions[i].instruction.lowercased()
+                return cookingVerbs.contains { text.contains($0) }
+            } ?? mentioning.last
+            if let target, directions[target].safeTemperature == nil {
+                directions[target].safeTemperature = temp
+            }
         }
 
         var nutritionalInfo: NutritionalInfo?
@@ -566,6 +587,7 @@ final class RecipeIngestionService {
             sourceURL: sourceURL,
             sourceName: sourceName
         )
+        recipe.safeTemperatures = safeTemperatures
 
         // Add domain as a tag for URL imports
         if let host = sourceURL.flatMap({ URL(string: $0)?.host }) {

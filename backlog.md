@@ -95,9 +95,14 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 - [x] Currency from the profile used in Metrics, Bulk Photo Add, receipt matching and the budget placeholder.
 - [x] Receipt scanner reaches a grocery list (Dashboard and a new Shopping row), records actual prices, moves matched items to the pantry and closes their reminders.
 - [x] Tag management case-insensitive; journal dish photo removal deferred to Save.
-- [ ] Receipt scanner "Photo OCR" still builds a Vision request it never runs (`captureWithVisionOCR`). Live text scan + regex parse is the working path.
+- [x] Receipt scanner "Photo OCR" stub removed; the live text scan + regex parse is the one path.
 - [ ] Meal plan reminders need a meal time on `PlannedMeal` before `scheduleMealPlanReminders` can be wired.
-- [ ] `ShoppingListGenerator`, `SafeCookingTemperatureService`, `MultiRecipeCookingService`, `MealPlanGenerator` remain orphaned; variations have no create UI; widget timeline still returns placeholder data.
+- [x] `ShoppingListGenerator` wired: Shopping list "Add This Week's Meal Plan" (empty state and progress section) merges the next 7 days' ingredients into the single list, net of pantry and items already listed.
+- [x] `SafeCookingTemperatureService` wired: ingestion attaches USDA temperatures to protein ingredients and badges the step where the protein is cooked.
+- [x] `SubstitutionEngine` lookup is canonical ("unsalted butter", "eggs", "whole milk" now resolve).
+- [x] Dead code removed: `MealPlanGenerator`, `SeasonalRecipesView`, `QuickMealsView`, `IngredientFilter`, `CuisineFilterSheet`, `ImportPhotoPickerButton`, four unused `AITaskType` cases.
+- [ ] `MultiRecipeCookingService` / Cook All remains built but hidden (`MealPlanView` "hidden for now"). Decide: ship or delete.
+- [ ] Variations have no create UI; widget timeline still returns placeholder data; dead model fields (`isFavorite`, `sourceMarkdown`, carb/fat targets, iCloud flags, profile time totals) need a schema V2 to remove.
 
 ## Architecture
 

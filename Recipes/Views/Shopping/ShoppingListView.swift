@@ -10,8 +10,10 @@ struct ShoppingListView: View {
     @Query(sort: \GroceryList.dateCreated, order: .reverse) private var lists: [GroceryList]
     @Query private var profiles: [UserProfile]
     @Query private var pantryItems: [PantryItem]
+    @Query(sort: \MealPlan.startDate, order: .reverse) private var mealPlans: [MealPlan]
 
     @State private var showingAddItem = false
+    @State private var generationMessage: String?
     @State private var showingGuidedShopping = false
     @State private var showingRemindersSetup = false
     @State private var showingReceiptScanner = false
@@ -59,6 +61,14 @@ struct ShoppingListView: View {
             }
             .sheet(isPresented: $showingReceiptScanner) {
                 ReceiptScannerView(groceryList: list)
+            }
+            .alert("Meal Plan", isPresented: Binding(
+                get: { generationMessage != nil },
+                set: { if !$0 { generationMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) { generationMessage = nil }
+            } message: {
+                Text(generationMessage ?? "")
             }
         }
         .onAppear {
@@ -119,6 +129,17 @@ struct ShoppingListView: View {
             .tint(Brand.herbGreen)
             .padding(.top, 8)
 
+            if upcomingPlanHasRecipes {
+                Button {
+                    generateFromMealPlan()
+                } label: {
+                    Label("Add This Week's Meal Plan", systemImage: "calendar.badge.plus")
+                        .font(.subheadline)
+                }
+                .buttonStyle(.bordered)
+                .tint(Brand.warmTan)
+            }
+
             if !remindersSync.isLinked {
                 Button {
                     showingRemindersSetup = true
@@ -174,6 +195,26 @@ struct ShoppingListView: View {
                             Image(systemName: "waveform.circle.fill")
                                 .font(.title2)
                                 .foregroundStyle(Brand.herbGreen)
+                        }
+                    }
+                }
+
+                if upcomingPlanHasRecipes {
+                    Button {
+                        generateFromMealPlan()
+                    } label: {
+                        Label {
+                            VStack(alignment: .leading) {
+                                Text("Add This Week's Meal Plan")
+                                    .fontWeight(.medium)
+                                Text("Ingredients for the next 7 days, minus what's in your pantry")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "calendar.badge.plus")
+                                .font(.title2)
+                                .foregroundStyle(Brand.warmTan)
                         }
                     }
                 }
@@ -302,6 +343,54 @@ struct ShoppingListView: View {
     private func ensureListExists() {
         guard lists.isEmpty else { return }
         modelContext.insert(GroceryList(name: "Shopping List"))
+    }
+
+    // MARK: - Meal Plan → Shopping List
+
+    /// Today through six days from now, as start-of-day dates.
+    private var upcomingRange: ClosedRange<Date> {
+        let cal = Calendar.current
+        let start = cal.startOfDay(for: .now)
+        let end = cal.date(byAdding: .day, value: 6, to: start) ?? start
+        return start...end
+    }
+
+    /// The plan whose date span covers today (MealPlanView creates one silently).
+    private var upcomingPlan: MealPlan? {
+        let today = Calendar.current.startOfDay(for: .now)
+        return mealPlans.first {
+            Calendar.current.startOfDay(for: $0.startDate) <= today &&
+            Calendar.current.startOfDay(for: $0.endDate) >= today
+        }
+    }
+
+    private var upcomingPlanHasRecipes: Bool {
+        guard let plan = upcomingPlan else { return false }
+        return plan.meals.contains { $0.recipe != nil && upcomingRange.contains(Calendar.current.startOfDay(for: $0.date)) }
+    }
+
+    private func generateFromMealPlan() {
+        ensureListExists()
+        guard let plan = upcomingPlan, let list else {
+            generationMessage = "No meal plan covers this week yet. Plan a few meals first."
+            return
+        }
+        let items = ShoppingListGenerator.generateItems(
+            from: plan,
+            dateRange: upcomingRange,
+            pantryItems: pantryItems,
+            existingItems: list.items
+        )
+        guard !items.isEmpty else {
+            generationMessage = "Everything this week's meals need is already in your pantry or on the list."
+            return
+        }
+        for item in items {
+            modelContext.insert(item)
+            list.items.append(item)
+        }
+        remindersSync.pushAdd(items)
+        generationMessage = "Added \(items.count) item\(items.count == 1 ? "" : "s") from this week's meal plan."
     }
 }
 

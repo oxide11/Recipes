@@ -136,9 +136,21 @@ enum SubstitutionEngine {
         for ingredient: String,
         restrictions: [DietaryRestriction] = []
     ) -> [Substitution] {
+        // Exact, then canonical ("unsalted butter" → "butter", "eggs" → "egg"),
+        // then any table key contained in the name ("whole milk" → "milk").
         let key = ingredient.lowercased().trimmingCharacters(in: .whitespaces)
-
-        guard let subs = knownSubstitutions[key] else {
+        let canonical = IngredientNormalizer.canonicalize(ingredient)
+        let subs: [Substitution]
+        if let exact = knownSubstitutions[key] {
+            subs = exact
+        } else if let viaCanonical = knownSubstitutions[canonical] {
+            subs = viaCanonical
+        } else if let containedKey = knownSubstitutions.keys
+                    .filter({ key.contains($0) || canonical.contains($0) })
+                    .max(by: { $0.count < $1.count }),
+                  let contained = knownSubstitutions[containedKey] {
+            subs = contained
+        } else {
             return []
         }
 

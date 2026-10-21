@@ -1,7 +1,6 @@
 import SwiftUI
 import SwiftData
 import VisionKit
-import Vision
 
 // MARK: - Receipt Parser Service
 
@@ -393,17 +392,6 @@ struct ReceiptScannerView: View {
                         }
                         .buttonStyle(.glass)
                         .disabled(scannedText.isEmpty || isProcessing)
-
-                        Button {
-                            captureWithVisionOCR()
-                        } label: {
-                            Label("Photo OCR", systemImage: "camera.fill")
-                                .font(.headline)
-                                .padding(.horizontal, 24)
-                                .padding(.vertical, 12)
-                        }
-                        .buttonStyle(.glass)
-                        .disabled(isProcessing)
                     }
                     .padding(.bottom, 30)
                 }
@@ -529,55 +517,6 @@ struct ReceiptScannerView: View {
 
         isProcessing = false
         showingReview = true
-    }
-
-    private func captureWithVisionOCR() {
-        isProcessing = true
-        isScanning = false
-
-        // Use Vision framework OCR on the scanned text already collected
-        // from the DataScanner as a fallback; in production this would
-        // operate on a captured CGImage from the camera feed.
-        let request = VNRecognizeTextRequest { request, error in
-            guard let observations = request.results as? [VNRecognizedTextObservation] else {
-                DispatchQueue.main.async {
-                    self.isProcessing = false
-                    self.errorMessage = error?.localizedDescription ?? "OCR failed."
-                    self.isScanning = true
-                }
-                return
-            }
-
-            let recognizedStrings = observations.compactMap { observation in
-                observation.topCandidates(1).first?.string
-            }
-
-            DispatchQueue.main.async {
-                let fullText = recognizedStrings.joined(separator: "\n")
-                if !fullText.isEmpty {
-                    self.scannedText = fullText
-                }
-                let parsed = ReceiptParserService.parseReceiptText(self.scannedText)
-                self.applyParsedResult(parsed)
-                self.isProcessing = false
-                self.showingReview = true
-            }
-        }
-
-        request.recognitionLevel = .accurate
-        request.usesLanguageCorrection = true
-
-        // If we already have scanned text, just parse it directly.
-        if !scannedText.isEmpty {
-            let parsed = ReceiptParserService.parseReceiptText(scannedText)
-            applyParsedResult(parsed)
-            isProcessing = false
-            showingReview = true
-        } else {
-            isProcessing = false
-            errorMessage = "No text detected. Please position the receipt in the camera view."
-            isScanning = true
-        }
     }
 
     private func applyParsedResult(_ parsed: ReceiptParserService.ParsedReceipt) {

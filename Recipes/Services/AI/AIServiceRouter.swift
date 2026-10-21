@@ -36,15 +36,13 @@ enum AIServiceError: LocalizedError {
 
 // MARK: - AI Task Type
 
+/// Routing hint for a request. Only cases that a caller actually passes are kept;
+/// routing differs by whether a task needs a large context or a strict JSON reply.
 enum AITaskType {
-    case recipeGeneration
     case nutritionalEstimation
-    case ingredientSubstitution
     case recipeIngestion
     case imageAnalysis
-    case stepInference
     case classification
-    case blindSpotDetection
     case mealPlanGeneration
     case cookingOptimization
     case ingredientLookup

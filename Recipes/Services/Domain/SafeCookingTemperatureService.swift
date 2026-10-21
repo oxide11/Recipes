@@ -67,6 +67,28 @@ enum SafeCookingTemperatureService {
         lookup(protein: protein).first
     }
 
+    /// Protein keywords, most specific first, so "ground beef" beats "beef".
+    private static let proteinKeywords: [String] = [
+        "ground beef", "ground pork", "ground turkey", "ground chicken", "ground lamb",
+        "chicken", "turkey", "duck", "beef", "steak", "pork", "ham", "bacon", "sausage",
+        "salmon", "tuna", "fish", "cod", "halibut", "tilapia", "trout",
+        "shrimp", "prawn", "lobster", "scallop", "lamb", "egg",
+    ]
+
+    /// The safe temperature that applies to an ingredient as written in a recipe,
+    /// e.g. "boneless chicken thighs" → the chicken entry. Nil for non-proteins.
+    static func safeTemperature(forIngredientNamed name: String) -> SafeTemperature? {
+        let lower = name.lowercased()
+        guard let keyword = proteinKeywords.first(where: { lower.contains($0) }) else { return nil }
+        // Table entries are named by protein; search with the base word.
+        let base = keyword.components(separatedBy: " ").last ?? keyword
+        let candidates = lookup(protein: base)
+        if keyword.hasPrefix("ground"), let ground = candidates.first(where: { $0.protein.lowercased().contains("ground") }) {
+            return ground
+        }
+        return candidates.first(where: { !$0.protein.lowercased().contains("ground") }) ?? candidates.first
+    }
+
     /// Get all temperature entries grouped by protein type.
     static var grouped: [String: [SafeTemperature]] {
         let categories = ["Chicken", "Turkey", "Duck", "Beef", "Pork", "Ham",
