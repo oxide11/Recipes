@@ -13,6 +13,7 @@ struct CookingModeView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Query private var profiles: [UserProfile]
+    @Query private var pantryItems: [PantryItem]
 
     @State private var currentStepIndex = 0
     @State private var stepEndDates: [Int: Date] = [:]
@@ -623,6 +624,17 @@ struct CookingModeView: View {
         )
         recipe.cookingLog.append(entry)
         profiles.first?.recordCook(ofRecipeWithDifficulty: recipe.difficulty)
+
+        if profiles.first?.autoDeductPantry ?? true {
+            let consumed = PantryDeductionService.deductAfterCooking(
+                recipe: recipe,
+                servingsCooked: recipe.servings,
+                pantryItems: Array(pantryItems)
+            )
+            // Cooking mode has no follow-up sheet; drop what ran out so the
+            // pantry doesn't keep listing empty items.
+            for item in consumed { modelContext.delete(item) }
+        }
     }
 
 }

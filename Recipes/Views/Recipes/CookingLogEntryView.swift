@@ -25,6 +25,9 @@ struct CookingLogEntryView: View {
     @State private var existingPhotoFilename: String?  // filename of existing photo when editing
     @State private var showingPantryCleanup = false
     @State private var didSave = false
+    /// Items auto-deduct emptied; pre-checked in the cleanup sheet.
+    @State private var consumedItemIDs: Set<UUID> = []
+    @State private var didAutoDeduct = false
 
     private var isEditing: Bool { existingEntry != nil }
 
@@ -160,7 +163,12 @@ struct CookingLogEntryView: View {
             }
             .sensoryFeedback(.success, trigger: didSave)
             .sheet(isPresented: $showingPantryCleanup) {
-                PostCookPantrySheet(recipe: recipe, pantryItems: Array(pantryItems)) {
+                PostCookPantrySheet(
+                    recipe: recipe,
+                    pantryItems: Array(pantryItems),
+                    preselected: consumedItemIDs,
+                    quantitiesDeducted: didAutoDeduct
+                ) {
                     dismiss()
                 }
             }
@@ -216,9 +224,21 @@ struct CookingLogEntryView: View {
             profiles.first?.recordCook(ofRecipeWithDifficulty: recipe.difficulty)
             didSave = true
 
+            // Auto-deduct (Settings › Meal Planning & Cooking) reduces quantities by
+            // what the recipe used, scaled to the servings cooked.
+            if profiles.first?.autoDeductPantry ?? true {
+                let consumed = PantryDeductionService.deductAfterCooking(
+                    recipe: recipe,
+                    servingsCooked: servingsCooked,
+                    pantryItems: Array(pantryItems)
+                )
+                consumedItemIDs = Set(consumed.map(\.id))
+                didAutoDeduct = true
+            }
+
             // Pantry cleanup only on new entries
-            let recipeIngredientNames = Set(recipe.ingredients.map { $0.name.lowercased() })
-            let hasMatches = pantryItems.contains { recipeIngredientNames.contains($0.name.lowercased()) }
+            let recipeNames = Set(recipe.ingredients.map { IngredientNormalizer.canonicalize($0.name) })
+            let hasMatches = pantryItems.contains { recipeNames.contains(IngredientNormalizer.canonicalize($0.name)) }
             if hasMatches {
                 showingPantryCleanup = true
             } else {
@@ -233,18 +253,34 @@ struct CookingLogEntryView: View {
 struct PostCookPantrySheet: View {
     let recipe: Recipe
     let pantryItems: [PantryItem]
+    /// True when quantities were already reduced automatically; changes the copy.
+    let quantitiesDeducted: Bool
     let onDone: () -> Void
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
-    // Pantry items whose name matches a recipe ingredient
-    private var matchedItems: [PantryItem] {
-        let names = Set(recipe.ingredients.map { $0.name.lowercased() })
-        return pantryItems.filter { names.contains($0.name.lowercased()) }
+    init(
+        recipe: Recipe,
+        pantryItems: [PantryItem],
+        preselected: Set<UUID> = [],
+        quantitiesDeducted: Bool = false,
+        onDone: @escaping () -> Void
+    ) {
+        self.recipe = recipe
+        self.pantryItems = pantryItems
+        self.quantitiesDeducted = quantitiesDeducted
+        self.onDone = onDone
+        _usedUp = State(initialValue: preselected)
     }
 
-    @State private var usedUp: Set<UUID> = []
+    // Pantry items matching a recipe ingredient by canonical name
+    private var matchedItems: [PantryItem] {
+        let names = Set(recipe.ingredients.map { IngredientNormalizer.canonicalize($0.name) })
+        return pantryItems.filter { names.contains(IngredientNormalizer.canonicalize($0.name)) }
+    }
+
+    @State private var usedUp: Set<UUID>
 
     var body: some View {
         NavigationStack {
@@ -267,9 +303,18 @@ struct PostCookPantrySheet: View {
                                     }
                                 } label: {
                                     HStack {
-                                        Text(item.name)
-                                            .foregroundStyle(usedUp.contains(item.id) ? .secondary : .primary)
-                                            .strikethrough(usedUp.contains(item.id))
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(item.name)
+                                                .foregroundStyle(usedUp.contains(item.id) ? .secondary : .primary)
+                                                .strikethrough(usedUp.contains(item.id))
+                                            if quantitiesDeducted {
+                                                Text(item.quantity <= 0
+                                                     ? "None left"
+                                                     : "\(IngredientAmount(quantity: item.quantity, unit: item.unit).displayString) left")
+                                                    .font(.caption)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        }
                                         Spacer()
                                         if usedUp.contains(item.id) {
                                             Image(systemName: "checkmark.circle.fill")
@@ -283,9 +328,11 @@ struct PostCookPantrySheet: View {
                                 .buttonStyle(.plain)
                             }
                         } header: {
-                            Text("Tap anything you used up")
+                            Text(quantitiesDeducted ? "Anything used up?" : "Tap anything you used up")
                         } footer: {
-                            Text("Selected items will be removed from your pantry.")
+                            Text(quantitiesDeducted
+                                 ? "Quantities were reduced by what the recipe used. Items that ran out are pre-selected; selected items are removed from your pantry."
+                                 : "Selected items will be removed from your pantry.")
                         }
                     }
                 }

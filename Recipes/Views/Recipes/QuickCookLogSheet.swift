@@ -12,6 +12,7 @@ struct QuickCookLogSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Query private var profiles: [UserProfile]
+    @Query private var pantryItems: [PantryItem]
 
     @State private var rating: Int = 0
     @State private var showingFullLog = false
@@ -126,5 +127,14 @@ struct QuickCookLogSheet: View {
         modelContext.insert(entry)
         recipe.cookingLog.append(entry)
         profiles.first?.recordCook(ofRecipeWithDifficulty: recipe.difficulty)
+
+        if profiles.first?.autoDeductPantry ?? true {
+            let consumed = PantryDeductionService.deductAfterCooking(
+                recipe: recipe,
+                servingsCooked: recipe.servings,
+                pantryItems: Array(pantryItems)
+            )
+            for item in consumed { modelContext.delete(item) }
+        }
     }
 }

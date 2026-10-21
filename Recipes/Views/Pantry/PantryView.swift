@@ -550,6 +550,8 @@ struct BarcodeScannerFullView: View {
     @State private var isFrozen = false
     @State private var manualName = ""
     @State private var manualCategory: IngredientCategory = .other
+    @State private var manualQuantity: Double = 1
+    @State private var manualUnit: MeasurementUnit = .piece
 
     var body: some View {
         NavigationStack {
@@ -710,6 +712,7 @@ struct BarcodeScannerFullView: View {
                             Text(c.rawValue.capitalized).tag(c)
                         }
                     }
+                    PantryQuantityRow(quantity: $manualQuantity, unit: $manualUnit)
 
                     if let img = scanner.capturedImage {
                         Image(uiImage: img)
@@ -761,14 +764,16 @@ struct BarcodeScannerFullView: View {
             name: manualName,
             category: manualCategory,
             barcode: scanner.scannedCode,
-            quantity: 1,
-            unit: .piece,
+            quantity: manualQuantity,
+            unit: manualUnit,
             expirationDate: hasExpiration ? expirationDate : nil
         )
         item.isFrozen = isFrozen
         modelContext.insert(item)
         scanner.resetForNextScan()
         manualName = ""
+        manualQuantity = 1
+        manualUnit = .piece
     }
 }
 
@@ -780,6 +785,8 @@ struct AddPantryItemView: View {
 
     @State private var name = ""
     @State private var category: IngredientCategory = .other
+    @State private var quantity: Double = 1
+    @State private var unit: MeasurementUnit = .piece
     @State private var hasExpiration = false
     @State private var expirationDate = Date().addingTimeInterval(7 * 86400)
     @State private var isFrozen = false
@@ -794,6 +801,8 @@ struct AddPantryItemView: View {
                         Text(c.rawValue.capitalized).tag(c)
                     }
                 }
+
+                PantryQuantityRow(quantity: $quantity, unit: $unit)
 
                 if category == .protein || category == .vegetable || category == .fruit {
                     Toggle("Frozen", isOn: $isFrozen)
@@ -815,8 +824,8 @@ struct AddPantryItemView: View {
                         let item = PantryItem(
                             name: name,
                             category: category,
-                            quantity: 1,
-                            unit: .piece,
+                            quantity: quantity,
+                            unit: unit,
                             expirationDate: hasExpiration ? expirationDate : nil
                         )
                         item.isFrozen = isFrozen
@@ -838,6 +847,8 @@ struct EditPantryItemView: View {
 
     @State private var name: String
     @State private var category: IngredientCategory
+    @State private var quantity: Double
+    @State private var unit: MeasurementUnit
     @State private var hasExpiration: Bool
     @State private var expirationDate: Date
     @State private var isFrozen: Bool
@@ -846,6 +857,8 @@ struct EditPantryItemView: View {
         self.item = item
         _name = State(initialValue: item.name)
         _category = State(initialValue: item.category)
+        _quantity = State(initialValue: item.quantity)
+        _unit = State(initialValue: item.unit)
         _hasExpiration = State(initialValue: item.expirationDate != nil)
         _expirationDate = State(initialValue: item.expirationDate ?? Date().addingTimeInterval(7 * 86400))
         _isFrozen = State(initialValue: item.isFrozen)
@@ -861,6 +874,8 @@ struct EditPantryItemView: View {
                         Text(c.rawValue.capitalized).tag(c)
                     }
                 }
+
+                PantryQuantityRow(quantity: $quantity, unit: $unit)
 
                 if category == .protein || category == .vegetable || category == .fruit {
                     Toggle("Frozen", isOn: $isFrozen)
@@ -881,6 +896,8 @@ struct EditPantryItemView: View {
                     Button("Save") {
                         item.name = name
                         item.category = category
+                        item.quantity = quantity
+                        item.unit = unit
                         item.expirationDate = hasExpiration ? expirationDate : nil
                         item.isFrozen = isFrozen
                         dismiss()
@@ -1006,6 +1023,36 @@ struct QuickAddPantryView: View {
             guard let name = dict["name"] as? String else { return nil }
             let cat = IngredientCategory(rawValue: dict["category"] as? String ?? "") ?? .other
             return ParsedItem(name: name, category: cat)
+        }
+    }
+}
+
+// MARK: - Pantry Quantity Row
+
+/// Quantity field plus a unit picker, shared by every manual pantry form.
+/// Temperature units and "as needed" are not stock units, so they are excluded.
+struct PantryQuantityRow: View {
+    @Binding var quantity: Double
+    @Binding var unit: MeasurementUnit
+
+    private static let stockUnits: [MeasurementUnit] = MeasurementUnit.allCases.filter {
+        ![.asNeeded, .fahrenheit, .celsius].contains($0)
+    }
+
+    var body: some View {
+        HStack {
+            Text("Quantity")
+            Spacer()
+            TextField("1", value: $quantity, format: .number)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 70)
+            Picker("", selection: $unit) {
+                ForEach(Self.stockUnits, id: \.self) { u in
+                    Text(u.rawValue).tag(u)
+                }
+            }
+            .labelsHidden()
         }
     }
 }
