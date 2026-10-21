@@ -3,6 +3,15 @@
 ## Unreleased
 
 ### Fixed
+- Removed a duplicate `AIRecipeEditView` declaration under Views/Components that broke the build after the XcodeGen migration
+- Widget extension now keeps its `NSExtensionPointIdentifier` Info.plist entry so WidgetKit recognises it
+- Introduced `RecipesSchemaV1` and `RecipesMigrationPlan`; future model changes migrate instead of falling back to an in-memory store
+- Notification defaults are registered at launch, so expiry, streak, weekly planning and season alerts actually schedule on a fresh install
+- Notification triggers that would have landed in the past now roll to the next 9 am / 6 pm slot; streak reminder no longer prints an absurd day count when nothing has been cooked
+- Turning a notification type off cancels its already-scheduled requests; alerts for deleted pantry items are cleaned up
+- AI provider choice is persisted across launches
+- "On-Device Only" now refuses photo analysis with a clear message instead of silently sending images to a cloud provider, and streaming no longer falls back to the cloud in that mode
+- Allergens, disliked ingredients and max cook time from the profile are now included as hard constraints in recipe generation and meal plan prompts
 - Recipe editor: step ingredient chips now reference the ingredient row by ID, so renaming or re-measuring an ingredient updates every step that uses it and the saved directions always match the ingredient list
 - Recipe editor: the unit-conversion popover is owned per step row instead of being attached to the Form section (which presented it on every row at once)
 - Meal plan generation now shows a progress indicator after the sheet dismisses and an alert with "Try Again" if the AI call fails or no meals could be added, instead of failing silently

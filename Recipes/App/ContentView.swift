@@ -130,14 +130,7 @@ enum AppTab: String, Hashable {
 
 @MainActor
 let previewContainer: ModelContainer = {
-    let schema = Schema([
-        Recipe.self, Ingredient.self, PantryItem.self,
-        MealPlan.self, PlannedMeal.self,
-        GroceryList.self, GroceryItem.self, GroceryReceipt.self,
-        RecipePhoto.self, CookingLogEntry.self, RecipeVariation.self,
-        RestaurantJournalEntry.self, RestaurantWantToTry.self,
-        UserProfile.self,
-    ])
+    let schema = Schema(versionedSchema: RecipesSchemaV1.self)
     let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
     do {
         let container = try ModelContainer(for: schema, configurations: [config])

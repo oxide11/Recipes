@@ -375,6 +375,9 @@ struct RecipeGeneratorView: View {
         if !dietaryRestrictions.isEmpty {
             suffix += " Dietary needs: \(dietaryRestrictions.map(\.displayName).joined(separator: ", "))."
         }
+        // Allergens, dislikes and max time are profile-level hard limits, independent
+        // of the per-request dietary toggles above.
+        suffix += profile?.aiHardLimitsClause ?? ""
         suffix += skillConstraint(for: profile?.skillLevel ?? .intermediate)
         suffix += ingredientDeduplicationInstruction
         return suffix
@@ -506,9 +509,9 @@ struct QuickGenerateView: View {
             // the AI toward one cuisine. Let the AI choose freely what fits the dish.
             description = "Surprise me with a simple, delicious home-cooked recipe. Aim for 10 ingredients or fewer — everyday cooking, not restaurant food."
         }
-        // Dietary restrictions are a hard requirement — always included.
-        if let restrictions = profile?.dietaryRestrictions, !restrictions.isEmpty {
-            description += " Dietary needs: \(restrictions.map(\.displayName).joined(separator: ", "))."
+        // Dietary restrictions, allergens, dislikes and max time are hard requirements — always included.
+        if let profile {
+            description += profile.aiConstraintClause
         }
 
         // When the user asked for something specific (initialDescription set, or a named

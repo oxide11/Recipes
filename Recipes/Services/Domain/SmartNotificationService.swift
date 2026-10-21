@@ -37,7 +37,61 @@ final class SmartNotificationService {
         static let seasonChange    = "notification_seasonChange"
     }
 
-    private init() {}
+    private init() {
+        Self.registerDefaults()
+    }
+
+    /// All notification types are on unless the user turns them off.
+    /// `UserDefaults.bool(forKey:)` returns `false` for an unwritten key, so without
+    /// this every scheduler below would silently no-op on a fresh install while the
+    /// settings screen (which uses `@AppStorage` defaults of `true`) showed them enabled.
+    static func registerDefaults() {
+        UserDefaults.standard.register(defaults: [
+            SettingsKey.pantryAlerts: true,
+            SettingsKey.mealReminders: true,
+            SettingsKey.streakReminders: true,
+            SettingsKey.weeklyPlanning: true,
+            SettingsKey.seasonChange: true,
+        ])
+    }
+
+    /// Removes every pending request for the category behind a settings key.
+    /// Called when the user turns a notification type off, so already-scheduled
+    /// alerts don't keep firing.
+    func cancelPending(forSettingsKey key: String) {
+        let prefix: String
+        switch key {
+        case SettingsKey.pantryAlerts:    prefix = Category.pantryExpiry
+        case SettingsKey.mealReminders:   prefix = Category.mealReminder
+        case SettingsKey.streakReminders: prefix = Category.cookingStreak
+        case SettingsKey.weeklyPlanning:  prefix = Category.weeklyPlanning
+        case SettingsKey.seasonChange:    prefix = Category.seasonChange
+        default: return
+        }
+        center.getPendingNotificationRequests { requests in
+            let ids = requests.map(\.identifier).filter { $0.hasPrefix(prefix) }
+            guard !ids.isEmpty else { return }
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+        }
+    }
+
+    // MARK: - Trigger Helpers
+
+    /// A one-shot calendar trigger for `date`, or nil when `date` is already past.
+    /// Scheduling a calendar trigger in the past never fires, so callers skip instead.
+    private func futureTrigger(for date: Date, calendar: Calendar) -> UNCalendarNotificationTrigger? {
+        guard date > .now else { return nil }
+        let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: date)
+        return UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+    }
+
+    /// `hour:00` today if still ahead, otherwise `hour:00` tomorrow.
+    private func nextOccurrence(hour: Int, calendar: Calendar) -> Date? {
+        let now = Date.now
+        guard let today = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: now) else { return nil }
+        if today > now { return today }
+        return calendar.date(byAdding: .day, value: 1, to: today)
+    }
 
     // MARK: - Permission
 
@@ -59,15 +113,14 @@ final class SmartNotificationService {
     func scheduleExpiringPantryAlerts(items: [PantryItem]) {
         guard UserDefaults.standard.bool(forKey: SettingsKey.pantryAlerts) else { return }
 
-        // Remove existing pantry notifications before rescheduling.
-        center.removePendingNotificationRequests(withIdentifiers:
-            items.flatMap { item in
-                ["\(Category.pantryExpiry)_3d_\(item.id.uuidString)", "\(Category.pantryExpiry)_1d_\(item.id.uuidString)"]
-            }
-        )
-
         let calendar = Calendar.current
         let now = Date.now
+
+        // Adding a request with an existing identifier replaces it, so items that
+        // still qualify are refreshed in place. Identifiers scheduled in this pass are
+        // collected so the async cleanup below removes only the leftovers (deleted or
+        // no-longer-expiring items) and never races with the fresh adds.
+        var scheduledIDs = Set<String>()
 
         for item in items {
             guard let expirationDate = item.expirationDate else { continue }
@@ -77,48 +130,63 @@ final class SmartNotificationService {
 
             guard daysUntilExpiry >= 0, daysUntilExpiry <= 3 else { continue }
 
-            // 3-day warning — fires at 9 am today to give the user time to plan.
-            if daysUntilExpiry >= 2 {
+            // Early warning — fires at the next 9 am while there are still 2+ days left,
+            // so the user has time to plan a recipe around it.
+            if daysUntilExpiry >= 2,
+               let fireDate = nextOccurrence(hour: 9, calendar: calendar),
+               fireDate < calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: expirationDate)) ?? expirationDate,
+               let trigger = futureTrigger(for: fireDate, calendar: calendar) {
                 let threeDayContent = UNMutableNotificationContent()
                 threeDayContent.title = "Expiring Soon"
                 threeDayContent.body = "\(item.name) expires in \(daysUntilExpiry) days. Plan a recipe to use it up!"
                 threeDayContent.sound = .default
                 threeDayContent.categoryIdentifier = Category.pantryExpiry
 
-                var components = calendar.dateComponents([.year, .month, .day], from: now)
-                components.hour = 9
-                components.minute = 0
-
-                let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
                 let request = UNNotificationRequest(
                     identifier: "\(Category.pantryExpiry)_3d_\(item.id.uuidString)",
                     content: threeDayContent,
                     trigger: trigger
                 )
+                scheduledIDs.insert(request.identifier)
                 center.add(request)
             }
 
-            // 1-day warning — fires at 8 am the day before expiration.
+            // Last-chance warning — 8 am the day before expiry. If that moment has
+            // already passed (item expires today, or it's past 8 am), fire at the next
+            // 9 am or 6 pm that is still before the item expires.
             if daysUntilExpiry <= 1 {
+                let dayBefore = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: expirationDate)) ?? expirationDate
+                var fireDate = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: dayBefore) ?? dayBefore
+                if fireDate <= now {
+                    let candidates = [9, 18].compactMap { calendar.date(bySettingHour: $0, minute: 0, second: 0, of: now) }
+                    guard let next = candidates.first(where: { $0 > now && $0 < calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: expirationDate)) ?? expirationDate }) else { continue }
+                    fireDate = next
+                }
+                guard let trigger = futureTrigger(for: fireDate, calendar: calendar) else { continue }
+
                 let oneDayContent = UNMutableNotificationContent()
-                oneDayContent.title = "Expires Tomorrow!"
+                oneDayContent.title = daysUntilExpiry == 0 ? "Expires Today" : "Expires Tomorrow!"
                 oneDayContent.body = "\(item.name) is about to expire. Use it today or it may go to waste."
                 oneDayContent.sound = .default
                 oneDayContent.categoryIdentifier = Category.pantryExpiry
                 oneDayContent.interruptionLevel = .timeSensitive
 
-                guard let dayBefore = calendar.date(byAdding: .day, value: -1, to: expirationDate) else { continue }
-                var components = calendar.dateComponents([.year, .month, .day], from: dayBefore)
-                components.hour = 8
-                components.minute = 0
-
-                let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
                 let request = UNNotificationRequest(
                     identifier: "\(Category.pantryExpiry)_1d_\(item.id.uuidString)",
                     content: oneDayContent,
                     trigger: trigger
                 )
+                scheduledIDs.insert(request.identifier)
                 center.add(request)
+            }
+        }
+
+        // Drop pantry alerts for items that were deleted, eaten, or no longer qualify.
+        let keep = scheduledIDs
+        center.getPendingNotificationRequests { requests in
+            let stale = requests.map(\.identifier).filter { $0.hasPrefix(Category.pantryExpiry) && !keep.contains($0) }
+            if !stale.isEmpty {
+                UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: stale)
             }
         }
     }
@@ -181,28 +249,24 @@ final class SmartNotificationService {
         let calendar = Calendar.current
         let now = Date.now
 
-        let daysSinceLastCook: Int
-        if let lastCookDate {
-            daysSinceLastCook = calendar.dateComponents([.day], from: calendar.startOfDay(for: lastCookDate),
-                                                        to: calendar.startOfDay(for: now)).day ?? 0
-        } else {
-            daysSinceLastCook = Int.max
+        let daysSinceLastCook: Int? = lastCookDate.map {
+            calendar.dateComponents([.day], from: calendar.startOfDay(for: $0),
+                                    to: calendar.startOfDay(for: now)).day ?? 0
         }
 
-        guard daysSinceLastCook >= 2 else { return }
+        if let days = daysSinceLastCook, days < 2 { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "Keep Your Streak Alive!"
-        content.body = "You haven't cooked in \(daysSinceLastCook) days. Pick a quick recipe and get back on track!"
+        content.title = daysSinceLastCook == nil ? "Ready to Cook?" : "Keep Your Streak Alive!"
+        content.body = daysSinceLastCook.map {
+            "You haven't cooked in \($0) days. Pick a quick recipe and get back on track!"
+        } ?? "You haven't logged a cook yet. Pick a quick recipe and get started!"
         content.sound = .default
         content.categoryIdentifier = Category.cookingStreak
 
-        // Fire the reminder the same evening at 6 PM.
-        var components = calendar.dateComponents([.year, .month, .day], from: now)
-        components.hour = 18
-        components.minute = 0
-
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        // Fire at the next 6 pm (today if still ahead, otherwise tomorrow).
+        guard let fireDate = nextOccurrence(hour: 18, calendar: calendar),
+              let trigger = futureTrigger(for: fireDate, calendar: calendar) else { return }
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
         center.add(request)
     }
@@ -408,10 +472,15 @@ struct NotificationSettingsView: View {
             } header: {
                 Text("Notification Types")
             } footer: {
-                Text("Choose which notifications you'd like to receive. Changes take effect the next time notifications are scheduled.")
+                Text("Choose which notifications you'd like to receive. Turning a type off cancels anything already scheduled.")
             }
         }
         .formStyle(.grouped)
+        .onChange(of: pantryAlerts)    { if !pantryAlerts    { SmartNotificationService.shared.cancelPending(forSettingsKey: SmartNotificationService.SettingsKey.pantryAlerts) } }
+        .onChange(of: mealReminders)   { if !mealReminders   { SmartNotificationService.shared.cancelPending(forSettingsKey: SmartNotificationService.SettingsKey.mealReminders) } }
+        .onChange(of: streakReminders) { if !streakReminders { SmartNotificationService.shared.cancelPending(forSettingsKey: SmartNotificationService.SettingsKey.streakReminders) } }
+        .onChange(of: weeklyPlanning)  { if !weeklyPlanning  { SmartNotificationService.shared.cancelPending(forSettingsKey: SmartNotificationService.SettingsKey.weeklyPlanning) } }
+        .onChange(of: seasonChange)    { if !seasonChange    { SmartNotificationService.shared.cancelPending(forSettingsKey: SmartNotificationService.SettingsKey.seasonChange) } }
         .navigationTitle("Notifications")
         .scrollContentBackground(.hidden)
         .background(.ultraThinMaterial)

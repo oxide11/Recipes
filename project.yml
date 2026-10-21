@@ -75,6 +75,10 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: "$(BUNDLE_ID_PREFIX).RecipesWidgets"
+        # Generated plist is merged with this file, which supplies the
+        # NSExtensionPointIdentifier WidgetKit needs. Without it the extension
+        # builds but is not recognised as a widget.
+        INFOPLIST_FILE: RecipesWidgets/Info.plist
         GENERATE_INFOPLIST_FILE: YES
         TARGETED_DEVICE_FAMILY: "1,2"
         SKIP_INSTALL: YES

@@ -9,6 +9,7 @@ enum AIServiceError: LocalizedError {
     case invalidResponse
     case httpError(statusCode: Int, data: Data)
     case onDeviceUnavailable
+    case cloudRequiredForImages
     case allProvidersFailed([Error])
 
     var errorDescription: String? {
@@ -24,6 +25,8 @@ enum AIServiceError: LocalizedError {
             return "AI service HTTP \(code): \(body)"
         case .onDeviceUnavailable:
             return "On-device AI is not available on this device."
+        case .cloudRequiredForImages:
+            return "Photo analysis needs a cloud provider. Your AI setting is On-Device Only; switch to Hybrid, Claude, or OpenAI in Settings to analyze photos."
         case .allProvidersFailed(let errors):
             let detail = errors.map { $0.localizedDescription }.joined(separator: "; ")
             return "All AI providers failed. \(detail)"
@@ -59,7 +62,23 @@ final class AIServiceRouter {
     let openAIService = OpenAIService()
     let claudeService = ClaudeService()
 
-    var preferredProvider: AIProvider = .hybrid
+    /// Persisted across launches. Stored in UserDefaults rather than on UserProfile
+    /// because the profile field pre-dates the picker and defaults to `.onDevice`,
+    /// which would silently downgrade existing users.
+    var preferredProvider: AIProvider {
+        get { storedProvider }
+        set {
+            storedProvider = newValue
+            UserDefaults.standard.set(newValue.rawValue, forKey: Self.providerKey)
+        }
+    }
+    private var storedProvider: AIProvider
+    private static let providerKey = "ai_preferredProvider"
+
+    init() {
+        let stored = UserDefaults.standard.string(forKey: Self.providerKey)
+        storedProvider = stored.flatMap(AIProvider.init(rawValue:)) ?? .hybrid
+    }
 
     /// Whether any cloud AI provider has an API key configured.
     var hasCloudProvider: Bool {
@@ -120,8 +139,17 @@ final class AIServiceRouter {
                             continuation.finish()
                             return
                         } catch {
-                            // On-device failed — fall through to cloud
+                            // On-Device Only: surface the failure instead of quietly
+                            // sending the prompt to a cloud provider.
+                            if self.preferredProvider == .onDevice {
+                                continuation.finish(throwing: error)
+                                return
+                            }
+                            // Hybrid: fall through to cloud
                         }
+                    } else if self.preferredProvider == .onDevice {
+                        continuation.finish(throwing: AIServiceError.onDeviceUnavailable)
+                        return
                     }
                     // Fall back to cloud streaming or single-chunk
                     if self.claudeService.isConfigured {
@@ -199,7 +227,12 @@ final class AIServiceRouter {
         case .openAI where openAIService.isConfigured:
             return try await openAIService.analyzeImage(imageBase64: imageBase64, prompt: prompt)
 
-        case .hybrid, .onDevice:
+        case .onDevice:
+            // Apple's on-device model has no vision path. Honour the user's choice
+            // rather than silently uploading the photo.
+            throw AIServiceError.cloudRequiredForImages
+
+        case .hybrid:
             // Prefer Claude for image analysis, fall back to OpenAI
             if claudeService.isConfigured {
                 return try await claudeService.analyzeRecipeImage(imageBase64: imageBase64, prompt: prompt)
@@ -208,8 +241,11 @@ final class AIServiceRouter {
             }
             throw AIServiceError.apiKeyMissing(provider: "Claude or OpenAI")
 
-        default:
-            throw AIServiceError.apiKeyMissing(provider: target.rawValue)
+        case .claude:
+            throw AIServiceError.apiKeyMissing(provider: "Claude")
+
+        case .openAI:
+            throw AIServiceError.apiKeyMissing(provider: "OpenAI")
         }
     }
 

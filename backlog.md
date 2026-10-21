@@ -7,7 +7,7 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 ## Stability — Crash Risks
 
 - [x] **CRITICAL** `RecipesApp.swift:71` — Production `fatalError()` on schema migration failure. ~~No `VersionedSchema` or `MigrationPlan` defined; any model change crashes prod.~~ Fixed: falls back to in-memory store in production, and the app now shows a persistent "Temporary mode" banner plus an explanatory alert so the user knows changes won't persist.
-- [ ] **HIGH** `RecipesApp.swift` — Define a `VersionedSchema` + `SchemaMigrationPlan` so model changes migrate instead of triggering the in-memory fallback.
+- [x] **HIGH** `RecipesApp.swift` — Define a `VersionedSchema` + `SchemaMigrationPlan` so model changes migrate instead of triggering the in-memory fallback. Fixed: `RecipesSchemaV1` + `RecipesMigrationPlan` in Models/RecipesSchema.swift; add V2 + a stage for the next model change.
 - [x] **CRITICAL** `ContentView.swift:118` — `try!` on preview `ModelContainer` init; crashes if creation fails. Fixed: uses do/catch with fatalError only in preview context.
 - [x] **HIGH** `CookingLogEntryView.swift:199` — Force unwrap `photo!` after optional assignment; crashes if `PhotoStorageService.save()` fails. Fixed: safe binding.
 - [ ] **HIGH** `RecipeIngestionService.swift:1194` — Unsafe force-unwrap of string indices from malformed JSON.
@@ -29,7 +29,9 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 - [ ] **HIGH** `PhotoStorageService.swift:15,54` — Silent `try?` on directory creation and file deletion; orphaned files accumulate.
 - [ ] **HIGH** `RecipeIngestionService.swift:277,301` — Vision OCR errors silently ignored.
 - [ ] **MEDIUM** `ClaudeService.swift:164` — `try?` swallows JSON serialization error in streaming request.
+- [x] **CRITICAL** `SmartNotificationService.swift` — Every scheduler guarded on `UserDefaults.bool(forKey:)` for keys never written, so nothing fired on a fresh install. Fixed: `registerDefaults()` at launch; past-dated triggers now roll to the next slot; streak body no longer prints `Int.max`; turning a type off cancels its pending requests; alerts for deleted pantry items are removed.
 - [ ] **MEDIUM** `SmartNotificationService.swift:280,348` — Notification scheduling failures invisible.
+- [ ] **MEDIUM** `SmartNotificationService.scheduleMealPlanReminders` — never called. Blocked on PlannedMeal having a time of day; `meal.date` is start-of-day so "30 minutes before" would fire at 23:30 the previous evening.
 - [ ] **MEDIUM** `SampleData.swift:12-27` — `clearAll()` silently ignores deletion errors.
 
 ## Concurrency & Task Management
@@ -63,6 +65,22 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 - [ ] **MEDIUM** `RecipeDetailView.swift:911,913` — Loop-based ingredient delete + re-insert is non-atomic.
 - [ ] **MEDIUM** `OnboardingView.swift:653,684,719` — Multiple `modelContext.insert()` without transaction wrapping.
 
+## Build & Packaging
+
+- [x] **CRITICAL** `Views/Components/AIRecipeEditView.swift` — duplicate `struct AIRecipeEditView` (also in Views/Recipes). XcodeGen compiles the whole folder, so the default branch failed with an invalid redeclaration. Fixed: dead Components copy deleted.
+- [x] **CRITICAL** `project.yml` — widget target excluded its Info.plist and generated one without `NSExtensionPointIdentifier`. Fixed: `INFOPLIST_FILE` set so the generated plist merges with it.
+
+## AI & Privacy
+
+- [x] **HIGH** `AIServiceRouter.preferredProvider` — in-memory only; reset to Hybrid every launch. Fixed: persisted in UserDefaults (`ai_preferredProvider`). `UserProfile.preferredAIProvider` / `enableOnDeviceAI` remain dead fields to remove.
+- [x] **HIGH** `AIServiceRouter` — "On-Device Only" still sent images and streaming prompts to Claude/OpenAI. Fixed: images throw `cloudRequiredForImages` with guidance; streaming surfaces the on-device error instead of falling back.
+- [x] **HIGH** Prompts ignored `UserProfile.allergens`, `dislikedIngredients`, `maxCookTimeMinutes`. Fixed: `UserProfile.aiConstraintClause` / `aiHardLimitsClause` appended in RecipeGeneratorView (both builders) and MealPlanView generation.
+- [ ] **HIGH** `FoundationModelService` — one cached `LanguageModelSession` shared across every task; transcript grows, concurrent calls throw.
+- [ ] **HIGH** `FoundationModelService:327` — `ParsedRecipeFromOCR` capped at 10 ingredients but used for real parsing.
+- [ ] **HIGH** `AIServiceRouter.hybridGeneration` — accepts on-device prose as success so JSON parse fails with no cloud retry.
+- [ ] **HIGH** `RecipeIngestionService:284` — URL imports without JSON-LD truncated to ~2000 chars by the sanitizer.
+- [ ] **MEDIUM** `RecipeIngestionService.parseIngestionResponse` — strict Decodable fails on `servings: "4-6"`, numeric amounts, float nutrition.
+
 ## Architecture
 
 - [x] **HIGH** `ContentView.swift:62-73` — Overlapping `onChange` handlers all call `SmartNotificationService` methods; duplicate notifications. Fixed: all onChange handlers now call unified `scheduleAllNotifications()`.
@@ -72,4 +90,4 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 
 ---
 
-*Last updated: 2026-09-13*
+*Last updated: 2026-10-21*
