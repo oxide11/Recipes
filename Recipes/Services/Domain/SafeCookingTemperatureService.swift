@@ -86,7 +86,17 @@ enum SafeCookingTemperatureService {
         if keyword.hasPrefix("ground"), let ground = candidates.first(where: { $0.protein.lowercased().contains("ground") }) {
             return ground
         }
-        return candidates.first(where: { !$0.protein.lowercased().contains("ground") }) ?? candidates.first
+        let nonGround = candidates.filter { !$0.protein.lowercased().contains("ground") }
+        // "Chicken (thigh)" beats "Chicken (whole)" for "boneless chicken thighs".
+        if let cutMatch = nonGround.first(where: { entry in
+            let cut = entry.protein.lowercased()
+                .components(separatedBy: CharacterSet(charactersIn: "() -"))
+                .filter { !$0.isEmpty && $0 != base && $0 != "whole" }
+            return !cut.isEmpty && cut.allSatisfy { lower.contains($0) }
+        }) {
+            return cutMatch
+        }
+        return nonGround.first ?? candidates.first
     }
 
     /// Get all temperature entries grouped by protein type.

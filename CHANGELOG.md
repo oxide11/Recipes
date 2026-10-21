@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- Shopping list header shows spend or estimate against the weekly grocery budget from the profile
+- Nutrition tracking can step back and forward through days, weeks and months
+- Unit tests for lenient AI JSON decoding, hybrid JSON detection, pantry deduction, meal-plan shopping generation, safe temperature mapping, substitution lookup, hemisphere seasons and profile prompt constraints
 - Shopping list can add this week's meal plan ingredients in one tap, merged by ingredient and net of pantry stock and items already listed
 - Imported and generated recipes get USDA safe cooking temperatures for their proteins, shown on the step where the protein is cooked
 - Pantry items have editable quantities and units in every manual add/edit form

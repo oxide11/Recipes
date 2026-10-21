@@ -47,12 +47,65 @@ struct NutritionTrackingView: View {
     // MARK: - Period Picker
 
     private var periodPicker: some View {
-        Picker("Period", selection: $selectedPeriod) {
-            ForEach(TrackingPeriod.allCases, id: \.self) { period in
-                Text(period.rawValue.capitalized).tag(period)
+        VStack(spacing: 10) {
+            Picker("Period", selection: $selectedPeriod) {
+                ForEach(TrackingPeriod.allCases, id: \.self) { period in
+                    Text(period.rawValue.capitalized).tag(period)
+                }
             }
+            .pickerStyle(.segmented)
+
+            // Move the reference date one period at a time; forward stops at today.
+            HStack {
+                Button { shiftReference(by: -1) } label: {
+                    Image(systemName: "chevron.left")
+                        .frame(width: 44, height: 32)
+                }
+                .accessibilityLabel("Previous \(selectedPeriod.rawValue)")
+                Spacer()
+                Text(periodLabel)
+                    .font(.subheadline.weight(.medium))
+                Spacer()
+                Button { shiftReference(by: 1) } label: {
+                    Image(systemName: "chevron.right")
+                        .frame(width: 44, height: 32)
+                }
+                .disabled(isAtToday)
+                .accessibilityLabel("Next \(selectedPeriod.rawValue)")
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(Brand.warmTan)
         }
-        .pickerStyle(.segmented)
+    }
+
+    private var isAtToday: Bool {
+        Calendar.current.isDateInToday(referenceDate) || referenceDate > .now
+    }
+
+    private var periodLabel: String {
+        let cal = Calendar.current
+        switch selectedPeriod {
+        case .day:
+            return referenceDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())
+        case .week:
+            let start = cal.date(byAdding: .day, value: -6, to: referenceDate) ?? referenceDate
+            return "\(start.formatted(.dateTime.month(.abbreviated).day())) – \(referenceDate.formatted(.dateTime.month(.abbreviated).day()))"
+        case .month:
+            let start = cal.date(byAdding: .day, value: -29, to: referenceDate) ?? referenceDate
+            return "\(start.formatted(.dateTime.month(.abbreviated).day())) – \(referenceDate.formatted(.dateTime.month(.abbreviated).day()))"
+        }
+    }
+
+    private func shiftReference(by steps: Int) {
+        let cal = Calendar.current
+        let days: Int
+        switch selectedPeriod {
+        case .day:   days = 1
+        case .week:  days = 7
+        case .month: days = 30
+        }
+        guard let shifted = cal.date(byAdding: .day, value: days * steps, to: referenceDate) else { return }
+        referenceDate = min(shifted, .now)
     }
 
     // MARK: - Goal Progress

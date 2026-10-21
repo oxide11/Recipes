@@ -179,6 +179,28 @@ struct ShoppingListView: View {
                 }
                 .tint(Brand.herbGreen)
 
+                // Weekly budget from the profile (Edit Profile › Weekly grocery budget).
+                if let budget = profiles.first?.weeklyGroceryBudget, budget > 0 {
+                    let spent = list.totalActualCost
+                    let estimated = list.totalEstimatedCost
+                    let overBudget = max(spent, estimated) > budget
+                    HStack(spacing: 4) {
+                        Image(systemName: overBudget ? "exclamationmark.circle" : "banknote")
+                            .foregroundStyle(overBudget ? Brand.spiceRed : Brand.herbGreen)
+                        if spent > 0 {
+                            Text("Spent \(spent, format: .currency(code: currencyCode))")
+                        } else if estimated > 0 {
+                            Text("Est. \(estimated, format: .currency(code: currencyCode))")
+                        } else {
+                            Text("No prices yet")
+                        }
+                        Text("·").foregroundStyle(.tertiary)
+                        Text("Budget \(budget, format: .currency(code: currencyCode).precision(.fractionLength(0)))")
+                            .foregroundStyle(.secondary)
+                    }
+                    .font(.caption)
+                }
+
                 if !remaining.isEmpty {
                     Button {
                         showingGuidedShopping = true
