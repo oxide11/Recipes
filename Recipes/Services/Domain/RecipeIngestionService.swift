@@ -1373,8 +1373,11 @@ enum LenientJSON {
 
         // Each range becomes its lower bound with whichever unit it carries, in place:
         // "10-15 min" → "10 min", "45 minutes to 1 hour" → "45 minutes", so the parts
-        // still add up: "1 hr 10-15 min" → 60 + 10.
+        // still add up: "1 hr 10-15 min" → 60 + 10. The upper bound may itself be compound
+        // ("1h to 1h30m"); its extra parts belong to the range and are replaced with it.
+        // Groups 1, 2 and 4 are what replacingRanges reads.
         let rangePattern = number + #"\s*"# + unit + #"?\s*(?:-|–|to)\s*"# + number + #"\s*"# + unit + "?"
+            + #"(?:\s*\d+(?:\.\d+)?\s*"# + unit + ")*"
         let text = replacingRanges(rangePattern, in: decimals)
 
         // Add up the parts: "1 hr 30 min", "1h30m", "PT1H30M".

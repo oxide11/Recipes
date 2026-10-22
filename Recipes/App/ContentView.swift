@@ -87,10 +87,11 @@ struct ContentView: View {
         // the count, so meal reminders follow a signature of what they depend on. Debounced,
         // and limited to the meal scheduler, so typing in a planned recipe's title doesn't
         // reschedule every notification per keystroke.
-        .task(id: mealReminderSignature) {
+        .task(id: mealReminderSignature + weeklyPlanningSignature) {
             try? await Task.sleep(for: .seconds(1))
             guard !Task.isCancelled else { return }
             SmartNotificationService.shared.scheduleMealReminders(for: plannedMeals)
+            SmartNotificationService.shared.scheduleWeeklyPlanningReminder(mealPlans: mealPlans)
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { scheduleAllNotifications() }
@@ -129,6 +130,17 @@ struct ContentView: View {
                 let lead = min(max(meal.recipe?.estimatedTotalMinutes ?? 30, 30), 240)
                 return "\(meal.id.uuidString)|\(meal.date.timeIntervalSince1970)|\(meal.mealType.rawValue)|\(lead)|\(title)"
             }
+            .sorted()
+    }
+
+    /// Dinners from today through the end of next week: what the Saturday planning
+    /// reminder counts. A lunch retyped as dinner, or a dinner moved, changes it.
+    private var weeklyPlanningSignature: [String] {
+        let start = Calendar.current.startOfDay(for: .now)
+        let end = Calendar.current.date(byAdding: .day, value: 16, to: start) ?? start
+        return plannedMeals
+            .filter { $0.mealType == .dinner && $0.date >= start && $0.date < end }
+            .map { "dinner|\($0.id.uuidString)|\($0.date.timeIntervalSince1970)" }
             .sorted()
     }
 

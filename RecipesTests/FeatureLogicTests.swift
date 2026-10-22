@@ -542,3 +542,15 @@ struct FinalPassTests {
         #expect(eggs.quantity == 1)
     }
 }
+
+@Suite("Compound range upper bounds")
+struct CompoundRangeTests {
+
+    @Test("A compound upper bound belongs to the range")
+    func compoundUpperBound() {
+        #expect(LenientJSON.parseMinutes("1h to 1h30m") == 60)
+        #expect(LenientJSON.parseMinutes("1 hour to 1 hour 30 minutes") == 60)
+        #expect(LenientJSON.parseMinutes("45 minutes to 1 hour 15 minutes") == 45)
+        #expect(LenientJSON.parseMinutes("1 hr 10-15 min") == 70)
+    }
+}

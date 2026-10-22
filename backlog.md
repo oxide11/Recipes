@@ -121,6 +121,8 @@ A second pass verified those fixes (nine checkers, three refuters per finding): 
 
 A third pass on that commit confirmed 4 more (none compile errors), all fixed: the placeholder rule now uses a real-quantity marker (deduction or an entered quantity) instead of `lastUsed`, which the Keep button also sets; meal-reminder rescheduling is debounced and observes only reminder-eligible meals; a minute range after an hour part adds up again; "New York strip" is beef.
 
+A fourth pass confirmed 3 (none compile errors), all fixed: the real-quantity marker's read-modify-write is now locked (tests run in parallel) and bounded; compound upper bounds in ranges ("1h to 1h30m") no longer add to the lower bound; in-place meal edits also reschedule the weekly planning reminder.
+
 - [ ] **MEDIUM** Replace the UserDefaults real-quantity marker (`PantryDeductionService.markRealQuantity`) with a stored `PantryItem` field once a `RecipesSchemaV2` with frozen V1 models and a migration stage exists.
 
 ## Architecture

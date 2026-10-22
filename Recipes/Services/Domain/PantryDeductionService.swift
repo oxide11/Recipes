@@ -69,16 +69,26 @@ enum PantryDeductionService {
     /// `lastUsed` can't serve: the pantry's "Keep" button also sets it. A stale ID for a
     /// deleted item is harmless, since IDs are never reused.
     private static let realQuantityKey = "pantry_realQuantityItemIDs"
+    /// Bounds the list; the oldest IDs (most likely deleted items) drop off first.
+    private static let realQuantityLimit = 2_000
+    /// The read-append-write below must be atomic: callers can overlap (tests run in parallel).
+    private static let realQuantityLock = NSLock()
 
     static func hasRealQuantity(_ item: PantryItem) -> Bool {
-        let ids = UserDefaults.standard.stringArray(forKey: realQuantityKey) ?? []
-        return ids.contains(item.id.uuidString)
+        let id = item.id.uuidString
+        return realQuantityLock.withLock {
+            (UserDefaults.standard.stringArray(forKey: realQuantityKey) ?? []).contains(id)
+        }
     }
 
     static func markRealQuantity(_ item: PantryItem) {
-        var ids = UserDefaults.standard.stringArray(forKey: realQuantityKey) ?? []
-        guard !ids.contains(item.id.uuidString) else { return }
-        ids.append(item.id.uuidString)
-        UserDefaults.standard.set(ids, forKey: realQuantityKey)
+        let id = item.id.uuidString
+        realQuantityLock.withLock {
+            var ids = UserDefaults.standard.stringArray(forKey: realQuantityKey) ?? []
+            guard !ids.contains(id) else { return }
+            ids.append(id)
+            if ids.count > realQuantityLimit { ids.removeFirst(ids.count - realQuantityLimit) }
+            UserDefaults.standard.set(ids, forKey: realQuantityKey)
+        }
     }
 }
