@@ -54,8 +54,10 @@ enum PantryDeductionService {
         return fullyConsumed
     }
 
-    /// "1 piece" means "an unknown amount" throughout the app (see GroceryItem.formattedAmount).
+    /// "1 piece" means "an unknown amount" throughout the app (see GroceryItem.formattedAmount),
+    /// but only until deduction has touched the item: a real count that drops to one
+    /// (3 eggs → 1 egg) sets `lastUsed` and keeps being deducted.
     static func isPlaceholderQuantity(_ item: PantryItem) -> Bool {
-        item.quantity == 1 && item.unit == .piece
+        item.quantity == 1 && item.unit == .piece && item.lastUsed == nil
     }
 }

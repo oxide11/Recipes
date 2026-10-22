@@ -1366,25 +1366,86 @@ enum LenientJSON {
         return parseMinutes(s)
     }
 
-    static func parseMinutes(_ text: String) -> Int? {
-        let pattern = #"(\d+(?:\.\d+)?)\s*(?:(?:-|–|to)\s*\d+(?:\.\d+)?\s*)?(days?|hours?|hrs?|minutes?|mins?|seconds?|secs?|d|h|m|s)?"#
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else { return nil }
+    static func parseMinutes(_ raw: String) -> Int? {
+        let text = decimalFractions(raw)
+        let number = #"(\d+(?:\.\d+)?)"#
+        let unit = #"(days?|hours?|hrs?|minutes?|mins?|seconds?|secs?|d|h|m|s)"#
+
+        // A range takes its lower bound, with whichever unit is given:
+        // "10-15 min" → 10, "2-3 hrs" → 120, "45 minutes to 1 hour" → 45.
+        let rangePattern = number + #"\s*"# + unit + #"?\s*(?:-|–|to)\s*"# + number + #"\s*"# + unit + "?"
+        if let range = firstMatch(rangePattern, in: text), let low = Double(range[1] ?? "") {
+            return Int(minutes(low, unit: range[2] ?? range[4] ?? "").rounded())
+        }
+
+        // Otherwise add up the parts: "1 hr 30 min", "1h30m", "PT1H30M".
+        guard let regex = try? NSRegularExpression(pattern: number + #"\s*"# + unit + "?", options: [.caseInsensitive]) else { return nil }
         let ns = text as NSString
         var total = 0.0
         var matched = false
         for match in regex.matches(in: text, range: NSRange(location: 0, length: ns.length)) {
             guard let value = Double(ns.substring(with: match.range(at: 1))) else { continue }
             let unitRange = match.range(at: 2)
-            let unit = unitRange.location == NSNotFound ? "" : ns.substring(with: unitRange).lowercased()
-            switch unit.first {
-            case "d": total += value * 1440
-            case "h": total += value * 60
-            case "s": total += value / 60
-            default:  total += value    // minutes, or a bare number
-            }
+            total += minutes(value, unit: unitRange.location == NSNotFound ? "" : ns.substring(with: unitRange))
             matched = true
         }
         return matched ? Int(total.rounded()) : nil
+    }
+
+    private static func minutes(_ value: Double, unit: String) -> Double {
+        switch unit.lowercased().first {
+        case "d": return value * 1440
+        case "h": return value * 60
+        case "s": return value / 60
+        default:  return value      // minutes, or a bare number
+        }
+    }
+
+    /// Capture groups of the first match (index 0 is the whole match); nil for absent groups.
+    private static func firstMatch(_ pattern: String, in text: String) -> [String?]? {
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else { return nil }
+        let ns = text as NSString
+        guard let match = regex.firstMatch(in: text, range: NSRange(location: 0, length: ns.length)) else { return nil }
+        return (0..<match.numberOfRanges).map { i in
+            let r = match.range(at: i)
+            return r.location == NSNotFound ? nil : ns.substring(with: r)
+        }
+    }
+
+    private static let vulgarFractions: [String: Double] = [
+        "½": 0.5, "⅓": 1.0 / 3, "⅔": 2.0 / 3, "¼": 0.25, "¾": 0.75, "⅛": 0.125,
+    ]
+
+    /// Rewrites fractions as decimals so each quantity is one number:
+    /// "1 1/2" → "1.5", "1/2" → "0.5", "1½" and "1 ½" → "1.5", "½" → "0.5".
+    static func decimalFractions(_ text: String) -> String {
+        func rewrite(_ pattern: String, in text: String, _ value: ([String?]) -> Double?) -> String {
+            guard let regex = try? NSRegularExpression(pattern: pattern) else { return text }
+            let ns = text as NSString
+            var result = text
+            for match in regex.matches(in: text, range: NSRange(location: 0, length: ns.length)).reversed() {
+                let groups: [String?] = (0..<match.numberOfRanges).map { i in
+                    let r = match.range(at: i)
+                    return r.location == NSNotFound ? nil : ns.substring(with: r)
+                }
+                guard let v = value(groups) else { continue }
+                result = (result as NSString).replacingCharacters(in: match.range, with: String(format: "%g", v))
+            }
+            return result
+        }
+        var out = rewrite(#"(\d+)?\s?([½⅓⅔¼¾⅛])"#, in: text) { g in
+            guard let symbol = g[2], let fraction = vulgarFractions[symbol] else { return nil }
+            return (Double(g[1] ?? "") ?? 0) + fraction
+        }
+        out = rewrite(#"(\d+)\s+(\d+)/(\d+)"#, in: out) { g in
+            guard let whole = Double(g[1] ?? ""), let n = Double(g[2] ?? ""), let d = Double(g[3] ?? ""), d != 0 else { return nil }
+            return whole + n / d
+        }
+        out = rewrite(#"(\d+)/(\d+)"#, in: out) { g in
+            guard let n = Double(g[1] ?? ""), let d = Double(g[2] ?? ""), d != 0 else { return nil }
+            return n / d
+        }
+        return out
     }
 
     /// Int from an Int, a Double (12.5 → 12), or a String ("4", "4-6" → 4, "serves 4").

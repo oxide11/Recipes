@@ -11,7 +11,7 @@
 - Pantry items have editable quantities and units in the Add, Edit and barcode manual-add forms (Quick Add, voice, photo and shopping check-off still record an unspecified amount)
 - Auto-Deduct Pantry now works: logging a cook from the full log, the quick log or Cooking Mode reduces pantry quantities with unit conversion (scaled to the servings cooked in the full log, the recipe's servings otherwise) and offers to remove items that ran out. Items with an unspecified amount ("1 piece") and staples are not deducted, and nothing is removed without confirmation
 - Shopping list has a "Scan a Receipt" entry; matched receipt lines record actual prices, move items to the pantry and close their Reminders entries
-- Meal reminders: each planned meal in the next 7 days gets a "start cooking" notification, timed from the recipe's total time before a usual meal time (breakfast 8:00, lunch 12:30, snack 15:30, dinner 18:30, dessert 19:30)
+- Meal reminders: each planned meal in the next 7 days gets a "start cooking" notification, timed from the recipe's total time before a usual meal time (breakfast 8:00, lunch 12:30, snack 15:30, dinner 18:30, dessert 19:30); moving, retyping or swapping the recipe of a meal reschedules it
 
 ### Fixed
 - Ingredient category inference matches protein words whole, so "eggplant" is a vegetable and "graham crackers" or "hamburger buns" are not protein

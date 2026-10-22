@@ -117,6 +117,8 @@ A seven-lens review with three independent refuters per finding confirmed 15 def
 - [x] Substitution fallback matched "butter" in "butternut squash"; seasonal fallback badged "apple cider vinegar"; JSON detection rejected valid JSON after "[serves 4]".
 - [x] Changelog structure and claims corrected; stale README claims (Recipe as Code, markdown, step inference) removed.
 
+A second pass verified those fixes (nine checkers, three refuters per finding): 12 further edge cases confirmed, 5 refuted, none compile errors. All fixed: ground steak cuts at 160°F, "chicken-fried steak" as beef, eggs/roe/game/look-alikes unbadged, prep text no longer hiding the head noun; closed-compound protein names ("porkchops", "fishcakes"); multi-word seasonal plurals and canned tomato forms; fractions and unit-bearing ranges in durations; JSON span chosen by the opening bracket; placeholder rule limited to never-deducted items; Reminders re-link checks the store first and claims each reminder once; meal edits reschedule reminders.
+
 ## Architecture
 
 - [x] **HIGH** `ContentView.swift:62-73` — Overlapping `onChange` handlers all call `SmartNotificationService` methods; duplicate notifications. Fixed: all onChange handlers now call unified `scheduleAllNotifications()`.

@@ -134,15 +134,38 @@ enum SeasonalAwarenessService {
         // backwards so "plum tomato" resolves to tomato, the same way every time.
         let words = name.split(whereSeparator: { !$0.isLetter }).map(String.init)
         guard !words.contains(where: processedMarkers.contains) else { return nil }
+        // Canned tomato products: "diced tomatoes", "crushed tomatoes", "stewed tomatoes".
+        let cannedTomatoForms: Set<String> = ["diced", "crushed", "stewed"]
+        if words.contains(where: cannedTomatoForms.contains),
+           words.contains(where: { $0.hasPrefix("tomato") }) {
+            return nil
+        }
+        // Multi-word entries first, longest tail first: "baby sweet potatoes" → "sweet potato".
+        if words.count >= 2 {
+            for length in stride(from: words.count, through: 2, by: -1) {
+                let tail = Array(words.suffix(length))
+                let joined = tail.joined(separator: " ")
+                let singularTail = (tail.dropLast() + [singular(tail[tail.count - 1])]).joined(separator: " ")
+                if let hit = seasonalLookup[joined] ?? seasonalLookup[singularTail] { return hit }
+            }
+        }
         for word in words.reversed() {
             if let hit = seasonalLookup[word]
                 ?? seasonalLookup[word + "s"]
-                ?? seasonalLookup[word + "es"]
-                ?? seasonalLookup[IngredientNormalizer.singularize(word)] {
+                ?? seasonalLookup[singular(word)] {
                 return hit
             }
         }
         return nil
+    }
+
+    /// Singular form for table lookups, including "-es" plurals ("peaches", "radishes",
+    /// "potatoes") that IngredientNormalizer.singularize leaves as "peache".
+    private static func singular(_ word: String) -> String {
+        if word.hasSuffix("es"), seasonalLookup[String(word.dropLast(2))] != nil {
+            return String(word.dropLast(2))
+        }
+        return IngredientNormalizer.singularize(word)
     }
 
     /// Words that mark a shelf-stable or processed product rather than fresh produce.
@@ -151,6 +174,7 @@ enum SeasonalAwarenessService {
         "puree", "sauce", "ketchup", "jam", "jelly", "preserves", "starch", "flour",
         "cider", "wine", "butter", "chips", "dried", "canned", "tinned", "frozen",
         "pickled", "concentrate", "seasoning", "bread", "cake", "soup", "tortillas", "tortilla",
+        "creamed",
     ]
 
     /// Get seasonal recommendations for a given season.

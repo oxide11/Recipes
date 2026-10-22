@@ -391,3 +391,121 @@ struct MealReminderTimeTests {
         #expect(dinner.hour == 18 && dinner.minute == 30)
     }
 }
+
+// MARK: - Verification-pass fixes
+
+@Suite("Safe temperatures: ground cuts, styles, eggs, game, prep text")
+struct SafeTemperatureEdgeTests {
+
+    private func temp(_ name: String) -> SafeTemperature? {
+        SafeCookingTemperatureService.safeTemperature(forIngredientNamed: name)
+    }
+
+    @Test("Ground steak cuts use the ground-beef minimum")
+    func groundCuts() {
+        for name in ["steak mince", "minced steak", "ground sirloin", "ground chuck", "ground round"] {
+            #expect(temp(name)?.protein == "Ground beef", "\(name)")
+            #expect(temp(name)?.minimumFahrenheit == 160, "\(name)")
+        }
+    }
+
+    @Test("Cooking styles and look-alikes don't change species or add badges")
+    func stylesAndLookAlikes() {
+        #expect(temp("chicken-fried steak")?.protein == "Beef steak (medium)")
+        for name in ["duck eggs", "quail eggs", "venison steak", "cabbage steaks", "portobello steaks",
+                     "steak fries", "pork rinds", "salmon roe", "tortilla strips", "anchovy filets",
+                     "chicken bouillon cubes"] {
+            #expect(temp(name) == nil, "\(name)")
+        }
+    }
+
+    @Test("Prep text after the name keeps the badge")
+    func prepText() {
+        #expect(temp("stew beef, cut into cubes")?.protein == "Beef")
+        #expect(temp("chicken thighs with skin")?.protein == "Chicken (thigh)")
+        #expect(temp("chicken bites")?.protein == "Chicken")
+        #expect(temp("chicken skin") == nil)
+    }
+}
+
+@Suite("Category inference for closed compounds")
+struct CompoundCategoryTests {
+
+    @Test("Compounds of a protein and a cut are protein; non-protein heads win")
+    func compounds() {
+        for name in ["porkchops", "fishcakes", "swordfish", "sausagemeat"] {
+            #expect(IngredientNormalizer.inferCategory(fromName: name) == .protein, "\(name)")
+        }
+        for name in ["hamburger buns", "fish sauce", "egg noodles", "beefsteak tomato"] {
+            #expect(IngredientNormalizer.inferCategory(fromName: name) != .protein, "\(name)")
+        }
+    }
+}
+
+@Suite("Duration parsing: fractions and ranges with units")
+struct DurationFractionTests {
+
+    @Test("Fractions become one quantity; ranges take the lower bound")
+    func fractionsAndRanges() {
+        #expect(LenientJSON.parseMinutes("1 1/2 hours") == 90)
+        #expect(LenientJSON.parseMinutes("1/2 hour") == 30)
+        #expect(LenientJSON.parseMinutes("1½ hours") == 90)
+        #expect(LenientJSON.parseMinutes("½ hour") == 30)
+        #expect(LenientJSON.parseMinutes("45 minutes to 1 hour") == 45)
+        #expect(LenientJSON.parseMinutes("2-3 hrs") == 120)
+    }
+}
+
+@Suite("JSON detection follows the opening bracket")
+struct OpeningBracketJSONTests {
+
+    @Test("A reply cut off mid-array is rejected") @MainActor
+    func truncatedArray() {
+        #expect(!AIServiceRouter.looksLikeJSON("[{\"name\":\"milk\",\"category\":\"dairy\"},{\"name\":\"eg"))
+        #expect(AIServiceRouter.looksLikeJSON("[{\"name\":\"milk\",\"category\":\"dairy\"}]"))
+    }
+}
+
+@Suite("Deduction continues once a real count reaches one")
+struct DeductionToZeroTests {
+
+    @Test("3 eggs, a 1-egg recipe cooked three times, ends at zero and is reported")
+    func countsDownThroughOne() {
+        let recipe = Recipe(
+            title: "Fried egg", servings: 1,
+            ingredients: [Ingredient(name: "Egg", category: .protein, amount: IngredientAmount(quantity: 1, unit: .piece))]
+        )
+        let eggs = PantryItem(name: "eggs", category: .protein, quantity: 3, unit: .piece)
+        _ = PantryDeductionService.deductAfterCooking(recipe: recipe, servingsCooked: 1, pantryItems: [eggs])
+        _ = PantryDeductionService.deductAfterCooking(recipe: recipe, servingsCooked: 1, pantryItems: [eggs])
+        #expect(eggs.quantity == 1)
+        let consumed = PantryDeductionService.deductAfterCooking(recipe: recipe, servingsCooked: 1, pantryItems: [eggs])
+        #expect(eggs.quantity == 0)
+        #expect(consumed.count == 1)
+    }
+}
+
+@Suite("Seasonal processed tomato forms")
+struct SeasonalCannedTomatoTests {
+
+    @Test("Canned tomato products are never in season")
+    func cannedTomatoes() {
+        for name in ["diced tomatoes", "crushed tomatoes", "stewed tomatoes", "creamed corn"] {
+            #expect(!SeasonalAwarenessService.isInSeason(name), "\(name)")
+        }
+    }
+}
+
+extension HemisphereSeasonTests {
+
+    @Test("Multi-word entries match plurals: 'sweet potatoes' is the autumn/winter sweet potato")
+    func multiWordPlural() {
+        let saved = Season.activeHemisphere
+        defer { Season.activeHemisphere = saved }
+        // Exactly one hemisphere is in autumn or winter in any month.
+        let coldNorth = [.autumn, .winter].contains(Season.current(for: .northern))
+        Season.activeHemisphere = coldNorth ? .northern : .southern
+        #expect(SeasonalAwarenessService.isInSeason("sweet potatoes"))
+        #expect(SeasonalAwarenessService.isInSeason("sweet potato"))
+    }
+}

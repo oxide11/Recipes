@@ -282,16 +282,32 @@ final class AIServiceRouter {
         let stripped = text
             .replacingOccurrences(of: "```json", with: "")
             .replacingOccurrences(of: "```", with: "")
-        // Prose before the JSON can itself contain brackets ("[serves 4]"), so the
-        // object span and the array span are checked separately. Callers that parse
-        // an object extract first "{" to last "}", so that span is tried first.
         func parses(open: Character, close: Character) -> Bool {
             guard let start = stripped.firstIndex(of: open),
                   let end = stripped.lastIndex(of: close), end > start,
                   let data = String(stripped[start...end]).data(using: .utf8) else { return false }
             return (try? JSONSerialization.jsonObject(with: data)) != nil
         }
-        return parses(open: "{", close: "}") || parses(open: "[", close: "]")
+        // The span is chosen by the bracket that opens the JSON, the same way callers
+        // extract it, so a reply cut off mid-array is not accepted because one inner
+        // object parses. A bracketed aside in prose ("[serves 4]") that closes before
+        // the first "{" is skipped.
+        let firstObject = stripped.firstIndex(of: "{")
+        let firstArray = stripped.firstIndex(of: "[")
+        switch (firstObject, firstArray) {
+        case (nil, nil):
+            return false
+        case (.some, nil):
+            return parses(open: "{", close: "}")
+        case (nil, .some):
+            return parses(open: "[", close: "]")
+        case let (.some(object), .some(array)):
+            if object < array { return parses(open: "{", close: "}") }
+            if let asideEnd = stripped[array...].firstIndex(of: "]"), asideEnd < object {
+                return parses(open: "{", close: "}")
+            }
+            return parses(open: "[", close: "]")
+        }
     }
 
     /// On-device call that fails when a JSON task gets a non-JSON answer.

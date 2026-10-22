@@ -80,7 +80,9 @@ struct ContentView: View {
         }
         .onChange(of: pantryItems.count) { scheduleAllNotifications() }
         .onChange(of: cookingLogs.count) { scheduleAllNotifications() }
-        .onChange(of: plannedMeals.count) { scheduleAllNotifications() }
+        // Meals are edited in place (moved, retyped, recipe swapped) without changing
+        // the count, so reschedule on any change to what a reminder depends on.
+        .onChange(of: mealReminderSignature) { scheduleAllNotifications() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { scheduleAllNotifications() }
         }
@@ -103,6 +105,14 @@ struct ContentView: View {
         .foregroundStyle(.black)
         .background(.yellow)
         .accessibilityElement(children: .combine)
+    }
+
+    private var mealReminderSignature: [String] {
+        plannedMeals.map { meal in
+            let title = meal.recipe?.title ?? meal.customTitle ?? ""
+            let minutes = meal.recipe?.estimatedTotalMinutes ?? -1
+            return "\(meal.id.uuidString)|\(meal.date.timeIntervalSince1970)|\(meal.mealType.rawValue)|\(minutes)|\(title)"
+        }
     }
 
     private func scheduleAllNotifications() {

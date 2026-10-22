@@ -93,7 +93,7 @@ enum SafeCookingTemperatureService {
         "broth", "stock", "bouillon", "base", "sauce", "gravy", "noodle", "pasta",
         "bun", "cracker", "powder", "seasoning", "rub", "flavor", "flavour", "flavoring",
         "paste", "extract", "fat", "lard", "tallow", "schmaltz", "gelatin", "dripping",
-        "granule", "cube", "bit", "skin", "bone", "jerky", "chip", "spread", "pate",
+        "granule", "skin", "bone", "jerky", "chip", "spread", "pate",
         "salad", "sandwich", "soup",
     ]
 
@@ -103,8 +103,14 @@ enum SafeCookingTemperatureService {
         "eggplant", "veggie", "vegetable", "vegetarian", "vegan", "plant", "imitation",
         "tofu", "tempeh", "seitan", "bean", "lentil", "chickpea", "mushroom",
         "cauliflower", "jackfruit", "canned", "tinned", "jerky", "cured", "dried", "powdered",
-        // Cured pork is cooked to crisp or eaten as is, not to a temperature.
+        "cabbage", "portobello", "fries", "tortilla", "broth", "stock", "bouillon",
+        // Cured, rendered or ready-to-eat: cooked to crisp or eaten as is, not to a temperature.
         "bacon", "pancetta", "prosciutto", "guanciale", "salami", "pepperoni", "lardon",
+        "anchovy", "anchovies", "rind", "crackling", "chicharron",
+        // Eggs and roe: see the doc comment.
+        "egg", "roe", "caviar",
+        // Game: no USDA row in the table, so no badge rather than a borrowed beef value.
+        "venison", "bison", "elk", "boar", "rabbit", "goat",
     ]
 
     private static let finFish: [String] = [
@@ -123,8 +129,16 @@ enum SafeCookingTemperatureService {
     /// would land on a mixing step. Shellfish without a temperature rule (clams,
     /// mussels, oysters: cook until the shells open) are excluded too.
     static func safeTemperature(forIngredientNamed name: String) -> SafeTemperature? {
-        let words = name.lowercased().split(whereSeparator: { !$0.isLetter }).map(String.init)
-        guard let head = words.last else { return nil }
+        let lower = name.lowercased()
+        let words = lower.split(whereSeparator: { !$0.isLetter }).map(String.init)
+        // The head noun comes from the name before any prep text, so "beef, cut into
+        // cubes" and "chicken thighs with skin" keep their badge.
+        var core = lower
+        for separator in [",", " with ", " cut "] {
+            if let range = core.range(of: separator) { core = String(core[..<range.lowerBound]) }
+        }
+        let coreWords = core.split(whereSeparator: { !$0.isLetter }).map(String.init)
+        guard let head = coreWords.last ?? words.last else { return nil }
         let wordSet = Set(words)
         func has(_ k: String) -> Bool { wordSet.contains(k) || wordSet.contains(k + "s") || wordSet.contains(k + "es") }
         func hasAny(_ ks: [String]) -> Bool { ks.contains(where: has) }
@@ -137,9 +151,14 @@ enum SafeCookingTemperatureService {
             return nil
         }
 
+        // "chicken-fried steak" is beef; "chicken" there names the cooking style.
+        let chickenFried = zip(words, words.dropFirst()).contains { $0 == "chicken" && $1 == "fried" }
+        let hasChicken = has("chicken") && !chickenFried
         let gameBirds = ["hen", "quail", "goose", "pheasant", "poultry"]
-        let poultry = hasAny(["chicken", "turkey", "duck"]) || hasAny(gameBirds)
-        let namedMeat = poultry || hasAny(["beef", "pork", "lamb", "veal", "meat"])
+        let poultry = hasChicken || hasAny(["turkey", "duck"]) || hasAny(gameBirds)
+        // Beef-only cut names; "steak" and "filet" alone also mean beef in recipes.
+        let beefCuts = ["ribeye", "sirloin", "porterhouse", "flank", "skirt", "hanger", "mignon", "brisket", "chuck", "rump"]
+        let namedMeat = poultry || hasAny(["beef", "pork", "lamb", "veal", "meat", "steak", "round"]) || hasAny(beefCuts)
         let ground = hasAny(["ground", "minced", "mince"]) && namedMeat   // not "ground cumin"
         let groundForm = hasAny(["burger", "hamburger", "meatball", "meatloaf", "patty"]) || wordSet.contains("patties")
         let sausage = hasAny(["sausage", "chorizo", "bratwurst", "kielbasa"])
@@ -159,7 +178,7 @@ enum SafeCookingTemperatureService {
             if has("whole") { return entry("Turkey (whole)") }
             return usdaTurkey
         }
-        if has("chicken") {
+        if hasChicken {
             if has("thigh") { return entry("Chicken (thigh)") }
             if has("breast") { return entry("Chicken (breast)") }
             if has("whole") { return entry("Chicken (whole)") }
@@ -196,12 +215,12 @@ enum SafeCookingTemperatureService {
         if has("lobster") { return entry("Lobster") }
         if hasAny(["scallop", "crab", "crawfish", "crayfish", "langoustine"]) { return usdaShellfish }
 
-        // Beef, including a bare "steak" or a named steak cut.
-        let steakCuts = ["steak", "ribeye", "sirloin", "strip", "filet", "porterhouse", "flank", "skirt", "hanger", "tenderloin"]
-        let roastCuts = ["roast", "brisket", "chuck", "rump", "round", "prime", "rib"]
-        if has("beef") || hasAny(steakCuts) || has("brisket") {
-            if hasAny(steakCuts) { return entry("Beef steak (medium)") }
-            if hasAny(roastCuts) { return entry("Beef roast") }
+        // Beef: the word "beef", a beef-only cut, or a bare "steak"/"filet".
+        let steakWords = ["steak", "filet", "strip", "tenderloin", "ribeye", "sirloin", "porterhouse", "flank", "skirt", "hanger", "mignon"]
+        let roastWords = ["roast", "brisket", "chuck", "rump", "round", "prime", "rib"]
+        if has("beef") || hasAny(beefCuts) || hasAny(["steak", "filet"]) {
+            if hasAny(steakWords) { return entry("Beef steak (medium)") }
+            if hasAny(roastWords) { return entry("Beef roast") }
             return usdaBeef
         }
 

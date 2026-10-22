@@ -295,10 +295,13 @@ enum IngredientNormalizer {
         let lower = normalize(name)
 
         // Protein keywords are short ("egg", "ham") and occur inside other words
-        // ("eggplant", "graham crackers"), so they match whole words only, with
-        // simple plurals ("eggs", "prawns").
-        let words = Set(lower.split(whereSeparator: { !$0.isLetter }).map(String.init))
-        if proteinKeywords.contains(where: { words.contains($0) || words.contains($0 + "s") || words.contains($0 + "es") }) {
+        // ("eggplant", "graham crackers"), so they match whole words, simple plurals,
+        // and closed compounds made of a keyword plus a cut or form ("porkchops",
+        // "fishcakes", "hambone", "swordfish"). A non-protein head noun wins:
+        // "fish sauce", "egg noodles", "hamburger buns".
+        let wordList = lower.split(whereSeparator: { !$0.isLetter }).map(String.init)
+        if let head = wordList.last, !nonProteinHeads.contains(head),
+           wordList.contains(where: isProteinToken) {
             return .protein
         }
         if herbKeywords.contains(where: lower.contains) { return .herb }
@@ -338,6 +341,31 @@ enum IngredientNormalizer {
         if joined.contains("beverage") || joined.contains("drink") || joined.contains("juice") || joined.contains("water") { return .liquid }
 
         return .other
+    }
+
+    private static let nonProteinHeads: Set<String> = [
+        "bun", "buns", "cracker", "crackers", "noodle", "noodles", "sauce", "sauces",
+        "broth", "stock", "bouillon", "powder", "seasoning", "paste",
+    ]
+
+    /// Tokens that start with a protein keyword but aren't protein.
+    private static let nonProteinTokens: Set<String> = [
+        "eggplant", "eggplants", "eggnog", "graham", "champagne", "chamomile", "lambrusco", "beefsteak",
+    ]
+
+    /// Cut or form suffixes that keep a closed compound a protein ("pork" + "chops").
+    private static let proteinForms: Set<String> = [
+        "chop", "chops", "steak", "steaks", "cake", "cakes", "white", "whites", "meat",
+        "bone", "bones", "burger", "burgers", "fillet", "fillets", "ball", "balls",
+    ]
+
+    private static func isProteinToken(_ word: String) -> Bool {
+        if nonProteinTokens.contains(word) { return false }
+        if proteinKeywords.contains(where: { word == $0 || word == $0 + "s" || word == $0 + "es" }) { return true }
+        if word.hasSuffix("fish") || word.hasSuffix("fishes") { return true }
+        return proteinKeywords.contains { keyword in
+            word.hasPrefix(keyword) && proteinForms.contains(String(word.dropFirst(keyword.count)))
+        }
     }
 
     // MARK: - Keyword Lists
