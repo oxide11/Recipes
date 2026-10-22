@@ -45,6 +45,7 @@ enum PantryDeductionService {
 
             pantryItem.quantity = max(0, pantryItem.quantity - inPantryUnits.quantity)
             pantryItem.lastUsed = .now
+            markRealQuantity(pantryItem)
 
             if pantryItem.quantity <= 0 {
                 fullyConsumed.append(pantryItem)
@@ -55,9 +56,29 @@ enum PantryDeductionService {
     }
 
     /// "1 piece" means "an unknown amount" throughout the app (see GroceryItem.formattedAmount),
-    /// but only until deduction has touched the item: a real count that drops to one
-    /// (3 eggs → 1 egg) sets `lastUsed` and keeps being deducted.
+    /// unless the item is known to hold a real count: it was deducted before (3 eggs → 1 egg)
+    /// or the user entered a quantity in a pantry form.
     static func isPlaceholderQuantity(_ item: PantryItem) -> Bool {
-        item.quantity == 1 && item.unit == .piece && item.lastUsed == nil
+        item.quantity == 1 && item.unit == .piece && !hasRealQuantity(item)
+    }
+
+    // MARK: - Real-quantity marker
+
+    /// IDs of pantry items whose quantity is a real count. Kept in UserDefaults rather
+    /// than on PantryItem because a new stored property needs a schema migration, and
+    /// `lastUsed` can't serve: the pantry's "Keep" button also sets it. A stale ID for a
+    /// deleted item is harmless, since IDs are never reused.
+    private static let realQuantityKey = "pantry_realQuantityItemIDs"
+
+    static func hasRealQuantity(_ item: PantryItem) -> Bool {
+        let ids = UserDefaults.standard.stringArray(forKey: realQuantityKey) ?? []
+        return ids.contains(item.id.uuidString)
+    }
+
+    static func markRealQuantity(_ item: PantryItem) {
+        var ids = UserDefaults.standard.stringArray(forKey: realQuantityKey) ?? []
+        guard !ids.contains(item.id.uuidString) else { return }
+        ids.append(item.id.uuidString)
+        UserDefaults.standard.set(ids, forKey: realQuantityKey)
     }
 }

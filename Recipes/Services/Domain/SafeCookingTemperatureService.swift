@@ -218,7 +218,10 @@ enum SafeCookingTemperatureService {
         // Beef: the word "beef", a beef-only cut, or a bare "steak"/"filet".
         let steakWords = ["steak", "filet", "strip", "tenderloin", "ribeye", "sirloin", "porterhouse", "flank", "skirt", "hanger", "mignon"]
         let roastWords = ["roast", "brisket", "chuck", "rump", "round", "prime", "rib"]
-        if has("beef") || hasAny(beefCuts) || hasAny(["steak", "filet"]) {
+        // "strip" alone is ambiguous ("pepper strips"); "New York strip", "NY strip" and
+        // "strip loin" are steak. A bare "tenderloin" stays unbadged: it may be pork.
+        let stripSteak = has("striploin") || (has("strip") && (wordSet.contains("york") || wordSet.contains("ny") || has("loin")))
+        if has("beef") || hasAny(beefCuts) || hasAny(["steak", "filet"]) || stripSteak {
             if hasAny(steakWords) { return entry("Beef steak (medium)") }
             if hasAny(roastWords) { return entry("Beef roast") }
             return usdaBeef

@@ -119,6 +119,10 @@ A seven-lens review with three independent refuters per finding confirmed 15 def
 
 A second pass verified those fixes (nine checkers, three refuters per finding): 12 further edge cases confirmed, 5 refuted, none compile errors. All fixed: ground steak cuts at 160°F, "chicken-fried steak" as beef, eggs/roe/game/look-alikes unbadged, prep text no longer hiding the head noun; closed-compound protein names ("porkchops", "fishcakes"); multi-word seasonal plurals and canned tomato forms; fractions and unit-bearing ranges in durations; JSON span chosen by the opening bracket; placeholder rule limited to never-deducted items; Reminders re-link checks the store first and claims each reminder once; meal edits reschedule reminders.
 
+A third pass on that commit confirmed 4 more (none compile errors), all fixed: the placeholder rule now uses a real-quantity marker (deduction or an entered quantity) instead of `lastUsed`, which the Keep button also sets; meal-reminder rescheduling is debounced and observes only reminder-eligible meals; a minute range after an hour part adds up again; "New York strip" is beef.
+
+- [ ] **MEDIUM** Replace the UserDefaults real-quantity marker (`PantryDeductionService.markRealQuantity`) with a stored `PantryItem` field once a `RecipesSchemaV2` with frozen V1 models and a migration stage exists.
+
 ## Architecture
 
 - [x] **HIGH** `ContentView.swift:62-73` — Overlapping `onChange` handlers all call `SmartNotificationService` methods; duplicate notifications. Fixed: all onChange handlers now call unified `scheduleAllNotifications()`.

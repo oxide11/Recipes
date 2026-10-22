@@ -1367,18 +1367,17 @@ enum LenientJSON {
     }
 
     static func parseMinutes(_ raw: String) -> Int? {
-        let text = decimalFractions(raw)
+        let decimals = decimalFractions(raw)
         let number = #"(\d+(?:\.\d+)?)"#
         let unit = #"(days?|hours?|hrs?|minutes?|mins?|seconds?|secs?|d|h|m|s)"#
 
-        // A range takes its lower bound, with whichever unit is given:
-        // "10-15 min" → 10, "2-3 hrs" → 120, "45 minutes to 1 hour" → 45.
+        // Each range becomes its lower bound with whichever unit it carries, in place:
+        // "10-15 min" → "10 min", "45 minutes to 1 hour" → "45 minutes", so the parts
+        // still add up: "1 hr 10-15 min" → 60 + 10.
         let rangePattern = number + #"\s*"# + unit + #"?\s*(?:-|–|to)\s*"# + number + #"\s*"# + unit + "?"
-        if let range = firstMatch(rangePattern, in: text), let low = Double(range[1] ?? "") {
-            return Int(minutes(low, unit: range[2] ?? range[4] ?? "").rounded())
-        }
+        let text = replacingRanges(rangePattern, in: decimals)
 
-        // Otherwise add up the parts: "1 hr 30 min", "1h30m", "PT1H30M".
+        // Add up the parts: "1 hr 30 min", "1h30m", "PT1H30M".
         guard let regex = try? NSRegularExpression(pattern: number + #"\s*"# + unit + "?", options: [.caseInsensitive]) else { return nil }
         let ns = text as NSString
         var total = 0.0
@@ -1401,15 +1400,21 @@ enum LenientJSON {
         }
     }
 
-    /// Capture groups of the first match (index 0 is the whole match); nil for absent groups.
-    private static func firstMatch(_ pattern: String, in text: String) -> [String?]? {
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else { return nil }
+    /// Replaces each range match (groups: low, low unit, high, high unit) with "low unit".
+    private static func replacingRanges(_ pattern: String, in text: String) -> String {
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else { return text }
         let ns = text as NSString
-        guard let match = regex.firstMatch(in: text, range: NSRange(location: 0, length: ns.length)) else { return nil }
-        return (0..<match.numberOfRanges).map { i in
-            let r = match.range(at: i)
-            return r.location == NSNotFound ? nil : ns.substring(with: r)
+        var result = text
+        for match in regex.matches(in: text, range: NSRange(location: 0, length: ns.length)).reversed() {
+            func group(_ i: Int) -> String? {
+                let r = match.range(at: i)
+                return r.location == NSNotFound ? nil : ns.substring(with: r)
+            }
+            guard let low = group(1) else { continue }
+            let unitText = group(2) ?? group(4) ?? ""
+            result = (result as NSString).replacingCharacters(in: match.range, with: "\(low) \(unitText) ")
         }
+        return result
     }
 
     private static let vulgarFractions: [String: Double] = [

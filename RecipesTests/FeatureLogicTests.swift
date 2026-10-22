@@ -509,3 +509,36 @@ extension HemisphereSeasonTests {
         #expect(SeasonalAwarenessService.isInSeason("sweet potato"))
     }
 }
+
+// MARK: - Final verification pass
+
+@Suite("Final pass fixes")
+struct FinalPassTests {
+
+    @Test("A range after an hour part still adds the hour")
+    func rangeAfterHours() {
+        #expect(LenientJSON.parseMinutes("1 hr 10-15 min") == 70)
+        #expect(LenientJSON.parseMinutes("1 hour 15-20 minutes") == 75)
+    }
+
+    @Test("Strip steak names are beef; generic strips are not")
+    func stripSteaks() {
+        for name in ["New York strip", "NY strip", "strip loin"] {
+            #expect(SafeCookingTemperatureService.safeTemperature(forIngredientNamed: name)?.protein == "Beef steak (medium)", "\(name)")
+        }
+        #expect(SafeCookingTemperatureService.safeTemperature(forIngredientNamed: "pepper strips") == nil)
+    }
+
+    @Test("Tapping Keep on a placeholder doesn't make it a real count")
+    func keepDoesNotMakeRealCount() {
+        let recipe = Recipe(
+            title: "Scramble", servings: 1,
+            ingredients: [Ingredient(name: "Eggs", category: .protein, amount: IngredientAmount(quantity: 2, unit: .piece))]
+        )
+        let eggs = PantryItem(name: "eggs", category: .protein, quantity: 1, unit: .piece)
+        eggs.lastUsed = .now   // what the pantry's "Keep" button does
+        let consumed = PantryDeductionService.deductAfterCooking(recipe: recipe, servingsCooked: 1, pantryItems: [eggs])
+        #expect(consumed.isEmpty)
+        #expect(eggs.quantity == 1)
+    }
+}

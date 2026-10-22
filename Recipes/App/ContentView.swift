@@ -80,9 +80,18 @@ struct ContentView: View {
         }
         .onChange(of: pantryItems.count) { scheduleAllNotifications() }
         .onChange(of: cookingLogs.count) { scheduleAllNotifications() }
-        // Meals are edited in place (moved, retyped, recipe swapped) without changing
-        // the count, so reschedule on any change to what a reminder depends on.
-        .onChange(of: mealReminderSignature) { scheduleAllNotifications() }
+        // Adding or removing a meal reschedules everything (the weekly planning reminder
+        // counts next week's dinners).
+        .onChange(of: plannedMeals.count) { scheduleAllNotifications() }
+        // Meals are also edited in place (moved, retyped, recipe swapped) without changing
+        // the count, so meal reminders follow a signature of what they depend on. Debounced,
+        // and limited to the meal scheduler, so typing in a planned recipe's title doesn't
+        // reschedule every notification per keystroke.
+        .task(id: mealReminderSignature) {
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            SmartNotificationService.shared.scheduleMealReminders(for: plannedMeals)
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { scheduleAllNotifications() }
         }
@@ -107,12 +116,20 @@ struct ContentView: View {
         .accessibilityElement(children: .combine)
     }
 
+    /// Inputs to the meal reminders that can fire: meals in the next 7 days, not yet
+    /// cooked. Only these are observed, so edits to past meals' recipes don't re-render
+    /// the root view or reschedule anything.
     private var mealReminderSignature: [String] {
-        plannedMeals.map { meal in
-            let title = meal.recipe?.title ?? meal.customTitle ?? ""
-            let minutes = meal.recipe?.estimatedTotalMinutes ?? -1
-            return "\(meal.id.uuidString)|\(meal.date.timeIntervalSince1970)|\(meal.mealType.rawValue)|\(minutes)|\(title)"
-        }
+        let start = Calendar.current.startOfDay(for: .now)
+        let end = Calendar.current.date(byAdding: .day, value: 8, to: start) ?? start
+        return plannedMeals
+            .filter { $0.date >= start && $0.date < end && !$0.isCompleted }
+            .map { meal in
+                let title = meal.recipe?.title ?? meal.customTitle ?? ""
+                let lead = min(max(meal.recipe?.estimatedTotalMinutes ?? 30, 30), 240)
+                return "\(meal.id.uuidString)|\(meal.date.timeIntervalSince1970)|\(meal.mealType.rawValue)|\(lead)|\(title)"
+            }
+            .sorted()
     }
 
     private func scheduleAllNotifications() {

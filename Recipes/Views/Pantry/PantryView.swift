@@ -770,6 +770,7 @@ struct BarcodeScannerFullView: View {
         )
         item.isFrozen = isFrozen
         modelContext.insert(item)
+        if manualQuantity != 1 || manualUnit != .piece { PantryDeductionService.markRealQuantity(item) }
         scanner.resetForNextScan()
         manualName = ""
         manualQuantity = 1
@@ -830,6 +831,7 @@ struct AddPantryItemView: View {
                         )
                         item.isFrozen = isFrozen
                         modelContext.insert(item)
+                        if quantity != 1 || unit != .piece { PantryDeductionService.markRealQuantity(item) }
                         dismiss()
                     }
                     .disabled(name.isEmpty)
@@ -896,6 +898,8 @@ struct EditPantryItemView: View {
                     Button("Save") {
                         item.name = name
                         item.category = category
+                        // Editing the amount, to any value, makes it a real count.
+                        if quantity != item.quantity || unit != item.unit { PantryDeductionService.markRealQuantity(item) }
                         item.quantity = quantity
                         item.unit = unit
                         item.expirationDate = hasExpiration ? expirationDate : nil
