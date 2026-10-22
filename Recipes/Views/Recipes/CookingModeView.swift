@@ -14,6 +14,8 @@ struct CookingModeView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var profiles: [UserProfile]
     @Query private var pantryItems: [PantryItem]
+    @State private var showingPantryCleanup = false
+    @State private var consumedItemIDs: Set<UUID> = []
 
     @State private var currentStepIndex = 0
     @State private var stepEndDates: [Int: Date] = [:]
@@ -400,7 +402,11 @@ struct CookingModeView: View {
                 VStack(spacing: 12) {
                     Button {
                         saveLog()
-                        dismiss()
+                        if consumedItemIDs.isEmpty {
+                            dismiss()
+                        } else {
+                            showingPantryCleanup = true
+                        }
                     } label: {
                         Text("Save & Finish")
                             .font(.title3)
@@ -420,6 +426,15 @@ struct CookingModeView: View {
             .padding(24)
         }
         .sensoryFeedback(.success, trigger: currentStepIndex)
+        // Closing the sheet any way ends cooking mode, so Save & Finish can't log twice.
+        .sheet(isPresented: $showingPantryCleanup, onDismiss: { dismiss() }) {
+            PostCookPantrySheet(
+                recipe: recipe,
+                pantryItems: Array(pantryItems),
+                preselected: consumedItemIDs,
+                quantitiesDeducted: true
+            ) {}
+        }
     }
 
     // MARK: - Control Bar
@@ -631,9 +646,8 @@ struct CookingModeView: View {
                 servingsCooked: recipe.servings,
                 pantryItems: Array(pantryItems)
             )
-            // Cooking mode has no follow-up sheet; drop what ran out so the
-            // pantry doesn't keep listing empty items.
-            for item in consumed { modelContext.delete(item) }
+            // Items that ran out are offered for removal, never deleted unasked.
+            consumedItemIDs = Set(consumed.map(\.id))
         }
     }
 

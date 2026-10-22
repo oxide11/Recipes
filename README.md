@@ -7,17 +7,15 @@ Built with SwiftUI, SwiftData, and Apple's FoundationModels framework. Designed 
 ## Features
 
 ### Recipe Management
-- **Recipe as Code** — Define recipes declaratively with ingredients and desired outcomes. AI infers the cooking steps automatically.
-- **Recipe Ingestion Pipeline** — Import recipes from URLs (with JSON-LD/schema.org extraction), plain text, markdown, photos, and Recipe-as-Code definitions.
+- **Recipe Ingestion Pipeline** — Import recipes from URLs (with JSON-LD/schema.org extraction), pasted text, and photos of recipe cards or cookbook pages.
 - **Recipe Variations** — Stack multiple variations under a single recipe card (e.g., vegan version, gluten-free version).
 - **Colour-Coded Ingredients** — 14 ingredient categories, each with a distinct colour for quick visual scanning.
 - **Inline Timers** — Directions include built-in countdown timers and ingredient measurements directly in step text.
 - **Safe Cooking Temperatures** — USDA-recommended temperatures for 30+ proteins at various doneness levels, shown inline in recipe steps.
-- **Markdown Support** — Recipe source text preserved for reference.
 - **Easy Sharing** — Export recipes as plain text without proprietary formats.
 
 ### AI Capabilities
-- **Apple Intelligence (On-Device)** — Uses iOS 26 FoundationModels with `@Generable` structured output for recipe generation, nutritional estimation, ingredient substitution, step inference, and blind-spot detection. All processing stays on-device.
+- **Apple Intelligence (On-Device)** — Uses iOS 26 FoundationModels with `@Generable` structured output for recipe generation, nutritional estimation, ingredient substitution, and blind-spot detection. All processing stays on-device.
 - **Claude (Anthropic)** — Cloud AI for recipe generation, image analysis (recipe photos, restaurant dishes), and recipe ingestion. Supports vision for extracting recipes from images.
 - **OpenAI** — Cloud AI alternative with GPT-4o for recipe generation and image analysis.
 - **Hybrid Mode** — On-device first with automatic cloud fallback. Configurable per user preference.
@@ -38,7 +36,7 @@ Built with SwiftUI, SwiftData, and Apple's FoundationModels framework. Designed 
 
 ### Meal Planning
 - **Weekly Meal Plans** — Assign recipes to breakfast, lunch, dinner, snacks across date ranges.
-- **Budget Tracking** — Set weekly grocery budgets and calorie/protein targets.
+- **Budget Tracking** — Set a weekly grocery budget in your profile; the shopping list shows spend against it. Calorie and protein targets drive the nutrition tracker.
 - **Automated Recipe Selection** — AI-powered suggestions based on nutritional goals, budget, and available ingredients.
 
 ### Shopping Experience
@@ -72,7 +70,7 @@ Built with SwiftUI, SwiftData, and Apple's FoundationModels framework. Designed 
 - **Cooking Log** — Every cook is recorded with timestamps, ratings, and substitutions made.
 
 ### Grocery Budget
-- **Receipt Scanning** — Capture receipt photos for spend tracking.
+- **Receipt Scanning** — Scan a receipt with the live camera text scanner to record what you paid; matched items move to the pantry.
 - **Estimated vs Actual** — Compare planned grocery costs with actual spend.
 
 ## Architecture

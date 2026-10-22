@@ -282,11 +282,16 @@ final class AIServiceRouter {
         let stripped = text
             .replacingOccurrences(of: "```json", with: "")
             .replacingOccurrences(of: "```", with: "")
-        guard let start = stripped.firstIndex(where: { $0 == "{" || $0 == "[" }) else { return false }
-        let closer: Character = stripped[start] == "{" ? "}" : "]"
-        guard let end = stripped.lastIndex(of: closer), end > start,
-              let data = String(stripped[start...end]).data(using: .utf8) else { return false }
-        return (try? JSONSerialization.jsonObject(with: data)) != nil
+        // Prose before the JSON can itself contain brackets ("[serves 4]"), so the
+        // object span and the array span are checked separately. Callers that parse
+        // an object extract first "{" to last "}", so that span is tried first.
+        func parses(open: Character, close: Character) -> Bool {
+            guard let start = stripped.firstIndex(of: open),
+                  let end = stripped.lastIndex(of: close), end > start,
+                  let data = String(stripped[start...end]).data(using: .utf8) else { return false }
+            return (try? JSONSerialization.jsonObject(with: data)) != nil
+        }
+        return parses(open: "{", close: "}") || parses(open: "[", close: "]")
     }
 
     /// On-device call that fails when a JSON task gets a non-JSON answer.

@@ -7,29 +7,31 @@
 - Nutrition tracking can step back and forward through days, weeks and months
 - Unit tests for lenient AI JSON decoding, hybrid JSON detection, pantry deduction, meal-plan shopping generation, safe temperature mapping, substitution lookup, hemisphere seasons and profile prompt constraints
 - Shopping list can add this week's meal plan ingredients in one tap, merged by ingredient and net of pantry stock and items already listed
-- Imported and generated recipes get USDA safe cooking temperatures for their proteins, shown on the step where the protein is cooked
-- Pantry items have editable quantities and units in every manual add/edit form
-- Auto-Deduct Pantry now works: logging a cook reduces pantry quantities (scaled to servings cooked, with unit conversion) and offers to remove items that ran out
+- Imported and generated recipes get USDA minimum safe temperatures for raw proteins, shown on the step where the protein is cooked. Matching is on whole words and never uses a below-USDA chef preference; stocks, sauces, cured, smoked, canned and plant-based look-alikes get no badge
+- Pantry items have editable quantities and units in the Add, Edit and barcode manual-add forms (Quick Add, voice, photo and shopping check-off still record an unspecified amount)
+- Auto-Deduct Pantry now works: logging a cook from the full log, the quick log or Cooking Mode reduces pantry quantities with unit conversion (scaled to the servings cooked in the full log, the recipe's servings otherwise) and offers to remove items that ran out. Items with an unspecified amount ("1 piece") and staples are not deducted, and nothing is removed without confirmation
 - Shopping list has a "Scan a Receipt" entry; matched receipt lines record actual prices, move items to the pantry and close their Reminders entries
-- Profile allergens, disliked ingredients and max cook time are enforced in recipe generation and meal plan prompts
+- Meal reminders: each planned meal in the next 7 days gets a "start cooking" notification, timed from the recipe's total time before a usual meal time (breakfast 8:00, lunch 12:30, snack 15:30, dinner 18:30, dessert 19:30)
 
 ### Fixed
-- Seasonal badges, filters and picks follow the profile's hemisphere; plural and qualified ingredient names match the seasonal table
+- Ingredient category inference matches protein words whole, so "eggplant" is a vegetable and "graham crackers" or "hamburger buns" are not protein
+- Hybrid AI no longer discards a valid on-device JSON answer when the prose before it contains brackets
+- The pantry quantity field commits each keystroke; values typed on the decimal pad were lost when tapping Add or Save
+- Guided shopping: "Skip Item" in the substitution sheet leaves the item on the list with a note instead of marking it bought
+- The Dashboard receipt scanner now receives the shopping list, so receipt lines can be matched and priced
+- Saving a cook log and then swiping away the pantry sheet no longer leaves the log open for a duplicate save
+- Seasonal badges, filters and picks follow the profile's hemisphere; plural and qualified ingredient names match the seasonal table, while processed forms ("apple cider vinegar", "corn syrup") do not
 - Recommendation cards for saved recipes open the recipe instead of the AI generator
 - Onboarding "Skip pantry setup" no longer seeds the pantry; typed or spoken ingredients outside the starter kit are kept
 - Settings: removed disabled "(todo)" iCloud toggles, Developer/Debug tools are DEBUG-only, Measurements picker persists and is applied to ingredient rows and step chips
 - Currency from the profile replaces hard-coded "$"/"CAD" in Metrics, Bulk Photo Add and receipt matching
-- Reminders deleted in the Reminders app are no longer recreated on sync; guided shopping, substitutions and receipt matches push completion so sync doesn't revert them
+- Reminders deleted in the Reminders app are no longer recreated on sync. A shopping item is removed only when its reminder is gone from the store; a changed identifier re-links by name and a reminder moved to another list is left alone. Reminders whose commit fails are unlinked so they are retried. Guided shopping, substitutions and receipt matches push completion so sync doesn't revert them
 - On-device AI session is recycled before its transcript overflows and retried once on context-window errors; the parsing schema no longer drops ingredients past the tenth
 - Hybrid AI mode falls back to the cloud when the on-device model answers in prose for a JSON task
-- Recipe import tolerates ranges, "30 min" times, numeric amounts and other schema drift from AI output, and reports the decode reason on failure
-- URL imports without structured data send up to 6,000 characters of page text instead of 2,000
+- Recipe import tolerates schema drift from AI output: servings ranges, times in minutes or hours ("1 hr 30 min", "PT1H30M"), numeric amounts, and bare-string ingredients ("2 cups flour" is split into amount and name). The decode reason is reported on failure
+- URL imports without structured data send up to 6,000 characters of page text instead of 2,000; prompt-injection phrases in any AI input are masked in place as "[…]" instead of dropping the whole line
 - Tag filter/delete match case-insensitively; removing a dish photo in the journal waits for Save
-- Substitution lookup matches canonical ingredient names ("unsalted butter", "eggs", "whole milk")
-
-### Removed
-- Receipt scanner "Photo OCR" button, which never ran its Vision request
-- Unreachable views and types: SeasonalRecipesView, QuickMealsView, IngredientFilter, CuisineFilterSheet, ImportPhotoPickerButton, the unused MealPlanGenerator class and four unused AITaskType cases
+- Substitution lookup matches canonical names and head nouns ("unsalted butter", "eggs", "whole milk") without offering butter swaps for "butternut squash" or dairy swaps for "almond milk"
 - Removed a duplicate `AIRecipeEditView` declaration under Views/Components that broke the build after the XcodeGen migration
 - Widget extension now keeps its `NSExtensionPointIdentifier` Info.plist entry so WidgetKit recognises it
 - Introduced `RecipesSchemaV1` and `RecipesMigrationPlan`; future model changes migrate instead of falling back to an in-memory store
@@ -73,6 +75,10 @@
 - Fixed force unwrap in widget timeline provider with fallback `addingTimeInterval(3600)`
 - Fixed silent error swallowing in `RecipeDetailView.estimateNutrition()` — now shows user-facing error state
 - Fixed force cast `as!` in `BarcodeScannerService.CameraPreviewUIView` — replaced with safe `as?` guard
+
+### Removed
+- Receipt scanner "Photo OCR" button, which never ran its Vision request
+- Unreachable views and types: SeasonalRecipesView, QuickMealsView, IngredientFilter, CuisineFilterSheet, ImportPhotoPickerButton, the unused MealPlanGenerator class and four unused AITaskType cases
 
 ### Changed
 - Rewrote `DashboardView` with data-driven, actionable content replacing static/mock placeholders:

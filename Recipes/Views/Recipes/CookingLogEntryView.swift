@@ -162,15 +162,15 @@ struct CookingLogEntryView: View {
                 }
             }
             .sensoryFeedback(.success, trigger: didSave)
-            .sheet(isPresented: $showingPantryCleanup) {
+            // onDismiss (not onDone) closes the log, so swiping the sheet away can't
+            // leave the form open for a second Save and a duplicate entry.
+            .sheet(isPresented: $showingPantryCleanup, onDismiss: { dismiss() }) {
                 PostCookPantrySheet(
                     recipe: recipe,
                     pantryItems: Array(pantryItems),
                     preselected: consumedItemIDs,
                     quantitiesDeducted: didAutoDeduct
-                ) {
-                    dismiss()
-                }
+                ) {}
             }
         }
     }
@@ -237,8 +237,7 @@ struct CookingLogEntryView: View {
             }
 
             // Pantry cleanup only on new entries
-            let recipeNames = Set(recipe.ingredients.map { IngredientNormalizer.canonicalize($0.name) })
-            let hasMatches = pantryItems.contains { recipeNames.contains(IngredientNormalizer.canonicalize($0.name)) }
+            let hasMatches = !PostCookPantrySheet.matchedItems(recipe: recipe, pantryItems: Array(pantryItems)).isEmpty
             if hasMatches {
                 showingPantryCleanup = true
             } else {
@@ -276,6 +275,10 @@ struct PostCookPantrySheet: View {
 
     // Pantry items matching a recipe ingredient by canonical name
     private var matchedItems: [PantryItem] {
+        Self.matchedItems(recipe: recipe, pantryItems: pantryItems)
+    }
+
+    static func matchedItems(recipe: Recipe, pantryItems: [PantryItem]) -> [PantryItem] {
         let names = Set(recipe.ingredients.map { IngredientNormalizer.canonicalize($0.name) })
         return pantryItems.filter { names.contains(IngredientNormalizer.canonicalize($0.name)) }
     }

@@ -1,6 +1,9 @@
 import EventKit
 import SwiftData
 import SwiftUI
+import OSLog
+
+private let remindersLogger = Logger(subsystem: "com.recipes", category: "RemindersSync")
 
 // MARK: - Pantry Ingestion Service
 
@@ -146,6 +149,7 @@ final class RemindersSync {
         completedItems.forEach { context.delete($0) }
 
         // Step 2 — push active Mise items to Reminders (link or create)
+        var created: [GroceryItem] = []
         for item in activeItems {
             let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
             if let existing = remindersByTitle[key]?.first {
@@ -154,8 +158,13 @@ final class RemindersSync {
                 let reminder = EKReminder(eventStore: store)
                 reminder.title = item.name
                 reminder.calendar = calendar
-                try? store.save(reminder, commit: false)
-                item.remindersIdentifier = reminder.calendarItemIdentifier
+                do {
+                    try store.save(reminder, commit: false)
+                    item.remindersIdentifier = reminder.calendarItemIdentifier
+                    created.append(item)
+                } catch {
+                    remindersLogger.error("Couldn't save reminder for \(item.name, privacy: .private): \(error)")
+                }
             }
         }
 
@@ -177,7 +186,19 @@ final class RemindersSync {
             groceryList.items.append(item)
         }
 
-        try? store.commit()
+        commit(unlinkingOnFailure: created)
+    }
+
+    /// Commits pending EventKit writes. If the commit fails, reminders created in this
+    /// pass never reached the store, so their identifiers are cleared; otherwise the next
+    /// sync would see a linked item whose reminder doesn't exist.
+    private func commit(unlinkingOnFailure created: [GroceryItem]) {
+        do {
+            try store.commit()
+        } catch {
+            remindersLogger.error("Reminders commit failed: \(error)")
+            for item in created { item.remindersIdentifier = nil }
+        }
     }
 
     // MARK: - Sync
@@ -257,7 +278,11 @@ final class RemindersSync {
         }
 
         // ── Push: GroceryList → Reminders ───────────────────────────────────
-        for item in groceryList.items {
+        // Iterate a copy: this loop can delete items from the list.
+        var linkedIDs = Set(groceryList.items.compactMap(\.remindersIdentifier))
+        var created: [GroceryItem] = []
+        for item in Array(groceryList.items) {
+            let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
             if let rid = item.remindersIdentifier, let reminder = remindersByID[rid] {
                 // Already linked — push completion state if app is ahead
                 if item.isPurchased != reminder.isCompleted {
@@ -265,14 +290,25 @@ final class RemindersSync {
                     if item.isPurchased { reminder.completionDate = .now }
                     try? store.save(reminder, commit: false)
                 }
-            } else if item.remindersIdentifier != nil, !reminders.isEmpty {
-                // Linked reminder no longer exists: the user deleted it in the Reminders
-                // app. Mirror the deletion instead of recreating it on every sync.
-                // Guarded on a non-empty fetch so a failed or empty fetch can't wipe the list.
-                context.delete(item)
+            } else if let rid = item.remindersIdentifier {
+                // Linked, but absent from this pass's fetch. That alone isn't proof the
+                // user deleted it: the item may have been linked while the fetch was in
+                // flight, the identifier may have changed after a full iCloud sync, or the
+                // reminder may have been moved to another list.
+                if let match = remindersByTitle[key]?.first(where: { !linkedIDs.contains($0.calendarItemIdentifier) }) {
+                    // Same reminder under a new identifier: re-link instead of duplicating.
+                    item.remindersIdentifier = match.calendarItemIdentifier
+                    linkedIDs.insert(match.calendarItemIdentifier)
+                } else if !reminders.isEmpty, store.calendarItem(withIdentifier: rid) == nil {
+                    // Gone from the store entirely: the user deleted it in Reminders.
+                    // Mirror that rather than recreating it on every sync. The non-empty
+                    // fetch guard keeps a failed fetch from wiping the list.
+                    groceryList.items.removeAll { $0.persistentModelID == item.persistentModelID }
+                    context.delete(item)
+                }
+                // Otherwise the reminder still exists elsewhere; leave the link alone.
             } else {
                 // Not linked yet — match by name or create new reminder
-                let key = item.name.lowercased().trimmingCharacters(in: .whitespaces)
                 if let existing = remindersByTitle[key]?.first {
                     item.remindersIdentifier = existing.calendarItemIdentifier
                 } else {
@@ -280,13 +316,18 @@ final class RemindersSync {
                     reminder.title = item.name
                     reminder.calendar = calendar
                     reminder.isCompleted = item.isPurchased
-                    try? store.save(reminder, commit: false)
-                    item.remindersIdentifier = reminder.calendarItemIdentifier
+                    do {
+                        try store.save(reminder, commit: false)
+                        item.remindersIdentifier = reminder.calendarItemIdentifier
+                        created.append(item)
+                    } catch {
+                        remindersLogger.error("Couldn't save reminder for \(item.name, privacy: .private): \(error)")
+                    }
                 }
             }
         }
 
-        try? store.commit()
+        commit(unlinkingOnFailure: created)
     }
 
     /// Create a Reminders entry for a newly-added GroceryItem immediately, without
@@ -305,7 +346,7 @@ final class RemindersSync {
               let calendar = linkedCalendar,
               authorizationStatus == .fullAccess else { return }
 
-        var saved = false
+        var created: [GroceryItem] = []
         for item in items where item.remindersIdentifier == nil {
             let reminder = EKReminder(eventStore: store)
             reminder.title = item.name
@@ -314,12 +355,13 @@ final class RemindersSync {
             do {
                 try store.save(reminder, commit: false)
                 item.remindersIdentifier = reminder.calendarItemIdentifier
-                saved = true
+                created.append(item)
             } catch {
                 // Continue with remaining items; next full sync will retry this one.
+                remindersLogger.error("Couldn't save reminder for \(item.name, privacy: .private): \(error)")
             }
         }
-        if saved { try? store.commit() }
+        if !created.isEmpty { commit(unlinkingOnFailure: created) }
     }
 
     /// Push the current isPurchased state to Reminders immediately when the user

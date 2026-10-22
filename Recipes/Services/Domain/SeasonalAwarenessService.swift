@@ -128,9 +128,30 @@ enum SeasonalAwarenessService {
         if let hit = seasonalLookup[name] { return hit }
         let canonical = IngredientNormalizer.canonicalize(ingredientName)
         if let hit = seasonalLookup[canonical] { return hit }
-        // Last resort: the table entry is a word inside the ingredient name ("roma tomato").
-        return seasonalLookup.first { name.split(separator: " ").contains(Substring($0.key)) }?.value
+        // Last resort: a table entry is a word of the name ("roma tomato", "asparagus
+        // spears"). Processed forms ("apple cider vinegar", "corn syrup", "lime juice")
+        // are not fresh produce, so they never match. Words are tried from the head noun
+        // backwards so "plum tomato" resolves to tomato, the same way every time.
+        let words = name.split(whereSeparator: { !$0.isLetter }).map(String.init)
+        guard !words.contains(where: processedMarkers.contains) else { return nil }
+        for word in words.reversed() {
+            if let hit = seasonalLookup[word]
+                ?? seasonalLookup[word + "s"]
+                ?? seasonalLookup[word + "es"]
+                ?? seasonalLookup[IngredientNormalizer.singularize(word)] {
+                return hit
+            }
+        }
+        return nil
     }
+
+    /// Words that mark a shelf-stable or processed product rather than fresh produce.
+    private static let processedMarkers: Set<String> = [
+        "vinegar", "syrup", "oil", "juice", "powder", "spice", "extract", "paste",
+        "puree", "sauce", "ketchup", "jam", "jelly", "preserves", "starch", "flour",
+        "cider", "wine", "butter", "chips", "dried", "canned", "tinned", "frozen",
+        "pickled", "concentrate", "seasoning", "bread", "cake", "soup", "tortillas", "tortilla",
+    ]
 
     /// Get seasonal recommendations for a given season.
     static func recommendations(for season: Season) -> [SeasonalIngredient] {

@@ -191,49 +191,79 @@ final class SmartNotificationService {
         }
     }
 
-    // MARK: - Meal Plan Reminders
+    // MARK: - Meal Reminders
 
-    /// Schedules a reminder 30 minutes before each incomplete meal in the plan.
-    func scheduleMealPlanReminders(plan: MealPlan) {
+    /// When a meal of each type is usually eaten. Planned meals store a day, not a
+    /// time of day, so reminders are anchored to these.
+    static func usualMealTime(for type: MealType) -> (hour: Int, minute: Int) {
+        switch type {
+        case .breakfast:                 return (8, 0)
+        case .lunch:                     return (12, 30)
+        case .snack:                     return (15, 30)
+        case .dinner, .side, .appetizer: return (18, 30)
+        case .dessert:                   return (19, 30)
+        }
+    }
+
+    /// Keeps the 64-request system limit free for expiry and other alerts.
+    private static let maxMealReminders = 21
+
+    /// Reminds the user to start each planned meal in the next 7 days. The reminder
+    /// fires the recipe's total time before the usual meal time (at least 30 minutes,
+    /// at most 4 hours ahead), so "start now" means the food is ready on time.
+    /// Rebuilds from scratch on every call, so removed or moved meals lose their reminder.
+    func scheduleMealReminders(for meals: [PlannedMeal]) {
         guard UserDefaults.standard.bool(forKey: SettingsKey.mealReminders) else { return }
 
         let calendar = Calendar.current
         let now = Date.now
+        let horizon = calendar.date(byAdding: .day, value: 7, to: now) ?? now
 
-        // Remove stale reminders for this plan.
-        let existingIdentifiers = plan.meals.map { "\(Category.mealReminder)_\($0.id)" }
-        center.removePendingNotificationRequests(withIdentifiers: existingIdentifiers)
+        let upcoming = meals
+            .compactMap { meal -> (meal: PlannedMeal, mealTime: Date, fireDate: Date)? in
+                guard !meal.isCompleted else { return nil }
+                let usual = Self.usualMealTime(for: meal.mealType)
+                guard let mealTime = calendar.date(bySettingHour: usual.hour, minute: usual.minute, second: 0, of: meal.date),
+                      mealTime > now, mealTime <= horizon else { return nil }
+                let lead = min(max(meal.recipe?.estimatedTotalMinutes ?? 30, 30), 240)
+                guard let fireDate = calendar.date(byAdding: .minute, value: -lead, to: mealTime),
+                      fireDate > now else { return nil }
+                return (meal, mealTime, fireDate)
+            }
+            .sorted { $0.fireDate < $1.fireDate }
+            .prefix(Self.maxMealReminders)
 
-        for meal in plan.meals where !meal.isCompleted {
-            // Only schedule future reminders.
-            guard meal.date > now else { continue }
-
-            let reminderDate = calendar.date(byAdding: .minute, value: -30, to: meal.date) ?? meal.date
-
-            // Skip if the reminder time has already passed.
-            guard reminderDate > now else { continue }
-
+        var scheduledIDs = Set<String>()
+        for item in upcoming {
+            let meal = item.meal
+            let time = item.mealTime.formatted(date: .omitted, time: .shortened)
             let content = UNMutableNotificationContent()
-            content.title = "Meal Reminder"
-
-            let mealLabel = meal.mealType.rawValue.capitalized
+            content.title = meal.mealType.displayName
             if let recipe = meal.recipe {
-                content.body = "Time to start \(mealLabel): \(recipe.title) in 30 minutes."
+                content.body = "Start \(recipe.title) now to eat at \(time)."
             } else {
-                content.body = "\(mealLabel) is coming up in 30 minutes."
+                content.body = "\(meal.displayTitle) at \(time)."
             }
             content.sound = .default
             content.categoryIdentifier = Category.mealReminder
 
-            let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: reminderDate)
-            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-
+            guard let trigger = futureTrigger(for: item.fireDate, calendar: calendar) else { continue }
             let request = UNNotificationRequest(
-                identifier: "\(Category.mealReminder)_\(meal.id)",
+                identifier: "\(Category.mealReminder)_\(meal.id.uuidString)",
                 content: content,
                 trigger: trigger
             )
+            scheduledIDs.insert(request.identifier)
             center.add(request)
+        }
+
+        // Drop reminders for meals that were removed, moved, cooked or fell out of range.
+        let keep = scheduledIDs
+        center.getPendingNotificationRequests { requests in
+            let stale = requests.map(\.identifier).filter { $0.hasPrefix(Category.mealReminder) && !keep.contains($0) }
+            if !stale.isEmpty {
+                UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: stale)
+            }
         }
     }
 

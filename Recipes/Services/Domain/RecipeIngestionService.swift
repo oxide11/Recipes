@@ -461,7 +461,15 @@ final class RecipeIngestionService {
             $0.rawValue.lowercased() == result.cuisine?.lowercased()
         } ?? .other
 
-        let ingredients: [Ingredient] = result.ingredients.flatMap { parsed -> [Ingredient] in
+        let ingredients: [Ingredient] = result.ingredients.flatMap { original -> [Ingredient] in
+            // A bare-string ingredient ("2 cups flour") arrives with the amount inside
+            // the name. Split it so the name matches pantry items and direction text.
+            var parsed = original
+            if parsed.amount.trimmingCharacters(in: .whitespaces).isEmpty,
+               let split = splitLeadingAmount(parsed.name) {
+                parsed.amount = split.amount
+                parsed.name = split.name
+            }
             let amount = parseAmount(parsed.amount)
             // If the AI combined assumed staples into one line ("salt and
             // black ground pepper"), split them into separate Ingredient
@@ -1123,6 +1131,31 @@ final class RecipeIngestionService {
         return IngredientAmount(quantity: quantity, unit: unit)
     }
 
+    /// "2 cups flour" → ("2 cups", "flour"); "1 1/2 tsp salt" → ("1 1/2 tsp", "salt");
+    /// "3 eggs" → ("3", "eggs"). Nil when the line doesn't start with a number.
+    private func splitLeadingAmount(_ line: String) -> (amount: String, name: String)? {
+        let parts = line.split(separator: " ").map(String.init)
+        guard parts.count >= 2, parseFraction(parts[0]) != nil else { return nil }
+        var consumed = 1
+        if parts.count > 2, parts[1].contains("/"), parseFraction(parts[1]) != nil {
+            consumed = 2
+        }
+        // Up to two unit words ("fl oz"), always leaving at least one word for the name.
+        let maxUnitWords = min(2, parts.count - consumed - 1)
+        if maxUnitWords >= 1 {
+            for length in stride(from: maxUnitWords, through: 1, by: -1) {
+                let candidate = parts[consumed..<(consumed + length)].joined(separator: " ").lowercased()
+                if matchUnit(candidate) != nil {
+                    consumed += length
+                    break
+                }
+            }
+        }
+        let name = parts[consumed...].joined(separator: " ")
+        guard !name.isEmpty else { return nil }
+        return (parts[..<consumed].joined(separator: " "), name)
+    }
+
     private func parseFraction(_ str: String) -> Double? {
         if let num = Double(str) { return num }
 
@@ -1263,8 +1296,8 @@ struct RecipeIngestionResult: Codable {
         } else {
             directions = []
         }
-        prepTimeMinutes = LenientJSON.int(c, .prepTimeMinutes)
-        cookTimeMinutes = LenientJSON.int(c, .cookTimeMinutes)
+        prepTimeMinutes = LenientJSON.minutes(c, .prepTimeMinutes)
+        cookTimeMinutes = LenientJSON.minutes(c, .cookTimeMinutes)
         source = try c.decodeIfPresent(String.self, forKey: .source)
         imageURL = try c.decodeIfPresent(String.self, forKey: .imageURL)
         dietaryInfo = try c.decodeIfPresent([String].self, forKey: .dietaryInfo)
@@ -1322,7 +1355,39 @@ struct RecipeIngestionResult: Codable {
 
 /// Decoding helpers that accept the number/string drift LLM output produces.
 enum LenientJSON {
-    /// Int from an Int, a Double (12.5 → 12), or a String ("4", "4-6", "30 min", "about 20").
+    /// Minutes from an Int, a Double, or a String such as "30 min", "1 hour",
+    /// "1.5 hrs", "1 hr 30 min", "1h30m", "10-15 minutes" (lower bound) or ISO 8601
+    /// "PT1H30M". A bare number is minutes. Taking only the first digit run would
+    /// read "1 hour" as one minute.
+    static func minutes<K: CodingKey>(_ c: KeyedDecodingContainer<K>, _ key: K) -> Int? {
+        if let v = try? c.decodeIfPresent(Int.self, forKey: key) { return v }
+        if let v = try? c.decodeIfPresent(Double.self, forKey: key) { return Int(v.rounded()) }
+        guard let s = try? c.decodeIfPresent(String.self, forKey: key) else { return nil }
+        return parseMinutes(s)
+    }
+
+    static func parseMinutes(_ text: String) -> Int? {
+        let pattern = #"(\d+(?:\.\d+)?)\s*(?:(?:-|–|to)\s*\d+(?:\.\d+)?\s*)?(days?|hours?|hrs?|minutes?|mins?|seconds?|secs?|d|h|m|s)?"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else { return nil }
+        let ns = text as NSString
+        var total = 0.0
+        var matched = false
+        for match in regex.matches(in: text, range: NSRange(location: 0, length: ns.length)) {
+            guard let value = Double(ns.substring(with: match.range(at: 1))) else { continue }
+            let unitRange = match.range(at: 2)
+            let unit = unitRange.location == NSNotFound ? "" : ns.substring(with: unitRange).lowercased()
+            switch unit.first {
+            case "d": total += value * 1440
+            case "h": total += value * 60
+            case "s": total += value / 60
+            default:  total += value    // minutes, or a bare number
+            }
+            matched = true
+        }
+        return matched ? Int(total.rounded()) : nil
+    }
+
+    /// Int from an Int, a Double (12.5 → 12), or a String ("4", "4-6" → 4, "serves 4").
     static func int<K: CodingKey>(_ c: KeyedDecodingContainer<K>, _ key: K) -> Int? {
         if let v = try? c.decodeIfPresent(Int.self, forKey: key) { return v }
         if let v = try? c.decodeIfPresent(Double.self, forKey: key) { return Int(v.rounded()) }

@@ -1029,24 +1029,47 @@ struct QuickAddPantryView: View {
 
 // MARK: - Pantry Quantity Row
 
-/// Quantity field plus a unit picker, shared by every manual pantry form.
+/// Quantity field plus a unit picker, shared by the manual pantry forms.
 /// Temperature units and "as needed" are not stock units, so they are excluded.
+///
+/// The field edits a String and writes the parsed value on every keystroke.
+/// `TextField(value:format:)` only commits on Return or focus loss; the decimal pad
+/// has no Return key and tapping Add doesn't end editing, so typed values were lost.
 struct PantryQuantityRow: View {
     @Binding var quantity: Double
     @Binding var unit: MeasurementUnit
+    @State private var text = ""
 
     private static let stockUnits: [MeasurementUnit] = MeasurementUnit.allCases.filter {
         ![.asNeeded, .fahrenheit, .celsius].contains($0)
+    }
+
+    /// Accepts either decimal separator; decimal pads show the locale's.
+    private static func parse(_ text: String) -> Double? {
+        Double(text.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: ",", with: "."))
+    }
+
+    private static func display(_ value: Double) -> String {
+        String(format: "%g", value)
     }
 
     var body: some View {
         HStack {
             Text("Quantity")
             Spacer()
-            TextField("1", value: $quantity, format: .number)
+            TextField("1", text: $text)
                 .keyboardType(.decimalPad)
                 .multilineTextAlignment(.trailing)
                 .frame(width: 70)
+                .onAppear { text = Self.display(quantity) }
+                .onChange(of: text) { _, new in
+                    if let value = Self.parse(new), value > 0 { quantity = value }
+                }
+                .onChange(of: quantity) { _, new in
+                    // External resets (e.g. after adding an item) update the field,
+                    // without rewriting what the user is in the middle of typing.
+                    if Self.parse(text) != new { text = Self.display(new) }
+                }
             Picker("", selection: $unit) {
                 ForEach(Self.stockUnits, id: \.self) { u in
                     Text(u.rawValue).tag(u)

@@ -33,7 +33,7 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 - [ ] **MEDIUM** `ClaudeService.swift:164` — `try?` swallows JSON serialization error in streaming request.
 - [x] **CRITICAL** `SmartNotificationService.swift` — Every scheduler guarded on `UserDefaults.bool(forKey:)` for keys never written, so nothing fired on a fresh install. Fixed: `registerDefaults()` at launch; past-dated triggers now roll to the next slot; streak body no longer prints `Int.max`; turning a type off cancels its pending requests; alerts for deleted pantry items are removed.
 - [ ] **MEDIUM** `SmartNotificationService.swift:280,348` — Notification scheduling failures invisible.
-- [ ] **MEDIUM** `SmartNotificationService.scheduleMealPlanReminders` — never called. Blocked on PlannedMeal having a time of day; `meal.date` is start-of-day so "30 minutes before" would fire at 23:30 the previous evening.
+- [x] **MEDIUM** Meal plan reminders never scheduled. Fixed: `scheduleMealReminders(for:)` anchors each meal in the next 7 days to a usual time per meal type (no schema change) and fires the recipe's total time before it; capped at 21 requests and rebuilt on every schedule pass.
 - [ ] **MEDIUM** `SampleData.swift:12-27` — `clearAll()` silently ignores deletion errors.
 
 ## Concurrency & Task Management
@@ -104,6 +104,19 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 - [ ] `MultiRecipeCookingService` / Cook All remains built but hidden (`MealPlanView` "hidden for now"). Decide: ship or delete.
 - [ ] Variations have no create UI; widget timeline still returns placeholder data; dead model fields (`isFavorite`, `sourceMarkdown`, carb/fat targets, iCloud flags, profile time totals) need a schema V2 to remove.
 
+## Adversarial Review of the Uncompiled Branch (2026-10-22)
+
+A seven-lens review with three independent refuters per finding confirmed 15 defects and refuted 8. No compile or concurrency errors were found; that is not a substitute for building. All 15 are fixed:
+
+- [x] Safe temperatures: substring keywords badged eggplant, hamburger buns, graham crackers, broths and sauces; generic beef and pork/ham/tuna "steak" resolved to the 125°F rare-steak row. Now whole-word rules, species before cut words, USDA minimums only.
+- [x] Category inference matched "egg"/"ham" inside other words; protein keywords now match whole words.
+- [x] Reminders sync deleted shopping items on a stale snapshot, changed identifiers, moved reminders or failed commits. Now re-links by name, deletes only when the store confirms the reminder is gone, and unlinks reminders whose commit failed.
+- [x] Quick log and Cooking Mode deleted pantry items unasked, including "1 piece" placeholders. Placeholders and staples are no longer deducted; items that run out are offered in the post-cook sheet.
+- [x] Pantry quantity field lost typed values (decimal pad never commits). Now String-backed.
+- [x] Times like "1 hour" decoded as 1 minute; bare-string ingredients kept the amount in the name.
+- [x] Substitution fallback matched "butter" in "butternut squash"; seasonal fallback badged "apple cider vinegar"; JSON detection rejected valid JSON after "[serves 4]".
+- [x] Changelog structure and claims corrected; stale README claims (Recipe as Code, markdown, step inference) removed.
+
 ## Architecture
 
 - [x] **HIGH** `ContentView.swift:62-73` — Overlapping `onChange` handlers all call `SmartNotificationService` methods; duplicate notifications. Fixed: all onChange handlers now call unified `scheduleAllNotifications()`.
@@ -113,4 +126,4 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 
 ---
 
-*Last updated: 2026-10-21*
+*Last updated: 2026-10-22*

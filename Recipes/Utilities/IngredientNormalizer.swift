@@ -294,7 +294,13 @@ enum IngredientNormalizer {
     static func inferCategory(fromName name: String) -> IngredientCategory {
         let lower = normalize(name)
 
-        if proteinKeywords.contains(where: lower.contains) { return .protein }
+        // Protein keywords are short ("egg", "ham") and occur inside other words
+        // ("eggplant", "graham crackers"), so they match whole words only, with
+        // simple plurals ("eggs", "prawns").
+        let words = Set(lower.split(whereSeparator: { !$0.isLetter }).map(String.init))
+        if proteinKeywords.contains(where: { words.contains($0) || words.contains($0 + "s") || words.contains($0 + "es") }) {
+            return .protein
+        }
         if herbKeywords.contains(where: lower.contains) { return .herb }
         if vegetableKeywords.contains(where: lower.contains) { return .vegetable }
         if fruitKeywords.contains(where: lower.contains) { return .fruit }

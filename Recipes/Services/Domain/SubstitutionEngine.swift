@@ -137,7 +137,8 @@ enum SubstitutionEngine {
         restrictions: [DietaryRestriction] = []
     ) -> [Substitution] {
         // Exact, then canonical ("unsalted butter" → "butter", "eggs" → "egg"),
-        // then any table key contained in the name ("whole milk" → "milk").
+        // then a table key that is the head noun of the name ("whole milk" → "milk").
+        // A plain substring match would offer butter swaps for "butternut squash".
         let key = ingredient.lowercased().trimmingCharacters(in: .whitespaces)
         let canonical = IngredientNormalizer.canonicalize(ingredient)
         let subs: [Substitution]
@@ -146,7 +147,7 @@ enum SubstitutionEngine {
         } else if let viaCanonical = knownSubstitutions[canonical] {
             subs = viaCanonical
         } else if let containedKey = knownSubstitutions.keys
-                    .filter({ key.contains($0) || canonical.contains($0) })
+                    .filter({ isHeadNoun($0, of: key) || isHeadNoun($0, of: canonical) })
                     .max(by: { $0.count < $1.count }),
                   let contained = knownSubstitutions[containedKey] {
             subs = contained
@@ -163,6 +164,22 @@ enum SubstitutionEngine {
                 sub.dietaryBenefit.contains(restriction)
             }
         }
+    }
+
+    /// Modifiers that turn a table key into a different product ("peanut butter",
+    /// "coconut milk", "cocoa butter") rather than a variety of it ("whole milk").
+    private static let differentProductModifiers: Set<String> = [
+        "peanut", "almond", "cashew", "sunflower", "apple", "nut", "cocoa", "shea",
+        "coconut", "oat", "soy", "rice", "hemp", "pea", "plant",
+    ]
+
+    /// True when `tableKey` ends `name` as whole words and nothing before it names
+    /// a different product: "low-sodium soy sauce" → "soy sauce", but not
+    /// "butternut squash" → "butter" or "almond milk" → "milk".
+    private static func isHeadNoun(_ tableKey: String, of name: String) -> Bool {
+        guard name == tableKey || name.hasSuffix(" " + tableKey) else { return false }
+        let modifiers = name.dropLast(tableKey.count).split(separator: " ").map(String.init)
+        return !modifiers.contains(where: differentProductModifiers.contains)
     }
 
     /// Check if any ingredients in a recipe need substitution for given restrictions.

@@ -239,3 +239,155 @@ struct ProfileConstraintTests {
         #expect(profile.aiHardLimitsClause.contains("ALLERGENS"))
     }
 }
+
+// MARK: - Review fixes
+
+@Suite("Safe temperatures never below USDA, no look-alikes")
+struct SafeTemperatureSafetyTests {
+
+    private func temp(_ name: String) -> SafeTemperature? {
+        SafeCookingTemperatureService.safeTemperature(forIngredientNamed: name)
+    }
+
+    @Test("Generic and cut names map to USDA minimums")
+    func usdaMinimums() {
+        #expect(temp("ribeye steak")?.protein == "Beef steak (medium)")
+        #expect(temp("ribeye steak")?.minimumFahrenheit == 145)
+        #expect(temp("beef chuck")?.protein == "Beef roast")
+        #expect(temp("ground turkey")?.protein == "Ground poultry")
+        #expect(temp("turkey breast")?.protein == "Turkey (breast)")
+        #expect(temp("pork shoulder")?.protein == "Pulled pork (shoulder)")
+        #expect(temp("Italian sausage")?.protein == "Ground pork")
+    }
+
+    @Test("Species beat cut words: pork, ham and tuna steaks are not beef")
+    func speciesBeforeCut() {
+        #expect(temp("pork steak")?.protein == "Pork")
+        #expect(temp("ham steak")?.protein == "Ham (pre-cooked, reheating)")
+        #expect(temp("tuna steak")?.protein == "Fish (fin fish)")
+        #expect(temp("salmon fillets")?.minimumFahrenheit == 145)
+    }
+
+    @Test("Look-alikes, stocks, cured and plant-based forms get no badge")
+    func noFalsePositives() {
+        for name in ["eggplant", "hamburger buns", "graham crackers", "beef broth", "chicken stock",
+                     "fish sauce", "egg noodles", "eggs", "bacon strips", "smoked salmon", "canned tuna",
+                     "veggie burger", "ground cumin", "beefsteak tomato", "Guanciale", "clams"] {
+            #expect(temp(name) == nil, "\(name) should have no safe-temperature badge")
+        }
+    }
+
+    @Test("No automatic badge is ever below the USDA minimum for its species")
+    func neverBelowUSDA() {
+        for name in ["steak", "beef", "salmon", "tuna", "scallops", "lamb chops", "duck breast", "shrimp"] {
+            if let t = temp(name) { #expect(t.minimumFahrenheit >= 145, "\(name) → \(t.protein)") }
+        }
+    }
+}
+
+@Suite("Category inference")
+struct CategoryInferenceTests {
+
+    @Test("Protein words match whole words only")
+    func wholeWordProtein() {
+        #expect(IngredientNormalizer.inferCategory(fromName: "Eggplant") == .vegetable)
+        #expect(IngredientNormalizer.inferCategory(fromName: "Eggs") == .protein)
+        #expect(IngredientNormalizer.inferCategory(fromName: "Graham crackers") != .protein)
+        #expect(IngredientNormalizer.inferCategory(fromName: "Chicken thighs") == .protein)
+    }
+}
+
+@Suite("Substitution head-noun matching")
+struct SubstitutionHeadNounTests {
+
+    @Test("Varieties match; different products don't")
+    func headNouns() {
+        #expect(!SubstitutionEngine.findSubstitutions(for: "whole milk").isEmpty)
+        #expect(!SubstitutionEngine.findSubstitutions(for: "low-sodium soy sauce").isEmpty)
+        #expect(SubstitutionEngine.findSubstitutions(for: "butternut squash").isEmpty)
+        #expect(SubstitutionEngine.findSubstitutions(for: "almond milk").isEmpty)
+        #expect(SubstitutionEngine.findSubstitutions(for: "peanut butter").isEmpty)
+        #expect(SubstitutionEngine.findSubstitutions(for: "sugar snap peas").isEmpty)
+    }
+}
+
+@Suite("Seasonal processed forms")
+struct SeasonalProcessedTests {
+
+    @Test("Shelf-stable products are never in season")
+    func processed() {
+        for name in ["apple cider vinegar", "corn syrup", "lime juice", "pumpkin pie spice"] {
+            #expect(!SeasonalAwarenessService.isInSeason(name), "\(name)")
+        }
+    }
+}
+
+@Suite("Duration parsing")
+struct DurationParsingTests {
+
+    @Test("Hours, ranges and ISO 8601 become minutes")
+    func minutes() {
+        #expect(LenientJSON.parseMinutes("30 min") == 30)
+        #expect(LenientJSON.parseMinutes("1 hour") == 60)
+        #expect(LenientJSON.parseMinutes("1.5 hours") == 90)
+        #expect(LenientJSON.parseMinutes("1h 30m") == 90)
+        #expect(LenientJSON.parseMinutes("1 hr 30 min") == 90)
+        #expect(LenientJSON.parseMinutes("10-15 minutes") == 10)
+        #expect(LenientJSON.parseMinutes("PT1H30M") == 90)
+        #expect(LenientJSON.parseMinutes("overnight") == nil)
+    }
+
+    @Test("Hour-denominated times decode as minutes")
+    func decodesHours() throws {
+        let json = "{\"title\":\"Stew\",\"prepTimeMinutes\":\"20 minutes\",\"cookTimeMinutes\":\"2 hours\",\"ingredients\":[],\"directions\":[]}"
+        let result = try JSONDecoder().decode(RecipeIngestionResult.self, from: Data(json.utf8))
+        #expect(result.prepTimeMinutes == 20)
+        #expect(result.cookTimeMinutes == 120)
+    }
+}
+
+@Suite("JSON detection with bracketed prose")
+struct BracketedProseJSONTests {
+
+    @Test("Brackets in prose before the object don't hide valid JSON") @MainActor
+    func bracketPrefix() {
+        #expect(AIServiceRouter.looksLikeJSON("Here is the recipe [serves 4]: {\"title\":\"x\",\"ingredients\":[]}"))
+    }
+}
+
+@Suite("Pantry deduction leaves unknown amounts alone")
+struct PantryPlaceholderTests {
+
+    private let recipe = Recipe(
+        title: "Omelette", servings: 1,
+        ingredients: [Ingredient(name: "Eggs", category: .dairy, amount: IngredientAmount(quantity: 2, unit: .piece))]
+    )
+
+    @Test("A '1 piece' placeholder is not deducted or reported as used up")
+    func placeholderUntouched() {
+        let eggs = PantryItem(name: "eggs", category: .dairy, quantity: 1, unit: .piece)
+        let consumed = PantryDeductionService.deductAfterCooking(recipe: recipe, servingsCooked: 1, pantryItems: [eggs])
+        #expect(consumed.isEmpty)
+        #expect(eggs.quantity == 1)
+    }
+
+    @Test("Staples are not deducted")
+    func staplesUntouched() {
+        let eggs = PantryItem(name: "eggs", category: .dairy, quantity: 12, unit: .piece)
+        eggs.isStaple = true
+        _ = PantryDeductionService.deductAfterCooking(recipe: recipe, servingsCooked: 1, pantryItems: [eggs])
+        #expect(eggs.quantity == 12)
+    }
+}
+
+@Suite("Meal reminder times")
+struct MealReminderTimeTests {
+
+    @Test("Usual meal times") @MainActor
+    func usualTimes() {
+        let breakfast = SmartNotificationService.usualMealTime(for: .breakfast)
+        let dinner = SmartNotificationService.usualMealTime(for: .dinner)
+        #expect(breakfast.hour == 8 && breakfast.minute == 0)
+        #expect(dinner.hour == 18 && dinner.minute == 30)
+    }
+}

@@ -108,6 +108,7 @@ struct ContentView: View {
     private func scheduleAllNotifications() {
         let hemisphere = profiles.first?.hemisphere ?? .northern
         SmartNotificationService.shared.scheduleExpiringPantryAlerts(items: pantryItems)
+        SmartNotificationService.shared.scheduleMealReminders(for: plannedMeals)
         SmartNotificationService.shared.scheduleCookingStreakReminder(lastCookDate: cookingLogs.first?.date)
         SmartNotificationService.shared.scheduleWeeklyPlanningReminder(mealPlans: mealPlans)
         SmartNotificationService.shared.scheduleSeasonChangeNotification(hemisphere: hemisphere)

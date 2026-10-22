@@ -12,6 +12,11 @@ enum PantryDeductionService {
     /// Matching uses canonical ingredient names ("yellow onions" matches "onion").
     /// Quantities are converted to the pantry item's unit when both are volumes or
     /// both are weights; a volume-to-weight mismatch is skipped rather than guessed.
+    ///
+    /// Two kinds of pantry item are never deducted, because their quantity isn't a
+    /// real count: "1 piece" is the app-wide placeholder for "I have some" (every add
+    /// path used it before quantities were editable), and staples are assumed to be
+    /// kept on hand. The post-cook sheet still lists them so the user can mark them used up.
     @discardableResult
     static func deductAfterCooking(
         recipe: Recipe,
@@ -31,6 +36,7 @@ enum PantryDeductionService {
             guard ingredient.amount.unit != .asNeeded, ingredient.amount.quantity > 0 else { continue }
             let key = IngredientNormalizer.canonicalize(ingredient.name)
             guard let pantryItem = pantryByCanonical[key] else { continue }
+            guard !isPlaceholderQuantity(pantryItem), !pantryItem.isStaple else { continue }
 
             let needed = IngredientAmount(quantity: ingredient.amount.quantity * scale, unit: ingredient.amount.unit)
             guard let inPantryUnits = MeasurementConversionService.convert(amount: needed, to: pantryItem.unit) else {
@@ -46,5 +52,10 @@ enum PantryDeductionService {
         }
 
         return fullyConsumed
+    }
+
+    /// "1 piece" means "an unknown amount" throughout the app (see GroceryItem.formattedAmount).
+    static func isPlaceholderQuantity(_ item: PantryItem) -> Bool {
+        item.quantity == 1 && item.unit == .piece
     }
 }

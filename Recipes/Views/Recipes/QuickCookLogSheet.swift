@@ -16,6 +16,8 @@ struct QuickCookLogSheet: View {
 
     @State private var rating: Int = 0
     @State private var showingFullLog = false
+    @State private var showingPantryCleanup = false
+    @State private var consumedItemIDs: Set<UUID> = []
 
     var body: some View {
         NavigationStack {
@@ -73,7 +75,12 @@ struct QuickCookLogSheet: View {
                 VStack(spacing: 12) {
                     Button {
                         saveQuickLog()
-                        dismiss()
+                        // Only interrupt a quick log when something actually ran out.
+                        if consumedItemIDs.isEmpty {
+                            dismiss()
+                        } else {
+                            showingPantryCleanup = true
+                        }
                     } label: {
                         Text("Save")
                             .font(.headline)
@@ -107,6 +114,14 @@ struct QuickCookLogSheet: View {
         .sheet(isPresented: $showingFullLog, onDismiss: { dismiss() }) {
             CookingLogEntryView(recipe: recipe, logDate: logDate)
         }
+        .sheet(isPresented: $showingPantryCleanup, onDismiss: { dismiss() }) {
+            PostCookPantrySheet(
+                recipe: recipe,
+                pantryItems: Array(pantryItems),
+                preselected: consumedItemIDs,
+                quantitiesDeducted: true
+            ) {}
+        }
     }
 
     // MARK: - Helpers
@@ -134,7 +149,8 @@ struct QuickCookLogSheet: View {
                 servingsCooked: recipe.servings,
                 pantryItems: Array(pantryItems)
             )
-            for item in consumed { modelContext.delete(item) }
+            // Items that ran out are offered for removal, never deleted unasked.
+            consumedItemIDs = Set(consumed.map(\.id))
         }
     }
 }
