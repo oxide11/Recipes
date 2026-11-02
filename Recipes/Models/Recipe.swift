@@ -16,7 +16,7 @@ enum Cuisine: String, Codable, CaseIterable, Sendable {
 enum DietaryRestriction: String, Codable, CaseIterable, Sendable {
     case vegetarian, vegan, glutenFree, dairyFree, nutFree
     case halal, kosher, lowSodium, lowCarb, keto, paleo
-    case whole30, fodmap, pescatarian
+    case whole30, fodmap, pescatarian, alcoholFree
 
     var displayName: String {
         switch self {
@@ -34,6 +34,7 @@ enum DietaryRestriction: String, Codable, CaseIterable, Sendable {
         case .whole30:     return "Whole30"
         case .fodmap:      return "FODMAP"
         case .pescatarian: return "Pescatarian"
+        case .alcoholFree: return "Alcohol Free"
         }
     }
 }

@@ -19,6 +19,7 @@ struct OnboardingView: View {
     @State private var pantryIngredients: [String] = []
     @State private var newIngredient = ""
     @FocusState private var newIngredientFocused: Bool
+    @FocusState private var nameFocused: Bool
     @State private var speechRecognizer = SpeechRecognizer()
     @State private var isParsingMic = false
     @State private var isFinishing = false
@@ -83,6 +84,11 @@ struct OnboardingView: View {
         // Using oldStep == .table means a back-swipe then re-forward-swipe
         // correctly recomputes if cuisine/dietary selections changed.
         .onChange(of: step) { oldStep, newStep in
+            // Dismiss any active keyboard when the user moves between steps —
+            // swiping or tapping Continue should never leave the keyboard up.
+            nameFocused = false
+            newIngredientFocused = false
+
             // Pre-populate pantry whenever the user arrives at the kitchen step
             // (forward or after changing cuisine/dietary selections mid-flow).
             if newStep == .kitchen && oldStep == .table {
@@ -163,6 +169,9 @@ struct OnboardingView: View {
                         .background(Brand.surface, in: RoundedRectangle(cornerRadius: 14))
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.words)
+                        .focused($nameFocused)
+                        .submitLabel(.done)
+                        .onSubmit { nameFocused = false }
                 }
                 .padding(.horizontal, 32)
 
@@ -282,7 +291,7 @@ struct OnboardingView: View {
 
     // Common intolerances and beliefs — shown by default
     private static let commonRestrictions: [DietaryRestriction] = [
-        .vegetarian, .vegan, .pescatarian, .glutenFree, .dairyFree, .nutFree, .halal, .kosher
+        .vegetarian, .vegan, .pescatarian, .glutenFree, .dairyFree, .nutFree, .alcoholFree, .halal, .kosher
     ]
     // Lifestyle/protocol diets — hidden under "More options"
     private static let lifestyleRestrictions: [DietaryRestriction] = [
@@ -297,29 +306,12 @@ struct OnboardingView: View {
         VStack(spacing: 0) {
             stepHeading(
                 title: "Any dietary needs?",
-                subtitle: "These filter your recipe suggestions and shape what gets generated."
+                subtitle: "Optional. Pick any that apply — these filter suggestions and shape generated recipes."
             )
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     FlowLayout(spacing: 10) {
-                        // "None" chip — prominent if nothing is selected
-                        let noneSelected = selectedRestrictions.isEmpty
-                        Button {
-                            withAnimation { selectedRestrictions.removeAll() }
-                        } label: {
-                            Text("None")
-                                .font(.system(.subheadline, design: .rounded, weight: .medium))
-                                .foregroundStyle(noneSelected ? Brand.midnight : Brand.cream)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 10)
-                                .background(noneSelected ? Brand.herbGreen : Brand.surface, in: Capsule())
-                                .overlay(Capsule().stroke(noneSelected ? Color.clear : Brand.border, lineWidth: 1))
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("None\(noneSelected ? ", selected" : "")")
-                        .accessibilityHint(noneSelected ? "Selected" : "Double tap to clear all restrictions")
-
                         ForEach(Self.commonRestrictions, id: \.self) { restriction in
                             dietaryChip(restriction)
                         }

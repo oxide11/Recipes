@@ -237,7 +237,7 @@ final class RecommendationAgent {
         // AI-powered blind spots for deeper insights
         do {
             let preferences = profile.map {
-                "Skill: \($0.skillLevel.rawValue), Restrictions: \($0.dietaryRestrictions.map(\.rawValue).joined(separator: ", "))"
+                "Skill: \($0.skillLevel.rawValue), Restrictions: \($0.dietaryRestrictions.map(\.displayName).joined(separator: ", "))"
             } ?? "No specific preferences"
 
             let suggestions = try await aiRouter.foundationModelService.suggestBlindSpots(
@@ -292,7 +292,7 @@ final class RecommendationAgent {
 
         if let profile {
             if !profile.dietaryRestrictions.isEmpty {
-                context += "Dietary restrictions: \(profile.dietaryRestrictions.map(\.rawValue).joined(separator: ", ")). "
+                context += "Dietary restrictions: \(profile.dietaryRestrictions.map(\.displayName).joined(separator: ", ")). "
             }
             context += "Skill level: \(profile.skillLevel.rawValue). "
             let goal = profile.cookingGoal ?? .greatFood

@@ -45,7 +45,7 @@ enum PantryStarterKit {
             .init(name: "Canned tomatoes",     category: .vegetable, unit: .can,        quantity: 2),
             .init(name: "Dried pasta",         category: .grain,     unit: .pound,      quantity: 1,  excludedFor: [.glutenFree]),
             .init(name: "Parmesan",            category: .dairy,     unit: .ounce,      quantity: 4,  excludedFor: [.vegan, .dairyFree]),
-            .init(name: "White wine",          category: .liquid,    unit: .cup,        quantity: 1),
+            .init(name: "White wine",          category: .liquid,    unit: .cup,        quantity: 1,  excludedFor: [.alcoholFree]),
             .init(name: "Red wine vinegar",    category: .condiment, unit: .cup,        quantity: 0.5),
             .init(name: "Dried oregano",       category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Dried basil",         category: .herb,      unit: .tablespoon, quantity: 1),
@@ -56,8 +56,8 @@ enum PantryStarterKit {
         ],
         .japanese: [
             .init(name: "Soy sauce",           category: .condiment, unit: .cup,        quantity: 1),
-            .init(name: "Mirin",               category: .condiment, unit: .cup,        quantity: 0.5),
-            .init(name: "Sake",                category: .liquid,    unit: .cup,        quantity: 0.5),
+            .init(name: "Mirin",               category: .condiment, unit: .cup,        quantity: 0.5, excludedFor: [.alcoholFree]),
+            .init(name: "Sake",                category: .liquid,    unit: .cup,        quantity: 0.5, excludedFor: [.alcoholFree]),
             .init(name: "Miso paste",          category: .condiment, unit: .tablespoon, quantity: 4),
             .init(name: "Short-grain rice",    category: .grain,     unit: .cup,        quantity: 2),
             .init(name: "Rice vinegar",        category: .condiment, unit: .cup,        quantity: 0.5),
@@ -127,7 +127,7 @@ enum PantryStarterKit {
         .chinese: [
             .init(name: "Soy sauce",           category: .condiment, unit: .cup,        quantity: 1),
             .init(name: "Dark soy sauce",      category: .condiment, unit: .cup,        quantity: 0.5),
-            .init(name: "Shaoxing wine",       category: .liquid,    unit: .cup,        quantity: 0.5),
+            .init(name: "Shaoxing wine",       category: .liquid,    unit: .cup,        quantity: 0.5, excludedFor: [.alcoholFree]),
             .init(name: "Oyster sauce",        category: .condiment, unit: .cup,        quantity: 0.5),
             .init(name: "Sesame oil",          category: .oil,       unit: .cup,        quantity: 0.5),
             .init(name: "Rice vinegar",        category: .condiment, unit: .cup,        quantity: 0.5),
@@ -155,7 +155,7 @@ enum PantryStarterKit {
         .french: [
             .init(name: "Dijon mustard",       category: .condiment, unit: .tablespoon, quantity: 3),
             .init(name: "Shallots",            category: .vegetable, unit: .whole,      quantity: 4),
-            .init(name: "Dry white wine",      category: .liquid,    unit: .cup,        quantity: 1),
+            .init(name: "Dry white wine",      category: .liquid,    unit: .cup,        quantity: 1,  excludedFor: [.alcoholFree]),
             .init(name: "Herbes de Provence",  category: .spice,     unit: .tablespoon, quantity: 2),
             .init(name: "Nutmeg",              category: .spice,     unit: .tablespoon, quantity: 1),
             .init(name: "Crème fraîche",       category: .dairy,     unit: .cup,        quantity: 0.5, excludedFor: [.vegan, .dairyFree]),

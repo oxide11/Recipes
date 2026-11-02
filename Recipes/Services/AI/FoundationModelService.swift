@@ -54,7 +54,7 @@ final class FoundationModelService {
         if let cuisine { prompt += " Cuisine style: \(cuisine.rawValue)." }
         if let maxTime = maxTimeMinutes { prompt += " Must be ready in \(maxTime) minutes or less." }
         if !dietaryRestrictions.isEmpty {
-            prompt += " Dietary restrictions: \(dietaryRestrictions.map(\.rawValue).joined(separator: ", "))."
+            prompt += " Dietary restrictions: \(dietaryRestrictions.map(\.displayName).joined(separator: ", "))."
         }
 
         let response = try await session.respond(to: prompt, generating: GeneratedRecipe.self)
