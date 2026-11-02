@@ -13,6 +13,7 @@ struct RecipeListView: View {
 
     @State private var searchText = ""
     @State private var selectedCuisine: Cuisine?
+    @State private var favoritesOnly = false
     @State private var selectedDifficulty: RecipeDifficulty?
     @State private var maxTimeFilter: Int?
     @State private var selectedDietaryRestrictions: Set<DietaryRestriction> = []
@@ -89,6 +90,9 @@ struct RecipeListView: View {
         }
         if let minRating = minRatingFilter {
             result = result.filter { ($0.averageRating ?? 0) >= Double(minRating) }
+        }
+        if favoritesOnly {
+            result = result.filter(\.isFavorite)
         }
         cachedFilteredRecipes = result
     }
@@ -228,6 +232,7 @@ struct RecipeListView: View {
             .onChange(of: pantryItems.count) { updateNoWasteMatches() }
             .onChange(of: debouncedSearch) { rebuildFilteredRecipes() }
             .onChange(of: selectedCuisine) { rebuildFilteredRecipes() }
+            .onChange(of: favoritesOnly) { rebuildFilteredRecipes() }
             .onChange(of: selectedDifficulty) { rebuildFilteredRecipes() }
             .onChange(of: maxTimeFilter) { rebuildFilteredRecipes() }
             .onChange(of: selectedDietaryRestrictions) { rebuildFilteredRecipes() }
@@ -281,7 +286,7 @@ struct RecipeListView: View {
             // Shuffle so ingredient chips rotate on each load / refresh.
             let inSeason = SeasonalAwarenessService.currentlyInSeason(hemisphere: hemisphere)
                 .filter { !$0.availableAllYear }
-                .sorted { $0.name < $1.name }
+                .shuffled()
                 .prefix(8)
                 .map(\.name)
             guard !Task.isCancelled else { return }
@@ -458,6 +463,17 @@ struct RecipeListView: View {
                     NavigationLink(value: recipe) {
                         RecipeRow(recipe: recipe)
                     }
+                    .swipeActions(edge: .leading) {
+                        Button {
+                            recipe.isFavorite.toggle()
+                        } label: {
+                            Label(
+                                recipe.isFavorite ? "Unfavorite" : "Favorite",
+                                systemImage: recipe.isFavorite ? "heart.slash.fill" : "heart.fill"
+                            )
+                        }
+                        .tint(.pink)
+                    }
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
                             recipeToDelete = recipe
@@ -468,10 +484,21 @@ struct RecipeListView: View {
                 }
             }
         } header: {
-            HStack {
+            HStack(spacing: 14) {
                 Text("All recipes")
                     .miseSectionHeader()
                 Spacer()
+                Button {
+                    favoritesOnly.toggle()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: favoritesOnly ? "heart.fill" : "heart")
+                        Text("Favorites")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(favoritesOnly ? .pink : .secondary)
+                }
+                .accessibilityLabel(favoritesOnly ? "Favorites filter on" : "Favorites filter off")
                 Button {
                     showingFilters = true
                 } label: {
@@ -705,10 +732,16 @@ struct RecipeRow: View {
 
             Spacer()
 
+            if recipe.isFavorite {
+                Image(systemName: "heart.fill")
+                    .font(.footnote)
+                    .foregroundStyle(.pink)
+                    .accessibilityLabel("Favorite")
+            }
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(recipe.title), \(recipe.formattedDuration), \(recipe.cuisine.rawValue)")
+        .accessibilityLabel("\(recipe.title)\(recipe.isFavorite ? ", favorite" : ""), \(recipe.formattedDuration), \(recipe.cuisine.rawValue)")
     }
 }
 
