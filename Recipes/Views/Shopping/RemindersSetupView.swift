@@ -1,5 +1,6 @@
 import EventKit
 import SwiftUI
+import SwiftData
 
 // MARK: - Reminders Setup View
 
