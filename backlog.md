@@ -72,4 +72,79 @@ Items are grouped by category and sorted by severity within each group.
 
 ---
 
-*Last updated: 2026-09-19*
+## Feature Ideas
+
+Captured 2026-11-16, not yet scoped. Notes record what already exists so the
+first hour of each isn't spent rediscovering it.
+
+### Ingredient Sankey — flow of ingredients and quantities through a recipe
+
+- [ ] **IDEA** Sankey/alluvial view of a recipe: ingredients on the left, flowing
+      into the steps that consume them.
+
+  **Already there.** The edge list exists — `RecipeDirection.ingredients` is
+  `[DirectionIngredientRef]`, and each ref carries `ingredientName` plus an
+  `IngredientAmount` (`Recipe.swift:92,112`). So "which ingredient goes into
+  which step, and how much" is already modelled; this is a rendering problem,
+  not a data problem. Band colours come free from
+  `IngredientCategory` → `IngredientColor.swiftUIColor`, 14 branded colours
+  already used elsewhere (`Ingredient.swift:102`). Swift Charts is already a
+  dependency (`MetricsView`, `NutritionTrackingView`).
+
+  **The real blocker: band width needs one comparable number, and we don't have
+  one.** `MeasurementConversionService` keeps two *separate* bases —
+  `volumeToMilliliters` and `weightToGrams` (`MeasurementConversion.swift:10,21`)
+  — with no bridge between them. Putting "2 cups flour" and "1 lb chicken" on a
+  shared axis needs density (g/ml) per ingredient, which the app has nowhere.
+  Nine units (`piece, pinch, dash, bunch, clove, slice, whole, can, asNeeded`)
+  have no magnitude at all (`Ingredient.swift:186`). Three ways out, cheapest
+  first:
+  1. **Don't scale by mass.** Equal-weight strands grouped by category. Honest,
+     reads well, ships in a day, and arguably communicates structure better than
+     true proportions would.
+  2. **Scale within a unit family only** — weight-vs-weight, volume-vs-volume —
+     and render count units as fixed-width strands.
+  3. **Add a density / typical-weight table** keyed by canonical name
+     (`IngredientNormalizer.canonicalize` already collapses "2 Medium Onions" →
+     "onion", so the keys are stable). Most accurate, most upkeep.
+
+  **Also note:** Swift Charts has no Sankey or alluvial mark, so the ribbons are
+  a custom `Canvas`/`Path` with cubic Béziers. Budget the layout pass (node
+  ordering to minimise crossings) as the bulk of the work, not the drawing.
+  Recipes with many ingredients will need a minimum band height and a scroll or
+  a "+N more" collapse — check it at Dynamic Type sizes before committing.
+
+### Substitution mindmap — a node that expands into alternatives
+
+- [ ] **IDEA** Tap an ingredient to expand a radial/mindmap node of substitutes,
+      each showing conversion ratio and trade-off.
+
+  **Already there.** `SubstitutionEngine.findSubstitutions(for:restrictions:)`
+  returns `[Substitution]` carrying exactly what the node needs to display —
+  `replacement`, `ratio`, `notes`, `dietaryBenefit`
+  (`SubstitutionEngine.swift:10,135`). `IngredientNormalizer.substitutionGroups`
+  adds interchangeable sets (oils, acids, vinegars, creams), and
+  `AITaskType.ingredientSubstitution` can fill gaps the static table misses.
+
+  **The gap is surfacing, not data.** `SubstitutionEngine` is currently wired
+  into exactly one screen — `GuidedShoppingView` — so substitutions exist only
+  while shopping. Natural homes: `IngredientRow` in `RecipeDetailView`, and
+  `CookingModeView`, where "I'm out of buttermilk" actually happens.
+
+  **Fix this first, it's a one-liner and it blocks the feature:**
+  `findSubstitutions` keys `knownSubstitutions` on the raw lowercased name
+  (`SubstitutionEngine.swift:139`) with no canonicalisation — so "butter" hits
+  and "Unsalted Butter" silently returns nothing. Route the lookup through
+  `IngredientNormalizer.canonicalize` and most real recipe text starts matching.
+  Worth doing on its own merits even if the mindmap never ships.
+
+  **Design questions to settle before building:** does picking a substitute
+  mutate the recipe, create a `RecipeVariation` (the model already supports
+  stacked variations), or just annotate the current cook? Does the chosen ratio
+  rescale the amount via `MeasurementConversionService.scale`? And a radial
+  layout needs a VoiceOver story — a disclosure list may serve better on iPhone
+  with a radial treatment reserved for iPad.
+
+---
+
+*Last updated: 2026-11-16*
