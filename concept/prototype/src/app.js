@@ -237,12 +237,20 @@ function sankey(){
 
 /* ================= RECIPE ================= */
 function cardSection(){
- var c=R.card;if(!c)return '';
- return '<section class="card" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">'+
-  '<div class="row" style="gap:14px;align-items:flex-start"><div class="cardthumb" aria-hidden="true"><i style="width:70%;height:5px;background:#8A8A85"></i><i></i><i style="width:80%"></i><i></i><i style="width:60%"></i></div>'+
-  '<div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="kicker">From Ashley’s card</span><b style="font-size:15px">'+esc(c.source)+'</b><span style="font-size:13px;line-height:1.4;color:#3A3A38">'+esc(c.credit)+'</span><button class="linkbtn" data-toast="The original photos open here in the app">View '+c.photos+' original photo'+(c.photos>1?'s':'')+'</button></div></div>'+
-  (c.questions.length?'<div style="display:flex;flex-direction:column;gap:6px"><span class="kicker" style="color:#111">Still to check with Ashley</span>'+c.questions.map(function(q){return '<p class="cardnote" style="margin:0">'+esc(q)+'</p>'}).join('')+'</div>':'<p class="cardnote" style="margin:0">Fully transcribed. Nothing left to check.</p>')+
+ var c=R.card;if(!c)return '';var q=c.questions.length;
+ return '<section class="card acard slim"><div class="row" style="gap:12px;align-items:center"><div class="cardthumb sm" aria-hidden="true"><i style="width:70%;height:4px;background:#8A8A85"></i><i></i><i style="width:80%"></i><i></i></div>'+
+  '<div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1"><span class="kicker">From Ashley’s card</span><b style="font-size:15px">'+esc(c.source)+'</b></div></div>'+
+  '<div class="between" style="gap:10px;font-size:13px"><button class="linkbtn" data-act="cardinfo">'+(q?q+' to check with Ashley':'Fully transcribed')+'</button><button class="linkbtn" data-toast="The original photos open here in the app">'+c.photos+' photo'+(c.photos>1?'s':'')+'</button></div>'+
  '</section>';
+}
+function openCard(){
+ var c=R.card,el=document.getElementById('sheet');
+ el.innerHTML='<div class="sheetwrap" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="About the original card">'+
+  '<div class="between"><div><span class="kicker">From Ashley’s card</span><h2 class="h2" style="font-size:20px">'+esc(c.source)+'</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  '<p style="margin:0;font-size:15px;line-height:1.5">'+esc(c.credit)+'</p>'+
+  (c.questions.length?'<div style="display:flex;flex-direction:column;gap:6px"><span class="kicker" style="color:#111">Still to check with Ashley</span>'+c.questions.map(function(q){return '<p class="cardnote" style="margin:0">'+esc(q)+'</p>'}).join('')+'</div>':'<p class="cardnote" style="margin:0">Fully transcribed. Nothing left to check.</p>')+
+  '<button class="secondary" data-toast="The original photos open here in the app">View '+c.photos+' original photo'+(c.photos>1?'s':'')+'</button></div></div>';
+ var b=el.querySelector('.iconbtn');if(b)b.focus();
 }
 
 function recipe(){
@@ -545,6 +553,7 @@ document.addEventListener('click',function(e){
   case 'share':openShare();break;
   case 'searchopen':S.search=true;render();var sf=document.getElementById('search');if(sf)sf.focus();break;
   case 'searchclose':S.search=false;render();var sb=document.querySelector('[data-act="searchopen"]');if(sb)sb.focus();break;
+  case 'cardinfo':openCard();break;
   case 'profile':openProfile();break;
   case 'sharesend':closeSheet();toast('Sharing is mocked in this prototype');break;
   case 'sharecopy':toast('Copy link is mocked in this prototype');break;

@@ -74,25 +74,20 @@ function sankeyWide(W){
 function stepTime(st){var on=st.on||0,tot=Math.max(on,Math.round((st.secs||0)/60));return {on:on,wait:tot-on}}
 function timeCard(){
  var on=0,wait=0,best=null;STEPS.forEach(function(st){var t=stepTime(st);on+=t.on;wait+=t.wait;if(t.wait&&(!best||t.wait>best.w))best={w:t.wait,t:stepTitle(st)}});
- return '<section class="card acard"><div class="between"><span class="kicker">Time at the stove</span><span style="font-size:13px"><b>'+(on+wait)+' min</b> total</span></div>'+
+ return '<section class="card acard slim"><div class="between"><span class="kicker">Time at the stove</span><span style="font-size:13px"><b>'+(on+wait)+' min</b> total</span></div>'+
   '<div class="hbar" aria-hidden="true"><span style="flex:'+on+';background:#111"></span>'+(wait?'<span class="hatch" style="flex:'+wait+'"></span>':'')+'</div>'+
   '<div class="between" style="font-size:13px"><span><b>'+on+' min</b> hands-on</span><span style="color:#3A3A38"><b>'+wait+' min</b> waiting</span></div>'+
-  (best?'<span style="font-size:13px;line-height:1.45;color:#3A3A38">Longest free stretch: '+best.w+' min during “'+esc(best.t)+'”.</span>':'')+'</section>';
+  '</section>';
 }
 function cooksCard(){
  var log=LOG[R.id]||[],n=log.length;
- if(!n)return '<section class="card acard"><span class="kicker">Your cooks</span><span style="font-size:13px;line-height:1.45;color:#3A3A38">Not cooked yet. Your ratings, swaps and notes will collect here after each cook.</span></section>';
+ if(!n)return '<section class="card acard slim"><span class="kicker">Your cooks</span><span style="font-size:13px;line-height:1.45;color:#3A3A38">Not cooked yet. Ratings, swaps and notes collect here.</span></section>';
  var rated=log.filter(function(c){return c.rating}),avg=rated.length?(rated.reduce(function(a,c){return a+c.rating},0)/rated.length).toFixed(1):'–';
  var timed=log.filter(function(c){return c.mins}),am=timed.length?Math.round(timed.reduce(function(a,c){return a+c.mins},0)/timed.length):0;
- var idx=log.map(function(_,i){return i}).reverse().slice(0,3);
- return '<section class="card acard"><div class="between"><span class="kicker">Your cooks</span><span style="font-size:13px"><b>'+n+'</b> cook'+(n>1?'s':'')+' · <b>★ '+avg+'</b>'+(am?' · '+am+' min avg':'')+'</span></div>'+
-  '<div style="display:flex;flex-direction:column">'+idx.map(function(i){var c=log[i],open=S.cookOpen===i,sw=c.swapList||[];
-   open=false;return '<div class="cookrow"><button data-cooksgo="'+i+'" aria-label="Open cook '+(i+1)+' in your cooks"><span class="pnum" style="width:24px;height:24px;font-size:11px">'+(i+1)+'</span><span style="flex:1;min-width:0"><b>'+(c.rating?'★★★★★'.slice(0,c.rating)+'<span style="color:#BDBDB8">'+'★★★★★'.slice(c.rating)+'</span>':'Not rated')+'</b> · '+esc(c.date||'')+' · '+esc(c.who||'You')+'</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>'+
-    (open?'<div class="cookbody">'+(c.mins?'<span><b>'+c.mins+' min</b> start to plate</span>':'')+
-     (sw.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+sw.map(function(x){return '<span class="badge" style="height:24px;font-size:11px">'+esc(x)+'</span>'}).join('')+'</div>':'<span class="muted">Cooked as written, no swaps</span>')+
-     (c.note?'<p class="cardnote" style="margin:0">“'+esc(c.note)+'”</p>':'')+'</div>':'')+'</div>'}).join('')+'</div>'+
-  '<button class="secondary" style="height:44px;font-size:14px" data-go="cooks">'+(n>3?'See all '+n+' cooks':'Open your cooks')+'</button>'+
-  (log.some(function(c){return c.sample})?'<span class="muted" style="font-size:11px">Earlier entries are sample data for the prototype.</span>':'')+'</section>';
+ var i=n-1,c=log[i];
+ return '<section class="card acard slim"><div class="between"><span class="kicker">Your cooks</span><span style="font-size:13px"><b>'+n+'</b> cook'+(n>1?'s':'')+' · <b>★ '+avg+'</b>'+(am?' · '+am+' min avg':'')+'</span></div>'+
+  '<div class="cookrow"><button data-cooksgo="'+i+'" aria-label="Open your cooks, latest cook"><span class="pnum" style="width:24px;height:24px;font-size:11px">'+(i+1)+'</span><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><b>'+starsHtml(c.rating)+'</b> · '+esc(c.date||'')+' · '+esc(c.who||'You')+'</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div>'+
+  '<button class="linkbtn" style="font-size:13px" data-go="cooks">'+(n>1?'See all '+n+' cooks':'Open your cooks')+'</button></section>';
 }
 function ingRowPad(it){
  var li=LINE[it.id]?lineInfo(it.id):null,sw=S.swaps[it.id],lf=sw?leafOf(it.id,sw):null,qty=li?li.qty:(lf&&lf.ratio!=='1 : 1'?lf.ratio:scaleQty(it.amt,F()));
