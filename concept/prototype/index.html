@@ -895,9 +895,9 @@ function header(backTo,title,sub,closeIcon){
   (title?'<div style="display:flex;flex-direction:column;gap:2px;min-width:0"><h1 class="t" style="font-size:26px">'+esc(title)+'</h1>'+(sub?'<p class="muted" style="margin:0;font-size:13px">'+sub+'</p>':'')+'</div>':'')+'</div>';
 }
 function profileBar(){
- return '<div class="row" style="gap:8px;flex-wrap:wrap;padding:10px 12px;border-radius:14px;background:var(--counter)"><span class="kicker" style="color:var(--ink)">Never</span>'+
- '<span class="chip out">Mushrooms <span class="muted" style="font-weight:500">dislike</span></span>'+
- '<span class="chip out" style="border-width:1.5px">'+SVG.warn('#111')+'Tree nuts <span class="muted" style="font-weight:500">allergy</span></span></div>';
+ return '<div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--counter)"><span class="kicker" style="color:var(--ink)">Never suggested</span>'+
+ '<div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip out">Mushrooms <span class="muted" style="font-weight:500">dislike</span></span>'+
+ '<span class="chip out" style="border-width:1.5px">'+SVG.warn('#111')+'Tree nuts <span class="muted" style="font-weight:500">allergy</span></span></div></div>';
 }
 function fpBar(r,h){var tot=0;r.ING.forEach(function(it){tot+=it.weight});return '<div style="display:flex;height:'+h+'px;width:100%" aria-hidden="true">'+r.ING.map(function(it){return '<span style="flex:'+it.weight+';background:'+(it.profile==='aubergine'?'#4B2E83':it.color)+'"></span>'}).join('')+'</div>'}
 
