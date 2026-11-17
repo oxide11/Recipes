@@ -248,3 +248,33 @@ button.badge:hover{box-shadow:0 0 0 2px rgba(17,17,17,.15)}
 .port .pcta .primary{flex:1 1 140px;max-width:220px}
 .port .pcta .lbl{display:none}
 .port .pcta [data-act="share"]{width:52px;padding:0;justify-content:center}
+
+/* ---------- recipes library ---------- */
+.libctl{display:flex;flex-direction:column;gap:8px}
+.ipad .libctl{display:grid;grid-template-columns:1.2fr 1fr;gap:12px}
+.port .libctl{grid-template-columns:minmax(0,1fr)}
+.libctl .seg button{font-size:12.5px;white-space:nowrap}
+.libtags{display:flex;gap:6px;flex-wrap:wrap}
+.libtags .badge{cursor:pointer;height:30px}
+.libgrid{display:flex;flex-direction:column;gap:12px}
+.ipad .libgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.port .libgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.librow{position:relative;border:1.5px solid #ECECE8;border-radius:18px;overflow:hidden;background:#fff}
+.libopen{display:flex;width:100%;border:none;background:none;padding:0;text-align:left;cursor:pointer;align-items:stretch}
+.libfp{flex:0 0 14px;display:flex}.libfp>div{height:100%!important;flex-direction:column}
+.ipad .libopen{flex-direction:column}.ipad .libfp{flex:none}.ipad .libfp>div{height:64px!important;flex-direction:row}
+.libtxt{display:flex;flex-direction:column;gap:4px;padding:14px 60px 14px 14px;min-width:0;flex:1}
+.ipad .libtxt{padding:14px 16px 16px}
+.libtxt b{font-family:var(--disp);font-size:19px;line-height:1.2}
+.libtxt .muted{font-size:13px}
+.libmeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.libmeta .badge{height:24px;font-size:11.5px}
+.libsave{position:absolute;right:10px;top:10px;background:#fff;box-shadow:0 0 0 1.5px #ECECE8}
+.ipad .libsave{top:74px}
+.papergrid{display:grid;grid-template-columns:1fr;gap:0}
+.ipad .papergrid{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:24px}
+.port .papergrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.paperrow{display:flex;align-items:center;gap:10px;min-height:44px;border:none;border-bottom:1px solid #ECECE8;background:none;text-align:left;font-size:14px;color:#3A3A38;cursor:pointer;padding:4px 0}
+/* settings cog at the bottom of the rail */
+.ipad .rail .railcog{margin-top:auto;margin-bottom:22px}
+.ipad .libtxt b{padding-right:50px}

@@ -430,6 +430,36 @@ button.badge:hover{box-shadow:0 0 0 2px rgba(17,17,17,.15)}
 .port .pcta .primary{flex:1 1 140px;max-width:220px}
 .port .pcta .lbl{display:none}
 .port .pcta [data-act="share"]{width:52px;padding:0;justify-content:center}
+
+/* ---------- recipes library ---------- */
+.libctl{display:flex;flex-direction:column;gap:8px}
+.ipad .libctl{display:grid;grid-template-columns:1.2fr 1fr;gap:12px}
+.port .libctl{grid-template-columns:minmax(0,1fr)}
+.libctl .seg button{font-size:12.5px;white-space:nowrap}
+.libtags{display:flex;gap:6px;flex-wrap:wrap}
+.libtags .badge{cursor:pointer;height:30px}
+.libgrid{display:flex;flex-direction:column;gap:12px}
+.ipad .libgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.port .libgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.librow{position:relative;border:1.5px solid #ECECE8;border-radius:18px;overflow:hidden;background:#fff}
+.libopen{display:flex;width:100%;border:none;background:none;padding:0;text-align:left;cursor:pointer;align-items:stretch}
+.libfp{flex:0 0 14px;display:flex}.libfp>div{height:100%!important;flex-direction:column}
+.ipad .libopen{flex-direction:column}.ipad .libfp{flex:none}.ipad .libfp>div{height:64px!important;flex-direction:row}
+.libtxt{display:flex;flex-direction:column;gap:4px;padding:14px 60px 14px 14px;min-width:0;flex:1}
+.ipad .libtxt{padding:14px 16px 16px}
+.libtxt b{font-family:var(--disp);font-size:19px;line-height:1.2}
+.libtxt .muted{font-size:13px}
+.libmeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.libmeta .badge{height:24px;font-size:11.5px}
+.libsave{position:absolute;right:10px;top:10px;background:#fff;box-shadow:0 0 0 1.5px #ECECE8}
+.ipad .libsave{top:74px}
+.papergrid{display:grid;grid-template-columns:1fr;gap:0}
+.ipad .papergrid{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:24px}
+.port .papergrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.paperrow{display:flex;align-items:center;gap:10px;min-height:44px;border:none;border-bottom:1px solid #ECECE8;background:none;text-align:left;font-size:14px;color:#3A3A38;cursor:pointer;padding:4px 0}
+/* settings cog at the bottom of the rail */
+.ipad .rail .railcog{margin-top:auto;margin-bottom:22px}
+.ipad .libtxt b{padding-right:50px}
 </style>
 </head>
 <body>
@@ -463,8 +493,8 @@ button.badge:hover{box-shadow:0 0 0 2px rgba(17,17,17,.15)}
   <div id="stagebox"><div class="devwrap" id="devwrap">
   <div class="phone" id="phone">
     <nav class="rail" aria-label="Main">
-      <button data-back="home" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>Recipes</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="7" width="12" height="14" rx="2"/><path d="M8 3h8v4H8z"/></svg>Pantry</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.5 12h11L21 8H6.5"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>Shop</button>
-    </nav>
+      <button data-back="home" data-nav="home" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</button><button data-go="library" data-nav="library"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>Recipes</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="7" width="12" height="14" rx="2"/><path d="M8 3h8v4H8z"/></svg>Pantry</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.5 12h11L21 8H6.5"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>Shop</button>
+    <button class="railcog" data-act="profile" aria-haspopup="dialog" aria-label="Settings and profile"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button></nav>
     <div class="screen" id="screen"></div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div id="sheet"></div>
@@ -1162,7 +1192,7 @@ seedLog();
 var D={device:'phone',orient:'landscape'},SCALE=1;
 function isPad(){return D.device==='ipad'}
 function isLand(){return isPad()&&D.orient==='landscape'}
-function freshGlobal(){S={screen:'home',speed:30,saved:{},dir:1};}
+function freshGlobal(){S={screen:'home',speed:30,saved:{cajun:true},dir:1,lib:{f:'all',s:'cooked',tag:null,q:'',more:false}};}
 freshGlobal();
 function loadRecipe(id){
  R=RECIPES[id];ING=R.ING;GROUPS=R.GROUPS;LINE=R.LINE;STEPS=R.STEPS;SETS=R.SETS;
@@ -1269,6 +1299,7 @@ function tagBar(){
  return '<div class="row" style="gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:14px;background:var(--counter)"><span style="font-size:14px"><b>'+n+'</b> recipe'+(n===1?'':'s')+' tagged</span><span class="badge solid">'+esc(S.tag)+'</span><button class="linkbtn" data-act="cleartag" style="margin-left:auto">Show all</button></div>';
 }
 
+function tabbar(cur){return '<nav class="tabbar" aria-label="Main">'+[['Home',SVG.tabHome,'home'],['Recipes',SVG.tabBook,'library'],['Pantry',SVG.tabJar],['Plan',SVG.tabCal],['Shop',SVG.tabCart]].map(function(t){var on=t[2]===cur;return '<button class="'+(on?'on':'')+'"'+(on?' aria-current="page"':t[2]==='home'?' data-back="home"':t[2]?' data-go="'+t[2]+'"':' data-toast="Not built yet in this prototype"')+'>'+t[1]+t[0]+'</button>'}).join('')+'</nav>'}
 /* ================= HOME ================= */
 function home(){
  var list=tagList(),feat=RECIPES[list[0]],others=list.slice(1);
@@ -1287,7 +1318,7 @@ function home(){
  '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">From Ashley’s recipe cards</p>'+
   others.map(function(id){var r=RECIPES[id];return '<button class="listrow" data-open="'+id+'"><div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0"><div class="between"><span style="font-weight:700;font-size:16px">'+esc(r.title)+'</span>'+cooked(id)+'</div><div class="fp">'+fpBar(r,10)+'</div><span class="muted" style="font-size:13px">'+r.meta+' · '+r.base+' servings'+(r.card.questions.length?' · '+r.card.questions.length+' card question'+(r.card.questions.length>1?'s':''):'')+'</span></div>'+SVG.arrow+'</button>'}).join('')+
  '</div></div>'+
- '<nav class="tabbar" aria-label="Main">'+[['Home',SVG.tabHome,1],['Recipes',SVG.tabBook],['Pantry',SVG.tabJar],['Plan',SVG.tabCal],['Shop',SVG.tabCart]].map(function(t){return '<button class="'+(t[2]?'on':'')+'"'+(t[2]?' aria-current="page"':' data-toast="Only the cooking flow is wired up"')+'>'+t[1]+t[0]+'</button>'}).join('')+'</nav>';
+ tabbar('home');
 }
 
 /* ================= SANKEY ================= */
@@ -1591,10 +1622,12 @@ function done(){
 }
 
 /* ================= RENDER + EVENTS ================= */
-var VIEWS={home:home,recipe:recipe,ingredients:ingredients,shop:shop,cook:cook,done:done,cooks:function(){return cooksView()}};
+var VIEWS={home:home,recipe:recipe,ingredients:ingredients,shop:shop,cook:cook,done:done,cooks:function(){return cooksView()},library:function(){return libraryView()}};
 var PADVIEWS={home:homePad,recipe:recipePad,ingredients:ingredientsPad};
 function render(anim){
  document.getElementById('phone').classList.toggle('norail',S.screen==='cook');
+ document.querySelectorAll('.rail [data-nav]').forEach(function(b){var on=(S.screen==='library')===(b.dataset.nav==='library');b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+ var lq=document.getElementById('libq');if(false)lq=null;
  scr.innerHTML=((isPad()&&PADVIEWS[S.screen])||VIEWS[S.screen])();
  scr.classList.remove('anim','animb');if(anim){void scr.offsetWidth;scr.classList.add(S.dir<0?'animb':'anim')}
  document.querySelectorAll('#steps li').forEach(function(li){li.classList.toggle('on',li.dataset.s===S.screen)});
@@ -1604,6 +1637,7 @@ function render(anim){
  var ph=document.getElementById('photo');
  if(ph)ph.addEventListener('change',function(){var f=ph.files&&ph.files[0];if(!f)return;if(S.photo)URL.revokeObjectURL(S.photo);S.photo=URL.createObjectURL(f);render()});
  var nt=document.getElementById('note');if(nt)nt.addEventListener('input',function(){S.note=nt.value});
+ var lq2=document.getElementById('libq');if(lq2)lq2.addEventListener('input',function(){S.lib.q=lq2.value;var ll=document.getElementById('liblist');if(ll)ll.innerHTML=libList()});
  var se=document.getElementById('search');if(se)se.addEventListener('keydown',function(e){if(e.key==='Escape'){e.stopPropagation();S.search=false;render();return}if(e.key==='Enter'){var q=se.value.toLowerCase().trim();var hit=RECIPE_ORDER.filter(function(id){var r=RECIPES[id];return r.title.toLowerCase().indexOf(q)>-1||r.ING.some(function(it){return it.name.toLowerCase().indexOf(q)>-1})})[0];if(q&&hit){openRecipe(hit)}else if(q){toast('No recipe matches "'+q+'" yet')}}});
 }
 function keep(fn){var y=scr.scrollTop;fn();scr.scrollTop=y}
@@ -1626,6 +1660,11 @@ document.addEventListener('click',function(e){
  var d=el.dataset;
  if(d.device||d.orient){if(d.device)D.device=d.device;if(d.orient)D.orient=d.orient;closeSheet();S.focus=null;devSeg();fit();keep(render);return}
  if(d.sharefmt){S.share.format=d.sharefmt;openShare(true);return}
+ if(d.libf){S.lib.f=d.libf;keep(render);return}
+ if(d.libs){S.lib.s=d.libs;keep(render);return}
+ if(d.libtag){S.lib.tag=S.lib.tag===d.libtag?null:d.libtag;keep(render);return}
+ if(d.libsave){S.saved[d.libsave]=!S.saved[d.libsave];keep(render);return}
+ if(d.libmore){S.lib.more=!S.lib.more;keep(render);return}
  if(d.ptog){P[d.ptog]=!P[d.ptog];openProfile(true);return}
  if(d.pset){var ps=d.pset.split(':');P[ps[0]]=ps[1];openProfile(true);keepUnder();return}
  if(d.pserv){P.serv=Math.max(1,Math.min(12,P.serv+(+d.pserv)));openProfile(true);return}
@@ -1710,7 +1749,7 @@ function homePad(){
  return '<div class="pad">'+
  '<div class="between" style="gap:20px;flex-wrap:wrap"><div><p class="muted" style="margin:0 0 4px;font-size:14px">Monday evening</p><h1 class="t" style="font-size:40px">What\'s cooking?</h1></div>'+
  '<div class="row" style="gap:12px;flex:1;justify-content:flex-end;min-width:300px">'+searchField('flex:1;max-width:380px')+searchBtn(48)+
- '<button class="iconbtn" style="width:48px;height:48px;background:#111;color:#fff;font-family:var(--disp);font-weight:700;font-size:18px" aria-label="Profile" data-act="profile" aria-haspopup="dialog">M</button></div></div>'+
+ '</div></div>'+
  tagBar()+'<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Cook with what you have</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+
   [['#F2C200','Lemons','piccata'],['#9CBF5A','Lemongrass','thai'],['#2E9E4F','Green onion','cajun'],['#6CBF3A','Limes','thai'],['#E9B98C','Chicken','cajun']].map(function(c){return '<button class="chip" data-open="'+c[2]+'" style="height:40px;font-size:15px"><span class="dot" style="background:'+c[0]+'"></span>'+c[1]+'</button>'}).join('')+'</div></div>'+
  '<div style="display:flex;flex-direction:column;gap:12px"><p class="kicker">From Ashley’s recipe cards</p><div class="rgrid">'+
@@ -1922,6 +1961,55 @@ function cooksView(){
   (log.some(function(c){return c.sample})?'<span class="muted" style="font-size:12px">Earlier entries are sample data for the prototype.</span>':'')+'</section>';
  return '<div class="pad">'+head+stats+'<div class="ckgrid"><div style="display:flex;flex-direction:column;gap:16px;min-width:0">'+chart+swaps+'</div>'+entries+'</div></div>'+
   '<div class="bottombar"><button class="primary" data-act="startcook">Cook it again</button></div>';
+}
+
+/* ================= RECIPES (library) ================= */
+var PAPER=["Udon Noodles", "Lady Rose Relish", "Nora’s Pasta Salad", "Ginger Bread", "Lemon Glaze", "Grape Jelly (two cards)", "Sourdough Cinnamon Cardamom Knots", "Hollandaise for Eggs Benedict", "Healthy Banana Oat Pancakes", "Pancakes", "Freezable Waffles", "Sherry’s Top Secret Cinnamon Buns", "Chocolate Chip Cookies", "Cinnamon Buns", "Carrot Cake", "Chocolate Chip Oatmeal Cookies", "Oh Henry Squares", "Pad Kee Mao", "Vietnamese Noodles with Lemongrass Chicken", "Yum Mustard Chicken", "Beef & Barley", "Lynd’s Focaccia", "Greek Turkey Burgers", "Clam Chowder", "Shepherd’s Pie", "Chilli Con Carne", "Sweet Cornbread", "Mom’s Sweet & Sour Meatballs", "Egg Rolls", "Bruschetta Tomato Topping", "Brown Bread", "Baked Beans", "Molasses and Oat Rolls", "Hummus", "Egg Seasoning"];
+
+function libMins(r){var m=/(\d+)\s*hr(?:\s*(\d+))?/.exec(r.meta);if(m)return +m[1]*60+(+m[2]||0);m=/(\d+)\s*min/.exec(r.meta);return m?+m[1]:999}
+function libIds(){
+ var L=S.lib,q=(L.q||'').toLowerCase().trim();
+ var ids=RECIPE_ORDER.filter(function(id){var r=RECIPES[id];
+  if(L.f==='saved'&&!S.saved[id])return false;
+  if(L.f==='cooked'&&!(LOG[id]||[]).length)return false;
+  if(L.f==='check'&&!r.card.questions.length)return false;
+  if(L.tag&&!r.tags.some(function(t){return t[0]===L.tag}))return false;
+  if(q&&r.title.toLowerCase().indexOf(q)<0&&!r.ING.some(function(it){return it.name.toLowerCase().indexOf(q)>-1}))return false;
+  return true});
+ if(L.s==='quick')ids.sort(function(x,y){return libMins(RECIPES[x])-libMins(RECIPES[y])});
+ else if(L.s==='az')ids.sort(function(x,y){return RECIPES[x].title.localeCompare(RECIPES[y].title)});
+ else ids.sort(function(x,y){return (LOG[y]||[]).length-(LOG[x]||[]).length});
+ return ids;
+}
+function libList(){
+ var ids=libIds(),pad=isPad();
+ if(!ids.length)return '<p class="insight" style="grid-column:1/-1">No recipes match. Try another filter or clear the search.</p>';
+ return ids.map(function(id){var r=RECIPES[id],n=(LOG[id]||[]).length,q=r.card.questions.length,sv=!!S.saved[id],hv=Object.keys(r.have).length;
+  var rt=(LOG[id]||[]).filter(function(c){return c.rating}),avg=rt.length?(rt.reduce(function(s,c){return s+c.rating},0)/rt.length).toFixed(1):null;
+  return '<div class="librow"><button class="libopen" data-open="'+id+'" aria-label="Open '+esc(r.title)+'">'+
+   '<span class="libfp">'+fpBar(r,pad?64:100)+'</span>'+
+   '<span class="libtxt"><span class="kicker">'+r.kicker.split(' · ')[0]+'</span><b>'+esc(r.title)+'</b><span class="muted">'+r.meta+' · '+r.base+' servings</span>'+
+   '<span class="libmeta">'+(n?'<span class="badge solid">Cooked '+n+'×'+(avg?' · ★ '+avg:'')+'</span>':'<span class="badge">Not cooked yet</span>')+'<span class="badge">'+hv+' of '+r.ING.length+' in pantry</span>'+(q?'<span class="badge" style="border-style:dashed">'+q+' to check</span>':'')+'</span></span></button>'+
+   '<button class="iconbtn libsave" data-libsave="'+id+'" aria-pressed="'+sv+'" aria-label="'+(sv?'Remove '+esc(r.title)+' from saved':'Save '+esc(r.title))+'">'+(sv?SVG.heartOn:SVG.heart)+'</button></div>'}).join('');
+}
+function libraryView(){
+ var L=S.lib,pad=isPad(),tags={};RECIPE_ORDER.forEach(function(id){RECIPES[id].tags.forEach(function(t){tags[t[0]]=(tags[t[0]]||0)+1})});
+ var tk=Object.keys(tags).sort(function(x,y){return tags[y]-tags[x]||x.localeCompare(y)});
+ var cnt={all:RECIPE_ORDER.length,saved:RECIPE_ORDER.filter(function(id){return S.saved[id]}).length,cooked:RECIPE_ORDER.filter(function(id){return (LOG[id]||[]).length}).length,check:RECIPE_ORDER.filter(function(id){return RECIPES[id].card.questions.length}).length};
+ var F=[['all','All'],['saved','Saved'],['cooked','Cooked'],['check','To check']],SO=[['cooked','Most cooked'],['quick','Quickest'],['az','A to Z']];
+ var paper=L.more?PAPER:PAPER.slice(0,pad?12:6);
+ return '<div class="pad">'+
+  '<div class="between" style="gap:16px;align-items:flex-end"><div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">'+RECIPE_ORDER.length+' ready to cook · '+PAPER.length+' still on paper</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Recipes</h1></div>'+
+   '<button class="secondary" style="height:44px;padding:0 16px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border-color:#111" data-toast="Adding a recipe is not built yet. It will start from a photo of the card.">+ Add</button></div>'+
+  '<label class="row searchf" style="animation:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search your recipes</span><input id="libq" type="search" placeholder="Search by name or ingredient" value="'+esc(L.q||'')+'"></label>'+
+  '<div class="libctl"><div class="seg" role="group" aria-label="Show" style="grid-template-columns:repeat(4,1fr)">'+F.map(function(f){return '<button data-libf="'+f[0]+'" aria-pressed="'+(L.f===f[0])+'">'+f[1]+' <span style="opacity:.7;font-weight:500">'+cnt[f[0]]+'</span></button>'}).join('')+'</div>'+
+   '<div class="seg" role="group" aria-label="Sort by" style="grid-template-columns:repeat(3,1fr)">'+SO.map(function(s){return '<button data-libs="'+s[0]+'" aria-pressed="'+(L.s===s[0])+'">'+s[1]+'</button>'}).join('')+'</div></div>'+
+  '<div class="libtags" role="group" aria-label="Filter by tag">'+tk.map(function(t){return '<button class="badge'+(L.tag===t?' solid':'')+'" data-libtag="'+esc(t)+'" aria-pressed="'+(L.tag===t)+'">'+esc(t)+' <span style="opacity:.65;font-weight:500;margin-left:4px">'+tags[t]+'</span></button>'}).join('')+'</div>'+
+  '<div class="libgrid" id="liblist">'+libList()+'</div>'+
+  '<section class="card acard" style="gap:12px"><div class="between" style="gap:12px;align-items:flex-start"><div><span class="kicker">Still on paper</span><p style="margin:4px 0 0;font-size:14px;line-height:1.45;color:#2B2B28">'+PAPER.length+' more of Ashley’s cards are transcribed but not built into the app yet.</p></div></div>'+
+   '<div class="papergrid">'+paper.map(function(n){return '<button class="paperrow" data-toast="'+esc(n)+' is transcribed but not built yet"><span class="cardthumb sm" aria-hidden="true" style="transform:none;width:26px;height:32px;padding:5px 4px;gap:3px"><i></i><i style="width:70%"></i><i></i></span>'+esc(n)+'</button>'}).join('')+'</div>'+
+   '<button class="linkbtn" style="font-size:13px" data-libmore="1">'+(L.more?'Show fewer':'Show all '+PAPER.length)+'</button></section>'+
+  '</div>'+(pad?'':tabbar('library'));
 }
 
 speedSeg();recipeSeg();devSeg();fit();render(true);

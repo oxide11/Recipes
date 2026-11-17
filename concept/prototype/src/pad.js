@@ -22,7 +22,7 @@ function homePad(){
  return '<div class="pad">'+
  '<div class="between" style="gap:20px;flex-wrap:wrap"><div><p class="muted" style="margin:0 0 4px;font-size:14px">Monday evening</p><h1 class="t" style="font-size:40px">What\'s cooking?</h1></div>'+
  '<div class="row" style="gap:12px;flex:1;justify-content:flex-end;min-width:300px">'+searchField('flex:1;max-width:380px')+searchBtn(48)+
- '<button class="iconbtn" style="width:48px;height:48px;background:#111;color:#fff;font-family:var(--disp);font-weight:700;font-size:18px" aria-label="Profile" data-act="profile" aria-haspopup="dialog">M</button></div></div>'+
+ '</div></div>'+
  tagBar()+'<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Cook with what you have</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+
   [['#F2C200','Lemons','piccata'],['#9CBF5A','Lemongrass','thai'],['#2E9E4F','Green onion','cajun'],['#6CBF3A','Limes','thai'],['#E9B98C','Chicken','cajun']].map(function(c){return '<button class="chip" data-open="'+c[2]+'" style="height:40px;font-size:15px"><span class="dot" style="background:'+c[0]+'"></span>'+c[1]+'</button>'}).join('')+'</div></div>'+
  '<div style="display:flex;flex-direction:column;gap:12px"><p class="kicker">From Ashley’s recipe cards</p><div class="rgrid">'+
@@ -234,4 +234,53 @@ function cooksView(){
   (log.some(function(c){return c.sample})?'<span class="muted" style="font-size:12px">Earlier entries are sample data for the prototype.</span>':'')+'</section>';
  return '<div class="pad">'+head+stats+'<div class="ckgrid"><div style="display:flex;flex-direction:column;gap:16px;min-width:0">'+chart+swaps+'</div>'+entries+'</div></div>'+
   '<div class="bottombar"><button class="primary" data-act="startcook">Cook it again</button></div>';
+}
+
+/* ================= RECIPES (library) ================= */
+var PAPER=["Udon Noodles", "Lady Rose Relish", "Nora’s Pasta Salad", "Ginger Bread", "Lemon Glaze", "Grape Jelly (two cards)", "Sourdough Cinnamon Cardamom Knots", "Hollandaise for Eggs Benedict", "Healthy Banana Oat Pancakes", "Pancakes", "Freezable Waffles", "Sherry’s Top Secret Cinnamon Buns", "Chocolate Chip Cookies", "Cinnamon Buns", "Carrot Cake", "Chocolate Chip Oatmeal Cookies", "Oh Henry Squares", "Pad Kee Mao", "Vietnamese Noodles with Lemongrass Chicken", "Yum Mustard Chicken", "Beef & Barley", "Lynd’s Focaccia", "Greek Turkey Burgers", "Clam Chowder", "Shepherd’s Pie", "Chilli Con Carne", "Sweet Cornbread", "Mom’s Sweet & Sour Meatballs", "Egg Rolls", "Bruschetta Tomato Topping", "Brown Bread", "Baked Beans", "Molasses and Oat Rolls", "Hummus", "Egg Seasoning"];
+
+function libMins(r){var m=/(\d+)\s*hr(?:\s*(\d+))?/.exec(r.meta);if(m)return +m[1]*60+(+m[2]||0);m=/(\d+)\s*min/.exec(r.meta);return m?+m[1]:999}
+function libIds(){
+ var L=S.lib,q=(L.q||'').toLowerCase().trim();
+ var ids=RECIPE_ORDER.filter(function(id){var r=RECIPES[id];
+  if(L.f==='saved'&&!S.saved[id])return false;
+  if(L.f==='cooked'&&!(LOG[id]||[]).length)return false;
+  if(L.f==='check'&&!r.card.questions.length)return false;
+  if(L.tag&&!r.tags.some(function(t){return t[0]===L.tag}))return false;
+  if(q&&r.title.toLowerCase().indexOf(q)<0&&!r.ING.some(function(it){return it.name.toLowerCase().indexOf(q)>-1}))return false;
+  return true});
+ if(L.s==='quick')ids.sort(function(x,y){return libMins(RECIPES[x])-libMins(RECIPES[y])});
+ else if(L.s==='az')ids.sort(function(x,y){return RECIPES[x].title.localeCompare(RECIPES[y].title)});
+ else ids.sort(function(x,y){return (LOG[y]||[]).length-(LOG[x]||[]).length});
+ return ids;
+}
+function libList(){
+ var ids=libIds(),pad=isPad();
+ if(!ids.length)return '<p class="insight" style="grid-column:1/-1">No recipes match. Try another filter or clear the search.</p>';
+ return ids.map(function(id){var r=RECIPES[id],n=(LOG[id]||[]).length,q=r.card.questions.length,sv=!!S.saved[id],hv=Object.keys(r.have).length;
+  var rt=(LOG[id]||[]).filter(function(c){return c.rating}),avg=rt.length?(rt.reduce(function(s,c){return s+c.rating},0)/rt.length).toFixed(1):null;
+  return '<div class="librow"><button class="libopen" data-open="'+id+'" aria-label="Open '+esc(r.title)+'">'+
+   '<span class="libfp">'+fpBar(r,pad?64:100)+'</span>'+
+   '<span class="libtxt"><span class="kicker">'+r.kicker.split(' · ')[0]+'</span><b>'+esc(r.title)+'</b><span class="muted">'+r.meta+' · '+r.base+' servings</span>'+
+   '<span class="libmeta">'+(n?'<span class="badge solid">Cooked '+n+'×'+(avg?' · ★ '+avg:'')+'</span>':'<span class="badge">Not cooked yet</span>')+'<span class="badge">'+hv+' of '+r.ING.length+' in pantry</span>'+(q?'<span class="badge" style="border-style:dashed">'+q+' to check</span>':'')+'</span></span></button>'+
+   '<button class="iconbtn libsave" data-libsave="'+id+'" aria-pressed="'+sv+'" aria-label="'+(sv?'Remove '+esc(r.title)+' from saved':'Save '+esc(r.title))+'">'+(sv?SVG.heartOn:SVG.heart)+'</button></div>'}).join('');
+}
+function libraryView(){
+ var L=S.lib,pad=isPad(),tags={};RECIPE_ORDER.forEach(function(id){RECIPES[id].tags.forEach(function(t){tags[t[0]]=(tags[t[0]]||0)+1})});
+ var tk=Object.keys(tags).sort(function(x,y){return tags[y]-tags[x]||x.localeCompare(y)});
+ var cnt={all:RECIPE_ORDER.length,saved:RECIPE_ORDER.filter(function(id){return S.saved[id]}).length,cooked:RECIPE_ORDER.filter(function(id){return (LOG[id]||[]).length}).length,check:RECIPE_ORDER.filter(function(id){return RECIPES[id].card.questions.length}).length};
+ var F=[['all','All'],['saved','Saved'],['cooked','Cooked'],['check','To check']],SO=[['cooked','Most cooked'],['quick','Quickest'],['az','A to Z']];
+ var paper=L.more?PAPER:PAPER.slice(0,pad?12:6);
+ return '<div class="pad">'+
+  '<div class="between" style="gap:16px;align-items:flex-end"><div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">'+RECIPE_ORDER.length+' ready to cook · '+PAPER.length+' still on paper</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Recipes</h1></div>'+
+   '<button class="secondary" style="height:44px;padding:0 16px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border-color:#111" data-toast="Adding a recipe is not built yet. It will start from a photo of the card.">+ Add</button></div>'+
+  '<label class="row searchf" style="animation:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search your recipes</span><input id="libq" type="search" placeholder="Search by name or ingredient" value="'+esc(L.q||'')+'"></label>'+
+  '<div class="libctl"><div class="seg" role="group" aria-label="Show" style="grid-template-columns:repeat(4,1fr)">'+F.map(function(f){return '<button data-libf="'+f[0]+'" aria-pressed="'+(L.f===f[0])+'">'+f[1]+' <span style="opacity:.7;font-weight:500">'+cnt[f[0]]+'</span></button>'}).join('')+'</div>'+
+   '<div class="seg" role="group" aria-label="Sort by" style="grid-template-columns:repeat(3,1fr)">'+SO.map(function(s){return '<button data-libs="'+s[0]+'" aria-pressed="'+(L.s===s[0])+'">'+s[1]+'</button>'}).join('')+'</div></div>'+
+  '<div class="libtags" role="group" aria-label="Filter by tag">'+tk.map(function(t){return '<button class="badge'+(L.tag===t?' solid':'')+'" data-libtag="'+esc(t)+'" aria-pressed="'+(L.tag===t)+'">'+esc(t)+' <span style="opacity:.65;font-weight:500;margin-left:4px">'+tags[t]+'</span></button>'}).join('')+'</div>'+
+  '<div class="libgrid" id="liblist">'+libList()+'</div>'+
+  '<section class="card acard" style="gap:12px"><div class="between" style="gap:12px;align-items:flex-start"><div><span class="kicker">Still on paper</span><p style="margin:4px 0 0;font-size:14px;line-height:1.45;color:#2B2B28">'+PAPER.length+' more of Ashley’s cards are transcribed but not built into the app yet.</p></div></div>'+
+   '<div class="papergrid">'+paper.map(function(n){return '<button class="paperrow" data-toast="'+esc(n)+' is transcribed but not built yet"><span class="cardthumb sm" aria-hidden="true" style="transform:none;width:26px;height:32px;padding:5px 4px;gap:3px"><i></i><i style="width:70%"></i><i></i></span>'+esc(n)+'</button>'}).join('')+'</div>'+
+   '<button class="linkbtn" style="font-size:13px" data-libmore="1">'+(L.more?'Show fewer':'Show all '+PAPER.length)+'</button></section>'+
+  '</div>'+(pad?'':tabbar('library'));
 }
