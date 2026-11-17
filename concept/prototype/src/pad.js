@@ -22,14 +22,14 @@ function homePad(){
  return '<div class="pad">'+
  '<div class="between" style="gap:20px;flex-wrap:wrap"><div><p class="muted" style="margin:0 0 4px;font-size:14px">Monday evening</p><h1 class="t" style="font-size:40px">What\'s cooking?</h1></div>'+
  '<div class="row" style="gap:12px;flex:1;justify-content:flex-end;min-width:300px"><label class="row" style="height:48px;padding:0 16px;border-radius:14px;background:var(--counter);gap:10px;flex:1;max-width:380px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search</span><input id="search" type="search" placeholder="Search recipes or ingredients" style="flex:1;border:none;background:transparent;font:inherit;font-size:15px;outline:none;min-width:0"></label>'+
- '<button class="iconbtn" style="width:48px;height:48px;background:#111;color:#fff;font-family:\'Space Grotesk\';font-weight:700;font-size:18px" aria-label="Profile" data-toast="Profile: avoids mushrooms, allergic to tree nuts">M</button></div></div>'+
+ '<button class="iconbtn" style="width:48px;height:48px;background:#111;color:#fff;font-family:var(--disp);font-weight:700;font-size:18px" aria-label="Profile" data-toast="Profile: avoids mushrooms, allergic to tree nuts">M</button></div></div>'+
  tagBar()+'<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Cook with what you have</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+
   [['#F2C200','Lemons','piccata'],['#9CBF5A','Lemongrass','thai'],['#2E9E4F','Green onion','cajun'],['#6CBF3A','Limes','thai'],['#E9B98C','Chicken','cajun']].map(function(c){return '<button class="chip" data-open="'+c[2]+'" style="height:40px;font-size:15px"><span class="dot" style="background:'+c[0]+'"></span>'+c[1]+'</button>'}).join('')+'</div></div>'+
  '<div style="display:flex;flex-direction:column;gap:12px"><p class="kicker">From Ashley’s recipe cards</p><div class="rgrid">'+
   tagList().map(function(id,i){var r=RECIPES[id],q=r.card.questions.length;
    return '<button class="rcard" data-open="'+id+'" aria-label="Open '+esc(r.title)+'">'+fpBar(r,120)+
    '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;width:100%"><div class="between" style="min-height:22px"><span class="kicker" style="color:#111">'+(i===0&&!S.tag?'Tonight\'s pick':r.kicker.split(' · ')[0])+'</span>'+cooked(id)+'</div>'+
-   '<span style="font-family:\'Space Grotesk\';font-size:24px;font-weight:700;line-height:1.15">'+esc(r.title)+'</span><span class="muted" style="font-size:14px">'+r.meta+' · '+r.base+' servings</span>'+
+   '<span style="font-family:var(--disp);font-size:24px;font-weight:700;line-height:1.15">'+esc(r.title)+'</span><span class="muted" style="font-size:14px">'+r.meta+' · '+r.base+' servings</span>'+
    '<span style="font-size:14px;line-height:1.45;color:#2B2B28">'+esc(r.desc)+'</span>'+
    '<span style="font-size:13px;font-weight:600;margin-top:2px">'+Object.keys(r.have).length+' of '+r.ING.length+' in your pantry'+(q?' · '+q+' card question'+(q>1?'s':''):'')+'</span></div></button>'}).join('')+
  '</div></div></div>';
@@ -98,7 +98,7 @@ function ingRowPad(it){
  var li=LINE[it.id]?lineInfo(it.id):null,sw=S.swaps[it.id],lf=sw?leafOf(it.id,sw):null,qty=li?li.qty:(lf&&lf.ratio!=='1 : 1'?lf.ratio:scaleQty(it.amt,F()));
  return '<div class="row" style="gap:12px;padding:10px 0;border-bottom:1px solid #ECECE8">'+icon(it.icon[0][0],38)+
   '<span style="flex:1;display:flex;flex-direction:column;gap:1px;padding-left:10px;border-left:4px solid '+edgeOf(it)+';min-width:0"><b style="font-size:16px">'+esc(shownName(it))+(sw?' <span class="muted" style="font-weight:500;text-decoration:line-through;font-size:13px">'+esc(it.name)+'</span>':'')+'</b><span class="muted" style="font-size:12px">'+esc(sw?lf.note:it.eq)+'</span></span>'+
-  (li?'<button class="qty'+(li.check?' q':'')+'" data-conv="'+it.id+'" aria-label="'+esc(qty+' '+li.name+'. Change units')+'">'+esc(qty)+SVG.convert+'</button>':'<span class="qty static">'+esc(qty)+'</span>')+
+  (li?'<button class="qty'+(li.check?' q':'')+'" data-conv="'+it.id+'" aria-label="'+esc(qty+' '+li.name+'. Change units')+'">'+esc(qty)+'</button>':'<span class="qty static">'+esc(qty)+'</span>')+
   (SETS[it.id]?'<button class="swapbtn'+(sw?' on':'')+'" data-focus="'+it.id+'" aria-label="'+(sw?'Swapped. Change swap for ':'Swap ')+esc(shownName(it))+'">'+SVG.swap+'</button>':'<span style="width:36px;flex-shrink:0"></span>')+'</div>';
 }
 function recipePad(){
@@ -106,7 +106,7 @@ function recipePad(){
  var W=padW()-34;
  var nsw=ING.filter(function(it){return S.swaps[it.id]}).length;
  var method=STEPS.map(function(st,i){var t=stepTime(st);
-  return '<li><span class="mnum">'+(i+1)+'</span><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><div class="between" style="gap:12px;flex-wrap:wrap"><b style="font-family:\'Space Grotesk\';font-size:20px">'+esc(stepTitle(st))+'</b>'+
+  return '<li><span class="mnum">'+(i+1)+'</span><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><div class="between" style="gap:12px;flex-wrap:wrap"><b style="font-family:var(--disp);font-size:20px">'+esc(stepTitle(st))+'</b>'+
    '<span class="row" style="gap:10px"><span class="hbar" style="width:'+((t.on+t.wait)*12)+'px;height:10px" aria-hidden="true"><span style="flex:'+t.on+';background:#111"></span>'+(t.wait?'<span class="hatch" style="flex:'+t.wait+'"></span>':'')+'</span><span style="font-size:12px;color:#3A3A38;white-space:nowrap">'+t.on+' min hands-on'+(t.wait?' · '+t.wait+' wait':'')+'</span>'+(st.secs?'<span class="badge" style="height:24px">'+Math.round(st.secs/60)+' min timer</span>':'')+'</span></div>'+
    safeBadge(st)+stepLines(st).map(function(l){return '<p class="mline">'+l+'</p>'}).join('')+(st.flag?'<p class="cardnote"><b>Card note:</b> '+esc(st.flag)+'</p>':'')+'</div></li>'}).join('');
  return '<div class="pad">'+
@@ -157,7 +157,7 @@ function shareSheet(){
   '<div class="between"><div><span class="kicker">Share</span><h2 class="h2" style="font-size:22px;line-height:1.15">'+esc(R.title)+'</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
   '<div class="seg" role="group" aria-label="Share as" style="grid-template-columns:repeat(4,1fr)">'+[['card','Card'],['link','Link'],['pdf','PDF'],['text','Text']].map(function(x){return '<button data-sharefmt="'+x[0]+'" aria-pressed="'+(s.format===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
   '<div style="padding:14px;border-radius:18px;background:var(--counter);display:flex;justify-content:center"><div style="width:100%;max-width:340px;border-radius:16px;background:#fff;box-shadow:0 10px 24px rgba(0,0,0,.1);overflow:hidden">'+fpBar(R,48)+
-   '<div style="padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px"><span class="kicker" style="font-size:10px">From Ashley’s recipe cards</span><b style="font-family:\'Space Grotesk\';font-size:19px;line-height:1.15">'+esc(R.title)+'</b>'+
+   '<div style="padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px"><span class="kicker" style="font-size:10px">From Ashley’s recipe cards</span><b style="font-family:var(--disp);font-size:19px;line-height:1.15">'+esc(R.title)+'</b>'+
    '<span style="font-size:12px;font-weight:700">'+R.meta.split(' · ')[0]+' · '+serv+' servings · '+ING.length+' ingredients · '+STEPS.length+' steps</span>'+
    (s.swaps&&sw.length?'<span style="padding:6px 9px;border-radius:9px;background:var(--counter);font-size:12px;line-height:1.4"><b>Our swaps:</b> '+esc(swTxt)+'</span>':'')+
    (s.notes?'<span class="cardnote" style="font-size:12px;padding:6px 9px">'+(log.length?log.length+' cook'+(log.length>1?'s':'')+' logged'+(log[log.length-1].note?' · “'+esc(log[log.length-1].note)+'”':''):'No cooks logged yet')+'</span>':'')+

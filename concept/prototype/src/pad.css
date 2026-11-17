@@ -9,7 +9,7 @@
 .sw i{width:26px;height:26px;border-radius:999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
 .sw.on{background:#111}.sw.on i{transform:translateX(20px)}
 .who{display:flex;flex-direction:column;align-items:center;gap:4px;border:none;background:none;font-size:12px;font-weight:600}
-.who i{width:44px;height:44px;border-radius:999px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;font-style:normal}
+.who i{width:44px;height:44px;border-radius:999px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:17px;font-weight:700;font-style:normal}
 .hatch{background:repeating-linear-gradient(135deg,#D6D6D1 0 3px,#F4F4F1 3px 7px)}
 .hbar{display:flex;height:20px;border-radius:6px;overflow:hidden;gap:2px}
 .swapbtn{display:inline-flex;align-items:center;gap:6px;height:38px;width:92px;justify-content:center;border-radius:999px;border:1.5px solid #111;background:#fff;font-size:13px;font-weight:700;flex-shrink:0}
@@ -53,7 +53,7 @@
 .method{list-style:none;margin:0;padding:0}
 .method li{display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px;padding:16px 0;border-bottom:1px solid #ECECE8}
 .mnum{width:36px;height:36px;border-radius:999px;border:2px solid #111;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.mline{margin:0;font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:500;line-height:1.5}
+.mline{margin:0;font-family:var(--disp);font-size:19px;font-weight:500;line-height:1.5}
 .lg{display:inline-block;width:18px;height:8px;border-radius:4px}
 .wblk{position:absolute;left:0;border-radius:14px 0 0 14px;display:flex;align-items:center;gap:10px;padding:6px 12px;overflow:hidden}
 .wicons{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;width:92px;flex-shrink:0}
@@ -79,7 +79,7 @@
 .sheet>*{flex-shrink:0}
 
 .safe{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:max-content;max-width:100%;padding:6px 12px;border-radius:12px;border:1.5px solid #111;background:#fff;font-size:13px;line-height:1.35}
-.safe b{font-family:'Space Grotesk',sans-serif;font-size:15px;white-space:nowrap}
+.safe b{font-family:var(--disp);font-size:15px;white-space:nowrap}
 .safe span{color:#3A3A38}
 .safe svg{flex-shrink:0}
 .safe.big{padding:10px 14px;background:#111;color:#fff;border-color:#111;font-size:14px}
@@ -100,23 +100,23 @@
 .dk{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
 .clockbtn{position:relative;width:60px;height:60px;padding:2px;border:none;border-radius:999px;background:none;flex-shrink:0;animation:dockin .35s cubic-bezier(.2,.8,.2,1)}
 .clockbtn .mr{display:block}
-.clockbtn .clk2{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:12px;font-variant-numeric:tabular-nums}
+.clockbtn .clk2{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:12px;font-variant-numeric:tabular-nums}
 .ringbtn{border:none;background:none;padding:0;display:flex;flex-shrink:0}
 
 .safe{display:inline-flex;align-items:center;gap:6px;flex-wrap:nowrap;width:max-content;height:32px;padding:0 12px 0 9px;border-radius:999px;border:1.5px solid #111;font-size:13px;line-height:1;color:#111;cursor:pointer}
-.safe b{font-family:'Space Grotesk',sans-serif;font-size:15px}
+.safe b{font-family:var(--disp);font-size:15px}
 .safe span{color:#111;font-weight:600}
 .safe.big,.ipad .safe.big{height:40px;padding:0 16px 0 12px;font-size:15px;color:#111}
 .safe.big b,.ipad .safe.big b{font-size:19px}.safe.big span{color:#111}
 .tempbox{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 8px;border-radius:16px;border:1.5px solid #111}
-.tempbox b{font-family:'Space Grotesk',sans-serif;font-size:34px;line-height:1}
+.tempbox b{font-family:var(--disp);font-size:34px;line-height:1}
 .tempbox span{font-size:12px;font-weight:600;color:#3A3A38}
 
 .nutbox{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--counter)}
 .nutgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .nutgrid div{display:flex;flex-direction:column;gap:2px;min-width:0}
 .nutgrid span{font-size:11px;font-weight:600;color:var(--muted)}
-.nutgrid b{font-family:'Space Grotesk',sans-serif;font-size:17px;white-space:nowrap}
+.nutgrid b{font-family:var(--disp);font-size:17px;white-space:nowrap}
 .nutgrid i{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
 .nutgrid i.chg{color:#111;font-weight:700}
 
@@ -135,3 +135,22 @@
 
 button.badge{background:#fff;cursor:pointer;height:30px;padding:0 12px;font-family:inherit}
 button.badge:hover{box-shadow:0 0 0 2px rgba(17,17,17,.15)}
+
+/* ---------- polish pass ---------- */
+.stats div{padding:10px 7px}
+.stats span{font-size:10.5px;white-space:nowrap}
+.ipad .stats div{padding:12px 14px}.ipad .stats span{font-size:12px}
+.star .nm,.star .sub{background:#fff;padding:0 4px;border-radius:5px}
+.primary:disabled{background:#E4E4E0;color:#595954}
+.aisles{display:flex;flex-direction:column;gap:20px}
+.ipad .aisles{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:24px 28px;align-items:start}
+.ipad .aisles .tiles{grid-template-columns:1fr 1fr}
+.cookbar{flex-direction:column}
+.ipad .cookbar{flex-direction:row;align-items:center;justify-content:space-between;gap:20px}
+.ipad .cookbar .dock{flex:1;min-width:0}
+.ipad .cookbar .navrow{flex-shrink:0;width:440px;margin-left:auto}
+.port .pctl{flex-direction:column;align-items:stretch}
+.port .pctl>.row:last-child .primary{flex:1}
+.ipad .ingcols .qty{min-width:64px;justify-content:center}
+.ingt.qd::after{content:none}
+.qm{display:inline-flex;align-items:center;justify-content:center;width:.9em;height:.9em;margin-left:3px;border-radius:99px;background:#111;color:#fff;font-family:Inter,sans-serif;font-size:.5em;font-weight:700;font-style:normal;vertical-align:super}

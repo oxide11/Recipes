@@ -158,13 +158,13 @@ function home(){
  var pantry=Object.keys(feat.have).length;
  return '<div class="pad">'+
  '<div class="between"><div><p class="muted" style="margin:0 0 4px;font-size:13px">Monday evening</p><h1 class="t" style="font-size:30px">What\'s cooking?</h1></div>'+
- '<button class="iconbtn" style="background:#111;color:#fff;font-family:\'Space Grotesk\';font-weight:700;font-size:17px" aria-label="Profile" data-toast="Profile: avoids mushrooms, allergic to tree nuts">M</button></div>'+
+ '<button class="iconbtn" style="background:#111;color:#fff;font-family:var(--disp);font-weight:700;font-size:17px" aria-label="Profile" data-toast="Profile: avoids mushrooms, allergic to tree nuts">M</button></div>'+
  '<label class="row" style="height:48px;padding:0 16px;border-radius:14px;background:var(--counter);gap:10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search</span><input id="search" type="search" placeholder="Search recipes or ingredients" style="flex:1;border:none;background:transparent;font:inherit;font-size:15px;outline:none"></label>'+
  tagBar()+'<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Cook with what you have</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+
   [['#F2C200','Lemons','piccata'],['#9CBF5A','Lemongrass','thai'],['#2E9E4F','Green onion','cajun'],['#6CBF3A','Limes','thai']].map(function(c){return '<button class="chip" data-open="'+c[2]+'"><span class="dot" style="background:'+c[0]+'"></span>'+c[1]+'</button>'}).join('')+'</div></div>'+
  '<button class="rcard" data-open="'+feat.id+'" aria-label="Open '+esc(feat.title)+'">'+fpBar(feat,112)+
   '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;width:100%"><div class="between"><span class="kicker" style="color:#111">'+(S.tag?'Best match':'Tonight\'s pick')+'</span>'+cooked(feat.id)+'</div>'+
-  '<span style="font-family:\'Space Grotesk\';font-size:24px;font-weight:700;line-height:1.15">'+esc(feat.title)+'</span><span class="muted" style="font-size:14px">'+feat.meta+' · '+feat.base+' servings</span>'+
+  '<span style="font-family:var(--disp);font-size:24px;font-weight:700;line-height:1.15">'+esc(feat.title)+'</span><span class="muted" style="font-size:14px">'+feat.meta+' · '+feat.base+' servings</span>'+
   '<span style="font-size:14px;font-weight:600;margin-top:2px">'+pantry+' of '+feat.ING.length+' ingredients already in your pantry</span></div></button>'+
  '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">From Ashley’s recipe cards</p>'+
   others.map(function(id){var r=RECIPES[id];return '<button class="listrow" data-open="'+id+'"><div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0"><div class="between"><span style="font-weight:700;font-size:16px">'+esc(r.title)+'</span>'+cooked(id)+'</div><div class="fp">'+fpBar(r,10)+'</div><span class="muted" style="font-size:13px">'+r.meta+' · '+r.base+' servings'+(r.card.questions.length?' · '+r.card.questions.length+' card question'+(r.card.questions.length>1?'s':''):'')+'</span></div>'+SVG.arrow+'</button>'}).join('')+
@@ -257,7 +257,7 @@ function recipe(){
  } else {
   body='<ol class="plan">'+STEPS.map(function(st,i){
    var keys=[];stepSrc(st).join(' ').replace(/\{(\w+)\}/g,function(_,k){if(keys.indexOf(k)<0)keys.push(k)});
-   return '<li><span class="pnum">'+(i+1)+'</span><div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0"><div class="between" style="gap:8px"><b style="font-family:\'Space Grotesk\';font-size:18px">'+esc(stepTitle(st))+'</b>'+'<span class="muted" style="font-size:12px;white-space:nowrap">'+(st.on?st.on+' min hands-on':'')+(st.secs?' · '+Math.round(st.secs/60)+' min timer':'')+'</span>'+'</div>'+
+   return '<li><span class="pnum">'+(i+1)+'</span><div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0"><div class="between" style="gap:8px"><b style="font-family:var(--disp);font-size:18px">'+esc(stepTitle(st))+'</b>'+'<span class="muted" style="font-size:12px;white-space:nowrap">'+(st.on?st.on+' min hands-on':'')+(st.secs?' · '+Math.round(st.secs/60)+' min timer':'')+'</span>'+'</div>'+
    safeBadge(st)+(keys.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+keys.map(function(k){var li=lineInfo(k);return '<button class="chip" data-conv="'+k+'" style="height:30px;font-size:13px;font-weight:600;background:'+li.color+'1F;box-shadow:inset 0 -2px 0 '+li.edge+'">'+esc(li.qty+' '+li.noun)+'</button>'}).join('')+'</div>':'')+
    '<p style="margin:0;font-size:15px;line-height:1.5;color:#2B2B28">'+stepLines(st).join(' ').replace(/<[^>]+>/g,function(t){return t.indexOf('ingt')>-1||t==='</span>'?'':t})+'</p></div></li>'}).join('')+'</ol>';
  }
@@ -272,7 +272,7 @@ function recipe(){
  '<div class="between" style="gap:10px"><div class="stepper" role="group" aria-label="Servings"><button data-serv="-1" aria-label="Fewer servings"'+(S.servings<=1?' disabled':'')+'>−</button><span aria-live="polite"><b>'+S.servings+'</b> serving'+(S.servings>1?'s':'')+'</span><button data-serv="1" aria-label="More servings"'+(S.servings>=12?' disabled':'')+'>+</button></div><span class="muted" style="font-size:13px">'+STEPS.length+' steps</span></div></div>'+
  '<div class="seg tabs" role="tablist" style="grid-template-columns:repeat(3,1fr)">'+tabs.map(function(t){return '<button role="tab" data-tab="'+t[0]+'" aria-pressed="'+(t[0]===tab)+'" aria-selected="'+(t[0]===tab)+'">'+t[1]+'</button>'}).join('')+'</div>'+
  body+'</div>'+
- '<div class="bottombar"><button class="secondary" style="flex:1;height:56px" data-go="ingredients">Ingredients &amp; swaps</button><button class="primary" style="flex:1.3" data-act="startcook">Start cooking</button></div>';
+ '<div class="bottombar"><button class="secondary" style="flex:1;height:56px" data-go="ingredients">Swaps</button><button class="primary" style="flex:2" data-act="startcook">Start cooking</button></div>';
 }
 
 /* ================= INGREDIENTS ================= */
@@ -287,7 +287,7 @@ function constellation(){
    '<span class="orb" style="width:'+d+'px;height:'+d+'px;background:'+fill+(it.edge?';border:1px solid '+it.edge:'')+'"></span><span class="nm">'+esc(name)+'</span><span class="sub">'+esc(sub)+'</span></button>';
  }).join('');
  return '<div class="cst '+(S.zoom==='out'?'zout':'')+'"><svg width="350" height="450" viewBox="0 0 350 450" aria-hidden="true" style="position:absolute;inset:0" fill="none"><path d="'+ring+' Z" stroke="#E4E4E0" stroke-width="1.5" stroke-dasharray="3 5"/><path d="'+spokes+'" stroke="#BDBDB8" stroke-width="1.5"/></svg>'+
- '<div class="hub"><span style="font-family:\'Space Grotesk\';font-size:16px;font-weight:700;line-height:1.1">'+esc(R.title)+'</span><span style="font-size:12px;color:#D9D9D4">'+n+' ingredients</span></div>'+stars+'</div>';
+ '<div class="hub"><span style="font-family:var(--disp);font-size:'+(R.title.length>18?13:16)+'px;font-weight:700;line-height:1.15">'+esc(R.title)+'</span><span style="font-size:12px;color:#D9D9D4">'+n+' ingredients</span></div>'+stars+'</div>';
 }
 function gatherRows(){
  return ING.map(function(it){
@@ -298,7 +298,7 @@ function gatherRows(){
    '<div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">'+
     '<span style="font-size:15px;font-weight:600">'+esc(shownName(it))+(sw?' <span class="muted" style="font-weight:500;text-decoration:line-through;font-size:13px">'+esc(it.name)+'</span>':'')+'</span>'+
     '<span class="muted" style="font-size:13px">'+esc(lf&&lf.ratio!=='1 : 1'?lf.ratio:scaleQty(it.amt,F())+' · '+it.eq)+'</span></div>'+
-   (SETS[it.id]?'<button class="chip out" data-focus="'+it.id+'" style="height:32px">Swap</button>':'')+'</div>';
+   (SETS[it.id]?'<button class="chip out" data-focus="'+it.id+'" style="height:36px;padding:0 14px">Swap</button>':'')+'</div>';
  }).join('');
 }
 function ingredients(){
@@ -327,9 +327,8 @@ function swapView(){
  var sub=it.profile?(it.why==='allergy'?'Your allergy profile swapped these out':'You dislike them, so a swap is already in'):'In '+esc(R.title)+' · '+esc(scaleQty(it.amt,F()));
  var map='<div class="zin" style="position:relative;width:350px;height:470px;margin:0 auto;transform-origin:'+p[0]+'px '+p[1]+'px">'+
   '<svg width="350" height="470" viewBox="0 0 350 470" aria-hidden="true" style="position:absolute;inset:0" fill="none" stroke-linecap="round">'+lines+'</svg>'+
-  '<div class="hub2"><span class="dot" style="width:14px;height:14px;background:'+it.color+(it.edge?';border:1px solid '+it.edge:'')+'"></span><span style="font-family:\'Space Grotesk\';font-size:16px;font-weight:700;line-height:1.1">'+esc(set.center)+'</span><span class="muted" style="font-size:11px">'+esc(scaleQty(it.amt,F()))+'</span></div>'+
+  '<div class="hub2"><span class="dot" style="width:14px;height:14px;background:'+it.color+(it.edge?';border:1px solid '+it.edge:'')+'"></span><span style="font-family:var(--disp);font-size:16px;font-weight:700;line-height:1.1">'+esc(set.center)+'</span><span class="muted" style="font-size:11px">'+esc(scaleQty(it.amt,F()))+'</span></div>'+
   branches+leaves+
-  '<button class="chip out" data-act="home" style="position:absolute;right:0;bottom:0;height:40px;border-width:1.5px;font-weight:700">Whole recipe</button>'+
  '</div>';
  var detail='<section class="card" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">'+
   '<div class="between"><h2 class="h2" style="font-size:20px">'+esc(s.name)+'</h2><b style="font-size:14px">'+(why?'':esc(s.ratio))+'</b></div>'+
@@ -365,7 +364,7 @@ function shop(){
  var done=!missing.length||inCart===missing.length;
  return '<div class="pad">'+header(isPad()?'recipe':'ingredients','Shopping list','For '+esc(R.title)+' · grouped by aisle')+
  '<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:14px">'+inCart+' of '+missing.length+' in your cart</b><div class="prog"><i style="width:'+(missing.length?Math.round(100*inCart/missing.length):100)+'%"></i></div></div>'+
- (missing.length?secs:'<p class="insight">Nothing to buy. Everything is in your pantry.</p>')+
+ (missing.length?'<div class="aisles">'+secs+'</div>':'<p class="insight">Nothing to buy. Everything is in your pantry.</p>')+
  (have?'<section style="display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:18px;background:var(--counter)"><span class="kicker" style="color:#111">Already in your pantry</span><div style="display:flex;flex-wrap:wrap;gap:8px">'+have+'</div></section>':'')+
  '</div><div class="bottombar"><button class="primary" data-act="shopdone"'+(done?'':' disabled')+'>'+(done?(isPad()?'Back to recipe':'Back to ingredients'):'Tick items as you shop')+'</button></div>';
 }
@@ -385,14 +384,14 @@ function cook(){
  var lines=ls.map(function(t,j){var dn=!!S.struck[i+':'+j];
   return '<li><div class="line'+(dn?' struck':'')+'" role="button" tabindex="0" data-strike="'+i+':'+j+'" aria-pressed="'+dn+'"><span class="num">'+(j+1)+'</span><span class="pl">'+t+'</span></div></li>'}).join('');
  var startCard='';
- if(st.secs){var t=timerOf(i);if(!t.started){startCard='<div class="startcard"><span class="row" style="gap:12px">'+miniRing(48,'#3A3A38',1)+'<span style="display:flex;flex-direction:column"><b style="font-family:\'Space Grotesk\';font-size:22px;font-variant-numeric:tabular-nums">'+clock(t.total)+'</b><span class="muted" style="font-size:13px">Timer for this step</span></span></span><button class="primary" data-act="tstart" style="width:auto;height:44px;padding:0 18px;font-size:15px;border-radius:12px">Start</button></div>'}}
+ if(st.secs){var t=timerOf(i);if(!t.started){startCard='<div class="startcard"><span class="row" style="gap:12px">'+miniRing(48,'#3A3A38',1)+'<span style="display:flex;flex-direction:column"><b style="font-family:var(--disp);font-size:22px;font-variant-numeric:tabular-nums">'+clock(t.total)+'</b><span class="muted" style="font-size:13px">Timer for this step</span></span></span><button class="primary" data-act="tstart" style="width:auto;height:44px;padding:0 18px;font-size:15px;border-radius:12px">Start</button></div>'}}
  var allDone=ls.every(function(_,j){return S.struck[i+':'+j]});
  return (isLand()?'<div class="cookwrap">'+stepListPad():'')+'<div class="pad cookpad">'+
  '<div class="row"><button class="iconbtn" data-back="recipe" aria-label="Exit cooking mode">'+SVG.close+'</button><div style="flex:1;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700">Step '+(i+1)+' of '+STEPS.length+' · '+esc(R.title)+'</span><div class="stepbar" style="grid-template-columns:repeat('+STEPS.length+',1fr)" aria-hidden="true">'+bar+'</div></div></div>'+
  '<p class="kicker" style="color:#111">'+esc(stepTitle(st))+'</p>'+
  '<ol class="lines">'+lines+'</ol>'+safeBadge(st,true)+(st.flag?'<p class="cardnote"><b>Card note:</b> '+esc(st.flag)+'</p>':'')+startCard+
  '<p class="muted hint">'+(allDone?'<b style="color:#111">Step done.</b> On to the next one.':'Tap a line to cross it off. Tap an ingredient to change its units.')+'</p>'+
- '</div>'+(isLand()?'</div>':'')+'<div class="bottombar" style="flex-direction:column"><div id="dock" class="dock"></div><div class="row" style="gap:10px"><button class="secondary" style="flex:1" data-act="prev"'+(i===0?' disabled':'')+'>Previous</button><button class="primary'+(allDone?' glow':'')+'" style="flex:2;height:52px;font-size:15px" data-act="next">'+(i===STEPS.length-1?'Plate it':'Next step')+'</button></div></div>';
+ '</div>'+(isLand()?'</div>':'')+'<div class="bottombar cookbar"><div id="dock" class="dock"></div><div class="row navrow" style="gap:10px"><button class="secondary" style="flex:1" data-act="prev"'+(i===0?' disabled':'')+'>Previous</button><button class="primary'+(allDone?' glow':'')+'" style="flex:2;height:52px;font-size:15px" data-act="next">'+(i===STEPS.length-1?'Plate it':'Next step')+'</button></div></div>';
 }
 function timerView(t){var f=t.total>0?t.left/t.total:0,done=f<=0;return {f:f,done:done,col:done?'#FF2A12':colorFor(f),dur:pulseSecs(f).toFixed(2),moving:t.running||done}}
 var dockSig='';
@@ -410,7 +409,7 @@ function updateTimerDom(){
    if(!open(k))return '<button class="clockbtn" data-k="'+k+'" data-dockopen="'+k+'" aria-label="'+esc(STEPS[k].label+' timer, step '+(+k+1)+'. Show details')+'"><span class="mr mot">'+miniRing(56,v.col,v.f)+'</span><b class="clk2"></b></button>';
    return '<div class="dockrow'+(v.done?' done':'')+'" data-k="'+k+'">'+
     '<button class="ringbtn" data-dockopen="'+k+'" aria-label="Collapse timer"><span class="mr mot">'+miniRing(52,v.col,v.f)+'</span></button>'+
-    '<span style="flex:1;display:flex;flex-direction:column;min-width:0"><span class="dk">'+(v.done?'Time is up':soon?'Almost done':t.running?'Running':'Paused')+' · step '+(+k+1)+'</span><b class="clk2" style="font-family:\'Space Grotesk\';font-size:24px;font-variant-numeric:tabular-nums;line-height:1.1"></b><span style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(STEPS[k].label)+' · '+esc(stepTitle(STEPS[k]))+'</span></span>'+
+    '<span style="flex:1;display:flex;flex-direction:column;min-width:0"><span class="dk">'+(v.done?'Time is up':soon?'Almost done':t.running?'Running':'Paused')+' · step '+(+k+1)+'</span><b class="clk2" style="font-family:var(--disp);font-size:24px;font-variant-numeric:tabular-nums;line-height:1.1"></b><span style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(STEPS[k].label)+' · '+esc(stepTitle(STEPS[k]))+'</span></span>'+
     (v.done?'<button class="dbtn" data-dismiss="'+k+'" aria-label="Dismiss timer" style="background:#fff;color:#111;width:auto;padding:0 16px;font-weight:700;font-size:14px">OK</button>':
     '<button class="dbtn light" data-tplus="'+k+'" aria-label="Add 30 seconds">+30</button><button class="dbtn" data-ttoggle="'+k+'" aria-label="'+(t.running?'Pause':'Resume')+' timer">'+playIcon(t.running)+'</button>')+'</div>'}).join('');
  }
@@ -442,7 +441,7 @@ function wordify(){
   var n=0;
   function mk(t){var w=document.createElement('span');w.className='w v'+(n%3);var h=(li*7+n*13)%5;w.style.setProperty('--r',((h-2)*0.7).toFixed(1)+'deg');w.style.setProperty('--y',(((n*5+li)%3)-1)+'px');w.style.setProperty('--d',(n*35)+'ms');w.textContent=t;n++;return w}
   function split(node){var fr=document.createDocumentFragment();node.textContent.split(/(\s+)/).forEach(function(t){if(!t)return;fr.appendChild(/^\s+$/.test(t)?document.createTextNode(t):mk(t))});node.parentNode.replaceChild(fr,node)}
-  Array.prototype.slice.call(pl.childNodes).forEach(function(k){if(k.nodeType===3)split(k);else if(k.classList&&k.classList.contains('ingt'))Array.prototype.slice.call(k.childNodes).forEach(function(t2){if(t2.nodeType===3)split(t2)})});
+  Array.prototype.slice.call(pl.childNodes).forEach(function(k){if(k.nodeType===3){var pm=/^([,.;:!?]+)/.exec(k.textContent),pv=k.previousSibling;if(pm&&pv&&pv.classList&&pv.classList.contains('ingt')&&pv.lastElementChild){var lw=pv.lastElementChild;lw.insertBefore(document.createTextNode(pm[1]),lw.querySelector('.qm'));k.textContent=k.textContent.slice(pm[1].length)}split(k)}else if(k.classList&&k.classList.contains('ingt')){Array.prototype.slice.call(k.childNodes).forEach(function(t2){if(t2.nodeType===3)split(t2)});if(k.classList.contains('q')&&k.lastElementChild){var qm=document.createElement('i');qm.className='qm';qm.textContent='?';k.lastElementChild.appendChild(qm);k.classList.add('qd')}}});
  });
 }
 
@@ -453,7 +452,7 @@ function done(){
  var timersUsed=Object.keys(S.timers).filter(function(k){return S.timers[k].started}).length;
  var starsH='';for(var n=1;n<=5;n++)starsH+='<button data-rate="'+n+'" aria-label="'+n+' star'+(n>1?'s':'')+'" aria-pressed="'+(S.rating===n)+'"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="'+(n<=S.rating?'#111':'none')+'" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg></button>';
  return '<div class="pad donepad">'+header('cook','Plated',esc(R.plate)+' for '+S.servings)+
- '<div class="plate"><div class="in">'+(S.photo?'<img src="'+S.photo+'" alt="Your finished '+esc(R.plate.toLowerCase())+'">':'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span style="font-family:\'Space Grotesk\';font-size:18px;font-weight:700">Your finished plate</span><span style="font-size:13px;color:#D9D9D4;max-width:180px">Choose a photo and it is cropped to the plate</span>')+
+ '<div class="plate"><div class="in">'+(S.photo?'<img src="'+S.photo+'" alt="Your finished '+esc(R.plate.toLowerCase())+'">':'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span style="font-family:var(--disp);font-size:18px;font-weight:700">Your finished plate</span><span style="font-size:13px;color:#D9D9D4;max-width:180px">Choose a photo and it is cropped to the plate</span>')+
  '<label class="photobtn'+(S.photo?' on':'')+'">'+(S.photo?'Change photo':'Add photo')+'<input type="file" accept="image/*" id="photo" class="sr"></label></div></div>'+
  '<section style="display:flex;flex-direction:column;gap:10px;text-align:center"><h2 class="h2" style="font-size:20px">How did it turn out?</h2><div class="stars5">'+starsH+'</div></section>'+
  '<label style="display:flex;flex-direction:column;gap:6px"><span class="kicker">Note for next time</span><textarea id="note" rows="2" placeholder="Let it simmer longer, more chilli…" style="font:inherit;font-size:15px;padding:12px;border-radius:14px;border:1.5px solid var(--soft);resize:none">'+esc(S.note)+'</textarea></label>'+

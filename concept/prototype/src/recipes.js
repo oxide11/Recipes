@@ -13,7 +13,7 @@ RECIPES.cajun={
  id:'cajun',short:'Cajun',title:'Creamy Cajun Chicken Pasta',kicker:'Dinner · From Ashley’s cards',base:2,
  desc:'Spiced chicken strips in a rich cream sauce with sun-dried tomatoes, tossed through linguine with Parmesan.',
  tags:[['30 min or less',1],['One skillet'],['Weeknight'],['Rich']],
- stats:[['10 min','Prep'],['15 min','Cook'],['1,300','kcal / serving'],['79 g','protein / serving']],
+ stats:[['10 min','Prep'],['15 min','Cook'],['1,300','kcal/serving'],['79 g','protein/serving']],
  meta:'25 min · Easy',plate:'Cajun chicken pasta',
  card:{source:'Printed sheet, 2 of 3',credit:'Lorac, Sept 2002. Prep 10 min, total 25 min.',photos:2,questions:[]},
  ING:[
@@ -92,7 +92,7 @@ RECIPES.thai={
  id:'thai',short:'Thai',title:'Thai Coconut Soup',kicker:'Dinner · From Ashley’s cards',base:6,
  desc:'Ginger, lemongrass and red curry paste bloomed in oil, simmered with broth and coconut milk, finished with lime and cilantro.',
  tags:[['Dairy-free',1],['One pot'],['Weeknight'],['Spicy'],['Serves a crowd']],
- stats:[['10 min','Prep'],['25 min','Cook'],['520','kcal / serving'],['21 g','protein / serving']],
+ stats:[['10 min','Prep'],['25 min','Cook'],['520','kcal/serving'],['21 g','protein/serving']],
  meta:'35 min · Easy',plate:'Thai coconut soup',
  card:{source:'Handwritten card',credit:'Serves about 6. The card does not give a yield.',photos:1,questions:['Is the coconut milk 3 cans of 13.5 oz each, and is the cilantro ¼ cup?','How long do you cook the shrimp or chicken?']},
  ING:[
@@ -178,7 +178,7 @@ RECIPES.piccata={
  id:'piccata',short:'Piccata',title:'Chicken Piccata',kicker:'Dinner · From Ashley’s cards',base:2,
  desc:'Butterflied chicken dredged and pan-fried, then finished in a bright pan sauce of lemon, capers and stock.',
  tags:[['30 min or less',1],['One skillet'],['Date night'],['Bright']],
- stats:[['10 min','Prep'],['20 min','Cook'],['1,010','kcal / serving'],['65 g','protein / serving']],
+ stats:[['10 min','Prep'],['20 min','Cook'],['1,010','kcal/serving'],['65 g','protein/serving']],
  meta:'30 min · Medium',plate:'Chicken piccata',
  card:{source:'Handwritten card',credit:'Card shorthand: “2 & 2 … again” for the second batch.',photos:1,questions:['Are the stock ½ cup and the capers ¼ cup?','When do you add the last 2 tbsp butter?']},
  ING:[

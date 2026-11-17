@@ -14,7 +14,7 @@ RECIPES.hamsoup={
  id:'hamsoup',short:'Ham soup',title:'Ham & Potato Soup',kicker:'Lunch · From Ashley’s cards',base:6,
  desc:'Diced potatoes, celery, onion and ham simmered until tender, then thickened with a quick butter, flour and milk sauce.',
  tags:[['Comfort food',1],['Weeknight'],['Kid friendly']],
- stats:[['10 min','Prep'],['25 min','Cook'],['260','kcal / serving'],['9 g','protein / serving']],
+ stats:[['10 min','Prep'],['25 min','Cook'],['260','kcal/serving'],['9 g','protein/serving']],
  meta:'35 min · Easy',plate:'Ham and potato soup',
  card:{source:'Printed recipe',credit:'Makes about 6 bowls. The card does not give a yield.',photos:1,questions:[]},
  ING:[
@@ -86,7 +86,7 @@ RECIPES.potpie={
  id:'potpie',short:'Pot pie',title:'Delicious Chicken Pot Pie',kicker:'Dinner · From Ashley’s cards',base:6,
  desc:'Sautéed vegetables and cooked chicken in a creamy sauce, poured into a casserole dish, topped with pie crust and baked until golden.',
  tags:[['Serves a crowd',1],['Comfort food'],['Make ahead'],['Kid friendly']],
- stats:[['1 hr','Prep'],['45 min','Bake'],['645','kcal / serving'],['35 g','protein / serving']],
+ stats:[['1 hr','Prep'],['45 min','Bake'],['645','kcal/serving'],['35 g','protein/serving']],
  meta:'1 hr 45 · Medium',plate:'Chicken pot pie',
  card:{source:'Printed recipe',credit:'vincy bramblett, Aug 2001. Serves 6 to 8. Prep 1 hour, total 1 hour 45 min.',photos:1,questions:[]},
  ING:[
@@ -161,7 +161,7 @@ RECIPES.scampi={
  id:'scampi',short:'Scampi',title:'Lemon Shrimp Scampi',kicker:'Dinner · From Ashley’s cards',base:4,
  desc:'Shrimp cooked in butter with garlic, lemon zest and juice and red pepper flakes, finished with parsley and tossed with angel hair and Parmesan.',
  tags:[['30 min or less',1],['One skillet'],['Date night'],['Spicy']],
- stats:[['10 min','Prep'],['10 min','Cook'],['708','kcal / serving'],['62 g','protein / serving']],
+ stats:[['10 min','Prep'],['10 min','Cook'],['708','kcal/serving'],['62 g','protein/serving']],
  meta:'20 min · Easy',plate:'Shrimp scampi',
  card:{source:'Handwritten card',credit:'With angel hair. The card gives no amounts for the pasta or Parmesan.',photos:1,questions:['Is the butter ⅓ cup?','Is the other lemon juice amount ⅓ cup?','How much angel hair and Parmesan do you use?']},
  ING:[
