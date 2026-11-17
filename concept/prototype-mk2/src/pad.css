@@ -411,3 +411,24 @@ body.darkstage #phone{border-color:#000}
 .tagrow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;border:none;border-bottom:1px solid #ECECE8;background:none;text-align:left;font-size:15px;cursor:pointer;padding:0 4px}
 .tagrow.on b::before{content:"✓ "}
 .tagrow span{font-size:13px}
+
+/* ---- pantry polish ---- */
+.psecn{display:flex;flex-direction:column;gap:10px}
+.ptile{border:1.5px solid #ECECE8;border-style:solid;min-height:60px;padding:8px 12px;gap:12px;transition:background .15s,border-color .15s}
+.ptile.on{border-color:transparent}
+.ptile:not(.on){background:#fff}
+.ptile:not(.on) svg.ic{opacity:.4;filter:grayscale(1)}
+.ptile:not(.on) .ptxt b{color:#3A3A38;font-weight:600}
+.ptile .ptxt span{font-size:12px}
+.pchk{width:24px;height:24px;border-width:1.5px}
+.ptile:not(.on) .pchk{border-color:#111;background:#fff}
+.panctl{display:flex;flex-direction:column;gap:10px}
+.ipad .panctl{flex-direction:row;align-items:center;gap:14px}.ipad .panctl .seg{flex:0 0 420px}.ipad .panctl .searchf{flex:1}
+.port .panctl{flex-direction:column;align-items:stretch}.port .panctl .seg{flex:none}
+.canrow{display:flex;gap:10px;overflow-x:auto;margin:0 -20px;padding:2px 20px 6px;scrollbar-width:none;scroll-snap-type:x proximity}
+.canrow::-webkit-scrollbar{display:none}
+.cancard{flex:0 0 172px;scroll-snap-align:start;gap:8px;padding:12px 14px}
+.cancard b{font-size:15px;min-height:36px}
+.ipad .canrow,.port .canrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0;padding:0;overflow:visible}
+.port .canrow{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ipad .cancard{flex:none}

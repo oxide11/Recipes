@@ -54,7 +54,7 @@ seedLog();
 var D={device:'phone',orient:'landscape'},SCALE=1;
 function isPad(){return D.device==='ipad'}
 function isLand(){return isPad()&&D.orient==='landscape'}
-function freshGlobal(){S={screen:'home',speed:30,saved:{cajun:true},dir:1,lib:{f:'all',s:'cooked',tag:null,q:'',more:false},pan:{f:'all',q:''}};}
+function freshGlobal(){S={screen:'home',speed:30,saved:{cajun:true},dir:1,lib:{f:'all',s:'cooked',tag:null,q:'',more:false},pan:{f:'have',q:''}};}
 freshGlobal();
 function loadRecipe(id){
  R=RECIPES[id];ING=R.ING;GROUPS=R.GROUPS;LINE=R.LINE;STEPS=R.STEPS;SETS=R.SETS;
@@ -542,7 +542,7 @@ document.addEventListener('click',function(e){
  if(d.promote){PROMO[R.id+':'+d.promote]=1;keep(render);toast('Now the default for this recipe. The original is kept as a version.');return}
  if(d.qa){if(QA[d.qa])delete QA[d.qa];else QA[d.qa]=1;keep(render);return}
  if(d.wcart){if(CART[d.wcart])delete CART[d.wcart];else CART[d.wcart]=1;keep(render);return}
- if(d.pan){if(PAN[d.pan])delete PAN[d.pan];else PAN[d.pan]=1;syncHave();keep(render);return}
+ if(d.pan){var was=!!PAN[d.pan];if(was)delete PAN[d.pan];else PAN[d.pan]=1;syncHave();keep(render);var pb=el.querySelector('b');toast((pb?pb.textContent:'Item')+(was?' marked used up':' added to your pantry'));return}
  if(d.panf){S.pan.f=d.panf;keep(render);return}
  if(d.plandel!==undefined){delete PLAN[d.plandel];keep(render);return}
  if(d.planadd!==undefined){openPlanPick(+d.planadd);return}

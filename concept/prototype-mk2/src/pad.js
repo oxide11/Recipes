@@ -303,27 +303,34 @@ function initPantry(){
 }
 function catalog(){var m={},out=[];RECIPE_ORDER.forEach(function(id){RECIPES[id].ING.forEach(function(it){var k=pKey(it);if(!m[k]){m[k]={key:k,it:it,n:0};out.push(m[k])}m[k].n++})});return out}
 function coverage(id){var r=RECIPES[id];return [Object.keys(r.have).length,r.ING.length]}
+function panTile(c){
+ var h=!!PAN[c.key],it=c.it,ex=h&&EXP[c.key];
+ return '<button class="ptile'+(h?' on':'')+'" data-pan="'+esc(c.key)+'" aria-pressed="'+h+'" aria-label="'+esc(it.name)+(h?', on hand. Tap to mark used up':', not in the pantry. Tap to add')+'" style="'+(h?'background:'+it.color+'24':'')+'">'+icon(it.icon[0][0],30)+
+  '<span class="ptxt"><b>'+esc(it.name)+'</b><span'+(ex?' class="exp'+(ex<=2?' soon':'')+'"':'')+'>'+(ex?'use within '+ex+' day'+(ex>1?'s':''):c.n+' recipe'+(c.n>1?'s':''))+'</span></span>'+
+  '<i class="pchk" aria-hidden="true">'+(h?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>':'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>')+'</i></button>';
+}
 function panList(){
  var q=(S.pan.q||'').toLowerCase().trim(),f=S.pan.f,cat=catalog().filter(function(c){if(f==='have'&&!PAN[c.key])return false;if(f==='out'&&PAN[c.key])return false;if(q&&c.key.indexOf(q)<0)return false;return true});
- if(!cat.length)return '<p class="insight">Nothing matches. Try another filter or clear the search.</p>';
- return AISLES.map(function(a){var items=cat.filter(function(c){return c.it.aisle===a});if(!items.length)return '';
-  items.sort(function(x,y){return x.it.name.localeCompare(y.it.name)});
-  var on=items.filter(function(c){return PAN[c.key]}).length;
-  return '<section style="display:flex;flex-direction:column;gap:10px"><div class="shead"><h2 class="h2" style="font-size:18px">'+a+'</h2><span class="muted" style="font-size:12px;font-weight:600">'+on+' of '+items.length+' on hand</span></div><div class="ptiles">'+
-   items.map(function(c){var h=!!PAN[c.key],it=c.it;return '<button class="ptile'+(h?' on':'')+'" data-pan="'+esc(c.key)+'" aria-pressed="'+h+'" aria-label="'+esc(it.name)+(h?', on hand':', not in the pantry')+'" style="'+(h?'background:'+it.color+'24':'')+'">'+icon(it.icon[0][0],30)+'<span class="ptxt"><b>'+esc(it.name)+'</b><span'+(h&&EXP[c.key]?' class="exp'+(EXP[c.key]<=2?' soon':'')+'"':'')+'>'+(h&&EXP[c.key]?'use within '+EXP[c.key]+' day'+(EXP[c.key]>1?'s':''):c.n+' recipe'+(c.n>1?'s':''))+'</span></span><i class="pchk" aria-hidden="true">'+(h?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>':'')+'</i></button>'}).join('')+'</div></section>'}).join('');
+ if(!cat.length)return '<p class="insight">'+(q?'Nothing matches “'+esc(S.pan.q)+'”.':f==='have'?'Nothing on hand yet. Switch to Missing to add what you have.':'Nothing is missing. Every ingredient your recipes use is on hand.')+'</p>';
+ var first=!q&&f!=='out'?cat.filter(function(c){return PAN[c.key]&&EXP[c.key]}).sort(function(x,y){return EXP[x.key]-EXP[y.key]}):[];
+ var out=first.length?'<section class="psecn"><div class="shead"><h2 class="h2" style="font-size:18px">Use first</h2><span class="muted" style="font-size:12px;font-weight:600">closest to their date</span></div><div class="ptiles">'+first.map(panTile).join('')+'</div></section>':'';
+ return out+AISLES.map(function(a){var items=cat.filter(function(c){return c.it.aisle===a});if(!items.length)return '';
+  items.sort(function(x,y){return (PAN[y.key]?1:0)-(PAN[x.key]?1:0)||x.it.name.localeCompare(y.it.name)});
+  var all=catalog().filter(function(c){return c.it.aisle===a}),on=all.filter(function(c){return PAN[c.key]}).length;
+  return '<section class="psecn"><div class="shead"><h2 class="h2" style="font-size:18px">'+a+'</h2><span class="muted" style="font-size:12px;font-weight:600">'+on+' of '+all.length+' on hand</span></div><div class="ptiles">'+items.map(panTile).join('')+'</div></section>'}).join('');
 }
 function pantryView(){
  var pad=isPad(),cat=catalog(),on=cat.filter(function(c){return PAN[c.key]}).length;
- var rank=RECIPE_ORDER.slice().sort(function(x,y){var a=coverage(x),b=coverage(y);return (a[1]-a[0])-(b[1]-b[0])||b[0]/b[1]-a[0]/a[1]}).slice(0,pad?4:3);
- var F=[['all','All',cat.length],['have','On hand',on],['out','Missing',cat.length-on]];
+ var rank=RECIPE_ORDER.slice().sort(function(x,y){var a=coverage(x),b=coverage(y);return (a[1]-a[0])-(b[1]-b[0])||b[0]/b[1]-a[0]/a[1]}).slice(0,4);
+ var F=[['have','On hand',on],['out','Missing',cat.length-on],['all','All',cat.length]];
  return '<div class="pad">'+
   '<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">'+on+' of '+cat.length+' ingredients on hand</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Pantry</h1></div>'+
   '<section style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Closest to ready</p><div class="canrow">'+rank.map(function(id){var c=coverage(id),miss=c[1]-c[0],r=RECIPES[id];
-   return '<button class="cancard" data-open="'+id+'" aria-label="Open '+esc(r.title)+'"><span class="canbar" aria-hidden="true"><i style="width:'+Math.round(c[0]/c[1]*100)+'%"></i></span><b>'+esc(r.title)+'</b><span>'+(miss?miss+' to buy':'Everything on hand')+' · '+c[0]+' of '+c[1]+'</span></button>'}).join('')+'</div></section>'+
-  '<div class="libctl"><label class="row searchf" style="animation:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search the pantry</span><input id="panq" type="search" placeholder="Search ingredients" value="'+esc(S.pan.q||'')+'"></label>'+
-   '<div class="seg" role="group" aria-label="Show" style="grid-template-columns:repeat(3,1fr)">'+F.map(function(f){return '<button data-panf="'+f[0]+'" aria-pressed="'+(S.pan.f===f[0])+'">'+f[1]+' <span style="opacity:.7;font-weight:500">'+f[2]+'</span></button>'}).join('')+'</div></div>'+
-  '<p class="muted" style="margin:-6px 0 0;font-size:13px">Tap an ingredient to mark it on hand or used up. Recipes and shopping lists update to match.</p>'+
-  '<div id="panlist" style="display:flex;flex-direction:column;gap:22px">'+panList()+'</div>'+
+   return '<button class="cancard" data-open="'+id+'" aria-label="Open '+esc(r.title)+', '+(miss?miss+' to buy':'everything on hand')+'"><b>'+esc(r.title)+'</b><span class="canbar" aria-hidden="true"><i style="width:'+Math.round(c[0]/c[1]*100)+'%"></i></span><span>'+(miss?miss+' to buy':'Ready to cook')+'</span></button>'}).join('')+'</div></section>'+
+  '<div class="panctl"><div class="seg" role="group" aria-label="Show" style="grid-template-columns:repeat(3,1fr)">'+F.map(function(f){return '<button data-panf="'+f[0]+'" aria-pressed="'+(S.pan.f===f[0])+'">'+f[1]+' <span style="opacity:.7;font-weight:500">'+f[2]+'</span></button>'}).join('')+'</div>'+
+   '<label class="row searchf" style="animation:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search the pantry</span><input id="panq" type="search" placeholder="Search ingredients" value="'+esc(S.pan.q||'')+'"></label></div>'+
+  '<div id="panlist" style="display:flex;flex-direction:column;gap:24px">'+panList()+'</div>'+
+  '<p class="muted" style="margin:0;font-size:12px;line-height:1.45">Tap an ingredient to mark it on hand or used up. Recipes, the plan and shopping lists follow. Dates are sample data.</p>'+
   '</div>'+(pad?'':tabbar('pantry'));
 }
 
