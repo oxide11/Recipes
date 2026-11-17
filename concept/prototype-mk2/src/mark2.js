@@ -317,4 +317,66 @@ function openSpice(i,keepPos){
   '</div></div>';
  if(!keepPos){var b=el.querySelector('.iconbtn');if(b)b.focus()}
 }
+
+/* ---- pantry amounts by weight, volume or count ---- */
+var UNITS={w:[['g',1,'g'],['kg',1000,'kg'],['oz',28.35,'oz'],['lb',453.6,'lb']],v:[['ml',1,'ml'],['L',1000,'L'],['cup',240,'cups'],['tbsp',15,'tbsp'],['tsp',5,'tsp']]};
+var STEP={g:50,kg:.25,oz:1,lb:.25,ml:50,L:.25,cup:.25,tbsp:1,tsp:1,c:1};
+function countInfo(it){var q=pv(it.amt);if(q){var mm=/^(large|medium|small|cloves?|stalks?|breasts?|cans?|sticks?|slices?|heads?|bunch(?:es)?|sprigs?|ears?|whole|fillets?|thighs?|cutlets?)\b/i.exec(q.u);if(q.u===''||mm){var lab=q.u===''?'':mm[1].toLowerCase();return {g:it.weight/q.v,label:lab,real:true}}}return {g:Math.max(50,Math.round(it.weight*2/50)*50),label:'packs',real:false}}
+function stockSetup(key){var s=stockOf(key);if(s.mode)return s;var it=catItem(key),q=pv(it.amt),ci=countInfo(it),dens=it.volume?it.weight/it.volume:0,volU=q&&/^(cups?|tbsp|tsp|ml|l|fl oz)\b/i.test(q.u),us=P.units!=='metric';
+ var G=it.weight*s.mult,V=it.volume*s.mult;
+ if(ci.real){s.mode='c'}else if((volU&&dens>=.85&&dens<=1.15)||(G<60&&it.volume)){s.mode='v'}else s.mode='w';
+ s.uw=us?(G>=454?'lb':'oz'):(G>=1000?'kg':'g');s.uv=us?(V>=60?'cup':V>=15?'tbsp':'tsp'):(V>=1000?'L':'ml');return s}
+function unitOf(s){return s.mode==='c'?'c':s.mode==='v'?s.uv:s.uw}
+function stockVal(key){var it=catItem(key),s=stockSetup(key),u=unitOf(s);
+ if(u==='c')return it.weight*s.mult/countInfo(it).g;var def=(s.mode==='v'?UNITS.v:UNITS.w).filter(function(x){return x[0]===u})[0];return (s.mode==='v'?it.volume:it.weight)*s.mult/def[1]}
+function numText(v,u){
+ if(u==='g'||u==='ml')return String(v>=100?Math.round(v/5)*5:Math.round(v));
+ if(u==='kg'||u==='L')return String(Math.round(v*100)/100);
+ if(u==='oz')return String(Math.round(v*10)/10);
+ var r=Math.round(v*4)/4,w=Math.floor(r),f=r-w,fc={0:'',.25:'¼',.5:'½',.75:'¾'}[f];return (w||!fc?w:'')+fc||'0'}
+function unitLabel(key,s,v){var u=unitOf(s);if(u!=='c')return (s.mode==='v'?UNITS.v:UNITS.w).filter(function(x){return x[0]===u})[0][2].replace(/^cups$/,v<=1?'cup':'cups');var ci=countInfo(catItem(key));return ci.label==='packs'?(v<=1?'pack':'packs'):ci.label}
+function qtyText(key){var it=catItem(key);if(!it)return '';var s=stockSetup(key),v=stockVal(key),u=unitOf(s),lab=unitLabel(key,s,v);return numText(v,u)+(lab?' '+lab:'')}
+function stockSetVal(key,v){var it=catItem(key),s=stockSetup(key),u=unitOf(s);if(!(v>0))return;
+ if(u==='c')s.mult=v*countInfo(it).g/it.weight;else{var def=(s.mode==='v'?UNITS.v:UNITS.w).filter(function(x){return x[0]===u})[0];s.mult=v*def[1]/(s.mode==='v'?it.volume:it.weight)}}
+function uses(key){var base=catItem(key),s=stockOf(key),G=base?base.weight*s.mult:0,out=[];RECIPE_ORDER.forEach(function(id){RECIPES[id].ING.forEach(function(it){if(pKey(it)!==key)return;out.push({id:id,amt:it.amt,ok:G>=it.weight-.5})})});return out}
+function parseQty(t){t=String(t).replace(',', '.').trim();var fr={'¼':.25,'½':.5,'¾':.75,'⅓':1/3,'⅔':2/3,'⅛':.125},mm=/^(\d+(?:\.\d+)?)?\s*(?:(\d+)\s*\/\s*(\d+)|([¼½¾⅓⅔⅛]))?/.exec(t);if(!mm)return NaN;var v=(mm[1]?parseFloat(mm[1]):0)+(mm[2]&&+mm[3]?mm[2]/mm[3]:0)+(mm[4]?fr[mm[4]]:0);return v||NaN}
+function openStock(key,keepPos){
+ var it=catItem(key);if(!it)return;var el=document.getElementById('sheet'),h=!!PAN[key],s=stockSetup(key),U=uses(key),ci=countInfo(it),u=unitOf(s),v=stockVal(key);
+ function stp(label,val,minus,plus,dis){return '<div class="prow"><span class="ptxt"><b>'+label+'</b></span><div class="stepper" style="height:44px" role="group" aria-label="'+label+'"><button style="width:36px;height:36px" data-stk="'+esc(key)+':'+minus+'" aria-label="Less"'+(dis?' disabled':'')+'>−</button><span aria-live="polite" style="min-width:86px;text-align:center"><b>'+val+'</b></span><button style="width:36px;height:36px" data-stk="'+esc(key)+':'+plus+'" aria-label="More">+</button></div></div>'}
+ var modes=[['w','Weight'],['v','Volume'],['c',ci.real?'Count':'Packs']],ul=s.mode==='c'?[]:(s.mode==='v'?UNITS.v:UNITS.w);
+ var amount='<div class="amt"><div class="between" style="gap:10px"><span class="kicker" style="color:#111">On hand</span><span class="muted" style="font-size:12px">measure by</span></div>'+
+  '<div class="seg" role="group" aria-label="Measure by" style="grid-template-columns:repeat(3,1fr)">'+modes.map(function(md){return '<button data-stk="'+esc(key)+':mode-'+md[0]+'" aria-pressed="'+(s.mode===md[0])+'">'+md[1]+'</button>'}).join('')+'</div>'+
+  '<div class="amtrow"><button class="amtbtn" data-stk="'+esc(key)+':minus" aria-label="Less">−</button><label class="amtfield"><span class="sr">Amount on hand</span><input id="stkq" data-key="'+esc(key)+'" type="text" inputmode="decimal" autocomplete="off" value="'+esc(numText(v,u))+'"><span class="amtunit">'+esc(unitLabel(key,s,v)||(ci.real?'':'packs'))+'</span></label><button class="amtbtn" data-stk="'+esc(key)+':plus" aria-label="More">+</button></div>'+
+  (ul.length?'<div class="unitrow" role="group" aria-label="Unit">'+ul.map(function(x){return '<button class="uchipb" data-stk="'+esc(key)+':unit-'+x[0]+'" aria-pressed="'+(u===x[0])+'">'+x[2]+'</button>'}).join('')+'</div>':'<span class="muted" style="font-size:12px">'+(ci.real?'About '+Math.round(ci.g)+' g each, from the recipe.':'A pack is assumed to be about '+ci.g+' g.')+'</span>')+'</div>';
+ el.innerHTML='<div class="sheetwrap'+(keepPos?' noanim':'')+'" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="'+esc(it.name)+' in your pantry">'+
+  '<div class="between"><div class="row" style="gap:12px">'+icon(it.icon[0][0],40)+'<div><span class="kicker">'+esc(it.aisle)+'</span><h2 class="h2" style="font-size:22px">'+esc(it.name)+'</h2></div></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  (h?amount+
+   '<div style="display:flex;flex-direction:column">'+
+    '<div class="prow"><span class="ptxt"><b>Bought</b><span>'+dateText(s.bought)+' · '+boughtText(s.bought)+'</span></span><button class="chip out" style="height:36px" data-stk="'+esc(key)+':today"'+(s.bought===0?' disabled':'')+'>Bought today</button></div>'+
+    (s.exp!==null?stp('Use within',s.exp+' day'+(s.exp===1?'':'s'),'expminus','expplus',s.exp<=0):'<div class="prow"><span class="ptxt"><b>Use within</b><span>Keeps. No date tracked.</span></span><button class="chip out" style="height:36px" data-stk="'+esc(key)+':expset">Set a date</button></div>')+'</div>'+
+   '<div style="display:flex;flex-direction:column;gap:6px"><span class="kicker">Enough for</span>'+U.map(function(x){return '<button class="userow" data-open="'+x.id+'"><i class="udot'+(x.ok?' ok':' no')+'"></i><span style="flex:1;min-width:0"><b>'+esc(RECIPES[x.id].title)+'</b></span><span class="muted" style="font-size:13px;white-space:nowrap">needs '+esc(x.amt)+(x.ok?'':' · short')+'</span></button>'}).join('')+'</div>'+
+   '<button class="secondary" data-stk="'+esc(key)+':used">Used up</button>'
+  :'<p style="margin:0;font-size:15px;line-height:1.5">Not in your pantry. Used in '+U.length+' recipe'+(U.length>1?'s':'')+': '+U.map(function(x){return esc(RECIPES[x.id].short||RECIPES[x.id].title)}).join(', ')+'.</p><button class="primary" data-stk="'+esc(key)+':add">Add to pantry, bought today</button>')+
+  '</div></div>';
+ if(!keepPos){var b=el.querySelector('.iconbtn');if(b)b.focus()}
+}
+function stockAct(arg){
+ var i=arg.lastIndexOf(':'),key=arg.slice(0,i),act=arg.slice(i+1),it=catItem(key),s=stockSetup(key),u=unitOf(s);
+ if(act==='plus'||act==='minus'){var st=STEP[u]||1,v=stockVal(key);if(u==='g'||u==='ml')st=v<100?10:50;var nv=Math.round((v+(act==='plus'?st:-st))/st)*st;if(nv<=0)nv=Math.min(v,st)/2;stockSetVal(key,nv)}
+ else if(act.indexOf('mode-')===0)s.mode=act.slice(5);
+ else if(act.indexOf('unit-')===0){if(s.mode==='v')s.uv=act.slice(5);else s.uw=act.slice(5)}
+ else if(act==='today'){s.bought=0;if(s.exp!==null)s.exp=SHELF[it.aisle]||7}
+ else if(act==='expplus')s.exp++;else if(act==='expminus')s.exp=Math.max(0,s.exp-1);else if(act==='expset')s.exp=7;
+ else if(act==='used'){delete PAN[key];delete STOCK[key];syncHave();syncExp();closeSheet();keep(render);toast((it?it.name:'Item')+' marked used up');return}
+ else if(act==='add'){PAN[key]=1;delete STOCK[key];stockSetup(key);syncHave();syncExp();openStock(key,true);keepUnder();toast((it?it.name:'Item')+' added to your pantry');return}
+ syncExp();openStock(key,true);keepUnder();
+}
+function stockDeduct(){
+ if(typeof ING==='undefined'||!ING)return;var f=F();
+ ING.forEach(function(it){var k=pKey(it);if(!PAN[k]||(S.haveVia&&S.haveVia[it.id]))return;var base=catItem(k),s=stockOf(k);if(!base||!base.weight)return;
+  s.mult=Math.round((s.mult-it.weight*f/base.weight)*1000)/1000;if(s.mult<=0.01){delete PAN[k];delete STOCK[k]}});
+ syncHave();syncExp();
+}
+document.addEventListener('change',function(e){var t=e.target;if(t&&t.id==='stkq'){var v=parseQty(t.value),key=t.dataset.key;if(v>0){stockSetVal(key,v)}syncExp();openStock(key,true);keepUnder()}});
+document.addEventListener('keydown',function(e){if(e.target&&e.target.id==='stkq'&&e.key==='Enter'){e.preventDefault();e.target.blur()}});
 initMark2();
