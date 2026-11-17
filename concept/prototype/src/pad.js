@@ -186,9 +186,9 @@ function profileSheet(){
  function tog(key,t,s){var on=!!P[key];return '<button class="tog" role="switch" aria-checked="'+on+'" data-ptog="'+key+'"><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>'+t+'</b><span>'+s+'</span></span><i class="sw'+(on?' on':'')+'"><i></i></i></button>'}
  function link(t,s,msg){return '<button class="plink" data-toast="'+esc(msg)+'"><span class="ptxt"><b>'+t+'</b><span>'+s+'</span></span>'+SVG.arrow+'</button>'}
  return '<div class="sheet profsheet" role="dialog" aria-modal="true" aria-label="Profile and settings">'+
-  '<div class="between"><div class="row" style="gap:12px"><span class="pava">M</span><div><h2 class="h2" style="font-size:22px">Moussa</h2><p class="muted" style="margin:2px 0 0;font-size:13px">Cooking with Ashley and Nicole</p></div></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  '<div class="row" style="gap:12px"><button class="iconbtn" data-closesheet="1" aria-label="Back">'+SVG.back+'</button><span class="pava">M</span><div><h2 class="h2" style="font-size:26px">Moussa</h2><p class="muted" style="margin:2px 0 0;font-size:13px">Cooking with Ashley and Nicole</p></div></div>'+
   '<div class="stats" style="grid-template-columns:repeat(4,1fr)"><div><b>'+cooks+'</b><span>cooks</span></div><div><b>'+(rated?(stars/rated).toFixed(1):'–')+'</b><span>avg rating</span></div><div><b>'+(cooks?Math.round(mins/cooks):0)+' min</b><span>avg cook</span></div><div><b>'+saved+'</b><span>saved</span></div></div>'+
-  '<section class="psec"><span class="kicker">Never suggested</span>'+
+  '<div class="pgrid"><div class="pcol"><section class="psec"><span class="kicker">Never suggested</span>'+
    '<p class="muted" style="margin:0;font-size:13px;line-height:1.4">Swaps and recipe picks skip these. Allergies are also flagged on any recipe that contains them.</p>'+
    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+P.never.map(function(n,i){return '<span class="chip out pchip"'+(n[1]==='allergy'?' style="border-width:1.5px"':'')+'>'+(n[1]==='allergy'?SVG.warn('#111'):'')+esc(n[0])+' <span class="muted" style="font-weight:500">'+n[1]+'</span><button data-pdel="'+i+'" aria-label="Remove '+esc(n[0])+'">'+SVG.close+'</button></span>'}).join('')+
    '<button class="chip out" style="border-style:dashed" data-toast="Adding an ingredient to avoid is mocked in this prototype">+ Add</button></div></section>'+
@@ -196,7 +196,7 @@ function profileSheet(){
    row('Temperature','Safe temperature badges',seg('temp',[['F','°F'],['C','°C']]))+
    row('Units','Default for new recipes',seg('units',[['us','US'],['metric','Metric']]))+
    row('Default servings','Recipes open scaled to this','<div class="stepper" style="height:44px" role="group" aria-label="Default servings"><button style="width:36px;height:36px" data-pserv="-1" aria-label="Fewer"'+(P.serv<=1?' disabled':'')+'>−</button><span aria-live="polite"><b>'+P.serv+'</b></span><button style="width:36px;height:36px" data-pserv="1" aria-label="More"'+(P.serv>=12?' disabled':'')+'>+</button></div>')+'</section>'+
-  '<section class="psec"><span class="kicker">While cooking</span><div style="display:flex;flex-direction:column">'+
+  '</div><div class="pcol"><section class="psec"><span class="kicker">While cooking</span><div style="display:flex;flex-direction:column">'+
    tog('awake','Keep screen awake','No dimming while a recipe is open')+
    tog('sound','Timer sounds','A chime when a timer ends')+
    tog('photo','Ask for a plate photo','Prompt at the end of every cook')+'</div></section>'+
@@ -206,13 +206,13 @@ function profileSheet(){
   '<section class="psec" style="gap:0"><span class="kicker" style="margin-bottom:6px">More</span>'+
    link('Cooking log',cooks+' cooks across '+Object.keys(LOG).filter(function(k){return LOG[k].length}).length+' recipes','The full cooking log is not built yet. Each recipe shows its own under Your cooks.')+
    link('Nutritional goals','Daily targets for calories and macros','Nutritional goals are on the backlog')+
-   link('Import recipe cards','Photograph a card to add it','Card import is not part of this prototype')+'</section>'+
+   link('Import recipe cards','Photograph a card to add it','Card import is not part of this prototype')+'</section></div></div>'+
   '<p class="muted" style="margin:0;font-size:12px;line-height:1.4">Prototype: temperature units and the never-suggested list take effect. The other settings only remember their state.</p>'+
  '</div>';
 }
 function openProfile(keepPos){
  var el=document.getElementById('sheet'),old=el.querySelector('.sheet'),y=old?old.scrollTop:0;
- el.innerHTML='<div class="sheetwrap'+(keepPos?' noanim':'')+'" data-closesheet="1">'+profileSheet()+'</div>';
+ el.innerHTML='<div class="sheetwrap full'+(keepPos?' noanim':'')+'">'+profileSheet()+'</div>';
  if(keepPos)el.querySelector('.sheet').scrollTop=y;else{var c=el.querySelector('.iconbtn');if(c)c.focus()}
 }
 
