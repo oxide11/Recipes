@@ -237,7 +237,7 @@ function cooksView(){
 }
 
 /* ================= RECIPES (library) ================= */
-var PAPER=["Udon Noodles", "Lady Rose Relish", "Nora’s Pasta Salad", "Ginger Bread", "Lemon Glaze", "Grape Jelly (two cards)", "Sourdough Cinnamon Cardamom Knots", "Hollandaise for Eggs Benedict", "Healthy Banana Oat Pancakes", "Pancakes", "Freezable Waffles", "Sherry’s Top Secret Cinnamon Buns", "Chocolate Chip Cookies", "Cinnamon Buns", "Carrot Cake", "Chocolate Chip Oatmeal Cookies", "Oh Henry Squares", "Pad Kee Mao", "Vietnamese Noodles with Lemongrass Chicken", "Yum Mustard Chicken", "Beef & Barley", "Lynd’s Focaccia", "Greek Turkey Burgers", "Clam Chowder", "Shepherd’s Pie", "Chilli Con Carne", "Sweet Cornbread", "Mom’s Sweet & Sour Meatballs", "Egg Rolls", "Bruschetta Tomato Topping", "Brown Bread", "Baked Beans", "Molasses and Oat Rolls", "Hummus", "Egg Seasoning"];
+var PAPER=["Udon Noodles", "Lady Rose Relish", "Nora’s Pasta Salad", "Ginger Bread", "Lemon Glaze", "Grape Jelly (two cards)", "Sourdough Cinnamon Cardamom Knots", "Hollandaise for Eggs Benedict", "Healthy Banana Oat Pancakes", "Freezable Waffles", "Sherry’s Top Secret Cinnamon Buns", "Cinnamon Buns", "Carrot Cake", "Chocolate Chip Oatmeal Cookies", "Oh Henry Squares", "Pad Kee Mao", "Vietnamese Noodles with Lemongrass Chicken", "Yum Mustard Chicken", "Beef & Barley", "Lynd’s Focaccia", "Greek Turkey Burgers", "Clam Chowder", "Chilli Con Carne", "Sweet Cornbread", "Mom’s Sweet & Sour Meatballs", "Egg Rolls", "Bruschetta Tomato Topping", "Brown Bread", "Baked Beans", "Molasses and Oat Rolls", "Hummus", "Egg Seasoning"];
 
 function libMins(r){var m=/(\d+)\s*hr(?:\s*(\d+))?/.exec(r.meta);if(m)return +m[1]*60+(+m[2]||0);m=/(\d+)\s*min/.exec(r.meta);return m?+m[1]:999}
 function libIds(){

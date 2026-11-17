@@ -42,7 +42,13 @@ function seedLog(){LOG={
   {date:'Nov 2',who:'Ashley',mins:31,rating:4,swapList:['Penne for linguine','1 cup cream for 1½ cups'],note:'Less cream next time.',sample:1},
   {date:'Nov 9',who:'Moussa',mins:27,rating:5,swapList:['Penne for linguine'],note:'Sauce reduced nicely. Keep the heat low once the cream goes in.',sample:1}],
  thai:[
-  {date:'Nov 5',who:'Moussa',mins:38,rating:4,swapList:['Chicken for shrimp'],note:'The chicken needed 8 minutes in the broth.',sample:1}]
+  {date:'Nov 5',who:'Moussa',mins:38,rating:4,swapList:['Chicken for shrimp'],note:'The chicken needed 8 minutes in the broth.',sample:1}],
+ cookies:[
+  {date:'Oct 19',who:'Ashley',mins:27,rating:5,swapList:[],note:'',sample:1},
+  {date:'Nov 1',who:'Nicole',mins:31,rating:4,swapList:['Dark chocolate chunks for chips'],note:'10 minutes was right for chewy centres.',sample:1},
+  {date:'Nov 14',who:'Ashley',mins:25,rating:5,swapList:[],note:'Double batch for the market.',sample:1}],
+ shepherd:[
+  {date:'Nov 8',who:'Ashley',mins:74,rating:4,swapList:['Frozen corn for peas and carrots'],note:'1 tbsp Worcestershire was enough.',sample:1}]
 }}
 seedLog();
 var D={device:'phone',orient:'landscape'},SCALE=1;
@@ -106,7 +112,7 @@ function A(key){
 }
 
 /* ================= SAFE TEMPERATURES ================= */
-var SAFE={poultry:{f:165,c:74,note:'thickest part. The juices should run clear'},seafood:{f:145,c:63,note:'thickest piece. It should be opaque and firm all the way through'}};
+var SAFE={poultry:{f:165,c:74,note:'thickest part. The juices should run clear'},seafood:{f:145,c:63,note:'thickest piece. It should be opaque and firm all the way through'},beef:{f:160,c:71,note:'centre of the meat. Ground meat should have no pink left'}};
 var THERMO='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13.5V5a2 2 0 0 1 4 0v8.5a4.5 4.5 0 1 1-4 0z"/><path d="M12 9v8"/></svg>';
 function safeFor(st){
  if(!st.protein)return null;var it=ing(st.protein);if(!it)return null;
