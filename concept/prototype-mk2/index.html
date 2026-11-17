@@ -635,6 +635,17 @@ body.darkstage #phone{border-color:#000}
 .prepgrid{display:flex;flex-direction:column;gap:20px}
 .ipad .prepgrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:32px;align-items:start}.port .prepgrid{grid-template-columns:minmax(0,1fr)}
 .pdhead .kicker{white-space:nowrap}
+
+/* ---- pantry inventory ---- */
+.ptile{align-items:center;min-height:64px}
+.ptile .ptxt span strong{color:#111;font-weight:700}
+.ptags{display:flex;gap:6px;flex-wrap:wrap}
+.ptags em{font-style:normal;font-size:11.5px;font-weight:700}
+.ptags .exp{color:var(--good)}.ptags .exp.soon{color:var(--bad)}.ptags .low{color:#111;background:#E4E4E0;border-radius:5px;padding:0 5px}
+.userow{display:flex;align-items:center;gap:10px;min-height:44px;border:none;border-bottom:1px solid #ECECE8;background:none;text-align:left;font-size:15px;cursor:pointer;padding:0}
+.udot{width:10px;height:10px;border-radius:99px;background:#BDBDB8;flex-shrink:0}.udot.ok{background:var(--good)}.udot.no{background:var(--bad)}
+.ipad .ptiles{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.ptiles{grid-template-columns:1fr}.ipad .ptiles{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}.ptile{min-height:56px}
 </style>
 </head>
 <body>
@@ -2078,7 +2089,8 @@ document.addEventListener('click',function(e){
  if(d.promote){PROMO[R.id+':'+d.promote]=1;keep(render);toast('Now the default for this recipe. The original is kept as a version.');return}
  if(d.qa){if(QA[d.qa])delete QA[d.qa];else QA[d.qa]=1;keep(render);return}
  if(d.wcart){if(CART[d.wcart])delete CART[d.wcart];else CART[d.wcart]=1;keep(render);return}
- if(d.pan){var was=!!PAN[d.pan];if(was)delete PAN[d.pan];else PAN[d.pan]=1;syncHave();keep(render);var pb=el.querySelector('b');toast((pb?pb.textContent:'Item')+(was?' marked used up':' added to your pantry'));return}
+ if(d.pan){openStock(d.pan);return}
+ if(d.stk){stockAct(d.stk);return}
  if(d.panf){S.pan.f=d.panf;keep(render);return}
  if(d.plandel!==undefined){var pd=d.plandel.split(':');PLAN[pd[0]].splice(+pd[1],1);if(!PLAN[pd[0]].length)delete PLAN[pd[0]];keep(render);return}
  if(d.prep!==undefined){S.prepDay=+d.prep;go('prep');return}
@@ -2149,7 +2161,7 @@ document.addEventListener('click',function(e){
   case 'tstart':{var ts=timerOf(S.step);ts.started=true;ts.running=true;S.dockOpen=null;var c0=scr.querySelector('.startcard');if(c0){c0.style.transition='all .3s';c0.style.transform='translateY(40px) scale(.6)';c0.style.opacity='0';setTimeout(function(){c0.remove();fitSteps()},300)}updateTimerDom();break}
   case 'prev':if(S.step>0){S.step--;dockSig='';S.dir=-1;render(true)}break;
   case 'next':{var cur=S.timers[S.step];if(cur&&cur.left<=0)cur.ack=true;dockSig='';if(S.step<STEPS.length-1){S.step++;S.dir=1;render(true)}else go('done');break}
-  case 'finish':(LOG[R.id]=LOG[R.id]||[]).push({date:'Today',who:'You',mins:S.started?Math.max(1,Math.round((Date.now()-S.started)/60000)):0,rating:S.rating,swapList:ING.filter(function(it){return S.swaps[it.id]}).map(function(it){return shownName(it)+' for '+it.name.toLowerCase()}),note:S.note});Object.keys(S.timers).forEach(function(k){S.timers[k].running=false});toast('Saved to your cooking log');setTimeout(function(){go('home',-1);recipeSeg()},900);break;
+  case 'finish':stockDeduct();(LOG[R.id]=LOG[R.id]||[]).push({date:'Today',who:'You',mins:S.started?Math.max(1,Math.round((Date.now()-S.started)/60000)):0,rating:S.rating,swapList:ING.filter(function(it){return S.swaps[it.id]}).map(function(it){return shownName(it)+' for '+it.name.toLowerCase()}),note:S.note});Object.keys(S.timers).forEach(function(k){S.timers[k].running=false});toast('Saved to your cooking log');setTimeout(function(){go('home',-1);recipeSeg()},900);break;
  }
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();var t=e.target;if((e.key==='Enter'||e.key===' ')&&t.dataset&&(t.dataset.strike||t.dataset.conv||t.dataset.focus||t.dataset.act)&&t.tagName!=='BUTTON'){e.preventDefault();t.click()}});
@@ -2556,7 +2568,7 @@ function initMark2(){
  // sample data: the second swap in every map is treated as already in the kitchen
  RECIPE_ORDER.forEach(function(id){var sets=RECIPES[id].SETS;Object.keys(sets).forEach(function(k){var l=sets[k].leaves[1];if(l&&!l.allergen&&!l.dislike)ONHAND[l.id]=1})});
  // sample data: a few things on hand are close to their date
- var n=0;[['milk',2],['egg',4],['green onion',2],['parmesan',3],['potato',5],['lemon',3],['cheddar',4],['butter',6]].forEach(function(e){if(PAN[e[0]]&&n<4){EXP[e[0]]=e[1];n++}});
+ STOCK={};var seedExp={milk:2,parmesan:3,egg:4,potato:5};catalog().forEach(function(c){if(PAN[c.key]){var s=stockOf(c.key);s.bought=1+hashStr(c.key)%11;if(seedExp[c.key]){s.exp=seedExp[c.key]}else if(s.exp!==null){s.exp=Math.max(6,s.exp-Math.min(s.bought,s.exp-6))}}});syncExp();
 }
 
 /* ---- F8 receipt prices ---- */
@@ -2626,7 +2638,7 @@ function myTimeLine(){
 
 /* ---- F5 use it up ---- */
 function useItUp(){
- var keys=Object.keys(EXP).filter(function(k){return PAN[k]}).sort(function(a,b){return EXP[a]-EXP[b]});if(!keys.length||S.tag)return '';
+ var keys=Object.keys(EXP).filter(function(k){return PAN[k]}).sort(function(a,b){return EXP[a]-EXP[b]}).slice(0,4);if(!keys.length||S.tag)return '';
  var cat={};catalog().forEach(function(c){cat[c.key]=c.it});
  var best=null;RECIPE_ORDER.forEach(function(id){var r=RECIPES[id],hit=r.ING.filter(function(it){return EXP[pKey(it)]&&PAN[pKey(it)]}),c=coverage(id),sc=hit.length*10+c[0]/c[1];if(hit.length&&(!best||sc>best.sc))best={id:id,sc:sc,hit:hit,miss:c[1]-c[0]}});
  return '<section class="useup"><div class="between"><p class="kicker" style="color:#111">Use it up</p><button class="linkbtn" style="font-size:13px" data-go="pantry">Pantry</button></div>'+
@@ -2782,6 +2794,57 @@ function prepView(){
   '<div class="prepgrid"><div style="display:flex;flex-direction:column;gap:12px;min-width:0"><span class="kicker">One timeline</span>'+tl+'</div><div style="display:flex;flex-direction:column;gap:16px;min-width:0">'+sharedCard+
    '<p class="muted" style="margin:0;font-size:12px;line-height:1.45">Steps are ordered so your hands are on one thing at a time and waits overlap. It does not yet account for oven space or the number of burners. This is a plan only: cooking mode still runs one recipe at a time.</p></div></div>'+
   '</div><div class="bottombar"><button class="primary" data-open="'+m.rows[0].r.id+'">Start with '+esc(names[m.rows[0].lane])+'</button></div>';
+}
+
+/* ---- pantry inventory: how much, bought when, use by ---- */
+var STOCK={},SHELF={'Produce':8,'Meat and seafood':3,'Dairy and eggs':12};
+function catItem(key){var f=catalog().filter(function(c){return c.key===key})[0];return f?f.it:null}
+function pv(str){var mm=/^(\d+(?:\.\d+)?)?([½¼¾⅓⅔⅛])?\s?(.*)$/.exec(str||'');if(!mm||(!mm[1]&&!mm[2]))return null;var v=(mm[1]?parseFloat(mm[1]):0)+({'½':.5,'¼':.25,'¾':.75,'⅓':1/3,'⅔':2/3,'⅛':.125}[mm[2]]||0);return v?{v:v,u:mm[3].replace(/\s+/g,' ').trim()}:null}
+function stockOf(key){
+ if(!STOCK[key]){var it=catItem(key),sh=it?SHELF[it.aisle]:null;STOCK[key]={mult:2+hashStr(key)%3,bought:0,exp:sh===undefined||sh===null?null:sh}}
+ return STOCK[key];
+}
+function syncExp(){EXP={};Object.keys(PAN).forEach(function(k){var s=STOCK[k];if(s&&s.exp!==null&&s.exp<=5)EXP[k]=Math.max(0,s.exp)})}
+function qtyText(key){var it=catItem(key),s=stockOf(key);if(!it)return '';return pv(it.amt)?scaleQty(it.amt,s.mult):'×'+s.mult}
+function boughtText(d){return d===0?'today':d===1?'yesterday':d+' days ago'}
+function dateText(d){var day=16-d,mo='Nov';if(day<1){day+=31;mo='Oct'}return mo+' '+day}
+function uses(key){var it0=catItem(key),base=it0?pv(it0.amt):null,s=stockOf(key),out=[];RECIPE_ORDER.forEach(function(id){RECIPES[id].ING.forEach(function(it){if(pKey(it)!==key)return;var q=pv(it.amt),cmp=base&&q&&q.u===base.u;out.push({id:id,amt:it.amt,ok:cmp?base.v*s.mult>=q.v-1e-9:null})})});return out}
+function isLow(key){return uses(key).some(function(u){return u.ok===false})}
+function panTile(c){
+ var h=!!PAN[c.key],it=c.it,s=h?stockOf(c.key):null,ex=h&&s.exp!==null&&s.exp<=5,low=h&&isLow(c.key);
+ return '<button class="ptile'+(h?' on':'')+'" data-pan="'+esc(c.key)+'" aria-haspopup="dialog" aria-label="'+esc(it.name)+(h?', '+qtyText(c.key)+' on hand, bought '+boughtText(s.bought):', not in the pantry. Add it')+'" style="'+(h?'background:'+it.color+'24':'')+'">'+icon(it.icon[0][0],30)+
+  '<span class="ptxt"><b>'+esc(it.name)+'</b>'+(h?'<span><strong>'+esc(qtyText(c.key))+'</strong> · bought '+boughtText(s.bought)+'</span>'+(ex||low?'<span class="ptags">'+(ex?'<em class="exp'+(s.exp<=2?' soon':'')+'">use within '+s.exp+' day'+(s.exp===1?'':'s')+'</em>':'')+(low?'<em class="low">running low</em>':'')+'</span>':''):'<span>'+c.n+' recipe'+(c.n>1?'s':'')+'</span>')+'</span>'+
+  (h?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="M9 6l6 6-6 6"/></svg>':'<i class="pchk" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></i>')+'</button>';
+}
+function openStock(key,keepPos){
+ var it=catItem(key);if(!it)return;var el=document.getElementById('sheet'),h=!!PAN[key],s=stockOf(key),U=uses(key);
+ function stp(label,val,minus,plus,dis){return '<div class="prow"><span class="ptxt"><b>'+label+'</b></span><div class="stepper" style="height:44px" role="group" aria-label="'+label+'"><button style="width:36px;height:36px" data-stk="'+esc(key)+':'+minus+'" aria-label="Less"'+(dis?' disabled':'')+'>−</button><span aria-live="polite" style="min-width:86px;text-align:center"><b>'+val+'</b></span><button style="width:36px;height:36px" data-stk="'+esc(key)+':'+plus+'" aria-label="More">+</button></div></div>'}
+ el.innerHTML='<div class="sheetwrap'+(keepPos?' noanim':'')+'" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="'+esc(it.name)+' in your pantry">'+
+  '<div class="between"><div class="row" style="gap:12px">'+icon(it.icon[0][0],40)+'<div><span class="kicker">'+esc(it.aisle)+'</span><h2 class="h2" style="font-size:22px">'+esc(it.name)+'</h2></div></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  (h?
+   '<div style="display:flex;flex-direction:column">'+stp('On hand',esc(qtyText(key)),'minus','plus',s.mult<=.5)+
+    '<div class="prow"><span class="ptxt"><b>Bought</b><span>'+dateText(s.bought)+' · '+boughtText(s.bought)+'</span></span><button class="chip out" style="height:36px" data-stk="'+esc(key)+':today"'+(s.bought===0?' disabled':'')+'>Bought today</button></div>'+
+    (s.exp!==null?stp('Use within',s.exp+' day'+(s.exp===1?'':'s'),'expminus','expplus',s.exp<=0):'<div class="prow"><span class="ptxt"><b>Use within</b><span>Keeps. No date tracked.</span></span><button class="chip out" style="height:36px" data-stk="'+esc(key)+':expset">Set a date</button></div>')+'</div>'+
+   '<div style="display:flex;flex-direction:column;gap:6px"><span class="kicker">Enough for</span>'+U.map(function(u){return '<button class="userow" data-open="'+u.id+'"><i class="udot'+(u.ok===true?' ok':u.ok===false?' no':'')+'"></i><span style="flex:1;min-width:0"><b>'+esc(RECIPES[u.id].title)+'</b></span><span class="muted" style="font-size:13px;white-space:nowrap">needs '+esc(u.amt)+(u.ok===false?' · short':u.ok===null?' · check':'')+'</span></button>'}).join('')+'</div>'+
+   '<button class="secondary" data-stk="'+esc(key)+':used">Used up</button>'
+  :'<p style="margin:0;font-size:15px;line-height:1.5">Not in your pantry. Used in '+U.length+' recipe'+(U.length>1?'s':'')+': '+U.map(function(u){return esc(RECIPES[u.id].short||RECIPES[u.id].title)}).join(', ')+'.</p><button class="primary" data-stk="'+esc(key)+':add">Add to pantry, bought today</button>')+
+  '</div></div>';
+ if(!keepPos){var b=el.querySelector('.iconbtn');if(b)b.focus()}
+}
+function stockAct(arg){
+ var i=arg.lastIndexOf(':'),key=arg.slice(0,i),act=arg.slice(i+1),it=catItem(key),s=stockOf(key);
+ if(act==='plus')s.mult+=.5;else if(act==='minus')s.mult=Math.max(.5,s.mult-.5);
+ else if(act==='today'){s.bought=0;if(s.exp!==null)s.exp=SHELF[it.aisle]||7}
+ else if(act==='expplus')s.exp++;else if(act==='expminus')s.exp=Math.max(0,s.exp-1);else if(act==='expset')s.exp=7;
+ else if(act==='used'){delete PAN[key];delete STOCK[key];syncHave();syncExp();closeSheet();keep(render);toast((it?it.name:'Item')+' marked used up');return}
+ else if(act==='add'){PAN[key]=1;delete STOCK[key];stockOf(key);syncHave();syncExp();openStock(key,true);keepUnder();toast((it?it.name:'Item')+' added to your pantry');return}
+ syncExp();openStock(key,true);keepUnder();
+}
+function stockDeduct(){
+ if(typeof ING==='undefined'||!ING)return;var f=F();
+ ING.forEach(function(it){var k=pKey(it);if(!PAN[k]||(S.haveVia&&S.haveVia[it.id]))return;var base=catItem(k),b=base?pv(base.amt):null,q=pv(it.amt),s=stockOf(k);
+  if(b&&q&&b.u===q.u){s.mult=Math.round((s.mult-q.v*f/b.v)*100)/100;if(s.mult<=0.01){delete PAN[k];delete STOCK[k]}}});
+ syncHave();syncExp();
 }
 initMark2();
 

@@ -542,7 +542,8 @@ document.addEventListener('click',function(e){
  if(d.promote){PROMO[R.id+':'+d.promote]=1;keep(render);toast('Now the default for this recipe. The original is kept as a version.');return}
  if(d.qa){if(QA[d.qa])delete QA[d.qa];else QA[d.qa]=1;keep(render);return}
  if(d.wcart){if(CART[d.wcart])delete CART[d.wcart];else CART[d.wcart]=1;keep(render);return}
- if(d.pan){var was=!!PAN[d.pan];if(was)delete PAN[d.pan];else PAN[d.pan]=1;syncHave();keep(render);var pb=el.querySelector('b');toast((pb?pb.textContent:'Item')+(was?' marked used up':' added to your pantry'));return}
+ if(d.pan){openStock(d.pan);return}
+ if(d.stk){stockAct(d.stk);return}
  if(d.panf){S.pan.f=d.panf;keep(render);return}
  if(d.plandel!==undefined){var pd=d.plandel.split(':');PLAN[pd[0]].splice(+pd[1],1);if(!PLAN[pd[0]].length)delete PLAN[pd[0]];keep(render);return}
  if(d.prep!==undefined){S.prepDay=+d.prep;go('prep');return}
@@ -613,7 +614,7 @@ document.addEventListener('click',function(e){
   case 'tstart':{var ts=timerOf(S.step);ts.started=true;ts.running=true;S.dockOpen=null;var c0=scr.querySelector('.startcard');if(c0){c0.style.transition='all .3s';c0.style.transform='translateY(40px) scale(.6)';c0.style.opacity='0';setTimeout(function(){c0.remove();fitSteps()},300)}updateTimerDom();break}
   case 'prev':if(S.step>0){S.step--;dockSig='';S.dir=-1;render(true)}break;
   case 'next':{var cur=S.timers[S.step];if(cur&&cur.left<=0)cur.ack=true;dockSig='';if(S.step<STEPS.length-1){S.step++;S.dir=1;render(true)}else go('done');break}
-  case 'finish':(LOG[R.id]=LOG[R.id]||[]).push({date:'Today',who:'You',mins:S.started?Math.max(1,Math.round((Date.now()-S.started)/60000)):0,rating:S.rating,swapList:ING.filter(function(it){return S.swaps[it.id]}).map(function(it){return shownName(it)+' for '+it.name.toLowerCase()}),note:S.note});Object.keys(S.timers).forEach(function(k){S.timers[k].running=false});toast('Saved to your cooking log');setTimeout(function(){go('home',-1);recipeSeg()},900);break;
+  case 'finish':stockDeduct();(LOG[R.id]=LOG[R.id]||[]).push({date:'Today',who:'You',mins:S.started?Math.max(1,Math.round((Date.now()-S.started)/60000)):0,rating:S.rating,swapList:ING.filter(function(it){return S.swaps[it.id]}).map(function(it){return shownName(it)+' for '+it.name.toLowerCase()}),note:S.note});Object.keys(S.timers).forEach(function(k){S.timers[k].running=false});toast('Saved to your cooking log');setTimeout(function(){go('home',-1);recipeSeg()},900);break;
  }
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();var t=e.target;if((e.key==='Enter'||e.key===' ')&&t.dataset&&(t.dataset.strike||t.dataset.conv||t.dataset.focus||t.dataset.act)&&t.tagName!=='BUTTON'){e.preventDefault();t.click()}});
