@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shopping list</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#111111}a:hover{color:#000000}
+</style>
+</helmet>
+<div style="width: 390px; height: 1500px; position: relative; background: #FFFFFF; font-family: Inter, sans-serif; color: #111111; overflow: hidden">
+  <div style="padding: 52px 20px 120px; display: flex; flex-direction: column; gap: 18px">
+    <div style="display: flex; align-items: center; gap: 14px">
+      <a href="Main.dc.html" aria-label="Back" style="width: 44px; height: 44px; border-radius: 999px; background: #F2F2F0; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+      </a>
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.02em">Shopping list</h1>
+        <p style="margin: 0; font-size: 13px; color: #595954">This week · Shakshuka, Squash soup, Pesto pasta</p>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <span style="font-size: 14px; font-weight: 700">{{ progressText }}</span>
+        <span style="font-size: 13px; color: #595954">Est. {{ estTotal }}</span>
+      </div>
+      <div style="height: 6px; border-radius: 3px; background: #E4E4E0; overflow: hidden" aria-hidden="true"><div style="{{ progressStyle }}"></div></div>
+    </div>
+
+    <div role="group" aria-label="Group by" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: #F2F2F0">
+      <sc-for list="{{ groupModes }}" as="g" hint-placeholder-count="2">
+        <button onClick="{{ g.pick }}" aria-pressed="{{ g.pressed }}" style="{{ g.style }}">{{ g.label }}</button>
+      </sc-for>
+    </div>
+
+    <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="3">
+      <section style="display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1.5px solid #111111; padding-bottom: 6px">
+          <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700">{{ sec.title }}</h2>
+          <span style="font-size: 12px; font-weight: 600; color: #595954">{{ sec.count }}</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+          <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="2">
+            <button onClick="{{ it.toggle }}" aria-pressed="{{ it.pressed }}" aria-label="{{ it.aria }}" style="{{ it.style }}">
+              <span style="{{ it.checkStyle }}" aria-hidden="true">
+                <sc-if value="{{ it.got }}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+              </span>
+              <span style="{{ it.iconsStyle }}">
+                <sc-for list="{{ it.icons }}" as="ic" hint-placeholder-count="2">
+                <span style="{{ ic.box }}">
+                  <sc-if value="{{ ic.tomato }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="15.5" r="10.5" fill="#E5392B"></circle><ellipse cx="10" cy="12" rx="3" ry="2" fill="#F07A6E"></ellipse><path d="M14 6.5l1.6 2.6 3-.8-1.8 2.3 2.4 1.6-3 .3L14 15l-1.2-2.8-3-.3 2.4-1.6-1.8-2.3 3 .8z" fill="#2E9E4F"></path></svg></sc-if>
+                  <sc-if value="{{ ic.pepper }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 7c-3-2-8-1-8.5 4-.4 4 .5 9 3 12 1.5 1.8 3.5 1.2 4.5 0 .5.6 1.5.6 2 0 1 1.2 3 1.8 4.5 0 2.5-3 3.4-8 3-12C22 6 17 5 14 7z" fill="#2E9E4F"></path><path d="M14 8v14" stroke="#1E7F3E" stroke-width="1.2" stroke-linecap="round" opacity="0.6"></path><path d="M14 7c0-2 .8-3.6 2.6-4.2" stroke="#1E7F3E" stroke-width="2" fill="none" stroke-linecap="round"></path></svg></sc-if>
+                  <sc-if value="{{ ic.onion }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 3c1 3 9 6 9 13a9 9 0 0 1-18 0c0-7 8-10 9-13z" fill="#7A4BB5"></path><path d="M14 6c-2 4-5 6-5 10.5S11 24 14 24.5M14 6c2 4 5 6 5 10.5S17 24 14 24.5" stroke="#B79AD9" stroke-width="1.2" fill="none"></path></svg></sc-if>
+                  <sc-if value="{{ ic.aubergine }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M9 9c3-3 8-2 11 2 4 5 5 12 1 14.5-4 2.5-10-1-12.5-6S6 12 9 9z" fill="#4B2E83"></path><ellipse cx="14" cy="15" rx="2" ry="4" fill="#7A5AB0" transform="rotate(-35 14 15)"></ellipse><path d="M8 10c-1-2 0-4 2-5 1 1.5 3 2 5 1.5-1 2-4 4-7 3.5z" fill="#2E9E4F"></path></svg></sc-if>
+                  <sc-if value="{{ ic.squash }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M11 4h6v6c4 2 6 6 6 9a9 7 0 0 1-18 0c0-3 2-7 6-9z" fill="#F58A1F"></path><path d="M11 4h6v3h-6z" fill="#D9CDB8"></path><path d="M14 2v3" stroke="#6B5A3E" stroke-width="2" stroke-linecap="round"></path><ellipse cx="14" cy="19" rx="3" ry="2.5" fill="#F7A85A"></ellipse></svg></sc-if>
+                  <sc-if value="{{ ic.basil }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 25V12" stroke="#1E7F3E" stroke-width="1.8" stroke-linecap="round"></path><path d="M14 13c-6 0-9-4-8-9 5 0 8 3 8 9z" fill="#2E9E4F"></path><path d="M14 16c5 0 8-3 8-8-5 0-8 3-8 8z" fill="#3DB862"></path><path d="M14 21c-4 0-7-2-7-5 4 0 7 2 7 5z" fill="#2E9E4F"></path></svg></sc-if>
+                  <sc-if value="{{ ic.lemon }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><ellipse cx="14" cy="15" rx="10" ry="8" fill="#F7D23A" transform="rotate(-20 14 15)"></ellipse><path d="M4.5 18.5l-2 1M23.5 11.5l2-1" stroke="#C9A800" stroke-width="2" stroke-linecap="round"></path><ellipse cx="11" cy="12" rx="3" ry="1.6" fill="#FBE68A" transform="rotate(-20 11 12)"></ellipse></svg></sc-if>
+                  <sc-if value="{{ ic.cube }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 4l9 4.5v10L14 23l-9-4.5v-10z" fill="#F3EEDF" stroke="#A89C7E" stroke-width="1.3" stroke-linejoin="round"></path><path d="M5 8.5L14 13l9-4.5M14 13v10" stroke="#A89C7E" stroke-width="1.3" fill="none" stroke-linejoin="round"></path></svg></sc-if>
+                  <sc-if value="{{ ic.wedge }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M4 20L24 9v11z" fill="#F2D98A" stroke="#C9A800" stroke-width="1.3" stroke-linejoin="round"></path><path d="M4 20h20v3H4z" fill="#E6C66A" stroke="#C9A800" stroke-width="1.3" stroke-linejoin="round"></path><circle cx="17" cy="16" r="1.4" fill="#E6C66A"></circle><circle cx="20.5" cy="18" r="1" fill="#E6C66A"></circle></svg></sc-if>
+                  <sc-if value="{{ ic.penne }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M5 9l9-4 2 5-9 4z" fill="#E8DFC9" stroke="#A89C7E" stroke-width="1.2" stroke-linejoin="round"></path><path d="M9 16l9-4 2 5-9 4z" fill="#E8DFC9" stroke="#A89C7E" stroke-width="1.2" stroke-linejoin="round"></path><path d="M14 22l8-3.5 1.5 4-8 3.5z" fill="#E8DFC9" stroke="#A89C7E" stroke-width="1.2" stroke-linejoin="round"></path></svg></sc-if>
+                  <sc-if value="{{ ic.can }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><rect x="6" y="5" width="16" height="19" rx="2" fill="#D6D6D1"></rect><rect x="6" y="9" width="16" height="11" fill="#E5392B"></rect><circle cx="14" cy="14.5" r="3" fill="#FFFFFF" opacity="0.9"></circle></svg></sc-if>
+                  <sc-if value="{{ ic.bottle }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M12 3h4v4l2 3v14a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1V10l2-3z" fill="#8C9A2B"></path><rect x="12" y="2" width="4" height="2.5" rx="0.8" fill="#3A3A38"></rect><rect x="11" y="13" width="6" height="6" rx="1" fill="#FFFFFF" opacity="0.85"></rect></svg></sc-if>
+                  <sc-if value="{{ ic.egg }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 3c4.5 0 8.5 7 8.5 13a8.5 8.5 0 0 1-17 0C5.5 10 9.5 3 14 3z" fill="#FFF8E8" stroke="#D9CBA8" stroke-width="1.4"></path></svg></sc-if>
+                  <sc-if value="{{ ic.jar }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><rect x="7" y="4" width="14" height="5" rx="1.5" fill="#3A3A38"></rect><rect x="6" y="9" width="16" height="16" rx="3" fill="#F58A1F"></rect><rect x="9" y="13" width="10" height="6" rx="1" fill="#FFFFFF" opacity="0.85"></rect></svg></sc-if>
+                </span>
+                </sc-for>
+              </span>
+              <span style="{{ it.nameStyle }}">{{ it.name }}</span>
+              <span style="font-size: 12px; line-height: 15px; color: #3A3A38">{{ it.qty }}</span>
+              <span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #FFFFFF; color: #111111; border: 1px solid #D6D6D1">{{ it.tag }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+    </sc-for>
+
+    <section style="display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 18px; background: #F2F2F0">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <h2 style="margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase">Already in your pantry</h2>
+        <span style="font-size: 12px; color: #595954">{{ haveCount }}</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{ have }}" as="h" hint-placeholder-count="5">
+          <span style="display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px 0 6px; border-radius: 999px; background: #FFFFFF; font-size: 13px; font-weight: 600">
+            <span style="display: block; width: 28px; height: 28px">
+              <sc-for list="{{ h.icons }}" as="ic" hint-placeholder-count="1">
+                <span style="{{ ic.box }}">
+                  <sc-if value="{{ ic.tomato }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="15.5" r="10.5" fill="#E5392B"></circle><ellipse cx="10" cy="12" rx="3" ry="2" fill="#F07A6E"></ellipse><path d="M14 6.5l1.6 2.6 3-.8-1.8 2.3 2.4 1.6-3 .3L14 15l-1.2-2.8-3-.3 2.4-1.6-1.8-2.3 3 .8z" fill="#2E9E4F"></path></svg></sc-if>
+                  <sc-if value="{{ ic.pepper }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 7c-3-2-8-1-8.5 4-.4 4 .5 9 3 12 1.5 1.8 3.5 1.2 4.5 0 .5.6 1.5.6 2 0 1 1.2 3 1.8 4.5 0 2.5-3 3.4-8 3-12C22 6 17 5 14 7z" fill="#2E9E4F"></path><path d="M14 8v14" stroke="#1E7F3E" stroke-width="1.2" stroke-linecap="round" opacity="0.6"></path><path d="M14 7c0-2 .8-3.6 2.6-4.2" stroke="#1E7F3E" stroke-width="2" fill="none" stroke-linecap="round"></path></svg></sc-if>
+                  <sc-if value="{{ ic.onion }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 3c1 3 9 6 9 13a9 9 0 0 1-18 0c0-7 8-10 9-13z" fill="#7A4BB5"></path><path d="M14 6c-2 4-5 6-5 10.5S11 24 14 24.5M14 6c2 4 5 6 5 10.5S17 24 14 24.5" stroke="#B79AD9" stroke-width="1.2" fill="none"></path></svg></sc-if>
+                  <sc-if value="{{ ic.aubergine }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M9 9c3-3 8-2 11 2 4 5 5 12 1 14.5-4 2.5-10-1-12.5-6S6 12 9 9z" fill="#4B2E83"></path><ellipse cx="14" cy="15" rx="2" ry="4" fill="#7A5AB0" transform="rotate(-35 14 15)"></ellipse><path d="M8 10c-1-2 0-4 2-5 1 1.5 3 2 5 1.5-1 2-4 4-7 3.5z" fill="#2E9E4F"></path></svg></sc-if>
+                  <sc-if value="{{ ic.squash }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M11 4h6v6c4 2 6 6 6 9a9 7 0 0 1-18 0c0-3 2-7 6-9z" fill="#F58A1F"></path><path d="M11 4h6v3h-6z" fill="#D9CDB8"></path><path d="M14 2v3" stroke="#6B5A3E" stroke-width="2" stroke-linecap="round"></path><ellipse cx="14" cy="19" rx="3" ry="2.5" fill="#F7A85A"></ellipse></svg></sc-if>
+                  <sc-if value="{{ ic.basil }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 25V12" stroke="#1E7F3E" stroke-width="1.8" stroke-linecap="round"></path><path d="M14 13c-6 0-9-4-8-9 5 0 8 3 8 9z" fill="#2E9E4F"></path><path d="M14 16c5 0 8-3 8-8-5 0-8 3-8 8z" fill="#3DB862"></path><path d="M14 21c-4 0-7-2-7-5 4 0 7 2 7 5z" fill="#2E9E4F"></path></svg></sc-if>
+                  <sc-if value="{{ ic.lemon }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><ellipse cx="14" cy="15" rx="10" ry="8" fill="#F7D23A" transform="rotate(-20 14 15)"></ellipse><path d="M4.5 18.5l-2 1M23.5 11.5l2-1" stroke="#C9A800" stroke-width="2" stroke-linecap="round"></path><ellipse cx="11" cy="12" rx="3" ry="1.6" fill="#FBE68A" transform="rotate(-20 11 12)"></ellipse></svg></sc-if>
+                  <sc-if value="{{ ic.cube }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 4l9 4.5v10L14 23l-9-4.5v-10z" fill="#F3EEDF" stroke="#A89C7E" stroke-width="1.3" stroke-linejoin="round"></path><path d="M5 8.5L14 13l9-4.5M14 13v10" stroke="#A89C7E" stroke-width="1.3" fill="none" stroke-linejoin="round"></path></svg></sc-if>
+                  <sc-if value="{{ ic.wedge }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M4 20L24 9v11z" fill="#F2D98A" stroke="#C9A800" stroke-width="1.3" stroke-linejoin="round"></path><path d="M4 20h20v3H4z" fill="#E6C66A" stroke="#C9A800" stroke-width="1.3" stroke-linejoin="round"></path><circle cx="17" cy="16" r="1.4" fill="#E6C66A"></circle><circle cx="20.5" cy="18" r="1" fill="#E6C66A"></circle></svg></sc-if>
+                  <sc-if value="{{ ic.penne }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M5 9l9-4 2 5-9 4z" fill="#E8DFC9" stroke="#A89C7E" stroke-width="1.2" stroke-linejoin="round"></path><path d="M9 16l9-4 2 5-9 4z" fill="#E8DFC9" stroke="#A89C7E" stroke-width="1.2" stroke-linejoin="round"></path><path d="M14 22l8-3.5 1.5 4-8 3.5z" fill="#E8DFC9" stroke="#A89C7E" stroke-width="1.2" stroke-linejoin="round"></path></svg></sc-if>
+                  <sc-if value="{{ ic.can }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><rect x="6" y="5" width="16" height="19" rx="2" fill="#D6D6D1"></rect><rect x="6" y="9" width="16" height="11" fill="#E5392B"></rect><circle cx="14" cy="14.5" r="3" fill="#FFFFFF" opacity="0.9"></circle></svg></sc-if>
+                  <sc-if value="{{ ic.bottle }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M12 3h4v4l2 3v14a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1V10l2-3z" fill="#8C9A2B"></path><rect x="12" y="2" width="4" height="2.5" rx="0.8" fill="#3A3A38"></rect><rect x="11" y="13" width="6" height="6" rx="1" fill="#FFFFFF" opacity="0.85"></rect></svg></sc-if>
+                  <sc-if value="{{ ic.egg }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 3c4.5 0 8.5 7 8.5 13a8.5 8.5 0 0 1-17 0C5.5 10 9.5 3 14 3z" fill="#FFF8E8" stroke="#D9CBA8" stroke-width="1.4"></path></svg></sc-if>
+                  <sc-if value="{{ ic.jar }}" hint-placeholder-val="{{ false }}"><svg width="100%" height="100%" viewBox="0 0 28 28" aria-hidden="true"><rect x="7" y="4" width="14" height="5" rx="1.5" fill="#3A3A38"></rect><rect x="6" y="9" width="16" height="16" rx="3" fill="#F58A1F"></rect><rect x="9" y="13" width="10" height="6" rx="1" fill="#FFFFFF" opacity="0.85"></rect></svg></sc-if>
+                </span>
+              </sc-for>
+            </span>
+            {{ h.name }}
+          </span>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 20px 30px; background: #FFFFFF; border-top: 1px solid #ECECE8; display: flex; gap: 10px">
+    <button style="flex: 1; height: 54px; border-radius: 14px; border: 1.5px solid #D6D6D1; background: #FFFFFF; font-family: Inter, sans-serif; font-size: 15px; font-weight: 700; color: #111111">Share</button>
+    <button style="flex: 2; height: 54px; border-radius: 14px; border: none; background: #111111; color: #FFFFFF; font-family: Inter, sans-serif; font-size: 15px; font-weight: 700">Start guided shopping</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { by: 'aisle', got: { pepper: true } };
+  }
+  renderVals() {
+    var self = this;
+    var TYPES = ["tomato", "pepper", "onion", "aubergine", "squash", "basil", "lemon", "cube", "wedge", "penne", "can", "bottle", "egg", "jar"];
+    var ITEMS = [
+      { id: 'pepper', name: 'Green pepper', qty: '1 medium · 150 g', aisle: 'Produce', recipe: 'Shakshuka', color: '#2E9E4F', icon: ['pepper', 1], price: 1.50 },
+      { id: 'aubergine', name: 'Aubergine', qty: '1 small · replaces mushrooms', aisle: 'Produce', recipe: 'Shakshuka', color: '#4B2E83', icon: ['aubergine', 1], price: 1.20 },
+      { id: 'squash', name: 'Butternut squash', qty: '1 large · about 1 kg', aisle: 'Produce', recipe: 'Squash soup', color: '#F58A1F', icon: ['squash', 1], price: 3.00 },
+      { id: 'basil', name: 'Basil', qty: '2 bunches · 60 g leaves', aisle: 'Produce', recipe: 'Pesto pasta', color: '#2E9E4F', icon: ['basil', 2], price: 4.00 },
+      { id: 'lemon', name: 'Lemon', qty: '1 · zest and juice', aisle: 'Produce', recipe: 'Pesto pasta', color: '#F7D23A', icon: ['lemon', 1], price: 0.80 },
+      { id: 'feta', name: 'Feta', qty: '60 g · buy a 200 g block', aisle: 'Dairy and eggs', recipe: 'Shakshuka', color: '#E8DFC9', icon: ['cube', 1], price: 4.50 },
+      { id: 'parm', name: 'Parmesan', qty: '50 g · 1 small wedge', aisle: 'Dairy and eggs', recipe: 'Pesto pasta', color: '#F7D23A', icon: ['wedge', 1], price: 6.00 },
+      { id: 'penne', name: 'Penne', qty: '250 g · half a bag', aisle: 'Dry goods', recipe: 'Pesto pasta', color: '#E8DFC9', icon: ['penne', 1], price: 2.50 }
+    ];
+    var HAVE = [
+      { name: 'Crushed tomatoes', icon: 'can' }, { name: 'Red onion', icon: 'onion' }, { name: 'Olive oil', icon: 'bottle' },
+      { name: 'Eggs', icon: 'egg' }, { name: 'Cumin + paprika', icon: 'jar' }
+    ];
+    function iconList(type, n, size) {
+      var out = [];
+      for (var i = 0; i < n; i++) {
+        var o = { box: 'display: block; width: ' + size + 'px; height: ' + size + 'px' };
+        TYPES.forEach(function (t) { o[t] = t === type; });
+        out.push(o);
+      }
+      return out;
+    }
+    var by = this.state.by, got = this.state.got;
+    var order = by === 'aisle' ? ['Produce', 'Dairy and eggs', 'Dry goods'] : ['Shakshuka', 'Squash soup', 'Pesto pasta'];
+    var sections = order.map(function (key) {
+      var items = ITEMS.filter(function (it) { return (by === 'aisle' ? it.aisle : it.recipe) === key; });
+      var left = items.filter(function (it) { return !got[it.id]; }).length;
+      return {
+        title: key,
+        count: left === 0 ? 'All in cart' : left + ' to get',
+        items: items.map(function (it) {
+          var g = !!got[it.id];
+          var size = it.icon[1] === 1 ? 56 : 44;
+          return {
+            name: it.name, qty: it.qty, tag: by === 'aisle' ? it.recipe : it.aisle,
+            got: g, pressed: g ? 'true' : 'false',
+            aria: it.name + ', ' + it.qty + (g ? ', in cart' : ''),
+            toggle: function () { var n = Object.assign({}, self.state.got); n[it.id] = !n[it.id]; self.setState({ got: n }); },
+            icons: iconList(it.icon[0], it.icon[1], size),
+            style: 'position: relative; min-height: 176px; padding: 14px 12px 12px; border-radius: 18px; border: ' + (g ? '1.5px solid #E4E4E0' : '1.5px solid transparent') + '; background: ' + (g ? '#FFFFFF' : it.color + '24') + '; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; text-align: center; font-family: Inter, sans-serif; color: #111111; cursor: pointer; opacity: ' + (g ? '0.55' : '1'),
+            checkStyle: 'position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; border-radius: 9px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; ' + (g ? 'background: #111111; border: 2px solid #111111;' : 'background: #FFFFFF; border: 2px solid #BDBDB8;'),
+            iconsStyle: 'display: flex; justify-content: center; margin-bottom: 4px; flex: 1; align-items: center',
+            nameStyle: 'font-size: 15px; font-weight: 700; line-height: 18px; ' + (g ? 'text-decoration: line-through;' : '')
+          };
+        })
+      };
+    });
+    var total = ITEMS.length, inCart = ITEMS.filter(function (it) { return got[it.id]; }).length;
+    var est = ITEMS.reduce(function (a, it) { return a + it.price; }, 0);
+    return {
+      sections: sections,
+      progressText: inCart + ' of ' + total + ' in your cart',
+      progressStyle: 'height: 6px; background: #111111; width: ' + Math.round(100 * inCart / total) + '%',
+      estTotal: '$' + est.toFixed(2),
+      have: HAVE.map(function (h) { return { name: h.name, icons: iconList(h.icon, 1, 28) }; }),
+      haveCount: HAVE.length + ' items',
+      groupModes: [['aisle', 'By aisle'], ['recipe', 'By recipe']].map(function (m) {
+        var on = m[0] === by;
+        return { label: m[1], pressed: on ? 'true' : 'false', pick: function () { self.setState({ by: m[0] }); },
+          style: 'height: 38px; border-radius: 10px; border: none; font-family: Inter, sans-serif; font-size: 14px; font-weight: ' + (on ? '700' : '600') + '; cursor: pointer; ' + (on ? 'background: #111111; color: #FFFFFF;' : 'background: transparent; color: #3A3A38;') };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Recipe: Shakshuka</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#111111}a:hover{color:#000000}
+</style>
+</helmet>
+<div style="width: 390px; height: 1280px; position: relative; background: #FFFFFF; font-family: Inter, sans-serif; color: #111111; overflow: hidden">
+  <div style="padding: 52px 20px 0; display: flex; flex-direction: column; gap: 22px">
+
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <a href="Main.dc.html" aria-label="Back" style="width: 44px; height: 44px; border-radius: 999px; background: #F2F2F0; display: flex; align-items: center; justify-content: center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+      </a>
+      <button aria-label="Save recipe" style="width: 44px; height: 44px; border-radius: 999px; border: none; background: #F2F2F0; display: flex; align-items: center; justify-content: center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
+      </button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #595954">Breakfast · North African</p>
+      <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; letter-spacing: -0.02em">Shakshuka</h1>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap">
+        <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid #111111; font-size: 13px; font-weight: 600">35 min</span>
+        <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid #111111; font-size: 13px; font-weight: 600">2 servings</span>
+        <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid #111111; font-size: 13px; font-weight: 600">980 g</span>
+      </div>
+    </div>
+
+    <section style="border: 1px solid #E4E4E0; border-radius: 22px; padding: 18px 10px 20px; display: flex; flex-direction: column; gap: 14px; margin: 0 -10px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700">Where it all goes</h2>
+        <span style="font-size: 12px; font-weight: 600; color: #595954">{{ caption }}</span>
+      </div>
+      <div role="group" aria-label="Measure by" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: #F2F2F0">
+        <sc-for list="{{ modes }}" as="m" hint-placeholder-count="4">
+          <button onClick="{{ m.pick }}" aria-pressed="{{ m.pressed }}" style="{{ m.style }}">{{ m.label }}</button>
+        </sc-for>
+      </div>
+      <div role="img" aria-label="{{ aria }}" style="position: relative; width: 350px; height: 640px; font-family: Inter, sans-serif">
+        <sc-for list="{{ flows }}" as="f" hint-placeholder-count="10">
+          <svg width="350" height="640" viewBox="0 0 350 640" aria-hidden="true" style="position: absolute; left: 0; top: 0"><path d="{{ f.d }}" fill="{{ f.fill }}" fill-opacity="{{ f.op }}"></path></svg>
+        </sc-for>
+        <sc-for list="{{ bars }}" as="r" hint-placeholder-count="4">
+          <div style="{{ r.style }}"></div>
+        </sc-for>
+        <sc-for list="{{ blocks }}" as="k" hint-placeholder-count="7">
+          <div style="{{ k.style }}">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 6px">
+              <span style="font-size: 13px; font-weight: 700; line-height: 16px">{{ k.name }}</span>
+              <span style="font-size: 13px; font-weight: 700; line-height: 16px; white-space: nowrap">{{ k.val }}</span>
+            </div>
+            <span style="font-size: 12px; line-height: 15px">{{ k.equiv }}</span>
+          </div>
+        </sc-for>
+        <sc-for list="{{ midLabels }}" as="l" hint-placeholder-count="3">
+          <div style="{{ l.style }}">{{ l.text }}</div>
+        </sc-for>
+        <div style="{{ plateStyle }}">Plate</div>
+      </div>
+      <p style="margin: 0; padding: 12px 14px; border-radius: 14px; background: #F2F2F0; font-size: 14px; line-height: 1.45"><strong>{{ insightLead }}</strong> {{ insight }}</p>
+    </section>
+
+    <a href="Swap.dc.html" style="display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 18px; border-radius: 16px; border: 1.5px solid #111111; text-decoration: none; font-size: 15px; font-weight: 700">
+      Explore swaps for this recipe
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 20px 34px; background: #FFFFFF; border-top: 1px solid #ECECE8">
+    <a href="Timer.dc.html" style="display: flex; align-items: center; justify-content: center; height: 56px; border-radius: 16px; background: #111111; color: #FFFFFF; font-size: 17px; font-weight: 700; text-decoration: none">Start cooking</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1280}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'weight' };
+  }
+  renderVals() {
+    var self = this;
+    var ING = [
+      { name: 'Tomato', color: '#E5392B', g: 0, weight: 400, volume: 400, calories: 80, cost: 2.00 },
+      { name: 'Pepper', color: '#2E9E4F', g: 0, weight: 150, volume: 355, calories: 30, cost: 1.50 },
+      { name: 'Onion', color: '#7A4BB5', g: 0, weight: 120, volume: 240, calories: 48, cost: 0.40 },
+      { name: 'Olive oil', color: '#8C9A2B', g: 0, weight: 30, volume: 30, calories: 265, cost: 0.60 },
+      { name: 'Spices', color: '#F58A1F', g: 0, weight: 20, volume: 30, calories: 30, cost: 0.50 },
+      { name: 'Eggs', color: '#F7D23A', g: 1, weight: 200, volume: 200, calories: 286, cost: 1.60 },
+      { name: 'Feta', color: '#CFC4A8', g: 2, weight: 60, volume: 120, calories: 159, cost: 1.50 }
+    ];
+    var GROUPS = [
+      { name: 'Sauce', color: '#E5392B', op: 0.16 },
+      { name: 'Eggs', color: '#F7D23A', op: 0.22 },
+      { name: 'Finish', color: '#CFC4A8', op: 0.3 }
+    ];
+    var MODES = {
+      weight: { label: 'Weight', caption: 'Grams', fmt: function (v) { return Math.round(v) + 'g'; },
+        lead: '73% of the plate is sauce.', text: 'Tomato alone is 41%, so that is the swap that changes the dish most.' },
+      volume: { label: 'Volume', caption: 'Millilitres, raw', fmt: function (v) { return Math.round(v) + 'ml'; },
+        lead: 'Pepper is 15% of the weight but 26% of the volume.', text: 'Raw veg takes up room in the pan before it cooks down, so start with a wide pan.' },
+      calories: { label: 'Calories', caption: 'kcal', fmt: function (v) { return Math.round(v) + ' cal'; },
+        lead: 'Oil is 3% of the weight but 30% of the calories.', text: 'Halve the oil and the dish loses about 130 kcal without changing how much is on the plate.' },
+      cost: { label: 'Cost', caption: 'Estimated, CAD', fmt: function (v) { return '$' + v.toFixed(2); },
+        lead: 'Tomato and pepper are 43% of the cost.', text: 'Eggs and feta add the most per gram. Buy peppers in season to bring the total down.' }
+    };
+    var mode = this.state.mode;
+    var M = MODES[mode];
+    var vals = ING.map(function (i) { return i[mode]; });
+    var total = vals.reduce(function (a, b) { return a + b; }, 0);
+    var H = 640, GAP = 6, MGAP = 18, MINB = 44;
+    var BX = 156, MX = 234, PX = 344;
+    var EQUIV = ['5 plum tomatoes, or 1 can', '1 medium bell pepper', '1 small onion', '2 tbsp, a 2-second pour', '3 garlic cloves + spices', '4 large eggs', '5 cm cube, or ½ cup'];
+    var INK = ['#111111', '#111111', '#FFFFFF', '#111111', '#111111', '#111111', '#111111'];
+    var FILL = ['#E5392B', '#2E9E4F', '#7A4BB5', '#8C9A2B', '#F58A1F', '#F7D23A', '#E8DFC9'];
+    var SPAN = 520, hs, bh, blockTotal;
+    for (var tries = 0; tries < 40; tries++) {
+      var kk = SPAN / total;
+      hs = vals.map(function (v) { return Math.max(1.5, v * kk); });
+      bh = hs.map(function (h) { return Math.max(MINB, h); });
+      blockTotal = bh.reduce(function (a, b) { return a + b; }, 0) + GAP * (bh.length - 1);
+      if (blockTotal <= H - 8) break;
+      SPAN -= 10;
+    }
+    var y = (H - blockTotal) / 2;
+    var blocksPos = bh.map(function (h) { var o = { y0: y, y1: y + h }; y += h + GAP; return o; });
+    var gsum = [0, 0, 0];
+    ING.forEach(function (ing, i) { gsum[ing.g] += hs[i]; });
+    var midTotal = gsum[0] + gsum[1] + gsum[2] + MGAP * 2;
+    var my = (H - midTotal) / 2;
+    var mids = gsum.map(function (h) { var o = { y0: my, y1: my + h }; my += h + MGAP; return o; });
+    var plateH = gsum[0] + gsum[1] + gsum[2];
+    var py = (H - plateH) / 2;
+    function band(x0, a0, a1, x1, b0, b1) {
+      var c = (x0 + x1) / 2;
+      function f(n) { return n.toFixed(1); }
+      return 'M' + x0 + ',' + f(a0) + ' C' + c + ',' + f(a0) + ' ' + c + ',' + f(b0) + ' ' + x1 + ',' + f(b0) +
+        ' L' + x1 + ',' + f(b1) + ' C' + c + ',' + f(b1) + ' ' + c + ',' + f(a1) + ' ' + x0 + ',' + f(a1) + ' Z';
+    }
+    function bar(x, y0, h, c) { return 'position: absolute; left: ' + x + 'px; top: ' + y0.toFixed(1) + 'px; width: 6px; height: ' + h.toFixed(1) + 'px; background: ' + c; }
+    var cursor = mids.map(function (m) { return m.y0; });
+    var flows = [], bars = [], blocks = [], midLabels = [];
+    ING.forEach(function (ing, i) {
+      var bp = blocksPos[i], h = hs[i], c0 = cursor[ing.g];
+      cursor[ing.g] += h;
+      var mid = (bp.y0 + bp.y1) / 2;
+      flows.push({ d: band(BX, mid - h / 2, mid + h / 2, MX, c0, c0 + h), fill: ing.color, op: ing.color === '#F7D23A' ? 0.6 : 0.42 });
+      blocks.push({
+        name: ing.name, val: M.fmt(vals[i]), equiv: EQUIV[i],
+        style: 'position: absolute; left: 0; top: ' + bp.y0.toFixed(1) + 'px; width: ' + BX + 'px; height: ' + (bp.y1 - bp.y0).toFixed(1) + 'px; box-sizing: border-box; padding: 6px 9px; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: 2px; background: ' + FILL[i] + '; color: ' + INK[i] + (i === 6 ? '; box-shadow: inset 0 0 0 1px #CFC4A8' : '')
+      });
+    });
+    var pc = py;
+    mids.forEach(function (m, gi) {
+      var h = m.y1 - m.y0;
+      flows.push({ d: band(MX + 6, m.y0, m.y1, PX, pc, pc + h), fill: GROUPS[gi].color, op: GROUPS[gi].op });
+      pc += h;
+      bars.push({ style: bar(MX, m.y0, h, '#111111') });
+      var gv = 0;
+      ING.forEach(function (ing, i) { if (ing.g === gi) gv += vals[i]; });
+      midLabels.push({ style: 'position: absolute; left: ' + (MX + 12) + 'px; top: ' + ((m.y0 + m.y1) / 2 - 8).toFixed(1) + 'px; font-size: 12px; line-height: 16px; font-weight: 700; white-space: nowrap; color: #111111', text: GROUPS[gi].name + ' · ' + M.fmt(gv) });
+    });
+    bars.push({ style: bar(PX, py, plateH, '#111111') });
+    var modes = Object.keys(MODES).map(function (key) {
+      var on = key === mode;
+      return {
+        label: MODES[key].label,
+        pressed: on ? 'true' : 'false',
+        pick: function () { self.setState({ mode: key }); },
+        style: 'height: 36px; border-radius: 10px; border: none; font-family: Inter, sans-serif; font-size: 13px; font-weight: ' + (on ? '700' : '600') + '; cursor: pointer; ' +
+          (on ? 'background: #111111; color: #FFFFFF;' : 'background: transparent; color: #3A3A38;')
+      };
+    });
+    return {
+      modes: modes,
+      caption: M.caption + ' · total ' + M.fmt(total),
+      flows: flows,
+      bars: bars,
+      blocks: blocks,
+      midLabels: midLabels,
+      plateStyle: 'position: absolute; right: 0; top: ' + (py - 20).toFixed(1) + 'px; font-size: 11px; line-height: 14px; font-weight: 700; color: #111111',
+      insightLead: M.lead,
+      insight: M.text,
+      aria: 'Sankey chart by ' + M.label.toLowerCase() + ': ' + ING.map(function (ing, i) { return ing.name + ' ' + M.fmt(vals[i]); }).join(', ') + '; total ' + M.fmt(total)
+    };
+  }
+}
+</script>
+</body>
+</html>

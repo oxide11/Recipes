@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#111111}a:hover{color:#000000}
+input::placeholder{color:#6B6B66}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; background: #FFFFFF; font-family: Inter, sans-serif; color: #111111; overflow: hidden">
+  <div style="padding: 56px 20px 0; display: flex; flex-direction: column; gap: 22px">
+
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <p style="margin: 0; font-size: 13px; color: #595954">Monday evening</p>
+        <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.02em">What's cooking?</h1>
+      </div>
+      <button aria-label="Profile" style="width: 44px; height: 44px; border-radius: 999px; border: none; background: #111111; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 17px; color: #FFFFFF">M</button>
+    </div>
+
+    <label style="display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 16px; border-radius: 14px; background: #F5F5F2">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B66" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+      <span style="position: absolute; width: 1px; height: 1px; overflow: hidden">Search</span>
+      <input type="search" placeholder="Search recipes or ingredients" style="flex: 1; border: none; background: transparent; font: inherit; font-size: 15px; color: #111111; outline: none">
+    </label>
+
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #595954">In season · November</p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap">
+        <button style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 999px; border: none; background: #F2F2F0; font: inherit; font-size: 14px; font-weight: 500; color: #111111"><span style="width: 10px; height: 10px; border-radius: 99px; background: #F58A1F"></span>Squash</button>
+        <button style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 999px; border: none; background: #F2F2F0; font: inherit; font-size: 14px; font-weight: 500; color: #111111"><span style="width: 10px; height: 10px; border-radius: 99px; background: #E5392B"></span>Apples</button>
+        <button style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 999px; border: none; background: #F2F2F0; font: inherit; font-size: 14px; font-weight: 500; color: #111111"><span style="width: 10px; height: 10px; border-radius: 99px; background: #2E9E4F"></span>Kale</button>
+        <button style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 999px; border: none; background: #F2F2F0; font: inherit; font-size: 14px; font-weight: 500; color: #111111"><span style="width: 10px; height: 10px; border-radius: 99px; background: #7A4BB5"></span>Beets</button>
+      </div>
+    </div>
+
+    <a href="Recipe.dc.html" style="display: flex; flex-direction: column; border-radius: 22px; border: 1px solid #ECECE8; overflow: hidden; text-decoration: none; color: #111111">
+      <div style="display: flex; height: 112px" aria-hidden="true">
+        <div style="flex: 400; background: #E5392B"></div>
+        <div style="flex: 150; background: #2E9E4F"></div>
+        <div style="flex: 120; background: #7A4BB5"></div>
+        <div style="flex: 30; background: #8C9A2B"></div>
+        <div style="flex: 20; background: #F58A1F"></div>
+        <div style="flex: 200; background: #F7D23A"></div>
+        <div style="flex: 60; background: #E8DFC9"></div>
+      </div>
+      <div style="padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #111111">Tonight's pick</span>
+          <span style="font-size: 12px; color: #595954">Ingredient fingerprint</span>
+        </div>
+        <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.01em">Shakshuka</h2>
+        <p style="margin: 0; font-size: 14px; color: #595954">35 min · 2 servings · Easy</p>
+        <p style="margin: 4px 0 0; font-size: 14px; font-weight: 600; color: #111111">Uses 3 pantry items before they turn</p>
+      </div>
+    </a>
+
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #595954">Use it up</p>
+        <a href="#" style="font-size: 14px; font-weight: 500">Pantry</a>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <div style="padding: 12px; border-radius: 16px; background: #F5F5F2; display: flex; flex-direction: column; gap: 8px">
+          <span style="width: 22px; height: 22px; border-radius: 99px; background: #2E9E4F"></span>
+          <span style="font-size: 14px; font-weight: 600">Peppers</span>
+          <span style="font-size: 12px; font-weight: 600; color: #111111">2 days</span>
+        </div>
+        <div style="padding: 12px; border-radius: 16px; background: #F5F5F2; display: flex; flex-direction: column; gap: 8px">
+          <span style="width: 22px; height: 22px; border-radius: 99px; background: #E8DFC9; border: 1px solid #CFC4A8; box-sizing: border-box"></span>
+          <span style="font-size: 14px; font-weight: 600">Feta</span>
+          <span style="font-size: 12px; font-weight: 600; color: #111111">3 days</span>
+        </div>
+        <div style="padding: 12px; border-radius: 16px; background: #F5F5F2; display: flex; flex-direction: column; gap: 8px">
+          <span style="width: 22px; height: 22px; border-radius: 99px; background: #E5392B"></span>
+          <span style="font-size: 14px; font-weight: 600">Tomatoes</span>
+          <span style="font-size: 12px; color: #595954">5 days</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: #FFFFFF; border-top: 1px solid #ECECE8; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding-top: 8px; box-sizing: border-box">
+    <button style="border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 4px; font: inherit; font-size: 11px; font-weight: 700; color: #111111; height: 48px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>Home</button>
+    <button style="border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 4px; font: inherit; font-size: 11px; font-weight: 500; color: #595954; height: 48px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M4 21V5"></path></svg>Recipes</button>
+    <button style="border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 4px; font: inherit; font-size: 11px; font-weight: 500; color: #595954; height: 48px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="7" width="12" height="14" rx="2"></rect><path d="M8 3h8v4H8z"></path></svg>Pantry</button>
+    <button style="border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 4px; font: inherit; font-size: 11px; font-weight: 500; color: #595954; height: 48px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>Plan</button>
+    <button style="border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 4px; font: inherit; font-size: 11px; font-weight: 500; color: #595954; height: 48px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.5 12h11L21 8H6.5"></path><circle cx="9" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle></svg>Shop</button>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Kitchen palette</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#111111}a:hover{color:#000000}
+</style>
+</helmet>
+<div style="width: 880px; height: 640px; box-sizing: border-box; padding: 44px 48px; background: #FFFFFF; font-family: Inter, sans-serif; color: #111111; display: flex; flex-direction: column; gap: 28px">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 34px; font-weight: 700; letter-spacing: -0.02em">Bright Kitchen</h1>
+      <p style="margin: 0; font-size: 15px; color: #595954">Black and white run the interface. Ingredient colours only ever mean food.</p>
+    </div>
+    <p style="margin: 0; font-size: 13px; color: #595954; text-align: right">Space Grotesk · headings<br>Inter · interface and body</p>
+  </div>
+
+  <section style="display: flex; flex-direction: column; gap: 12px">
+    <h2 style="margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase">Interface</h2>
+    <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px">
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #111111"></span><span style="font-size: 13px; font-weight: 600">Ink</span><span style="font-size: 12px; color: #595954">#111111 · text, buttons</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #3A3A38"></span><span style="font-size: 13px; font-weight: 600">Graphite</span><span style="font-size: 12px; color: #595954">#3A3A38 · timer start</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #595954"></span><span style="font-size: 13px; font-weight: 600">Muted</span><span style="font-size: 12px; color: #595954">#595954 · secondary</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #E4E4E0"></span><span style="font-size: 13px; font-weight: 600">Hairline</span><span style="font-size: 12px; color: #595954">#E4E4E0 · borders</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #F2F2F0"></span><span style="font-size: 13px; font-weight: 600">Counter</span><span style="font-size: 12px; color: #595954">#F2F2F0 · fills</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4E4E0"></span><span style="font-size: 13px; font-weight: 600">Paper</span><span style="font-size: 12px; color: #595954">#FFFFFF · ground</span></div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 12px">
+    <h2 style="margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase">Ingredient data · charts, dots, fingerprints only</h2>
+    <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px">
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #E5392B"></span><span style="font-size: 13px; font-weight: 600">Tomato</span><span style="font-size: 11px; color: #595954">Red veg, fruit</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #2E9E4F"></span><span style="font-size: 13px; font-weight: 600">Pepper</span><span style="font-size: 11px; color: #595954">Greens, herbs</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #F58A1F"></span><span style="font-size: 13px; font-weight: 600">Orange</span><span style="font-size: 11px; color: #595954">Squash, spice</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #F7D23A"></span><span style="font-size: 13px; font-weight: 600">Banana</span><span style="font-size: 11px; color: #595954">Eggs, corn</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #7A4BB5"></span><span style="font-size: 13px; font-weight: 600">Aubergine</span><span style="font-size: 11px; color: #595954">Onion, beet</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #3B5BDB"></span><span style="font-size: 13px; font-weight: 600">Blueberry</span><span style="font-size: 11px; color: #595954">Berries</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #8C9A2B"></span><span style="font-size: 13px; font-weight: 600">Olive</span><span style="font-size: 11px; color: #595954">Oils, nuts</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><span style="height: 56px; border-radius: 12px; background: #E8DFC9"></span><span style="font-size: 13px; font-weight: 600">Flour</span><span style="font-size: 11px; color: #595954">Grains, dairy</span></div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 12px">
+    <h2 style="margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase">Timer scale · time remaining</h2>
+    <div style="height: 20px; border-radius: 999px; background: linear-gradient(90deg, #3A3A38 0%, #8A8A85 50%, #2E9E4F 68%, #F2C200 86%, #E5392B 100%)" aria-hidden="true"></div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); font-size: 12px; color: #595954">
+      <span>100–50% · graphite, slow pulse</span>
+      <span style="text-align: center">32% · green</span>
+      <span style="text-align: center">14% · yellow</span>
+      <span style="text-align: right">0 · red, fast pulse</span>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":880,"height":640}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

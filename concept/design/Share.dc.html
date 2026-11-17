@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Share recipe sheet, iPad</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#111111}a:hover{color:#000000}
+</style>
+</helmet>
+<div style="width: 640px; height: 1000px; box-sizing: border-box; padding: 28px; background: #FFFFFF; border-radius: 28px; font-family: Inter, sans-serif; color: #111111; display: flex; flex-direction: column; gap: 20px">
+  <div style="display: flex; justify-content: space-between; align-items: center">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #595954">Share</span>
+      <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.02em">Creamy Cajun Chicken Pasta</h1>
+    </div>
+    <a href="Overview.dc.html" aria-label="Close" style="width: 44px; height: 44px; border-radius: 999px; background: #F2F2F0; display: flex; align-items: center; justify-content: center">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+    </a>
+  </div>
+
+  <div role="group" aria-label="Share as" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: #F2F2F0">
+    <sc-for list="{{ formats }}" as="f" hint-placeholder-count="4">
+      <button onClick="{{ f.pick }}" aria-pressed="{{ f.pressed }}" style="{{ f.style }}">{{ f.label }}</button>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; justify-content: center; padding: 18px; border-radius: 22px; background: #F2F2F0">
+    <div style="width: 380px; border-radius: 20px; background: #FFFFFF; box-shadow: 0 12px 30px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column">
+      <div style="display: flex; height: 64px" aria-hidden="true"><span style="flex: 400; background: #E9B98C"></span><span style="flex: 6; background: #F58A1F"></span><span style="flex: 28; background: #F7D23A"></span><span style="flex: 15; background: #2E9E4F"></span><span style="flex: 360; background: #E8DFC9"></span><span style="flex: 15; background: #B3261E"></span><span style="flex: 3; background: #6FA37A"></span><span style="flex: 113; background: #E9D8A6"></span><span style="flex: 25; background: #F2D98A"></span></div>
+      <div style="padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #595954">From Ashley's recipe cards</span>
+        <b style="font-family: 'Space Grotesk', sans-serif; font-size: 22px; line-height: 1.15">Creamy Cajun Chicken Pasta</b>
+        <span style="font-size: 13px; line-height: 1.45; color: #2B2B28">Cajun chicken in a quick cream sauce with sun-dried tomatoes, over linguine with Parmesan.</span>
+        <span style="font-size: 12px; font-weight: 700">25 min · {{ servingsText }} · 9 ingredients · 5 steps</span>
+        <sc-if value="{{ showSwaps }}" hint-placeholder-val="{{ true }}">
+          <span style="padding: 8px 10px; border-radius: 10px; background: #F2F2F0; font-size: 12px; line-height: 1.4"><b>Our swaps:</b> penne for linguine, 1 cup cream for a lighter sauce</span>
+        </sc-if>
+        <sc-if value="{{ showNotes }}" hint-placeholder-val="{{ false }}">
+          <span style="padding: 8px 10px; border-radius: 10px; border: 1px dashed #C9BFA6; background: #F7F4EC; font-size: 12px; line-height: 1.4">★ 4.5 from 4 cooks · "Less cream next time." Ashley</span>
+        </sc-if>
+        <sc-if value="{{ showCard }}" hint-placeholder-val="{{ true }}">
+          <span style="font-size: 12px; color: #595954">Includes 2 photos of the original card</span>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column">
+    <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="4">
+      <button onClick="{{ t.flip }}" role="switch" aria-checked="{{ t.checked }}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 6px 0; border: none; border-bottom: 1px solid #ECECE8; background: transparent; font-family: Inter, sans-serif; color: #111111; text-align: left; cursor: pointer">
+        <span style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 15px">{{ t.label }}</b><span style="font-size: 12px; color: #595954">{{ t.hint }}</span></span>
+        <span style="{{ t.trackStyle }}"><span style="{{ t.knobStyle }}"></span></span>
+      </button>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px">
+    <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #595954">Send to</span>
+    <div style="display: flex; gap: 14px">
+      <button style="display: flex; flex-direction: column; align-items: center; gap: 6px; border: none; background: transparent; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; color: #111111"><span style="width: 52px; height: 52px; border-radius: 999px; background: #111111; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700">A</span>Ashley</button>
+      <button style="display: flex; flex-direction: column; align-items: center; gap: 6px; border: none; background: transparent; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; color: #111111"><span style="width: 52px; height: 52px; border-radius: 999px; background: #111111; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700">N</span>Nicole</button>
+      <button style="display: flex; flex-direction: column; align-items: center; gap: 6px; border: none; background: transparent; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; color: #111111"><span style="width: 52px; height: 52px; border-radius: 999px; border: 1.5px dashed #8A8A85; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span>Contacts</button>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 10px; margin-top: auto">
+    <button style="flex: 1; height: 54px; border-radius: 14px; border: 1.5px solid #D6D6D1; background: #FFFFFF; font-family: Inter, sans-serif; font-size: 15px; font-weight: 700; color: #111111">Copy link</button>
+    <button style="flex: 2; height: 54px; border-radius: 14px; border: none; background: #111111; color: #FFFFFF; font-family: Inter, sans-serif; font-size: 15px; font-weight: 700">{{ shareText }}</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":640,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { format: 'card', swaps: true, notes: false, card: true, scale: false };
+  }
+  renderVals() {
+    var self = this, s = this.state;
+    var F = [['card', 'Recipe card'], ['link', 'Link'], ['pdf', 'PDF'], ['text', 'Text']];
+    var formats = F.map(function (f) {
+      var on = f[0] === s.format;
+      return { label: f[1], pressed: on ? 'true' : 'false', pick: function () { self.setState({ format: f[0] }); },
+        style: 'height: 38px; border-radius: 10px; border: none; font-family: Inter, sans-serif; font-size: 14px; font-weight: ' + (on ? '700' : '600') + '; cursor: pointer; ' + (on ? 'background: #111111; color: #FFFFFF;' : 'background: transparent; color: #3A3A38;') };
+    });
+    var T = [
+      ['swaps', 'Include our swaps', 'Penne and the lighter cream, marked as optional'],
+      ['notes', 'Include ratings and notes', 'Your cook log stays private unless this is on'],
+      ['card', 'Include the original card', 'Photos of Ashley’s handwritten card'],
+      ['scale', 'Share at 4 servings', 'Amounts are scaled before sending']
+    ];
+    var toggles = T.map(function (t) {
+      var on = !!s[t[0]];
+      return { label: t[1], hint: t[2], checked: on ? 'true' : 'false',
+        flip: function () { var n = {}; n[t[0]] = !s[t[0]]; self.setState(n); },
+        trackStyle: 'flex-shrink: 0; width: 52px; height: 32px; border-radius: 999px; padding: 3px; box-sizing: border-box; display: flex; justify-content: ' + (on ? 'flex-end' : 'flex-start') + '; background: ' + (on ? '#111111' : '#D6D6D1'),
+        knobStyle: 'width: 26px; height: 26px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.2)' };
+    });
+    var label = { card: 'Share recipe card', link: 'Share link', pdf: 'Share PDF', text: 'Share as text' }[s.format];
+    return { formats: formats, toggles: toggles, showSwaps: s.swaps, showNotes: s.notes, showCard: s.card,
+      servingsText: s.scale ? '4 servings' : '2 servings', shareText: label };
+  }
+}
+</script>
+</body>
+</html>

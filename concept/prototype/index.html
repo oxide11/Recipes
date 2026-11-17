@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recipes · prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#111111;--graphite:#3A3A38;--muted:#595954;--line:#E4E4E0;--counter:#F2F2F0;--paper:#FFFFFF;--soft:#D6D6D1}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:#E9E9E5;font-family:Inter,system-ui,sans-serif;color:var(--ink);display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+.devbar{flex-shrink:0;height:56px;display:flex;gap:10px;align-items:center;justify-content:center;padding:0 12px}
+.devbar .seg{background:#DADAD5}
+.stage{flex:1;min-height:0;display:flex;gap:40px;align-items:center;justify-content:center;padding:0 24px 20px}
+#stagebox{flex:1;height:100%;min-width:0;display:flex;align-items:center;justify-content:center}
+.devwrap{position:relative;flex-shrink:0}
+.side{width:240px;font-size:14px;line-height:1.5;color:var(--graphite)}
+.side h1{font-family:'Space Grotesk',sans-serif;font-size:26px;margin:0 0 8px;color:var(--ink);letter-spacing:-.02em}
+.side ol{padding-left:18px;margin:12px 0}
+.side li{margin:4px 0}
+.side li.on{font-weight:700;color:var(--ink)}
+.side .speed{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.phone{width:390px;height:844px;background:var(--paper);border-radius:44px;box-shadow:0 0 0 10px #111,0 30px 80px rgba(0,0,0,.25);position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden}
+.phone.ipad{border-radius:30px;box-shadow:0 0 0 14px #111,0 30px 80px rgba(0,0,0,.25)}
+.phone.noframe{border-radius:0;box-shadow:none}
+@media (max-width:760px){.side{display:none}.stage{padding:0}.devbar{height:48px}}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.screen.anim{animation:enter .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes enter{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+.pad{padding:52px 20px 24px;display:flex;flex-direction:column;gap:20px}
+h1.t{margin:0;font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.02em}
+.kicker{margin:0;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+button{font:inherit;color:inherit;cursor:pointer}
+.iconbtn{width:44px;height:44px;border-radius:999px;border:none;background:var(--counter);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.row{display:flex;align-items:center;gap:12px}
+.between{display:flex;justify-content:space-between;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 13px;border-radius:999px;border:none;background:var(--counter);font-size:14px;font-weight:500}
+.chip.out{background:#fff;border:1px solid var(--ink);font-weight:600;font-size:13px;height:30px}
+.dot{width:10px;height:10px;border-radius:99px;flex-shrink:0;display:inline-block}
+.card{border:1px solid var(--line);border-radius:22px}
+.primary{height:56px;border-radius:16px;border:none;background:var(--ink);color:#fff;font-size:17px;font-weight:700;width:100%}
+.primary:disabled{background:var(--soft);color:#fff}
+.secondary{height:52px;border-radius:14px;border:1.5px solid var(--soft);background:#fff;font-size:15px;font-weight:700}
+.bottombar{position:sticky;bottom:0;padding:14px 20px 28px;background:#fff;border-top:1px solid #ECECE8;display:flex;gap:10px;z-index:5}
+.seg{display:grid;gap:4px;padding:4px;border-radius:14px;background:var(--counter)}
+.seg button{height:36px;border-radius:10px;border:none;background:transparent;font-size:13px;font-weight:600;color:var(--graphite)}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff;font-weight:700}
+.insight{margin:0;padding:12px 14px;border-radius:14px;background:var(--counter);font-size:14px;line-height:1.45}
+.toast{position:absolute;left:20px;right:20px;bottom:110px;background:var(--ink);color:#fff;border-radius:14px;padding:12px 16px;font-size:14px;font-weight:600;z-index:20;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+.tabbar{position:sticky;bottom:0;height:84px;background:#fff;border-top:1px solid #ECECE8;display:grid;grid-template-columns:repeat(5,1fr);padding-top:8px}
+.tabbar button{border:none;background:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:500;color:var(--muted);height:48px}
+.tabbar button.on{color:var(--ink);font-weight:700}
+.fp{display:flex;height:10px;border-radius:5px;overflow:hidden}
+.rcard{display:flex;flex-direction:column;border-radius:22px;border:1px solid #ECECE8;overflow:hidden;text-align:left;background:#fff;padding:0;width:100%}
+.listrow{display:flex;align-items:center;gap:14px;padding:12px;border-radius:16px;border:1px solid #ECECE8;background:#fff;text-align:left;width:100%}
+/* sankey */
+.sk{position:relative;width:350px;margin:0 auto}
+.sk .blk{position:absolute;left:0;border-radius:12px 0 0 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px;overflow:hidden}
+.sk .icons{display:flex;justify-content:center}
+.sk .lab{display:flex;gap:6px;align-items:baseline;font-size:14px;line-height:18px}
+.sk .lab b{font-weight:700}
+.sk .lab span{color:var(--graphite);white-space:nowrap}
+.sk .mid{position:absolute;font-size:12px;line-height:15px;font-weight:700;white-space:pre-line}
+.sk .swaptag{font-size:11px;font-weight:700;background:#111;color:#fff;border-radius:6px;padding:1px 6px}
+/* constellation */
+.cst{position:relative;width:350px;height:450px;margin:0 auto}
+.star{position:absolute;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px;min-width:48px}
+.star .orb{border-radius:999px;box-shadow:0 0 0 3px #fff;transition:transform .2s}
+.star:hover .orb{transform:scale(1.06)}
+.star .nm{font-size:13px;font-weight:700;line-height:1.1;max-width:96px;text-align:center}
+.star .sub{font-size:11px;color:var(--muted);white-space:nowrap}
+.star.sw .orb{box-shadow:0 0 0 3px #fff,0 0 0 5px #111}
+.star.sw .sub{color:var(--ink);font-weight:700}
+.zin{animation:zin .45s cubic-bezier(.2,.8,.2,1)}
+.zout{animation:zout .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes zin{from{opacity:0;transform:scale(.35)}to{opacity:1;transform:none}}
+@keyframes zout{from{opacity:0;transform:scale(1.6)}to{opacity:1;transform:none}}
+.leaf{position:absolute;transform:translate(-50%,-50%);min-width:96px;max-width:128px;min-height:48px;padding:6px 10px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;background:#fff;border:2px solid var(--soft)}
+.leaf b{font-size:13px;line-height:1.1}
+.leaf small{font-size:11px;color:var(--muted)}
+.leaf.on{background:#111;border-color:#111;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.leaf.on small{color:#D9D9D4}
+.leaf.blk{background:var(--counter);border-style:dashed;color:var(--muted)}
+.leaf.blk b{text-decoration:line-through}
+.leaf.blk small{color:#111;font-weight:700}
+.leaf.blk.on{border-color:#111}
+.leaf.cur::after{content:"In use";position:absolute;top:-9px;right:-6px;background:#fff;color:#111;border:1.5px solid #111;border-radius:6px;font-size:10px;font-weight:700;padding:0 5px}
+.branch{position:absolute;transform:translate(-50%,-50%);padding:7px 12px;border-radius:999px;background:#111;color:#fff;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.bars{display:flex;gap:3px}.bars i{flex:1;height:6px;border-radius:3px;background:var(--line)}.bars i.f{background:#111}
+/* timer */
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.012)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.mot{animation:none!important}.screen.anim,.zin,.zout{animation:none}}
+.stepbar{display:grid;gap:4px}.stepbar i{height:4px;border-radius:2px;background:var(--line)}.stepbar i.f{background:#111}
+.plate{width:310px;height:310px;border-radius:999px;margin:0 auto;border:2px solid #DCDCD7;box-shadow:0 10px 30px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;background:#fff}
+.plate .in{width:264px;height:264px;border-radius:999px;overflow:hidden;background:#2B2B28;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;position:relative}
+.plate .in img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.lines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.line{position:relative;display:flex;gap:12px;align-items:flex-start;padding:8px 4px;border-radius:14px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:var(--fs,24px);font-weight:600;line-height:1.25;letter-spacing:-.015em;color:#111;outline-offset:2px}
+.line:hover{background:#F7F7F5}
+.line .num{flex-shrink:0;width:34px;height:34px;margin-top:calc((var(--fs,24px)*1.25 - 34px)/2);border-radius:999px;border:2px solid #111;font-family:Inter,sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.line.struck .num{background:#111;color:#fff}
+.line.struck .pl,.line.struck .ingt{color:#6B6B66}
+.line.struck .ingt{background:transparent!important;box-shadow:none!important}
+.w{display:inline-block;position:relative;--strk:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%2020%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M3%2011%20C20%208.5%2036%2013.5%2055%2010%20S84%208.6%2097%2011.5%22%20fill%3D%22none%22%20stroke%3D%22%23111%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.82%22/%3E%3Cpath%20d%3D%22M6%2014%20C30%2012%2058%2015%2095%2012.5%22%20fill%3D%22none%22%20stroke%3D%22%23111%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.45%22/%3E%3C/svg%3E")}
+.w.v1,.ingt.v1{--strk:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%2020%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M2%209.5%20C24%2012.5%2044%208%2066%2011%20S90%2012.8%2098%209%22%20fill%3D%22none%22%20stroke%3D%22%23111%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.82%22/%3E%3Cpath%20d%3D%22M4%2012.5%20C35%2010.5%2066%2013.5%2097%2011%22%20fill%3D%22none%22%20stroke%3D%22%23111%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.45%22/%3E%3C/svg%3E")}
+.w.v2,.ingt.v2{--strk:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%2020%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M4%2012%20C18%209.5%2041%2012%2061%209%20S88%2010.5%2096%2013%22%20fill%3D%22none%22%20stroke%3D%22%23111%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.82%22/%3E%3Cpath%20d%3D%22M3%209%20C28%2011.5%2055%208.5%2094%2010.5%22%20fill%3D%22none%22%20stroke%3D%22%23111%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.45%22/%3E%3C/svg%3E")}
+/*ingt*/.ingt{--strk:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%2020%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M3%2011%20C20%208.5%2036%2013.5%2055%2010%20S84%208.6%2097%2011.5%22%20fill%3D%22none%22%20stroke%3D%22%23111%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.82%22/%3E%3Cpath%20d%3D%22M6%2014%20C30%2012%2058%2015%2095%2012.5%22%20fill%3D%22none%22%20stroke%3D%22%23111%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.45%22/%3E%3C/svg%3E")}
+.struck .w::after{content:"";position:absolute;left:-4px;right:-4px;top:calc(52% - .19em + var(--y,0px));height:.38em;background:var(--strk) no-repeat center/100% 100%;transform:rotate(var(--r,0deg));transform-origin:left center;animation:pen .16s ease-out var(--d,0ms) both;pointer-events:none}
+@keyframes pen{from{transform:rotate(var(--r,0deg)) scaleX(0)}}
+@media (prefers-reduced-motion:reduce){.struck .w::after{animation:none}}
+.ingt{font:inherit;color:inherit;border:none;padding:0 5px;margin:0 -1px;border-radius:7px;cursor:pointer;display:inline;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.ingt:hover{filter:brightness(.95)}
+.startcard{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:18px;border:1px solid var(--line)}
+.dock{display:flex;flex-direction:column;gap:8px}
+.dock:empty{display:none}
+.dockrow{display:flex;align-items:center;gap:12px;padding:8px 10px 8px 8px;border-radius:16px;background:#F2F2F0;animation:dockin .35s cubic-bezier(.2,.8,.2,1)}
+.dockrow.done{background:#FF2A12;color:#fff}
+.dockrow .mr{display:block;flex-shrink:0}
+.dbtn{width:44px;height:44px;border-radius:999px;border:none;background:#111;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+@keyframes dockin{from{opacity:0;transform:translateY(-80px) scale(1.6)}to{opacity:1;transform:none}}
+.badge{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;border:1.5px solid #111;font-size:12px;font-weight:700}
+.badge.solid{background:#111;color:#fff}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.stats div{display:flex;flex-direction:column;gap:2px;padding:10px 8px;border-left:1px solid var(--line)}
+.stats div:first-child{border-left:none}
+.stats b{font-family:'Space Grotesk',sans-serif;font-size:18px}
+.stats span{font-size:11px;color:var(--muted);line-height:1.2}
+.stepper{display:inline-flex;align-items:center;gap:4px;height:48px;padding:4px;border-radius:999px;border:1.5px solid #111}
+.stepper button{width:40px;height:40px;border-radius:999px;border:none;background:#111;color:#fff;font-size:20px;font-weight:700;line-height:1}
+.stepper button:disabled{background:var(--soft)}
+.stepper span{padding:0 10px;font-size:15px;white-space:nowrap}
+.qty{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:999px;border:1.5px solid #111;background:#fff;font-size:15px;font-weight:700;white-space:nowrap}
+.sheetwrap{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;justify-content:center;padding:24px;background:rgba(17,17,17,.35);animation:fade .2s}
+.sheet{background:#fff;border-radius:22px;padding:16px 16px 18px;box-shadow:0 20px 50px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:12px;animation:up .25s cubic-bezier(.2,.8,.2,1)}
+.sheet .opt{display:flex;justify-content:space-between;align-items:center;height:48px;padding:0 16px;border-radius:14px;border:1.5px solid var(--soft);background:#fff;font-size:16px}
+.sheet .opt[aria-pressed=true]{background:#111;border-color:#111;color:#fff}
+@keyframes fade{from{opacity:0}}@keyframes up{from{transform:scale(.92);opacity:0}}
+.stars5{display:flex;gap:6px;justify-content:center}
+.stars5 button{width:44px;height:44px;border:none;background:transparent;padding:0}
+
+.screen.animb{animation:enterb .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes enterb{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+:focus-visible{outline:3px solid #111;outline-offset:2px}
+.primary:focus-visible{outline-color:#111;box-shadow:0 0 0 3px #fff inset}
+.h2{margin:0;font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700}
+.tabs{position:sticky;top:8px;z-index:4;box-shadow:0 0 0 8px #fff}
+.hub{position:absolute;left:175px;top:225px;transform:translate(-50%,-50%);width:118px;height:118px;border-radius:999px;background:#111;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:10px}
+.hub2{position:absolute;left:175px;top:235px;transform:translate(-50%,-50%);width:108px;height:108px;border-radius:999px;background:#fff;border:3px solid #111;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:6px}
+.check{width:28px;height:28px;border-radius:9px;border:2px solid var(--soft);background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:background .15s,border-color .15s}
+.check[aria-checked=true]{background:#111;border-color:#111}
+.tile{position:relative;min-height:170px;padding:14px 10px 12px;border-radius:18px;border:1.5px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;text-align:center;transition:opacity .2s,background .2s}
+.tile b{font-size:15px;line-height:18px}
+.tile.got{border-color:#E4E4E0;opacity:.55}.tile.got b{text-decoration:line-through}
+.tchk{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:#fff;border:2px solid #BDBDB8}
+.tile.got .tchk{background:#111;border-color:#111}
+.ticons{flex:1;display:flex;align-items:center;justify-content:center;flex-wrap:wrap}
+.ttag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:#fff;border:1px solid #D6D6D1}
+.prog{height:6px;border-radius:3px;background:var(--line);overflow:hidden}.prog i{display:block;height:6px;background:#111;transition:width .3s}
+.photobtn{height:38px;padding:0 16px;border-radius:999px;background:#fff;color:#111;font-size:14px;font-weight:700;display:flex;align-items:center;cursor:pointer;position:relative;z-index:1}
+.photobtn.on{position:absolute;bottom:18px}
+.stepbar i.c{background:#8A8A85}
+.cookpad{gap:18px;min-height:calc(100% - 92px)}
+.hint{margin:auto 0 0;font-size:13px;text-align:center}
+.glow{animation:glow 1.8s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(17,17,17,.0)}50%{box-shadow:0 0 0 6px rgba(17,17,17,.12)}}
+.plan{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:18px}
+.plan li{display:flex;gap:14px}
+.pnum{flex-shrink:0;width:30px;height:30px;border-radius:999px;background:#111;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.dbtn.light{background:#fff;color:#111;border:1.5px solid #D6D6D1;font-size:12px;font-weight:700}
+.side .sec{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.ingt.q::after,.qty.q::after{content:"?";display:inline-flex;align-items:center;justify-content:center;width:.9em;height:.9em;margin-left:3px;border-radius:99px;background:#111;color:#fff;font-family:Inter,sans-serif;font-size:.5em;font-weight:700;vertical-align:super}
+.qty.q::after{font-size:10px;width:14px;height:14px;vertical-align:middle}
+.qty.static{border-color:#D6D6D1;cursor:default}
+.cardnote{margin:0;padding:10px 12px;border-radius:12px;background:#F7F4EC;border:1px dashed #C9BFA6;font-size:13px;line-height:1.45;color:#2B2B28}
+.cardthumb{flex-shrink:0;width:64px;height:84px;border-radius:8px;background:#F7F4EC;border:1px solid #DED7C7;transform:rotate(-3deg);padding:9px 7px;display:flex;flex-direction:column;gap:6px}
+.cardthumb i{display:block;height:3px;width:90%;border-radius:2px;background:#BDBDB8}
+.linkbtn{border:none;background:none;padding:0;text-align:left;font-size:13px;font-weight:700;text-decoration:underline;width:max-content}
+
+/* ---------- shared additions ---------- */
+.sheet{max-height:100%;overflow-y:auto}
+.noanim,.noanim .sheet{animation:none}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tog{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px;padding:6px 0;border:none;border-bottom:1px solid #ECECE8;background:none;text-align:left}
+.tog b{font-size:15px}.tog span span{font-size:12px;color:var(--muted)}
+.sw{flex-shrink:0;width:52px;height:32px;border-radius:999px;padding:3px;background:var(--soft);display:flex;transition:background .2s}
+.sw i{width:26px;height:26px;border-radius:999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+.sw.on{background:#111}.sw.on i{transform:translateX(20px)}
+.who{display:flex;flex-direction:column;align-items:center;gap:4px;border:none;background:none;font-size:12px;font-weight:600}
+.who i{width:44px;height:44px;border-radius:999px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;font-style:normal}
+.hatch{background:repeating-linear-gradient(135deg,#D6D6D1 0 3px,#F4F4F1 3px 7px)}
+.hbar{display:flex;height:20px;border-radius:6px;overflow:hidden;gap:2px}
+.swapbtn{display:inline-flex;align-items:center;gap:6px;height:38px;width:92px;justify-content:center;border-radius:999px;border:1.5px solid #111;background:#fff;font-size:13px;font-weight:700;flex-shrink:0}
+.swapbtn.on{background:#111;color:#fff}
+.rail{display:none}
+
+/* ---------- iPad ---------- */
+.ipad .rail{display:flex;flex-direction:column;align-items:center;gap:6px;position:absolute;left:0;top:0;bottom:0;width:88px;padding-top:28px;border-right:1px solid #ECECE8;background:#fff;z-index:6}
+.ipad .rail button{width:68px;height:64px;border:none;border-radius:16px;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;font-weight:500;color:var(--muted)}
+.ipad .rail button.on{background:var(--counter);color:#111;font-weight:700}
+.ipad .screen{left:88px}
+.ipad.norail .rail{display:none}.ipad.norail .screen{left:0}
+.ipad .pad{padding:32px 32px 28px;gap:24px}
+.ipad .tabs{display:none}
+.ipad .toast{left:50%;right:auto;min-width:340px;text-align:center;bottom:40px;transform:translate(-50%,10px)}
+.ipad .toast.show{transform:translate(-50%,0)}
+.ipad .sheetwrap{align-items:center;padding:32px}
+.ipad .sheet{width:460px;padding:22px}
+.ipad .sheet.swapmodal{width:770px;gap:16px}
+.ipad .sheet.sharesheet{width:520px}
+.swapgrid{display:grid;grid-template-columns:350px 1fr;gap:24px;align-items:start}
+.swapmodal [data-act="home"]{display:none}
+.ipad .bottombar{justify-content:flex-end;padding:14px 32px 22px}
+.ipad .bottombar>.primary{max-width:320px}
+.ipad .tiles{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.ipad .donepad{max-width:640px;margin:0 auto;width:100%}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px;align-items:stretch}
+.rgrid .rcard{height:100%;justify-content:flex-start}
+.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:20px 24px;flex-wrap:wrap}
+.pctl{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+.port .pctl{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;width:100%}
+.ovgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
+.port .ovgrid{grid-template-columns:minmax(0,1fr)}
+.aside{display:flex;flex-direction:column;gap:16px}
+.port .aside{display:grid;grid-template-columns:1fr 1fr;align-items:start}
+.port .aside>:first-child{grid-row:span 2}
+.acard{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.imgrid{display:grid;grid-template-columns:400px minmax(0,1fr);gap:32px;align-items:start}
+.port .imgrid{grid-template-columns:minmax(0,1fr)}
+.shead{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:6px;border-bottom:1.5px solid #111}
+.method{list-style:none;margin:0;padding:0}
+.method li{display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px;padding:16px 0;border-bottom:1px solid #ECECE8}
+.mnum{width:36px;height:36px;border-radius:999px;border:2px solid #111;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mline{margin:0;font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:500;line-height:1.5}
+.lg{display:inline-block;width:18px;height:8px;border-radius:4px}
+.wblk{position:absolute;left:0;border-radius:14px 0 0 14px;display:flex;align-items:center;gap:10px;padding:6px 12px;overflow:hidden}
+.wicons{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;width:92px;flex-shrink:0}
+.wplate{position:absolute;width:116px;height:116px;border-radius:999px;background:#fff;border:2px solid #DCDCD7;box-shadow:0 8px 22px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center}
+.wplate div{width:96px;height:96px;border-radius:999px;overflow:hidden;background:#2B2B28;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;font-size:11px;font-weight:600;line-height:1.2}
+.wplate img{width:100%;height:100%;object-fit:cover}
+.cookplan{display:grid;grid-template-columns:370px minmax(0,1fr);gap:32px;align-items:start}
+.port .cookplan{grid-template-columns:350px minmax(0,1fr);gap:20px}
+.cookwrap{display:flex;min-height:calc(100% - 92px)}
+.cookwrap .cookpad{flex:1;min-width:0;min-height:0}
+.ipad .cookpad{padding:36px 48px 20px}
+.ipad .line{gap:20px;padding:12px 8px}
+.ipad .line .num{width:44px;height:44px;font-size:18px;margin-top:calc((var(--fs,24px)*1.25 - 44px)/2)}
+.ipad .hint{font-size:15px}
+.ipad .startcard{max-width:420px}
+.ipad .cookpad .cardnote{max-width:640px;font-size:15px}
+.steplist{width:280px;flex-shrink:0;border-right:1px solid #ECECE8;padding:36px 14px 20px;display:flex;flex-direction:column;gap:4px}
+.steplist button{display:flex;align-items:center;gap:12px;padding:10px;border:none;border-radius:14px;background:none;text-align:left}
+.steplist button b{font-size:15px;line-height:1.2}.steplist button span span{font-size:12px;color:var(--muted)}
+.steplist .cur{background:var(--counter)}.steplist .cur .mnum{background:#111;color:#fff}
+.steplist .past b{text-decoration:line-through;color:var(--muted)}.steplist .past .mnum{border-color:#BDBDB8;color:var(--muted)}
+.ipad .dock{flex-direction:row;flex-wrap:wrap}.ipad .dockrow{flex:1;min-width:300px;max-width:520px}
+.sheet>*{flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="devbar" role="toolbar" aria-label="Device">
+  <div class="seg" id="devSeg" style="grid-template-columns:repeat(2,1fr);width:180px"></div>
+  <div class="seg" id="orientSeg" style="grid-template-columns:repeat(2,1fr);width:200px"></div>
+</div>
+<div class="stage">
+  <aside class="side" aria-label="About this prototype">
+    <h1 id="sideTitle">Recipe flow</h1>
+    <p>A clickable walk-through using three of Ashley’s real recipe cards. Your profile avoids mushrooms and is allergic to tree nuts.</p>
+    <ol id="steps">
+      <li data-s="home">Pick a recipe</li>
+      <li data-s="recipe">Read about it</li>
+      <li data-s="ingredients">Plan this cook (optional)</li>
+      <li data-s="shop">Shop for what is missing</li>
+      <li data-s="cook">Cook with timers</li>
+      <li data-s="done">Plate it</li>
+    </ol>
+    <div class="sec">
+      <span class="kicker">Jump to a recipe</span>
+      <div class="seg" style="grid-template-columns:repeat(3,1fr)" id="recipeSeg"></div>
+    </div>
+    <div class="sec">
+      <span class="kicker">Timer speed</span>
+      <div class="seg" style="grid-template-columns:repeat(3,1fr)" id="speedSeg"></div>
+      <span class="muted" style="font-size:12px">30x lets you watch a timer change colour in seconds.</span>
+      <button class="secondary" id="restart" style="height:40px;font-size:13px">Restart prototype</button>
+    </div>
+  </aside>
+  <div id="stagebox"><div class="devwrap" id="devwrap">
+  <div class="phone" id="phone">
+    <nav class="rail" aria-label="Main">
+      <button data-back="home" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>Recipes</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="7" width="12" height="14" rx="2"/><path d="M8 3h8v4H8z"/></svg>Pantry</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.5 12h11L21 8H6.5"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>Shop</button>
+    </nav>
+    <div class="screen" id="screen"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div id="sheet"></div>
+  </div></div></div>
+</div>
+<script>
+(function(){
+'use strict';
+/* ================= ICONS ================= */
+var ICON={
+ tomato:'<circle cx="14" cy="15.5" r="10.5" fill="#E5392B"/><ellipse cx="10" cy="12" rx="3" ry="2" fill="#F07A6E"/><path d="M14 6.5l1.6 2.6 3-.8-1.8 2.3 2.4 1.6-3 .3L14 15l-1.2-2.8-3-.3 2.4-1.6-1.8-2.3 3 .8z" fill="#2E9E4F"/><path d="M14 6.5V3.5" stroke="#1E7F3E" stroke-width="1.8" stroke-linecap="round"/>',
+ pepper:'<path d="M14 7c-3-2-8-1-8.5 4-.4 4 .5 9 3 12 1.5 1.8 3.5 1.2 4.5 0 .5.6 1.5.6 2 0 1 1.2 3 1.8 4.5 0 2.5-3 3.4-8 3-12C22 6 17 5 14 7z" fill="#2E9E4F"/><path d="M14 8v14" stroke="#1E7F3E" stroke-width="1.2" stroke-linecap="round" opacity=".6"/><path d="M14 7c0-2 .8-3.6 2.6-4.2" stroke="#1E7F3E" stroke-width="2" fill="none" stroke-linecap="round"/>',
+ onion:'<path d="M14 3c1 3 9 6 9 13a9 9 0 0 1-18 0c0-7 8-10 9-13z" fill="#7A4BB5"/><path d="M14 6c-2 4-5 6-5 10.5S11 24 14 24.5M14 6c2 4 5 6 5 10.5S17 24 14 24.5" stroke="#B79AD9" stroke-width="1.2" fill="none"/><path d="M12 25.5l-1 1.5M14 25.5v2M16 25.5l1 1.5" stroke="#5E3790" stroke-width="1.2" stroke-linecap="round"/>',
+ aubergine:'<path d="M9 9c3-3 8-2 11 2 4 5 5 12 1 14.5-4 2.5-10-1-12.5-6S6 12 9 9z" fill="#4B2E83"/><ellipse cx="14" cy="15" rx="2" ry="4" fill="#7A5AB0" transform="rotate(-35 14 15)"/><path d="M8 10c-1-2 0-4 2-5 1 1.5 3 2 5 1.5-1 2-4 4-7 3.5z" fill="#2E9E4F"/><path d="M9 6L7 3" stroke="#1E7F3E" stroke-width="1.8" stroke-linecap="round"/>',
+ spoon:'<ellipse cx="10" cy="10" rx="7" ry="5.5" fill="#E4E4E0" transform="rotate(-35 10 10)"/><ellipse cx="10" cy="10" rx="5" ry="3.6" fill="#8C9A2B" transform="rotate(-35 10 10)"/><path d="M14.5 13.5L25 24" stroke="#BDBDB8" stroke-width="3" stroke-linecap="round"/>',
+ garlic:'<path d="M14 4c3 3 7 8 6 14-.6 4-3.5 6-6 6s-5.4-2-6-6c-1-6 3-11 6-14z" fill="#FBF6EA" stroke="#C9BFA6" stroke-width="1.4"/><path d="M14 9c-1 4-1 9 0 13" stroke="#DCD3BD" stroke-width="1.2" fill="none"/>',
+ jar:'<rect x="7" y="4" width="14" height="5" rx="1.5" fill="#3A3A38"/><rect x="6" y="9" width="16" height="16" rx="3" fill="#F58A1F"/><rect x="9" y="13" width="10" height="6" rx="1" fill="#fff" opacity=".85"/>',
+ egg:'<path d="M14 3c4.5 0 8.5 7 8.5 13a8.5 8.5 0 0 1-17 0C5.5 10 9.5 3 14 3z" fill="#FFF8E8" stroke="#D9CBA8" stroke-width="1.4"/><ellipse cx="11" cy="10" rx="2" ry="3" fill="#fff"/>',
+ cube:'<path d="M14 4l9 4.5v10L14 23l-9-4.5v-10z" fill="#F3EEDF" stroke="#A89C7E" stroke-width="1.3" stroke-linejoin="round"/><path d="M5 8.5L14 13l9-4.5M14 13v10" stroke="#A89C7E" stroke-width="1.3" fill="none" stroke-linejoin="round"/><circle cx="10" cy="15" r=".9" fill="#C9BFA6"/><circle cx="18" cy="16" r=".9" fill="#C9BFA6"/>',
+ squash:'<path d="M11 4h6v6c4 2 6 6 6 9a9 7 0 0 1-18 0c0-3 2-7 6-9z" fill="#F58A1F"/><path d="M11 4h6v3h-6z" fill="#D9CDB8"/><path d="M14 2v3" stroke="#6B5A3E" stroke-width="2" stroke-linecap="round"/><ellipse cx="14" cy="19" rx="3" ry="2.5" fill="#F7A85A"/>',
+ carton:'<path d="M8 8l3-5h6l3 5v17H8z" fill="#D9CDB8" stroke="#A89C7E" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 8h12" stroke="#A89C7E" stroke-width="1.2"/><rect x="10.5" y="12" width="7" height="7" rx="1" fill="#fff" opacity=".85"/>',
+ jug:'<path d="M8 6h12v16a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3z" fill="#FBF6EA" stroke="#A89C7E" stroke-width="1.3"/><path d="M20 10h2a2 2 0 0 1 0 6h-2" fill="none" stroke="#A89C7E" stroke-width="1.3"/><path d="M8 6l-1.5-2.5" stroke="#A89C7E" stroke-width="1.3" stroke-linecap="round"/><path d="M8 11h12" stroke="#E8DFC9" stroke-width="3"/>',
+ leaf:'<path d="M6 22C6 12 13 5 23 5c0 10-7 17-17 17z" fill="#6FA37A"/><path d="M6 22L18 10" stroke="#3F6B47" stroke-width="1.3" stroke-linecap="round"/>',
+ chilli:'<path d="M7 9c2-1 4 0 5 2 3 5 7 9 12 11-6 2-12 0-15-4-2-3-3-6-2-9z" fill="#E5392B"/><path d="M7 9c-1-2 0-4 2-5" stroke="#2E9E4F" stroke-width="2" fill="none" stroke-linecap="round"/>',
+ penne:'<path d="M5 9l9-4 2 5-9 4z" fill="#E8DFC9" stroke="#A89C7E" stroke-width="1.2" stroke-linejoin="round"/><path d="M9 16l9-4 2 5-9 4z" fill="#E8DFC9" stroke="#A89C7E" stroke-width="1.2" stroke-linejoin="round"/><path d="M14 22l8-3.5 1.5 4-8 3.5z" fill="#E8DFC9" stroke="#A89C7E" stroke-width="1.2" stroke-linejoin="round"/>',
+ basil:'<path d="M14 25V12" stroke="#1E7F3E" stroke-width="1.8" stroke-linecap="round"/><path d="M14 13c-6 0-9-4-8-9 5 0 8 3 8 9z" fill="#2E9E4F"/><path d="M14 16c5 0 8-3 8-8-5 0-8 3-8 8z" fill="#3DB862"/><path d="M14 21c-4 0-7-2-7-5 4 0 7 2 7 5z" fill="#2E9E4F"/>',
+ seeds:'<path d="M8 5c2.5 2 3.5 5 2.5 8.5-2.5-1-4.5-4.5-2.5-8.5z" fill="#B8A27A" stroke="#8C7B65" stroke-width=".8"/><path d="M17 8c2.5 2 3.5 5 2.5 8.5-2.5-1-4.5-4.5-2.5-8.5z" fill="#B8A27A" stroke="#8C7B65" stroke-width=".8"/><path d="M11 15c2.5 2 3.5 5 2.5 8.5-2.5-1-4.5-4.5-2.5-8.5z" fill="#B8A27A" stroke="#8C7B65" stroke-width=".8"/>',
+ wedge:'<path d="M4 20L24 9v11z" fill="#F2D98A" stroke="#C9A800" stroke-width="1.3" stroke-linejoin="round"/><path d="M4 20h20v3H4z" fill="#E6C66A" stroke="#C9A800" stroke-width="1.3" stroke-linejoin="round"/><circle cx="17" cy="16" r="1.4" fill="#E6C66A"/><circle cx="20.5" cy="18" r="1" fill="#E6C66A"/>',
+ lemon:'<ellipse cx="14" cy="15" rx="10" ry="8" fill="#F7D23A" transform="rotate(-20 14 15)"/><path d="M4.5 18.5l-2 1M23.5 11.5l2-1" stroke="#C9A800" stroke-width="2" stroke-linecap="round"/><ellipse cx="11" cy="12" rx="3" ry="1.6" fill="#FBE68A" transform="rotate(-20 11 12)"/>',
+ bottle:'<path d="M12 3h4v4l2 3v14a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1V10l2-3z" fill="#8C9A2B"/><rect x="12" y="2" width="4" height="2.5" rx=".8" fill="#3A3A38"/><rect x="11" y="13" width="6" height="6" rx="1" fill="#fff" opacity=".85"/>',
+ salt:'<path d="M9 9h10l1 15H8z" fill="#fff" stroke="#8A8A85" stroke-width="1.3" stroke-linejoin="round"/><path d="M10 9V6a4 4 0 0 1 8 0v3" fill="#D6D6D1" stroke="#8A8A85" stroke-width="1.3"/><circle cx="12.5" cy="6" r=".8" fill="#595954"/><circle cx="15.5" cy="6" r=".8" fill="#595954"/>'
+
+ ,chicken:'<path d="M6 16c0-6 5-10 11-10 4 0 7 3 7 7 0 6-6 10-12 10-4 0-6-3-6-7z" fill="#E9B98C" stroke="#B9875A" stroke-width="1.2"/><path d="M10 15c3-3 7-4 10-3" stroke="#F4D3B0" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+ linguine:'<ellipse cx="14" cy="16" rx="10" ry="7" fill="#E9D8A6" stroke="#B89B5E" stroke-width="1.2"/><path d="M6 15c4-3 12-3 16 0M7 18c4-2 10-2 14 0M9 13c3-2 7-2 10 0" stroke="#B89B5E" stroke-width="1" fill="none"/>',
+ butter:'<path d="M5 13l6-4h12v8l-6 4H5z" fill="#F7D23A" stroke="#C9A800" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 13h12l6-4M17 13v8" stroke="#C9A800" stroke-width="1.2" fill="none" stroke-linejoin="round"/>',
+ greenonion:'<path d="M14 26V12" stroke="#F3EEDF" stroke-width="5" stroke-linecap="round"/><path d="M12 13l-4-10M14 12V2M16 13l4-10" stroke="#2E9E4F" stroke-width="2.4" stroke-linecap="round"/>',
+ sundried:'<path d="M6 12c3-5 13-6 16 0 2 5-3 10-9 10S4 17 6 12z" fill="#B3261E"/><path d="M9 13c3-2 7-2 10 0" stroke="#E5392B" stroke-width="1.4" fill="none"/>',
+ herbs:'<rect x="7" y="4" width="14" height="5" rx="1.5" fill="#3A3A38"/><rect x="6" y="9" width="16" height="16" rx="3" fill="#6FA37A"/><rect x="9" y="13" width="10" height="6" rx="1" fill="#fff" opacity=".85"/>',
+ ginger:'<path d="M5 15c0-3 3-4 5-3 1-3 4-4 6-2 2-2 6-1 7 2 1 3-1 6-4 6H9c-3 0-4-1-4-3z" fill="#D9A55B" stroke="#A9773A" stroke-width="1.2"/><path d="M12 12v-3M18 11l1-3" stroke="#A9773A" stroke-width="1.2" stroke-linecap="round"/>',
+ lemongrass:'<path d="M10 26L14 3M14 26L16 4M18 26l1-21" stroke="#9CBF5A" stroke-width="3" stroke-linecap="round"/><path d="M9 22h12" stroke="#E9EFD3" stroke-width="5" stroke-linecap="round"/>',
+ paste:'<rect x="7" y="4" width="14" height="5" rx="1.5" fill="#3A3A38"/><rect x="6" y="9" width="16" height="16" rx="3" fill="#C8321F"/><rect x="9" y="13" width="10" height="6" rx="1" fill="#fff" opacity=".85"/>',
+ fishsauce:'<path d="M12 3h4v4l2 3v14a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1V10l2-3z" fill="#7A4E2D"/><rect x="12" y="2" width="4" height="2.5" rx=".8" fill="#E5392B"/><rect x="11" y="13" width="6" height="6" rx="1" fill="#fff" opacity=".85"/>',
+ sugar:'<path d="M4 22c2-6 6-9 10-9s8 3 10 9z" fill="#A0703C"/><circle cx="11" cy="18" r=".9" fill="#C8955C"/><circle cx="16" cy="17" r=".9" fill="#C8955C"/><circle cx="13" cy="20" r=".9" fill="#C8955C"/>',
+ coconut:'<rect x="6" y="5" width="16" height="19" rx="2" fill="#D6D6D1"/><rect x="6" y="9" width="16" height="11" fill="#F3EEDF" stroke="#A89C7E" stroke-width=".8"/><circle cx="14" cy="14.5" r="3" fill="#7A5A3A"/>',
+ shrimp:'<path d="M20 7c-6-2-13 2-13 9 0 4 3 7 7 7 3 0 5-2 5-4" fill="none" stroke="#F28C6B" stroke-width="5" stroke-linecap="round"/><path d="M19 19l4 3M19 19l3-4" stroke="#E5392B" stroke-width="2" stroke-linecap="round"/><circle cx="18" cy="9" r="1" fill="#111"/>',
+ lime:'<circle cx="14" cy="15" r="9" fill="#6CBF3A"/><circle cx="14" cy="15" r="6.5" fill="#C9E7A6"/><path d="M14 8.5v13M7.5 15h13M9.5 10.5l9 9M18.5 10.5l-9 9" stroke="#6CBF3A" stroke-width="1"/>',
+ herb:'<path d="M14 26V14" stroke="#1E7F3E" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="11" r="4.5" fill="#2E9E4F"/><circle cx="18" cy="11" r="4.5" fill="#3DB862"/><circle cx="14" cy="6" r="4.5" fill="#2E9E4F"/><circle cx="14" cy="15" r="3.5" fill="#3DB862"/>',
+ flour:'<path d="M7 9l2-5h10l2 5v15H7z" fill="#F3EEDF" stroke="#A89C7E" stroke-width="1.2" stroke-linejoin="round"/><path d="M7 9h14" stroke="#A89C7E" stroke-width="1.2"/><path d="M11 15c1.5-2 4.5-2 6 0" stroke="#C9BFA6" stroke-width="1.4" fill="none"/>',
+ capers:'<circle cx="9" cy="12" r="3.2" fill="#5E7D3A"/><circle cx="16" cy="10" r="3.2" fill="#6F8F47"/><circle cx="13" cy="17" r="3.2" fill="#5E7D3A"/><circle cx="20" cy="16" r="3.2" fill="#6F8F47"/>'
+};
+
+/* ================= SHARED SWAP SETS ================= */
+function L(id,name,ratio,note,t,extra){var o={id:id,name:name,ratio:ratio,note:note,t:t};if(extra){for(var k in extra)o[k]=extra[k]}return o}
+var TN={allergen:'Tree nuts'};
+var OIL_SET={center:'Olive oil',branches:['Closest','Richer','Lighter'],traits:['Flavour','Heat limit','Richness'],leaves:[
+ L('avocado','Avocado oil','1 : 1','Neutral and handles high heat well.',[1,5,3]),
+ L('rapeseed','Rapeseed oil','1 : 1','Clean and inexpensive.',[1,4,3]),
+ L('butter','Butter','1 : 1','Rich and nutty but burns easily. Keep the heat at medium.',[4,2,5]),
+ L('ghee','Ghee','1 : 1','Butter flavour that tolerates high heat.',[4,4,5]),
+ L('spray','Oil spray','a light coat','Cuts most of the fat. Add a splash of water if things catch.',[1,3,1]),
+ L('stock','Stock splash','2 tbsp','Sweat in stock instead of fat.',[2,3,1])]};
+var ONION_SET=function(center){return {center:center,branches:['Closest','Milder','Allium-free'],traits:['Sweet','Sharp','Bulk'],leaves:[
+ L('shallot','Shallots','1 : 1','Finer and sweeter. Two to three shallots match one onion.',[4,2,3]),
+ L('white','White onion','1 : 1','Sharper. Cook a minute longer to mellow it.',[2,4,3]),
+ L('leek','Leek','1 : 1','Use the white and pale green parts. Softer and gentler.',[3,1,3]),
+ L('spring','Spring onion','1 : 1','Add the whites early and the greens at the end.',[2,2,2]),
+ L('fennel2','Fennel','1 : 1','Bulk and sweetness without any onion. Cook it slowly.',[3,1,4]),
+ L('hing','Asafoetida','a pinch','A tiny pinch fried in the oil brings an onion-like note.',[1,3,1])]}};
+var GARLIC_SET={center:'Garlic',branches:['Closest','Milder','Garlic-free'],traits:['Punch','Sweetness','Aroma'],leaves:[
+ L('roastgarlic','Roasted garlic','1 head','Sweet and mellow. Squeeze it in at the end.',[2,5,4]),
+ L('garlicpowder','Garlic powder','1 tsp','Handy and even.',[3,1,3]),
+ L('shallot3','Shallot','1 small','Gentle and sweet.',[2,4,3]),
+ L('chives','Chives','2 tbsp','Fresh and mild.',[1,2,3]),
+ L('garlicoil','Garlic oil','1 tbsp','Garlic flavour without the cloves.',[3,1,4]),
+ L('hing3','Asafoetida','a pinch','Fried in the oil, it fills the gap.',[3,1,3])]};
+
+
+/* ================= RECIPES (seeded from Ashley's recipe cards) ================= */
+var RECIPES={};
+
+var CHICKEN_SET={center:'Chicken',branches:['Closest','Seafood','Plant-based'],traits:['Tender','Flavour','Protein'],leaves:[
+ L('thighs','Chicken thighs','1 : 1','Juicier and harder to overcook. Add 2 minutes.',[5,4,4]),
+ L('turkey','Turkey cutlets','1 : 1','Leaner. Pound thin so they cook evenly.',[3,3,5]),
+ L('shrimp2','Shrimp','1 : 1 by weight','Cooks in 2 to 3 minutes. Add near the end.',[4,4,4]),
+ L('scallops','Scallops','1 : 1 by weight','Sear hard, 90 seconds a side.',[5,4,3]),
+ L('tofu2','Firm tofu','1 : 1','Press for 15 minutes, then cube.',[3,2,3]),
+ L('chickpeas3','Chickpeas','1 can per breast','Pan-fry until blistered.',[2,3,3])]};
+
+RECIPES.cajun={
+ id:'cajun',title:'Creamy Cajun Chicken Pasta',kicker:'Dinner · From Ashley’s cards',base:2,
+ desc:'Spiced chicken strips in a rich cream sauce with sun-dried tomatoes, tossed through linguine with Parmesan.',
+ tags:[['25 min',1],['One skillet'],['Weeknight'],['Rich']],
+ stats:[['10 min','Prep'],['15 min','Cook'],['1,300','kcal / serving'],['70 g','protein / serving']],
+ meta:'25 min · Easy',plate:'Cajun chicken pasta',
+ card:{source:'Printed sheet, 2 of 3',credit:'Lorac, Sept 2002. Prep 10 min, total 25 min.',photos:2,questions:[]},
+ ING:[
+  {id:'chicken',name:'Chicken',color:'#E9B98C',edge:'#B9875A',g:0,weight:400,volume:450,calories:660,cost:7.00,amt:'2 breasts',eq:'boneless, skinless, cut into thin strips',icon:[['chicken',2]],aisle:'Meat and seafood'},
+  {id:'cajun',name:'Cajun seasoning',color:'#F58A1F',g:0,weight:6,volume:10,calories:15,cost:0.30,amt:'2 tsp',eq:'store-bought or your own blend',icon:[['jar',1]],aisle:'Pantry'},
+  {id:'butter',name:'Butter',color:'#F7D23A',edge:'#C9A800',g:1,weight:28,volume:30,calories:200,cost:0.40,amt:'2 tbsp',eq:'or margarine',icon:[['butter',1]],aisle:'Dairy and eggs'},
+  {id:'greenonion',name:'Green onion',color:'#2E9E4F',g:1,weight:15,volume:20,calories:5,cost:0.30,amt:'1',eq:'thinly sliced',icon:[['greenonion',1]],aisle:'Produce'},
+  {id:'cream',name:'Heavy cream',color:'#E8DFC9',edge:'#A89C7E',g:1,weight:360,volume:360,calories:1200,cost:3.00,amt:'1½ cups',eq:'the card says 1 to 2 cups',icon:[['jug',1]],aisle:'Dairy and eggs'},
+  {id:'sundried',name:'Sun-dried tomatoes',color:'#B3261E',g:1,weight:15,volume:30,calories:20,cost:0.80,amt:'2 tbsp',eq:'chopped',icon:[['sundried',1]],aisle:'Canned'},
+  {id:'herbs',name:'Seasonings',color:'#6FA37A',g:1,weight:3,volume:5,calories:3,cost:0.20,amt:'1 tsp',eq:'basil, salt, garlic powder and pepper',icon:[['herbs',1]],aisle:'Pantry'},
+  {id:'linguine',name:'Linguine',color:'#E9D8A6',edge:'#B89B5E',g:2,weight:113,volume:200,calories:400,cost:0.60,amt:'4 oz',eq:'cooked al dente',icon:[['linguine',1]],aisle:'Dry goods'},
+  {id:'parm',name:'Parmesan',color:'#F2D98A',edge:'#C9A800',g:2,weight:25,volume:50,calories:110,cost:1.20,amt:'¼ cup',eq:'grated',icon:[['wedge',1]],aisle:'Dairy and eggs'}
+ ],
+ have:{cajun:1,butter:1,herbs:1,linguine:1,parm:1},
+ GROUPS:[{name:'Chicken',color:'#E9B98C',op:.35},{name:'Sauce',color:'#E8DFC9',op:.45},{name:'Pasta',color:'#E9D8A6',op:.45}],
+ INS:{weight:['Chicken and cream are 79% of the dish.','The card allows 1 to 2 cups of cream, so that is the easiest dial for a lighter plate.'],
+  volume:['Cream is 31% of the volume.','Use a wide skillet so the sauce can reduce a little.'],
+  calories:['Cream is 37% of the weight but 46% of the calories.','Use 1 cup instead of 1½ and each plate drops by about 200 kcal.'],
+  cost:['Chicken is half the cost.','Thighs cost less and stay juicier.']},
+ LINE:{
+  chicken:{ing:'chicken',noun:'chicken breasts',opts:[['2','boneless, skinless breasts','p'],['400 g','grams'],['14 oz','ounces']]},
+  cajun:{ing:'cajun',noun:'Cajun seasoning',opts:[['2 tsp','teaspoons'],['6 g','grams'],['⅔ tbsp','tablespoon']]},
+  linguine:{ing:'linguine',noun:'linguine',opts:[['4 oz','ounces'],['113 g','grams'],['1 cup','dry, loosely packed']]},
+  butter:{ing:'butter',noun:'butter',opts:[['2 tbsp','tablespoons'],['28 g','grams'],['¼ stick','US stick']]},
+  greenonion:{ing:'greenonion',noun:'green onion',opts:[['1','whole green onion','p'],['15 g','grams'],['2 tbsp','sliced']]},
+  cream:{ing:'cream',noun:'heavy cream',check:'The card says 1 to 2 cups. Ashley uses 1½.',opts:[['1½ cups','cups'],['360 ml','millilitres'],['12 fl oz','US fluid ounces']]},
+  sundried:{ing:'sundried',noun:'sun-dried tomatoes',opts:[['2 tbsp','chopped'],['15 g','grams']]},
+  basil:{ing:'herbs',name:'Dried basil',noun:'dried basil',color:'#6FA37A',icon:'herbs',opts:[['¼ tsp','teaspoon'],['0.3 g','grams']]},
+  salt:{ing:'herbs',name:'Salt',noun:'salt',color:'#8A8A85',icon:'salt',opts:[['¼ tsp','fine salt'],['1.5 g','grams']]},
+  garlicpowder:{ing:'herbs',name:'Garlic powder',noun:'garlic powder',color:'#6FA37A',icon:'herbs',opts:[['⅛ tsp','teaspoon'],['0.4 g','grams']]},
+  pepper:{ing:'herbs',name:'Black pepper',noun:'black pepper',color:'#3A3A38',icon:'herbs',opts:[['⅛ tsp','ground'],['a few grinds','fresh']]},
+  parm:{ing:'parm',noun:'grated Parmesan',opts:[['¼ cup','grated'],['25 g','grams'],['0.9 oz','ounces']]}
+ },
+ STEPS:[
+  {title:'Season the chicken',secs:0,on:4,lines:['Cut {chicken} into thin strips.','Toss with {cajun} in a bowl.']},
+  {title:'Cook the {linguine!}',secs:600,on:1,label:'Pasta',lines:['Boil {linguine} until al dente.','Drain and keep warm.']},
+  {title:'Sauté the chicken',secs:360,on:6,label:'Chicken',lines:['Melt {butter} in a large skillet over medium heat.','Sauté the chicken until tender, about 5 to 7 minutes.']},
+  {title:'Make the sauce',secs:0,on:3,lines:['Reduce the heat.','Add {greenonion}, {cream} and {sundried}.','Add {basil}, {salt}, {garlicpowder} and {pepper}.','Heat through.']},
+  {title:'Toss and serve',secs:0,on:2,lines:['Pour over the hot linguine.','Toss with {parm}.']}
+ ],
+ SETS:{
+  chicken:CHICKEN_SET,
+  linguine:{center:'Linguine',branches:['Closest','Gluten-free','Lighter'],traits:['Bite','Holds sauce','Fibre'],leaves:[
+   L('penne','Penne','1 : 1','Catches the cream sauce in the tubes. Ashley’s usual swap.',[4,5,2]),
+   L('fettuccine','Fettuccine','1 : 1','Wider ribbons for a richer bite.',[4,4,2]),
+   L('gflinguine','GF linguine','1 : 1','Cook 1 minute less and rinse quickly.',[3,3,2]),
+   L('ricenoodle','Rice noodles','1 : 1','Soak, do not boil. Lighter and silky.',[2,3,1]),
+   L('zoodles','Zucchini noodles','300 g','Warm them in the sauce for 1 minute.',[1,2,3]),
+   L('spaghettisquash','Spaghetti squash','½ squash','Roast first, then fork into strands.',[2,3,4])]},
+  cream:{center:'Heavy cream',branches:['Closest','Lighter','Dairy-free'],traits:['Richness','Body','Tang'],leaves:[
+   L('halfhalf','Half-and-half','1 : 1','Lighter. Do not let it boil or it may split.',[3,3,1]),
+   L('cookingcream','Cooking cream','1 : 1','Holds up to heat without splitting.',[4,4,1]),
+   L('milkflour','Milk + flour','1½ cups + 1 tbsp','Whisk the flour into the butter first.',[2,3,1]),
+   L('cream1','Cream, 1 cup','1 cup','The card’s lighter end. Same sauce, less rich.',[3,3,1]),
+   L('coconutcream','Coconut cream','1 : 1','Rich, with a gentle coconut note.',[5,4,1]),
+   L('cashewcream','Cashew cream','1 : 1','Silky, but made from cashews.',[4,4,1],TN)]},
+  sundried:{center:'Sun-dried tomatoes',branches:['Closest','Fresh'],traits:['Sweet','Tang','Chew'],leaves:[
+   L('roastedpep','Roasted red pepper','2 tbsp','Sweeter and softer.',[4,2,2]),
+   L('tomatopaste','Tomato paste','1 tbsp','Stir into the cream for colour and depth.',[3,4,1]),
+   L('cherrytom','Cherry tomatoes','6, halved','Fresher and juicier.',[3,4,1]),
+   L('freshtom','Fresh tomato','1 small, diced','Light and bright.',[2,3,1])]},
+  parm:{center:'Parmesan',branches:['Closest','Dairy-free'],traits:['Salty','Nutty','Melts'],leaves:[
+   L('pecorino','Pecorino','1 : 1','Sharper and saltier. Skip the added salt.',[5,3,3]),
+   L('grana','Grana Padano','1 : 1','Milder and cheaper.',[3,3,4]),
+   L('yeast','Nutritional yeast','2 tbsp','Cheesy and savoury, dairy-free.',[2,4,1]),
+   L('miso2','White miso','1 tsp','Salty depth, no dairy.',[4,2,1])]},
+  butter:{center:'Butter',branches:['Closest','Dairy-free'],traits:['Flavour','Heat limit','Richness'],leaves:[
+   L('margarine','Margarine','1 : 1','The card lists it as an option.',[2,3,4]),
+   L('ghee','Ghee','1 : 1','Butter flavour that tolerates high heat.',[4,5,5]),
+   L('oliveoil','Olive oil','1½ tbsp','Fruity and lighter.',[3,3,3]),
+   L('avocado','Avocado oil','1½ tbsp','Neutral and handles high heat.',[1,5,3])]}
+ }
+};
+
+RECIPES.thai={
+ id:'thai',title:'Thai Coconut Soup',kicker:'Dinner · From Ashley’s cards',base:6,
+ desc:'Ginger, lemongrass and red curry paste bloomed in oil, simmered with broth and coconut milk, finished with lime and cilantro.',
+ tags:[['Dairy-free',1],['One pot'],['Spicy'],['Serves a crowd']],
+ stats:[['10 min','Prep'],['25 min','Cook'],['520','kcal / serving'],['20 g','protein / serving']],
+ meta:'35 min · Easy',plate:'Thai coconut soup',
+ card:{source:'Handwritten card',credit:'Serves about 6. The card does not give a yield.',photos:1,questions:['Is the coconut milk 3 cans of 13.5 oz each, and is the cilantro ¼ cup?','How long do you cook the shrimp or chicken?']},
+ ING:[
+  {id:'oil',name:'Vegetable oil',color:'#8C9A2B',g:0,weight:14,volume:15,calories:120,cost:0.10,amt:'1 tbsp',eq:'any neutral oil',icon:[['spoon',1]],aisle:'Pantry'},
+  {id:'ginger',name:'Ginger',color:'#D9A55B',edge:'#A9773A',g:0,weight:12,volume:30,calories:10,cost:0.40,amt:'2 tbsp',eq:'about a thumb, grated',icon:[['ginger',1]],aisle:'Produce'},
+  {id:'lemongrass',name:'Lemongrass',color:'#9CBF5A',g:0,weight:20,volume:40,calories:5,cost:0.80,amt:'1 stalk',eq:'bruised and chopped',icon:[['lemongrass',1]],aisle:'Produce'},
+  {id:'curry',name:'Red curry paste',color:'#C8321F',g:0,weight:12,volume:10,calories:15,cost:0.60,amt:'2 tsp',eq:'more if you like heat',icon:[['paste',1]],aisle:'Pantry'},
+  {id:'broth',name:'Chicken broth',color:'#B8A27A',g:1,weight:950,volume:950,calories:40,cost:3.00,amt:'4 cups',eq:'1 carton, about 1 L',icon:[['carton',1]],aisle:'Canned'},
+  {id:'fish',name:'Fish sauce',color:'#7A4E2D',g:1,weight:54,volume:45,calories:30,cost:0.50,amt:'3 tbsp',eq:'salty and savoury',icon:[['fishsauce',1]],aisle:'Pantry'},
+  {id:'sugar',name:'Brown sugar',color:'#A0703C',g:1,weight:13,volume:15,calories:50,cost:0.10,amt:'1 tbsp',eq:'packed',icon:[['sugar',1]],aisle:'Pantry'},
+  {id:'coconut',name:'Coconut milk',color:'#F3EEDF',edge:'#A89C7E',g:1,weight:1200,volume:1200,calories:2400,cost:6.00,amt:'3 cans',eq:'13.5 oz cans',icon:[['coconut',3]],aisle:'Canned'},
+  {id:'shrimp',name:'Shrimp',color:'#F28C6B',g:2,weight:450,volume:500,calories:450,cost:9.00,amt:'1 lb',eq:'or chicken, the card allows either',icon:[['shrimp',3]],aisle:'Meat and seafood'},
+  {id:'lime',name:'Lime juice',color:'#6CBF3A',g:3,weight:30,volume:30,calories:8,cost:0.40,amt:'2 tbsp',eq:'about 1 lime',icon:[['lime',1]],aisle:'Produce'},
+  {id:'cilantro',name:'Cilantro',color:'#2E9E4F',g:3,weight:5,volume:15,calories:1,cost:1.00,amt:'¼ cup',eq:'roughly chopped',icon:[['herb',1]],aisle:'Produce'}
+ ],
+ have:{oil:1,curry:1,broth:1,fish:1,sugar:1,coconut:1},
+ GROUPS:[{name:'Aromatics',color:'#D9A55B',op:.3},{name:'Broth',color:'#F3EEDF',op:.6},{name:'Shrimp',color:'#F28C6B',op:.3},{name:'Finish',color:'#6CBF3A',op:.3}],
+ INS:{weight:['Coconut milk and broth are 78% of the pot.','Everything else is flavour, so taste before you add more fish sauce.'],
+  volume:['Coconut milk is 42% of the volume.','Use a big pot. This makes about 2.8 litres.'],
+  calories:['Coconut milk is 77% of the calories.','Light coconut milk cuts about 1,300 kcal across the pot.'],
+  cost:['Shrimp is 41% of the cost.','Chicken thighs work too, and the card allows either.']},
+ LINE:{
+  oil:{ing:'oil',noun:'vegetable oil',opts:[['1 tbsp','tablespoon'],['15 ml','millilitres'],['3 tsp','teaspoons']]},
+  ginger:{ing:'ginger',noun:'grated ginger',opts:[['2 tbsp','grated'],['12 g','grams'],['1 thumb','piece, about 5 cm','p','ginger']]},
+  lemongrass:{ing:'lemongrass',noun:'lemongrass',opts:[['1 stalk','bruised and chopped','p'],['20 g','grams'],['2 tbsp','paste, from a tube','','lemongrass paste']]},
+  curry:{ing:'curry',noun:'red curry paste',opts:[['2 tsp','teaspoons'],['12 g','grams'],['⅔ tbsp','tablespoon']]},
+  broth:{ing:'broth',noun:'chicken broth',opts:[['4 cups','cups'],['950 ml','millilitres'],['32 fl oz','US fluid ounces']]},
+  fish:{ing:'fish',noun:'fish sauce',opts:[['3 tbsp','tablespoons'],['45 ml','millilitres'],['9 tsp','teaspoons']]},
+  sugar:{ing:'sugar',noun:'brown sugar',opts:[['1 tbsp','packed'],['13 g','grams'],['3 tsp','teaspoons']]},
+  coconut:{ing:'coconut',noun:'coconut milk',check:'The card says “3 (13.5)”. Read as three 13.5 oz cans.',opts:[['3 cans','13.5 oz each','p'],['1.2 L','litres'],['5 cups','cups'],['40 fl oz','US fluid ounces']]},
+  shrimp:{ing:'shrimp',noun:'shrimp',opts:[['1 lb','pound, peeled'],['450 g','grams'],['about 25','large shrimp','p']]},
+  lime:{ing:'lime',noun:'lime juice',opts:[['2 tbsp','juice'],['30 ml','millilitres'],['1','lime, juiced','p','lime, juiced']]},
+  cilantro:{ing:'cilantro',noun:'cilantro',check:'The card says “1/4 cilantro” with no unit. Read as ¼ cup.',opts:[['¼ cup','chopped'],['5 g','grams'],['a small handful','loosely']]}
+ },
+ STEPS:[
+  {title:'Bloom the aromatics',secs:60,on:2,label:'Aromatics',lines:['Heat {oil} over medium heat.','Add {ginger}, {lemongrass} and {curry}.','Cook, stirring, for 1 minute.']},
+  {title:'Simmer the broth',secs:900,on:1,label:'Broth simmer',lines:['Add {broth}, {fish} and {sugar}.','Simmer for 15 minutes.']},
+  {title:'Add coconut and shrimp',secs:0,on:2,flag:'The card does not say how long to cook the shrimp or chicken.',lines:['Add {coconut}.','Add {shrimp}.','Cook until the shrimp turns pink.']},
+  {title:'Finish',secs:0,on:1,lines:['Stir in {lime}.','Garnish with {cilantro}.']}
+ ],
+ SETS:{
+  shrimp:{center:'Shrimp',branches:['Card says','Seafood','Plant-based'],traits:['Tender','Sweetness','Protein'],leaves:[
+   L('chickencard','Chicken','1 lb','The card offers it. Slice thin and simmer until cooked through.',[4,2,5]),
+   L('thighs2','Chicken thighs','1 lb','Juicier than breast and forgiving.',[5,3,5]),
+   L('scallops2','Scallops','1 lb','Sweet and tender. Add for the last 2 minutes.',[5,5,4]),
+   L('whitefish','White fish','1 lb','Cubes of cod or haddock. Poach gently.',[4,3,4]),
+   L('tofu3','Firm tofu','1 block','Cube it and add with the coconut milk.',[3,2,3]),
+   L('mushrooms3','Mushrooms','300 g','Earthy and meaty.',[3,2,1],{dislike:'Mushrooms'})]},
+  coconut:{center:'Coconut milk',branches:['Closest','Lighter'],traits:['Richness','Sweetness','Body'],leaves:[
+   L('lightcoconut','Light coconut milk','1 : 1','Same flavour, about half the calories.',[3,3,3]),
+   L('coconutcream2','Coconut cream','2 cans + water','Richer. Thin with 1 cup water.',[5,4,5]),
+   L('twocans','2 cans','2 cans','Brothier and lighter.',[3,2,2]),
+   L('evap','Evaporated milk','1 : 1','Creamy, not dairy-free.',[3,3,4])]},
+  broth:{center:'Chicken broth',branches:['Closest','Vegetarian'],traits:['Savoury','Body','Salt'],leaves:[
+   L('stockcube','Stock cube','1 cube per 2 cups','The pantry standby. Taste before adding fish sauce.',[3,2,5]),
+   L('seafoodstock','Seafood stock','1 : 1','Deeper with shrimp.',[4,3,4]),
+   L('vegbroth','Vegetable broth','1 : 1','Lighter and vegetarian.',[3,2,3]),
+   L('mushbroth','Mushroom broth','1 : 1','Deep and earthy.',[5,3,3],{dislike:'Mushrooms'})]},
+  fish:{center:'Fish sauce',branches:['Closest','Vegetarian'],traits:['Salty','Funk','Sweet'],leaves:[
+   L('soysauce','Soy sauce','1 : 1','Saltier, less funky.',[5,2,2]),
+   L('tamari','Tamari','1 : 1','Gluten-free soy sauce.',[5,2,2]),
+   L('vegfish','Vegan fish sauce','1 : 1','Seaweed based.',[4,3,2]),
+   L('misowater','Miso + water','1 tbsp + 2 tbsp','Savoury depth without fish.',[4,2,1])]},
+  lemongrass:{center:'Lemongrass',branches:['Closest','Pantry'],traits:['Citrus','Aroma','Fresh'],leaves:[
+   L('lgpaste','Lemongrass paste','1 tbsp','From a tube. Stir straight in.',[4,4,3]),
+   L('lgfrozen','Frozen lemongrass','1 tbsp','Keeps for months.',[4,4,4]),
+   L('limezest','Lime zest','1 lime','Bright citrus, different aroma.',[5,3,5]),
+   L('lemonzest','Lemon zest','½ lemon','Softer citrus note.',[4,3,5])]},
+  curry:{center:'Red curry paste',branches:['Closest','Milder'],traits:['Heat','Aroma','Colour'],leaves:[
+   L('greencurry','Green curry paste','1 : 1','Brighter, often hotter.',[4,5,3]),
+   L('yellowcurry','Yellow curry paste','1 : 1','Milder and warmer.',[2,4,4]),
+   L('halfcurry','Half the paste','1 tsp','Gentle heat for kids.',[1,3,2]),
+   L('sriracha','Sriracha','1 tbsp','Simple heat and garlic.',[4,2,4])]},
+  cilantro:{center:'Cilantro',branches:['Closest','No cilantro'],traits:['Fresh','Aroma','Colour'],leaves:[
+   L('thaibasil','Thai basil','1 : 1','Aniseed and sweet.',[4,5,4]),
+   L('mint','Mint','1 : 1','Cool and bright.',[5,4,4]),
+   L('greenonion2','Green onion','2, sliced','Mild and oniony.',[3,2,4]),
+   L('parsley2','Parsley','1 : 1','Clean and green.',[3,2,4])]}
+ }
+};
+
+RECIPES.piccata={
+ id:'piccata',title:'Chicken Piccata',kicker:'Dinner · From Ashley’s cards',base:2,
+ desc:'Butterflied chicken dredged and pan-fried, then finished in a bright pan sauce of lemon, capers and stock.',
+ tags:[['30 min',1],['Pan sauce'],['Date night'],['Bright']],
+ stats:[['10 min','Prep'],['20 min','Cook'],['1,010','kcal / serving'],['65 g','protein / serving']],
+ meta:'30 min · Medium',plate:'Chicken piccata',
+ card:{source:'Handwritten card',credit:'Card shorthand: “2 & 2 … again” for the second batch.',photos:1,questions:['Are the stock ½ cup and the capers ¼ cup?','When do you add the last 2 tbsp butter?']},
+ ING:[
+  {id:'chicken',name:'Chicken',color:'#E9B98C',edge:'#B9875A',g:0,weight:400,volume:450,calories:660,cost:7.00,amt:'2 breasts',eq:'butterflied',icon:[['chicken',2]],aisle:'Meat and seafood'},
+  {id:'flour',name:'Flour',color:'#E8DFC9',edge:'#A89C7E',g:0,weight:30,volume:60,calories:110,cost:0.10,amt:'¼ cup',eq:'for dredging',icon:[['flour',1]],aisle:'Pantry'},
+  {id:'butter',name:'Butter',color:'#F7D23A',edge:'#C9A800',g:1,weight:85,volume:90,calories:610,cost:1.20,amt:'6 tbsp',eq:'¾ of a US stick',icon:[['butter',3]],aisle:'Dairy and eggs'},
+  {id:'oil',name:'Olive oil',color:'#8C9A2B',g:1,weight:70,volume:75,calories:600,cost:1.20,amt:'5 tbsp',eq:'extra-virgin',icon:[['bottle',1]],aisle:'Pantry'},
+  {id:'lemon',name:'Lemon juice',color:'#F2C200',edge:'#C9A800',g:2,weight:80,volume:80,calories:18,cost:0.80,amt:'⅓ cup',eq:'about 2 lemons',icon:[['lemon',2]],aisle:'Produce'},
+  {id:'stock',name:'Chicken stock',color:'#B8A27A',g:2,weight:120,volume:120,calories:5,cost:0.50,amt:'½ cup',eq:'low sodium is best',icon:[['carton',1]],aisle:'Canned'},
+  {id:'capers',name:'Capers',color:'#5E7D3A',g:2,weight:35,volume:60,calories:8,cost:1.50,amt:'¼ cup',eq:'brined, rinsed',icon:[['capers',1]],aisle:'Canned'},
+  {id:'parsley',name:'Parsley',color:'#2E9E4F',g:3,weight:15,volume:80,calories:5,cost:1.00,amt:'⅓ cup',eq:'fresh, chopped',icon:[['herb',1]],aisle:'Produce'}
+ ],
+ have:{flour:1,butter:1,oil:1,stock:1,capers:1},
+ GROUPS:[{name:'Chicken',color:'#E9B98C',op:.35},{name:'Pan',color:'#F7D23A',op:.35},{name:'Sauce',color:'#F2C200',op:.3},{name:'Finish',color:'#2E9E4F',op:.25}],
+ INS:{weight:['Chicken is 48% of the plate.','The sauce is mostly lemon and stock, so use fresh lemons.'],
+  volume:['The sauce is a quarter of the volume.','Spoon it over just before serving so the coating stays crisp.'],
+  calories:['Butter and oil are 18% of the weight but 60% of the calories.','Use half the fat for the second batch to save about 250 kcal.'],
+  cost:['Chicken is 53% of the cost.','Thighs work well here and cost less.']},
+ LINE:{
+  chicken:{ing:'chicken',noun:'chicken breasts',opts:[['2','butterflied breasts','p'],['400 g','grams'],['14 oz','ounces']]},
+  saltpepper:{name:'Salt and pepper',noun:'salt and pepper',color:'#8A8A85',icon:'salt',opts:[['to taste','both sides'],['½ tsp each','a starting point']]},
+  flour:{ing:'flour',noun:'flour',check:'The card says “Flour” with no amount. About ¼ cup covers 2 breasts.',opts:[['¼ cup','for dredging'],['30 g','grams']]},
+  butter1:{ing:'butter',name:'Butter',noun:'butter',opts:[['2 tbsp','tablespoons'],['28 g','grams']]},
+  oil1:{ing:'oil',name:'Olive oil',noun:'olive oil',opts:[['3 tbsp','tablespoons'],['45 ml','millilitres']]},
+  butter2:{ing:'butter',name:'Butter',noun:'butter',check:'The card says “2 & 2 … again”. Read as 2 tbsp butter and 2 tbsp oil.',opts:[['2 tbsp','tablespoons'],['28 g','grams']]},
+  oil2:{ing:'oil',name:'Olive oil',noun:'olive oil',opts:[['2 tbsp','tablespoons'],['30 ml','millilitres']]},
+  butter3:{ing:'butter',name:'Butter',noun:'butter',check:'The card does not say where the last 2 tbsp go. Whisking them into the sauce is the classic finish.',opts:[['2 tbsp','tablespoons'],['28 g','grams']]},
+  lemon:{ing:'lemon',noun:'lemon juice',opts:[['⅓ cup','juice'],['80 ml','millilitres'],['2','lemons, juiced','p','lemons, juiced']]},
+  capers:{ing:'capers',noun:'capers',check:'The card says “1/4 brined capers” with no unit. Read as ¼ cup.',opts:[['¼ cup','rinsed'],['35 g','grams'],['4 tbsp','tablespoons']]},
+  stock:{ing:'stock',noun:'chicken stock',check:'The card says “1/2 chicken stock” with no unit. Read as ½ cup.',opts:[['½ cup','cup'],['120 ml','millilitres'],['4 fl oz','US fluid ounces']]},
+  parsley:{ing:'parsley',noun:'fresh parsley',opts:[['⅓ cup','chopped'],['15 g','grams'],['a big handful','loosely']]}
+ },
+ STEPS:[
+  {title:'Season and dredge',secs:0,on:5,lines:['Season {chicken} with {saltpepper}.','Dredge in {flour}.']},
+  {title:'Fry the first batch',secs:240,on:2,label:'First batch',lines:['Heat {butter1} and {oil1} in a large pan.','Cook half the chicken until golden, then lift it out.']},
+  {title:'Fry the second batch',secs:240,on:2,label:'Second batch',lines:['Add {butter2} and {oil2}.','Cook the rest of the chicken, then lift it out.']},
+  {title:'Make the sauce',secs:300,on:2,label:'Chicken in sauce',lines:['Add {lemon}, {capers} and {stock} to the pan.','Return the chicken for 5 minutes.']},
+  {title:'Finish',secs:0,on:2,flag:'The card does not say where the last 2 tbsp butter go.',lines:['Whisk {butter3} into the sauce.','Spoon the sauce over the chicken.','Finish with {parsley}.']}
+ ],
+ SETS:{
+  chicken:CHICKEN_SET,
+  flour:{center:'Flour',branches:['Closest','Gluten-free'],traits:['Crisp','Browning','Neutral'],leaves:[
+   L('wondra','Instant flour','1 : 1','Finer, for a thinner, crisper coat.',[5,4,5]),
+   L('cornstarch','Cornstarch','1 : 1','Crisp and gluten-free.',[5,2,5]),
+   L('ricefl','Rice flour','1 : 1','Light and gluten-free.',[4,3,5]),
+   L('almondfl','Almond flour','1 : 1','Nutty and low-carb, but made from almonds.',[3,4,2],TN)]},
+  butter:{center:'Butter',branches:['Closest','Dairy-free'],traits:['Flavour','Heat limit','Richness'],leaves:[
+   L('ghee','Ghee','1 : 1','Butter flavour that will not burn.',[4,5,5]),
+   L('halfbutter','Half the butter','3 tbsp','Lighter. Keep the last 2 tbsp for the sauce.',[3,2,3]),
+   L('vegbutter','Vegan butter','1 : 1','Melts and browns like butter.',[3,3,4]),
+   L('oliveoil2','Olive oil','1 : 1','Fruity. The sauce will be thinner.',[3,3,2])]},
+  lemon:{center:'Lemon',branches:['Closest','Sharper','Pantry'],traits:['Sour','Aroma','Sweet'],leaves:[
+   L('meyer','Meyer lemon','1 : 1','Sweeter and gentler.',[3,5,4]),
+   L('bottled','Bottled juice','1 : 1','Fine in a pinch. No aroma.',[4,1,2]),
+   L('lime','Lime','1 : 1','Sharper and more floral.',[5,4,2]),
+   L('whitewine','White wine + lemon','¼ cup + 2 tbsp','The restaurant version. Rounder and less sour.',[3,4,3]),
+   L('vinegar','White wine vinegar','2 tbsp','Sharp. Add slowly and taste.',[5,1,1]),
+   L('zestonly','Zest + stock','1 lemon zest','All aroma, gentle sour.',[2,5,3])]},
+  capers:{center:'Capers',branches:['Closest','Milder'],traits:['Briny','Salty','Pop'],leaves:[
+   L('olives','Green olives','2 tbsp, chopped','Briny and meaty.',[4,4,2]),
+   L('caperberries','Caper berries','8, halved','Bigger and milder.',[4,3,4]),
+   L('halfcapers','Half the capers','2 tbsp','Less salty.',[3,3,4]),
+   L('pickles','Chopped pickles','2 tbsp','Tangy and crunchy.',[3,2,4])]},
+  stock:{center:'Chicken stock',branches:['Closest','Other'],traits:['Savoury','Body','Salt'],leaves:[
+   L('stockcube2','Stock cube','½ cube + ½ cup water','Taste before salting.',[3,2,5]),
+   L('vegstock','Vegetable stock','1 : 1','Lighter.',[3,2,3]),
+   L('whitewine2','White wine','1 : 1','Classic and bright.',[3,3,1]),
+   L('water2','Water + butter','½ cup + 1 tbsp','Leans on the lemon and capers.',[1,3,1])]},
+  parsley:{center:'Parsley',branches:['Closest','Different'],traits:['Fresh','Aroma','Colour'],leaves:[
+   L('chives3','Chives','1 : 1','Mild and oniony.',[3,3,4]),
+   L('basil2','Basil','1 : 1','Sweet and aromatic.',[4,5,4]),
+   L('dill','Dill','2 tbsp','Bright with lemon.',[4,5,3]),
+   L('noparsley','Leave it out','—','Just a little lemon zest instead.',[1,2,1])]}
+ }
+};
+var RECIPE_ORDER=['cajun','thai','piccata'];
+
+/* ================= GLOBALS ================= */
+var R,ING,GROUPS,LINE,STEPS,SETS;
+var MODES={
+ weight:{label:'Weight',cap:'Grams',fmt:function(v){return Math.round(v)+'g'}},
+ volume:{label:'Volume',cap:'Millilitres, raw',fmt:function(v){return Math.round(v)+'ml'}},
+ calories:{label:'Calories',cap:'kcal',fmt:function(v){return Math.round(v)+' cal'}},
+ cost:{label:'Cost',cap:'Estimated, CAD',fmt:function(v){return '$'+v.toFixed(2)}}
+};
+var POS=[[62,38],[205,46],[290,142],[290,330],[70,432],[200,430]];
+var BPOS=[[100,118],[290,235],[100,352]];
+var LEAFLINES=['M100,118 Q70,90 62,38','M100,118 Q190,110 205,46','M290,235 Q300,200 290,142','M290,235 Q300,280 290,330','M100,352 Q70,390 70,432','M100,352 Q190,370 200,430'];
+var BLINES=['M175,235 Q120,200 100,118','M175,235 L290,235','M175,235 Q120,270 100,352'];
+var SVG={
+ share:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
+ swap:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>',
+ back:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
+ close:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+ warn:function(c){return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="'+c+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.5"/></svg>'},
+ tick:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+ arrow:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+ heart:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
+ heartOn:'<svg width="20" height="20" viewBox="0 0 24 24" fill="#111" stroke="#111" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
+ cst:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="4" cy="6" r="1.6"/><circle cx="20" cy="6" r="1.6"/><circle cx="5" cy="19" r="1.6"/><circle cx="19" cy="18" r="1.6"/><path d="M5.3 7l4.5 3.5M18.7 7l-4.5 3.5M6.3 18l3.6-3.6M17.7 17l-3.6-3"/></svg>',
+ convert:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/></svg>',
+ tabHome:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
+ tabBook:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>',
+ tabJar:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="7" width="12" height="14" rx="2"/><path d="M8 3h8v4H8z"/></svg>',
+ tabCal:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+ tabCart:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.5 12h11L21 8H6.5"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>'
+};
+function icon(t,size){return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 28 28" aria-hidden="true">'+(ICON[t]||'')+'</svg>'}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+/* ================= STATE ================= */
+var S;
+var LOG={};
+var D={device:'phone',orient:'landscape'},SCALE=1;
+function isPad(){return D.device==='ipad'}
+function isLand(){return isPad()&&D.orient==='landscape'}
+function freshGlobal(){S={screen:'home',speed:30,saved:{},dir:1};}
+freshGlobal();
+function loadRecipe(id){
+ R=RECIPES[id];ING=R.ING;GROUPS=R.GROUPS;LINE=R.LINE;STEPS=R.STEPS;SETS=R.SETS;
+ var sw={};ING.forEach(function(it){if(it.profile)sw[it.id]=it.profile});
+ var have={};for(var k in R.have)have[k]=true;
+ S.recipe=id;S.mode='weight';S.swaps=sw;S.have=have;S.focus=null;S.picked={};S.zoom=null;S.cart={};S.units={};S.struck={};
+ S.servings=R.base;S.tab='overview';S.step=0;S.timers={};S.rating=0;S.photo=null;S.started=null;S.note='';S.share={format:'card',swaps:true,notes:false,card:true,scale:false};
+}
+loadRecipe('cajun');
+function F(){return S.servings/R.base}
+function ing(id){for(var i=0;i<ING.length;i++)if(ING[i].id===id)return ING[i];return null}
+function leafOf(id,lid){var set=SETS[id];if(!set)return null;for(var i=0;i<set.leaves.length;i++)if(set.leaves[i].id===lid)return set.leaves[i];return null}
+function shownName(it){var sw=S.swaps[it.id];return sw?leafOf(it.id,sw).name:it.name}
+function colorOf(it){if(it.id==='mushroom'&&S.swaps.mushroom==='aubergine')return '#4B2E83';return it.color}
+function edgeOf(it){return it.edge||it.color}
+function blockedReason(l){if(l.allergen)return 'Contains '+l.allergen.toLowerCase();if(l.dislike)return 'You dislike '+l.dislike.toLowerCase();return ''}
+
+/* ================= QUANTITIES ================= */
+var FR=[[0,''],[.25,'¼'],[1/3,'⅓'],[.5,'½'],[2/3,'⅔'],[.75,'¾'],[1,'']];
+function scaleQty(str,f,whole){
+ if(f===1)return str;
+ var m=/^(\d+(?:\.\d+)?)?([½¼¾⅓⅔])?(\s?)(.*)$/.exec(str);if(!m||(!m[1]&&!m[2]))return str;
+ var fv={'½':.5,'¼':.25,'¾':.75,'⅓':1/3,'⅔':2/3}[m[2]]||0,v=(m[1]?parseFloat(m[1]):0)+fv,rest=m[3]+m[4];if(!v)return str;v*=f;
+ if(/^ ?(g|ml)\b/.test(rest)||(whole&&!fv&&parseFloat(m[1])>=3))return Math.max(1,Math.round(v))+rest;
+ if(/^ ?(oz|lb|kg|L|fl oz)\b/.test(rest))return (Math.round(v*10)/10)+rest;
+ var w=Math.floor(v),fr=v-w,best=FR[0];FR.forEach(function(x){if(Math.abs(x[0]-fr)<Math.abs(best[0]-fr))best=x});
+ if(best[0]===1){w+=1;best=FR[0]}
+ var out=(w?String(w):'')+best[1];if(!out)out='¼';
+ if(v>1.01){rest=rest.replace(/^ can\b/,' cans').replace(/^ bunch\b/,' bunches').replace(/^ lemon\b/,' lemons').replace(/^ clove\b/,' cloves')}
+ return out+rest;
+}
+function lineInfo(key){
+ if(key==='spices_sw'){var lf0=leafOf('spices',S.swaps.spices);return {key:key,name:lf0.name,noun:lf0.name.toLowerCase(),color:'#F58A1F',icon:'jar',opts:[[lf0.ratio,'in place of garlic, cumin and paprika']],u:0,qty:lf0.ratio}}
+ var L0=LINE[key],it=L0.ing?ing(L0.ing):null,sw=it?S.swaps[it.id]:null,profile=it&&it.profile===sw;
+ var color=L0.color||(it?colorOf(it):'#8A8A85'),ic=L0.icon||(it?it.icon[0][0]:null);
+ var name=L0.name||(it?shownName(it):key),noun=L0.noun||name.toLowerCase(),opts=L0.opts;
+ if(sw){var lf=leafOf(it.id,sw);name=lf.name;noun=lf.name.toLowerCase();
+  if(L0.swapOpts&&L0.swapOpts[sw]){opts=L0.swapOpts[sw]}
+  else if(lf.ratio==='1 : 1'){opts=L0.opts.filter(function(o){return o[2]!=='p'});if(!opts.length)opts=L0.opts}
+  else{opts=[[lf.ratio,'in place of '+L0.opts[0][0]+' '+(L0.noun||it.name.toLowerCase())]]}}
+ var scalable=!(sw&&!profile&&leafOf(it.id,sw).ratio!=='1 : 1'&&!(L0.swapOpts&&L0.swapOpts[sw]));
+ if(scalable)opts=opts.map(function(o){return[scaleQty(o[0],F(),o[2]==='p'),o[1],o[2],o[3]]});
+ var u=Math.min(S.units[key]||0,opts.length-1);
+ if(opts[u][3])noun=opts[u][3];
+ return {key:key,name:name,noun:noun,color:color,edge:L0.color||(it?edgeOf(it):color),icon:ic,opts:opts,u:u,qty:opts[u][0],check:sw?'':(L0.check||'')};
+}
+function stepSrc(st){var src=st.lines;if(st.swapLines){for(var k in st.swapLines)if(S.swaps[k])src=st.swapLines[k]}return src}
+function stepLines(st){
+ return stepSrc(st).map(function(t){return t.replace(/\{(\w+)\}/g,function(_,k){return A(k)})});
+}
+function stepTitle(st){return st.title.replace(/\{(\w+)!\}/g,function(_,k){var it=ing(k);return shownName(it).toLowerCase()})}
+function A(key){
+ var li=lineInfo(key),c=li.color,txt=li.qty&&li.qty!=='—'&&li.qty!=='to taste'?li.qty+' '+li.noun:li.noun;
+ return '<span class="ingt'+(li.check?' q':'')+'" role="button" tabindex="0" data-conv="'+key+'" style="background:'+c+'26;box-shadow:inset 0 -4px 0 '+li.edge+'" aria-label="'+esc(txt+'. Change units')+'">'+esc(txt)+'</span>';
+}
+
+/* ================= SHELL ================= */
+var scr=document.getElementById('screen');
+function go(screen,dir){S.dir=dir||1;S.screen=screen;closeSheet();render(true);scr.scrollTop=0}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove('show')},2400)}
+function header(backTo,title,sub,closeIcon){
+ return '<div class="row"><button class="iconbtn" data-back="'+backTo+'" aria-label="'+(closeIcon?'Close':'Back')+'">'+(closeIcon?SVG.close:SVG.back)+'</button>'+
+  (title?'<div style="display:flex;flex-direction:column;gap:2px;min-width:0"><h1 class="t" style="font-size:26px">'+esc(title)+'</h1>'+(sub?'<p class="muted" style="margin:0;font-size:13px">'+sub+'</p>':'')+'</div>':'')+'</div>';
+}
+function profileBar(){
+ return '<div class="row" style="gap:8px;flex-wrap:wrap;padding:10px 12px;border-radius:14px;background:var(--counter)"><span class="kicker" style="color:var(--ink)">Never</span>'+
+ '<span class="chip out">Mushrooms <span class="muted" style="font-weight:500">dislike</span></span>'+
+ '<span class="chip out" style="border-width:1.5px">'+SVG.warn('#111')+'Tree nuts <span class="muted" style="font-weight:500">allergy</span></span></div>';
+}
+function fpBar(r,h){var tot=0;r.ING.forEach(function(it){tot+=it.weight});return '<div style="display:flex;height:'+h+'px;width:100%" aria-hidden="true">'+r.ING.map(function(it){return '<span style="flex:'+it.weight+';background:'+(it.profile==='aubergine'?'#4B2E83':it.color)+'"></span>'}).join('')+'</div>'}
+
+/* ================= HOME ================= */
+function home(){
+ var feat=RECIPES[RECIPE_ORDER[0]],others=RECIPE_ORDER.slice(1);
+ function cooked(id){var n=(LOG[id]||[]).length;return n?'<span class="badge solid" style="height:22px;font-size:11px">Cooked '+n+'×</span>':''}
+ var pantry=Object.keys(feat.have).length;
+ return '<div class="pad">'+
+ '<div class="between"><div><p class="muted" style="margin:0 0 4px;font-size:13px">Monday evening</p><h1 class="t" style="font-size:30px">What\'s cooking?</h1></div>'+
+ '<button class="iconbtn" style="background:#111;color:#fff;font-family:\'Space Grotesk\';font-weight:700;font-size:17px" aria-label="Profile" data-toast="Profile: avoids mushrooms, allergic to tree nuts">M</button></div>'+
+ '<label class="row" style="height:48px;padding:0 16px;border-radius:14px;background:var(--counter);gap:10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search</span><input id="search" type="search" placeholder="Search recipes or ingredients" style="flex:1;border:none;background:transparent;font:inherit;font-size:15px;outline:none"></label>'+
+ '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Cook with what you have</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+
+  [['#F2C200','Lemons','piccata'],['#9CBF5A','Lemongrass','thai'],['#2E9E4F','Green onion','cajun'],['#6CBF3A','Limes','thai']].map(function(c){return '<button class="chip" data-open="'+c[2]+'"><span class="dot" style="background:'+c[0]+'"></span>'+c[1]+'</button>'}).join('')+'</div></div>'+
+ '<button class="rcard" data-open="'+feat.id+'" aria-label="Open '+esc(feat.title)+'">'+fpBar(feat,112)+
+  '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;width:100%"><div class="between"><span class="kicker" style="color:#111">Tonight\'s pick</span>'+cooked(feat.id)+'</div>'+
+  '<span style="font-family:\'Space Grotesk\';font-size:24px;font-weight:700;line-height:1.15">'+esc(feat.title)+'</span><span class="muted" style="font-size:14px">'+feat.meta+' · '+feat.base+' servings</span>'+
+  '<span style="font-size:14px;font-weight:600;margin-top:2px">'+pantry+' of '+feat.ING.length+' ingredients already in your pantry</span></div></button>'+
+ '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">From Ashley’s recipe cards</p>'+
+  others.map(function(id){var r=RECIPES[id];return '<button class="listrow" data-open="'+id+'"><div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0"><div class="between"><span style="font-weight:700;font-size:16px">'+esc(r.title)+'</span>'+cooked(id)+'</div><div class="fp">'+fpBar(r,10)+'</div><span class="muted" style="font-size:13px">'+r.meta+' · '+r.base+' servings'+(r.card.questions.length?' · '+r.card.questions.length+' card question'+(r.card.questions.length>1?'s':''):'')+'</span></div>'+SVG.arrow+'</button>'}).join('')+
+ '</div></div>'+
+ '<nav class="tabbar" aria-label="Main">'+[['Home',SVG.tabHome,1],['Recipes',SVG.tabBook],['Pantry',SVG.tabJar],['Plan',SVG.tabCal],['Shop',SVG.tabCart]].map(function(t){return '<button class="'+(t[2]?'on':'')+'"'+(t[2]?' aria-current="page"':' data-toast="Only the cooking flow is wired up"')+'>'+t[1]+t[0]+'</button>'}).join('')+'</nav>';
+}
+
+/* ================= SANKEY ================= */
+function sankey(){
+ var M=MODES[S.mode],mode=S.mode,f=F();
+ var vals=ING.map(function(i){return i[mode]*f});
+ var total=vals.reduce(function(a,b){return a+b},0);
+ var GAP=6,MGAP=18,BX=196,MX=262,PX=344,W=350;
+ var iconSpec=ING.map(function(it){return it.icon.map(function(p){return[p[0],Math.max(1,Math.round(p[1]*f))]})});
+ var counts=iconSpec.map(function(sp){return sp.reduce(function(a,p){return a+p[1]},0)});
+ var sizes=counts.map(function(n){return n===1?56:Math.min(42,Math.floor(178/n))});
+ var minH=sizes.map(function(z){return z+40});
+ var H=Math.max(560,minH.reduce(function(a,b){return a+b},0)+GAP*(ING.length-1)+40);
+ var SPAN=H*.7,hs,bh,bt;
+ for(var k=0;k<60;k++){var sc=SPAN/total;hs=vals.map(function(v){return Math.max(1.5,v*sc)});bh=hs.map(function(h,i){return Math.max(minH[i],h)});bt=bh.reduce(function(a,b){return a+b},0)+GAP*(bh.length-1);if(bt<=H-8)break;SPAN-=10}
+ var y=(H-bt)/2,bp=bh.map(function(h){var o={y0:y,y1:y+h};y+=h+GAP;return o});
+ var gs=GROUPS.map(function(){return 0});ING.forEach(function(it,i){gs[it.g]+=hs[i]});
+ var my=(H-(gs.reduce(function(a,b){return a+b},0)+MGAP*(gs.length-1)))/2,mids=gs.map(function(h){var o={y0:my,y1:my+h};my+=h+MGAP;return o});
+ var ph=gs.reduce(function(a,b){return a+b},0),py=(H-ph)/2;
+ function band(x0,a0,a1,x1,b0,b1){var c=(x0+x1)/2;function q(n){return n.toFixed(1)}return 'M'+x0+','+q(a0)+' C'+c+','+q(a0)+' '+c+','+q(b0)+' '+x1+','+q(b0)+' L'+x1+','+q(b1)+' C'+c+','+q(b1)+' '+c+','+q(a1)+' '+x0+','+q(a1)+' Z'}
+ var cur=mids.map(function(m){return m.y0}),paths='',html='';
+ ING.forEach(function(it,i){
+  var b=bp[i],h=hs[i],c0=cur[it.g];cur[it.g]+=h;var m=(b.y0+b.y1)/2,col=colorOf(it);
+  paths+='<path d="'+band(BX,m-h/2,m+h/2,MX,c0,c0+h)+'" fill="'+col+'" fill-opacity="'+(/^#F[27]D/.test(col)?.6:.42)+'"/>';
+  var icons='';iconSpec[i].forEach(function(p){for(var n=0;n<p[1];n++)icons+=icon(p[0],sizes[i])});
+  var sw=S.swaps[it.id];
+  html+='<div class="blk" style="top:'+b.y0.toFixed(1)+'px;height:'+(b.y1-b.y0).toFixed(1)+'px;width:'+(BX-6)+'px;background:'+col+'1F">'+
+   '<div class="icons">'+icons+'</div><div class="lab"><b>'+esc(shownName(it))+'</b><span>'+M.fmt(vals[i])+'</span></div>'+
+   (sw?'<span class="swaptag">for '+esc(it.name.toLowerCase())+'</span>':'')+'</div>'+
+   '<div style="position:absolute;left:'+(BX-6)+'px;top:'+b.y0.toFixed(1)+'px;width:6px;height:'+(b.y1-b.y0).toFixed(1)+'px;background:'+edgeOf(it)+'"></div>';
+ });
+ var pc=py;
+ mids.forEach(function(m,gi){var h=m.y1-m.y0;paths+='<path d="'+band(MX+6,m.y0,m.y1,PX,pc,pc+h)+'" fill="'+GROUPS[gi].color+'" fill-opacity="'+GROUPS[gi].op+'"/>';pc+=h;
+  var gv=0;ING.forEach(function(it,i){if(it.g===gi)gv+=vals[i]});
+  html+='<div style="position:absolute;left:'+MX+'px;top:'+m.y0.toFixed(1)+'px;width:6px;height:'+h.toFixed(1)+'px;background:#111"></div><div class="mid" style="left:'+(MX+12)+'px;top:'+((m.y0+m.y1)/2-15).toFixed(1)+'px">'+GROUPS[gi].name+'\n'+M.fmt(gv)+'</div>'});
+ html+='<div style="position:absolute;left:'+PX+'px;top:'+py.toFixed(1)+'px;width:6px;height:'+ph.toFixed(1)+'px;background:#111"></div><div class="mid" style="right:0;top:'+(py-20).toFixed(1)+'px">Plate</div>';
+ var aria='Sankey chart by '+M.label.toLowerCase()+': '+ING.map(function(it,i){return shownName(it)+' '+M.fmt(vals[i])+' ('+it.eq+')'}).join(', ')+'. Total '+M.fmt(total);
+ return {html:'<div class="sk" role="img" aria-label="'+esc(aria)+'" style="height:'+H+'px"><svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true" style="position:absolute;left:0;top:0">'+paths+'</svg>'+html+'</div>',total:M.fmt(total)};
+}
+
+/* ================= RECIPE ================= */
+function cardSection(){
+ var c=R.card;if(!c)return '';
+ return '<section class="card" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">'+
+  '<div class="row" style="gap:14px;align-items:flex-start"><div class="cardthumb" aria-hidden="true"><i style="width:70%;height:5px;background:#8A8A85"></i><i></i><i style="width:80%"></i><i></i><i style="width:60%"></i></div>'+
+  '<div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="kicker">From Ashley’s card</span><b style="font-size:15px">'+esc(c.source)+'</b><span style="font-size:13px;line-height:1.4;color:#3A3A38">'+esc(c.credit)+'</span><button class="linkbtn" data-toast="The original photos open here in the app">View '+c.photos+' original photo'+(c.photos>1?'s':'')+'</button></div></div>'+
+  (c.questions.length?'<div style="display:flex;flex-direction:column;gap:6px"><span class="kicker" style="color:#111">Still to check with Ashley</span>'+c.questions.map(function(q){return '<p class="cardnote" style="margin:0">'+esc(q)+'</p>'}).join('')+'</div>':'<p class="cardnote" style="margin:0">Fully transcribed. Nothing left to check.</p>')+
+ '</section>';
+}
+
+function recipe(){
+ var M=MODES[S.mode],tab=S.tab,body='',ins=R.INS[S.mode];
+ if(tab==='overview'){var sk=sankey();
+  body='<section class="card" style="padding:18px 10px 20px;margin:0 -10px;display:flex;flex-direction:column;gap:14px">'+
+  '<div class="between" style="padding:0 8px"><h2 class="h2">Where it all goes</h2><span class="muted" style="font-size:12px;font-weight:600">'+M.cap+' · total '+sk.total+'</span></div>'+
+  '<div class="seg" role="group" aria-label="Measure by" style="grid-template-columns:repeat(4,1fr)">'+Object.keys(MODES).map(function(k){return '<button data-mode="'+k+'" aria-pressed="'+(k===S.mode)+'">'+MODES[k].label+'</button>'}).join('')+'</div>'+
+  sk.html+'<p class="insight"><strong>'+ins[0]+'</strong> '+ins[1]+'</p></section>'+cardSection();
+ } else if(tab==='ingredients'){
+  var prof=ING.filter(function(it){return it.profile&&S.swaps[it.id]===it.profile});
+  body='<section style="display:flex;flex-direction:column"><div class="between" style="padding-bottom:4px"><span class="kicker">For '+S.servings+' serving'+(S.servings>1?'s':'')+'</span><span class="muted" style="font-size:12px">Tap an amount to convert</span></div>'+
+  ING.map(function(it){var li=LINE[it.id]?lineInfo(it.id):null,qty=li?li.qty:scaleQty(it.amt,F());return '<div class="row" style="gap:12px;padding:8px 0;border-bottom:1px solid #ECECE8">'+icon(it.icon[0][0],34)+
+   '<span style="flex:1;display:flex;flex-direction:column;gap:1px;padding-left:8px;border-left:4px solid '+edgeOf(it)+';min-width:0"><b style="font-size:16px">'+esc(shownName(it))+'</b><span class="muted" style="font-size:12px">'+esc(it.eq)+'</span></span>'+
+   (li?'<button class="qty'+(li.check?' q':'')+'" data-conv="'+it.id+'" aria-label="'+esc(qty+' '+li.name+'. Change units')+'">'+esc(qty)+SVG.convert+'</button>':'<span class="qty static">'+esc(qty)+'</span>')+'</div>'}).join('')+'</section>'+
+  prof.map(function(it){return '<div class="row" style="gap:10px;padding:10px 12px;border-radius:12px;background:var(--counter);font-size:14px"><span class="muted" style="text-decoration:line-through">'+esc(it.name)+'</span>'+SVG.arrow+'<b>'+esc(shownName(it))+'</b><span class="muted" style="margin-left:auto;font-size:12px">your '+it.why+'</span></div>'}).join('');
+ } else {
+  body='<ol class="plan">'+STEPS.map(function(st,i){
+   var keys=[];stepSrc(st).join(' ').replace(/\{(\w+)\}/g,function(_,k){if(keys.indexOf(k)<0)keys.push(k)});
+   return '<li><span class="pnum">'+(i+1)+'</span><div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0"><div class="between" style="gap:8px"><b style="font-family:\'Space Grotesk\';font-size:18px">'+esc(stepTitle(st))+'</b>'+'<span class="muted" style="font-size:12px;white-space:nowrap">'+(st.on?st.on+' min hands-on':'')+(st.secs?' · '+Math.round(st.secs/60)+' min timer':'')+'</span>'+'</div>'+
+   (keys.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+keys.map(function(k){var li=lineInfo(k);return '<button class="chip" data-conv="'+k+'" style="height:30px;font-size:13px;font-weight:600;background:'+li.color+'1F;box-shadow:inset 0 -2px 0 '+li.edge+'">'+esc(li.qty+' '+li.noun)+'</button>'}).join('')+'</div>':'')+
+   '<p style="margin:0;font-size:15px;line-height:1.5;color:#2B2B28">'+stepLines(st).join(' ').replace(/<[^>]+>/g,function(t){return t.indexOf('ingt')>-1||t==='</span>'?'':t})+'</p></div></li>'}).join('')+'</ol>';
+ }
+ var tabs=[['overview','Overview'],['ingredients','Ingredients'],['steps','Instructions']];
+ var saved=!!S.saved[R.id];
+ return '<div class="pad">'+
+ '<div class="between"><button class="iconbtn" data-back="home" aria-label="Back">'+SVG.back+'</button><span class="row" style="gap:8px"><button class="iconbtn" aria-label="Share recipe" data-act="share">'+SVG.share+'</button><button class="iconbtn" aria-label="'+(saved?'Saved':'Save recipe')+'" aria-pressed="'+saved+'" data-act="save">'+(saved?SVG.heartOn:SVG.heart)+'</button></span></div>'+
+ '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">'+R.kicker+'</p><h1 class="t" style="font-size:36px">'+R.title+'</h1>'+
+ '<div style="display:flex;gap:6px;flex-wrap:wrap">'+R.tags.map(function(t){return '<span class="badge'+(t[1]?' solid':'')+'">'+t[0]+'</span>'}).join('')+'</div>'+
+ '<p style="margin:0;font-size:15px;line-height:1.5;color:#2B2B28">'+R.desc+'</p>'+
+ '<div class="stats">'+R.stats.map(function(s){return '<div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'}).join('')+'</div>'+
+ '<div class="between" style="gap:10px"><div class="stepper" role="group" aria-label="Servings"><button data-serv="-1" aria-label="Fewer servings"'+(S.servings<=1?' disabled':'')+'>−</button><span aria-live="polite"><b>'+S.servings+'</b> serving'+(S.servings>1?'s':'')+'</span><button data-serv="1" aria-label="More servings"'+(S.servings>=12?' disabled':'')+'>+</button></div><span class="muted" style="font-size:13px">'+STEPS.length+' steps</span></div></div>'+
+ '<div class="seg tabs" role="tablist" style="grid-template-columns:repeat(3,1fr)">'+tabs.map(function(t){return '<button role="tab" data-tab="'+t[0]+'" aria-pressed="'+(t[0]===tab)+'" aria-selected="'+(t[0]===tab)+'">'+t[1]+'</button>'}).join('')+'</div>'+
+ body+'</div>'+
+ '<div class="bottombar"><button class="secondary" style="flex:1;height:56px" data-go="ingredients">Ingredients &amp; swaps</button><button class="primary" style="flex:1.3" data-act="startcook">Start cooking</button></div>';
+}
+
+/* ================= INGREDIENTS ================= */
+function starPos(i,n){var a=(-90+i*360/n)*Math.PI/180;return[Math.round(175+145*Math.cos(a)),Math.round(225+165*Math.sin(a))]}
+function constellation(){
+ var n=ING.length,ring='',spokes='';
+ ING.forEach(function(it,i){var p=starPos(i,n);ring+=(i?' L':'M')+p[0]+','+p[1];spokes+='M175,225 L'+p[0]+','+p[1]+' '});
+ var stars=ING.map(function(it,i){
+  var p=starPos(i,n),d=Math.max(30,Math.round(4.2*Math.sqrt(it.weight*(it.weight>600?.35:1)))),sw=S.swaps[it.id],name=shownName(it),fill=colorOf(it);
+  var sub=sw?'was '+it.name.toLowerCase():scaleQty(it.amt,F());
+  return '<button class="star'+(sw?' sw':'')+'" data-focus="'+it.id+'" aria-label="'+esc(name+(sw?', swapped for '+it.name.toLowerCase():'')+'. Show swaps')+'" style="left:'+p[0]+'px;top:'+p[1]+'px;transform:translate(-50%,-'+Math.round(d/2+4)+'px)">'+
+   '<span class="orb" style="width:'+d+'px;height:'+d+'px;background:'+fill+(it.edge?';border:1px solid '+it.edge:'')+'"></span><span class="nm">'+esc(name)+'</span><span class="sub">'+esc(sub)+'</span></button>';
+ }).join('');
+ return '<div class="cst '+(S.zoom==='out'?'zout':'')+'"><svg width="350" height="450" viewBox="0 0 350 450" aria-hidden="true" style="position:absolute;inset:0" fill="none"><path d="'+ring+' Z" stroke="#E4E4E0" stroke-width="1.5" stroke-dasharray="3 5"/><path d="'+spokes+'" stroke="#BDBDB8" stroke-width="1.5"/></svg>'+
+ '<div class="hub"><span style="font-family:\'Space Grotesk\';font-size:16px;font-weight:700;line-height:1.1">'+esc(R.title)+'</span><span style="font-size:12px;color:#D9D9D4">'+n+' ingredients</span></div>'+stars+'</div>';
+}
+function gatherRows(){
+ return ING.map(function(it){
+  var sw=S.swaps[it.id],on=!!S.have[it.id],lf=sw?leafOf(it.id,sw):null;
+  return '<div class="row" style="padding:10px 0;border-bottom:1px solid #ECECE8;align-items:center">'+
+   '<button class="check" role="checkbox" aria-checked="'+on+'" aria-label="I have '+esc(shownName(it))+'" data-have="'+it.id+'">'+(on?SVG.tick:'')+'</button>'+
+   icon(it.icon[0][0],30)+
+   '<div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">'+
+    '<span style="font-size:15px;font-weight:600">'+esc(shownName(it))+(sw?' <span class="muted" style="font-weight:500;text-decoration:line-through;font-size:13px">'+esc(it.name)+'</span>':'')+'</span>'+
+    '<span class="muted" style="font-size:13px">'+esc(lf&&lf.ratio!=='1 : 1'?lf.ratio:scaleQty(it.amt,F())+' · '+it.eq)+'</span></div>'+
+   (SETS[it.id]?'<button class="chip out" data-focus="'+it.id+'" style="height:32px">Swap</button>':'')+'</div>';
+ }).join('');
+}
+function ingredients(){
+ if(S.focus)return swapView();
+ var ready=ING.filter(function(it){return S.have[it.id]}).length,rows=gatherRows();
+ return '<div class="pad">'+header('recipe','This cook','Optional. Swap anything or tick what you have, then start.')+profileBar()+
+ constellation()+
+ '<section style="display:flex;flex-direction:column"><div class="between" style="padding-bottom:4px"><h2 class="h2">Gather</h2><span style="font-size:13px;font-weight:700">'+ready+' of '+ING.length+' ready</span></div>'+rows+'</section>'+
+ (ready<ING.length?'<button class="secondary" data-go="shop">Shop for '+(ING.length-ready)+' missing</button>':'')+
+ '</div><div class="bottombar"><button class="primary" data-act="startcook">Start cooking</button></div>';
+}
+function swapView(){
+ var id=S.focus,it=ing(id),set=SETS[id],idx=ING.indexOf(it),p=starPos(idx,ING.length);
+ var cur=S.swaps[id]||null,picked=S.picked[id]||cur||set.leaves[0].id;
+ var lines=set.branches.map(function(b,i){return '<path d="'+BLINES[i]+'" stroke="#111" stroke-width="3"/>'}).join('')+set.leaves.map(function(l,i){return '<path d="'+LEAFLINES[i]+'" stroke="#BDBDB8" stroke-width="2"/>'}).join('');
+ var leaves=set.leaves.map(function(l,i){
+  var on=l.id===picked,why=blockedReason(l),isCur=l.id===cur;
+  return '<button class="leaf'+(on?' on':'')+(why?' blk':'')+(isCur?' cur':'')+'" data-pick="'+l.id+'" aria-pressed="'+on+'" aria-label="'+esc(l.name+', '+(why||l.ratio))+'" style="left:'+POS[i][0]+'px;top:'+POS[i][1]+'px"><b>'+esc(l.name)+'</b><small>'+esc(why||l.ratio)+'</small></button>';
+ }).join('');
+ var branches=set.branches.map(function(b,i){return '<div class="branch" style="left:'+BPOS[i][0]+'px;top:'+BPOS[i][1]+'px">'+b+'</div>'}).join('');
+ var s=leafOf(id,picked),why=blockedReason(s),isCur=picked===cur;
+ var bars=set.traits.map(function(t,i){var b='';for(var n=0;n<5;n++)b+='<i class="'+(n<s.t[i]?'f':'')+'"></i>';return '<div style="display:flex;flex-direction:column;gap:6px"><span class="muted" style="font-size:12px;font-weight:600">'+t+'</span><div class="bars">'+b+'</div></div>'}).join('');
+ var btn=why?'<button class="secondary" disabled style="width:100%;color:#595954">Not available for you</button>':
+  (isCur?'<button class="secondary" disabled style="width:100%;color:#595954">In use</button>':'<button class="primary" data-act="use" style="height:50px;font-size:16px">Use '+esc(s.name)+'</button>');
+ var revert=(cur&&!it.profile)?'<button class="secondary" data-act="revert" style="width:100%;height:44px;font-size:14px">Go back to '+esc(it.name.toLowerCase())+'</button>':'';
+ var sub=it.profile?(it.why==='allergy'?'Your allergy profile swapped these out':'You dislike them, so a swap is already in'):'In '+esc(R.title)+' · '+esc(scaleQty(it.amt,F()));
+ var map='<div class="zin" style="position:relative;width:350px;height:470px;margin:0 auto;transform-origin:'+p[0]+'px '+p[1]+'px">'+
+  '<svg width="350" height="470" viewBox="0 0 350 470" aria-hidden="true" style="position:absolute;inset:0" fill="none" stroke-linecap="round">'+lines+'</svg>'+
+  '<div class="hub2"><span class="dot" style="width:14px;height:14px;background:'+it.color+(it.edge?';border:1px solid '+it.edge:'')+'"></span><span style="font-family:\'Space Grotesk\';font-size:16px;font-weight:700;line-height:1.1">'+esc(set.center)+'</span><span class="muted" style="font-size:11px">'+esc(scaleQty(it.amt,F()))+'</span></div>'+
+  branches+leaves+
+  '<button class="chip out" data-act="home" style="position:absolute;right:0;bottom:0;height:40px;border-width:1.5px;font-weight:700">Whole recipe</button>'+
+ '</div>';
+ var detail='<section class="card" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">'+
+  '<div class="between"><h2 class="h2" style="font-size:20px">'+esc(s.name)+'</h2><b style="font-size:14px">'+(why?'':esc(s.ratio))+'</b></div>'+
+  (why?'<div class="row" style="gap:8px;padding:8px 12px;border-radius:10px;background:#111;color:#fff;font-size:13px;font-weight:600">'+SVG.warn('#fff')+esc(why)+'. Hidden from your suggestions.</div>':'')+
+  '<p style="margin:0;font-size:14px;line-height:1.45;color:#2B2B28">'+esc(s.note)+'</p>'+
+  '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+bars+'</div>'+btn+revert+
+ '</section>';
+ if(isPad())return '<div class="sheet swapmodal" role="dialog" aria-modal="true" aria-label="Swap '+esc(set.center)+'"><div class="between"><div><h2 class="h2" style="font-size:26px">Swap '+esc(set.center.toLowerCase())+'</h2><p class="muted" style="margin:2px 0 0;font-size:13px">'+sub+'</p></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div><div class="swapgrid">'+map+'<div style="display:flex;flex-direction:column;gap:12px;min-width:0">'+profileBar()+detail+'</div></div></div>';
+ return '<div class="pad">'+header('ingredients','Swap '+set.center.toLowerCase(),sub)+
+ '<nav aria-label="Breadcrumb" class="row" style="gap:6px"><button class="chip out" data-act="home" style="height:36px;border-width:1.5px;font-weight:700">'+SVG.cst+esc(R.title)+'</button><span aria-hidden="true" style="color:#8A8A85">›</span><b style="font-size:14px">'+esc(set.center)+'</b></nav>'+map+detail+'</div>';
+}
+
+/* ================= SHOP ================= */
+var AISLES=['Produce','Dairy and eggs','Canned','Dry goods','Pantry'];
+function shop(){
+ var missing=ING.filter(function(it){return !S.have[it.id]});
+ var inCart=missing.filter(function(it){return S.cart[it.id]}).length;
+ var secs=AISLES.map(function(a){
+  var items=missing.filter(function(it){return it.aisle===a});if(!items.length)return '';
+  var left=items.filter(function(it){return !S.cart[it.id]}).length;
+  return '<section style="display:flex;flex-direction:column;gap:10px"><div class="between" style="border-bottom:1.5px solid #111;padding-bottom:6px"><h2 class="h2">'+a+'</h2><span class="muted" style="font-size:12px;font-weight:600">'+(left?left+' to get':'All in cart')+'</span></div>'+
+  '<div class="tiles">'+items.map(function(it){
+   var g=!!S.cart[it.id],spec=it.icon.map(function(p){return[p[0],Math.max(1,Math.round(p[1]*F()))]}),n=spec.reduce(function(a,p){return a+p[1]},0),size=n===1?56:Math.min(36,Math.floor(140/n)),ic='';
+   spec.forEach(function(p){for(var k=0;k<p[1];k++)ic+=icon(p[0],size)});
+   var sw=S.swaps[it.id],lf=sw?leafOf(it.id,sw):null;
+   return '<button class="tile'+(g?' got':'')+'" data-cart="'+it.id+'" aria-pressed="'+g+'" aria-label="'+esc(shownName(it)+', '+scaleQty(it.amt,F())+(g?', in cart':''))+'" style="background:'+(g?'#fff':colorOf(it)+'24')+'">'+
+    '<span class="tchk">'+(g?SVG.tick:'')+'</span><span class="ticons">'+ic+'</span>'+
+    '<b>'+esc(shownName(it))+'</b><span style="font-size:12px;color:#3A3A38">'+esc(lf&&lf.ratio!=='1 : 1'?lf.ratio:scaleQty(it.amt,F()))+'</span>'+
+    (sw?'<span class="ttag">replaces '+esc(it.name.toLowerCase())+'</span>':'')+'</button>';
+  }).join('')+'</div></section>';
+ }).join('');
+ var have=ING.filter(function(it){return S.have[it.id]}).map(function(it){return '<span class="chip" style="background:#fff;height:40px;padding:0 12px 0 6px;font-size:13px;font-weight:600">'+icon(it.icon[0][0],28)+esc(shownName(it))+'</span>'}).join('');
+ var done=!missing.length||inCart===missing.length;
+ return '<div class="pad">'+header('ingredients','Shopping list','For '+esc(R.title)+' · grouped by aisle')+
+ '<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:14px">'+inCart+' of '+missing.length+' in your cart</b><div class="prog"><i style="width:'+(missing.length?Math.round(100*inCart/missing.length):100)+'%"></i></div></div>'+
+ (missing.length?secs:'<p class="insight">Nothing to buy. Everything is in your pantry.</p>')+
+ (have?'<section style="display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:18px;background:var(--counter)"><span class="kicker" style="color:#111">Already in your pantry</span><div style="display:flex;flex-wrap:wrap;gap:8px">'+have+'</div></section>':'')+
+ '</div><div class="bottombar"><button class="primary" data-act="shopdone"'+(done?'':' disabled')+'>'+(done?'Back to ingredients':'Tick items as you shop')+'</button></div>';
+}
+
+/* ================= COOK ================= */
+function mix(a,b,k){function p(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]}var x=p(a),y=p(b);return '#'+x.map(function(v,i){var n=Math.round(v+(y[i]-v)*k).toString(16);return n.length<2?'0'+n:n}).join('')}
+function colorFor(f){var st=[[1,'#3A3A38'],[.5,'#8A8A85'],[.32,'#2E9E4F'],[.14,'#F2C200'],[0,'#E5392B']];for(var i=0;i<st.length-1;i++){if(f<=st[i][0]&&f>=st[i+1][0])return mix(st[i][1],st[i+1][1],(st[i][0]-f)/(st[i][0]-st[i+1][0]))}return f>1?st[0][1]:st[4][1]}
+function pulseSecs(f){if(f<=0)return 1.6;if(f>.5)return 4;return 1.8+(f/.5)*2.2}
+function clock(sec){var s=Math.ceil(sec),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),r=s%60;return (h?h+':'+(m<10?'0':''):'')+m+':'+(r<10?'0':'')+r}
+function timerOf(i){if(!S.timers[i])S.timers[i]={total:STEPS[i].secs,left:STEPS[i].secs,running:false,started:false};return S.timers[i]}
+function playIcon(on){return on?'<svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>':'<svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>'}
+function miniRing(size,col,f){var c=138.23;return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="22" fill="#fff" stroke="#ECECE8" stroke-width="5"/><circle class="arc" cx="26" cy="26" r="22" fill="none" stroke="'+col+'" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+(c*(1-f)).toFixed(2)+'" transform="rotate(-90 26 26)"/></svg>'}
+function cook(){
+ var i=S.step,st=STEPS[i];
+ var bar='';for(var n=0;n<STEPS.length;n++)bar+='<i class="'+(n<i?'f':n===i?'c':'')+'"></i>';
+ var ls=stepLines(st);
+ var lines=ls.map(function(t,j){var dn=!!S.struck[i+':'+j];
+  return '<li><div class="line'+(dn?' struck':'')+'" role="button" tabindex="0" data-strike="'+i+':'+j+'" aria-pressed="'+dn+'"><span class="num">'+(j+1)+'</span><span class="pl">'+t+'</span></div></li>'}).join('');
+ var startCard='';
+ if(st.secs){var t=timerOf(i);if(!t.started){startCard='<div class="startcard"><span class="row" style="gap:12px">'+miniRing(48,'#3A3A38',1)+'<span style="display:flex;flex-direction:column"><b style="font-family:\'Space Grotesk\';font-size:22px;font-variant-numeric:tabular-nums">'+clock(t.total)+'</b><span class="muted" style="font-size:13px">Timer for this step</span></span></span><button class="primary" data-act="tstart" style="width:auto;height:44px;padding:0 18px;font-size:15px;border-radius:12px">Start</button></div>'}}
+ var allDone=ls.every(function(_,j){return S.struck[i+':'+j]});
+ return (isLand()?'<div class="cookwrap">'+stepListPad():'')+'<div class="pad cookpad">'+
+ '<div class="row"><button class="iconbtn" data-back="recipe" aria-label="Exit cooking mode">'+SVG.close+'</button><div style="flex:1;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700">Step '+(i+1)+' of '+STEPS.length+' · '+esc(R.title)+'</span><div class="stepbar" style="grid-template-columns:repeat('+STEPS.length+',1fr)" aria-hidden="true">'+bar+'</div></div></div>'+
+ '<p class="kicker" style="color:#111">'+esc(stepTitle(st))+'</p>'+
+ '<ol class="lines">'+lines+'</ol>'+(st.flag?'<p class="cardnote"><b>Card note:</b> '+esc(st.flag)+'</p>':'')+startCard+
+ '<p class="muted hint">'+(allDone?'<b style="color:#111">Step done.</b> On to the next one.':'Tap a line to cross it off. Tap an ingredient to change its units.')+'</p>'+
+ '</div>'+(isLand()?'</div>':'')+'<div class="bottombar" style="flex-direction:column"><div id="dock" class="dock"></div><div class="row" style="gap:10px"><button class="secondary" style="flex:1" data-act="prev"'+(i===0?' disabled':'')+'>Previous</button><button class="primary'+(allDone?' glow':'')+'" style="flex:2;height:52px;font-size:15px" data-act="next">'+(i===STEPS.length-1?'Plate it':'Next step')+'</button></div></div>';
+}
+function timerView(t){var f=t.total>0?t.left/t.total:0,done=f<=0;return {f:f,done:done,col:done?'#FF2A12':colorFor(f),dur:pulseSecs(f).toFixed(2),moving:t.running||done}}
+var dockSig='';
+function activeTimers(){return Object.keys(S.timers).filter(function(k){var t=S.timers[k];return t.started&&!(t.left<=0&&t.ack)}).sort(function(a,b){return (+b===S.step)-(+a===S.step)||a-b})}
+function updateTimerDom(){
+ if(S.screen!=='cook')return;
+ var dock=document.getElementById('dock');if(!dock)return;
+ var keys=activeTimers();
+ var sig=keys.map(function(k){var t=S.timers[k];return k+(t.running?'r':'p')+(t.left<=0?'d':'')}).join(',')+'|'+S.step;
+ if(sig!==dockSig||!dock.dataset.built){
+  dockSig=sig;dock.dataset.built='1';setTimeout(fitSteps,0);
+  dock.innerHTML=keys.map(function(k){var t=S.timers[k],v=timerView(t),here=+k===S.step;
+   return '<div class="dockrow'+(v.done?' done':'')+'" data-k="'+k+'">'+
+    '<span class="mr mot">'+miniRing(here?52:40,v.col,v.f)+'</span>'+
+    '<span style="flex:1;display:flex;flex-direction:column;min-width:0"><b class="clk2" style="font-family:\'Space Grotesk\';font-size:'+(here?24:18)+'px;font-variant-numeric:tabular-nums;line-height:1.1"></b><span style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(STEPS[k].label)+(here?'':' · step '+(+k+1))+'</span></span>'+
+    (v.done?'<button class="dbtn" data-dismiss="'+k+'" aria-label="Dismiss timer" style="background:#fff;color:#111;width:auto;padding:0 16px;font-weight:700;font-size:14px">OK</button>':
+    '<button class="dbtn light" data-tplus="'+k+'" aria-label="Add 30 seconds">+30</button><button class="dbtn" data-ttoggle="'+k+'" aria-label="'+(t.running?'Pause':'Resume')+' timer">'+playIcon(t.running)+'</button>')+'</div>'}).join('');
+ }
+ keys.forEach(function(k){var row=dock.querySelector('[data-k="'+k+'"]');if(!row)return;var t=S.timers[k],v=timerView(t);
+  var arc=row.querySelector('.arc');arc.setAttribute('stroke',v.col);arc.setAttribute('stroke-dashoffset',(138.23*(1-v.f)).toFixed(2));
+  row.querySelector('.clk2').textContent=v.done?'Done':clock(t.left);
+  var mr=row.querySelector('.mr'),an=v.moving?'pulse '+v.dur+'s ease-in-out infinite':'none';if(mr.style.animation!==an)mr.style.animation=an;
+ });
+}
+setInterval(function(){
+ if(!S.timers)return;var step=.1*S.speed;
+ Object.keys(S.timers).forEach(function(k){var t=S.timers[k];if(t.running){t.left=Math.max(0,t.left-step);if(t.left<=0){t.running=false;toast(STEPS[k].label+' is done')}}});
+ updateTimerDom();
+},100);
+function fitSteps(){
+ var ol=scr.querySelector('.lines');if(!ol||!scr.clientHeight)return;
+ var bar=scr.querySelector('.bottombar'),hint=scr.querySelector('.hint');
+ var start=(ol.getBoundingClientRect().top-scr.getBoundingClientRect().top)/SCALE+scr.scrollTop;
+ var avail=scr.clientHeight-start-(bar?bar.offsetHeight:0)-(hint?hint.offsetHeight+28:28);
+ var sc=scr.querySelector('.startcard');if(sc)avail-=sc.offsetHeight+18;var cn=scr.querySelector('.cookpad .cardnote');if(cn)avail-=cn.offsetHeight+18;
+ if(avail<120)avail=120;
+ var lo=22,hi=isPad()?68:36,best=lo;
+ while(lo<=hi){var mid=(lo+hi)>>1;ol.style.setProperty('--fs',mid+'px');if(ol.scrollHeight<=avail){best=mid;lo=mid+1}else hi=mid-1}
+ ol.style.setProperty('--fs',best+'px');
+}
+window.addEventListener('resize',function(){fit();if(S.screen==='cook')fitSteps()});
+function wordify(){
+ scr.querySelectorAll('.line .pl').forEach(function(pl,li){
+  var n=0;
+  function mk(t){var w=document.createElement('span');w.className='w v'+(n%3);var h=(li*7+n*13)%5;w.style.setProperty('--r',((h-2)*0.7).toFixed(1)+'deg');w.style.setProperty('--y',(((n*5+li)%3)-1)+'px');w.style.setProperty('--d',(n*35)+'ms');w.textContent=t;n++;return w}
+  function split(node){var fr=document.createDocumentFragment();node.textContent.split(/(\s+)/).forEach(function(t){if(!t)return;fr.appendChild(/^\s+$/.test(t)?document.createTextNode(t):mk(t))});node.parentNode.replaceChild(fr,node)}
+  Array.prototype.slice.call(pl.childNodes).forEach(function(k){if(k.nodeType===3)split(k);else if(k.classList&&k.classList.contains('ingt'))Array.prototype.slice.call(k.childNodes).forEach(function(t2){if(t2.nodeType===3)split(t2)})});
+ });
+}
+
+/* ================= DONE ================= */
+function done(){
+ var swaps=ING.filter(function(it){return S.swaps[it.id]});
+ var mins=S.started?Math.max(1,Math.round((Date.now()-S.started)/60000)):0;
+ var timersUsed=Object.keys(S.timers).filter(function(k){return S.timers[k].started}).length;
+ var starsH='';for(var n=1;n<=5;n++)starsH+='<button data-rate="'+n+'" aria-label="'+n+' star'+(n>1?'s':'')+'" aria-pressed="'+(S.rating===n)+'"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="'+(n<=S.rating?'#111':'none')+'" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg></button>';
+ return '<div class="pad donepad">'+header('cook','Plated',esc(R.plate)+' for '+S.servings)+
+ '<div class="plate"><div class="in">'+(S.photo?'<img src="'+S.photo+'" alt="Your finished '+esc(R.plate.toLowerCase())+'">':'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span style="font-family:\'Space Grotesk\';font-size:18px;font-weight:700">Your finished plate</span><span style="font-size:13px;color:#D9D9D4;max-width:180px">Choose a photo and it is cropped to the plate</span>')+
+ '<label class="photobtn'+(S.photo?' on':'')+'">'+(S.photo?'Change photo':'Add photo')+'<input type="file" accept="image/*" id="photo" class="sr"></label></div></div>'+
+ '<section style="display:flex;flex-direction:column;gap:10px;text-align:center"><h2 class="h2" style="font-size:20px">How did it turn out?</h2><div class="stars5">'+starsH+'</div></section>'+
+ '<label style="display:flex;flex-direction:column;gap:6px"><span class="kicker">Note for next time</span><textarea id="note" rows="2" placeholder="Let it simmer longer, more chilli…" style="font:inherit;font-size:15px;padding:12px;border-radius:14px;border:1.5px solid var(--soft);resize:none">'+esc(S.note)+'</textarea></label>'+
+ '<section class="card" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px"><h2 class="h2">This cook</h2>'+
+  '<div class="stats" style="grid-template-columns:repeat(3,1fr)"><div><b>'+(mins||'–')+(mins?' min':'')+'</b><span>start to plate</span></div><div><b>'+STEPS.length+'</b><span>steps</span></div><div><b>'+timersUsed+'</b><span>timers used</span></div></div>'+
+  (swaps.length?swaps.map(function(it){return '<div class="row" style="gap:10px;font-size:14px"><span class="muted" style="text-decoration:line-through">'+esc(it.name)+'</span>'+SVG.arrow+'<b>'+esc(leafOf(it.id,S.swaps[it.id]).name)+'</b></div>'}).join(''):'<span class="muted">No swaps</span>')+
+  '<span class="muted" style="font-size:13px">'+ING.filter(function(it){return S.have[it.id]}).length+' of '+ING.length+' ingredients came from your pantry.</span></section>'+
+ '</div><div class="bottombar"><button class="primary" data-act="finish">Save to cooking log</button></div>';
+}
+
+/* ================= RENDER + EVENTS ================= */
+var VIEWS={home:home,recipe:recipe,ingredients:ingredients,shop:shop,cook:cook,done:done};
+var PADVIEWS={home:homePad,recipe:recipePad,ingredients:ingredientsPad};
+function render(anim){
+ document.getElementById('phone').classList.toggle('norail',S.screen==='cook');
+ scr.innerHTML=((isPad()&&PADVIEWS[S.screen])||VIEWS[S.screen])();
+ scr.classList.remove('anim','animb');if(anim){void scr.offsetWidth;scr.classList.add(S.dir<0?'animb':'anim')}
+ document.querySelectorAll('#steps li').forEach(function(li){li.classList.toggle('on',li.dataset.s===S.screen)});
+ document.getElementById('sideTitle').textContent=S.screen==='home'?'Recipe flow':R.title;
+ if(S.screen==='cook'){dockSig='';updateTimerDom();wordify();fitSteps()}
+ S.zoom=null;
+ var ph=document.getElementById('photo');
+ if(ph)ph.addEventListener('change',function(){var f=ph.files&&ph.files[0];if(!f)return;if(S.photo)URL.revokeObjectURL(S.photo);S.photo=URL.createObjectURL(f);render()});
+ var nt=document.getElementById('note');if(nt)nt.addEventListener('input',function(){S.note=nt.value});
+ var se=document.getElementById('search');if(se)se.addEventListener('keydown',function(e){if(e.key==='Enter'){var q=se.value.toLowerCase().trim();var hit=RECIPE_ORDER.filter(function(id){var r=RECIPES[id];return r.title.toLowerCase().indexOf(q)>-1||r.ING.some(function(it){return it.name.toLowerCase().indexOf(q)>-1})})[0];if(q&&hit){openRecipe(hit)}else if(q){toast('No recipe matches "'+q+'" yet')}}});
+}
+function keep(fn){var y=scr.scrollTop;fn();scr.scrollTop=y}
+function openRecipe(id){if(S.recipe!==id||S.screen==='home')loadRecipe(id);go('recipe')}
+function openSheet(k){
+ var li=lineInfo(k),el=document.getElementById('sheet');
+ el.innerHTML='<div class="sheetwrap" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="Convert '+esc(li.name)+'">'+
+  '<div class="between"><div class="row" style="gap:10px">'+(li.icon?icon(li.icon,30):'')+'<h2 class="h2" style="font-size:20px">'+esc(li.name)+'</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  (li.check?'<p class="cardnote"><b>From the card:</b> '+esc(li.check)+'</p>':'')+
+  '<p class="muted" style="margin:0;font-size:13px">Same amount, shown the way you measure. Your choice sticks for this recipe.</p>'+
+  li.opts.map(function(o,i){return '<button class="opt" data-unit="'+k+':'+i+'" aria-pressed="'+(i===li.u)+'"><b>'+esc(o[0])+'</b><span style="font-size:14px;opacity:.75">'+esc(o[1])+'</span></button>'}).join('')+
+ '</div></div>';
+ var first=el.querySelector('.opt[aria-pressed=true]')||el.querySelector('.opt');if(first)first.focus();
+}
+function closeSheet(){var el=document.getElementById('sheet');if(el)el.innerHTML='';if(isPad()&&S)S.focus=null}
+function speedSeg(){document.getElementById('speedSeg').innerHTML=[1,10,30].map(function(n){return '<button data-speed="'+n+'" aria-pressed="'+(S.speed===n)+'">'+n+'x</button>'}).join('')}
+function recipeSeg(){document.getElementById('recipeSeg').innerHTML=RECIPE_ORDER.map(function(id){return '<button data-open="'+id+'" aria-pressed="'+(S.screen!=='home'&&S.recipe===id)+'">'+RECIPES[id].title.split(' ')[0]+'</button>'}).join('')}
+document.addEventListener('click',function(e){
+ var el=e.target.closest('button,[data-go],[data-closesheet],[data-conv],[data-strike],[data-back],[data-open]');if(!el)return;
+ var d=el.dataset;
+ if(d.device||d.orient){if(d.device)D.device=d.device;if(d.orient)D.orient=d.orient;closeSheet();S.focus=null;devSeg();fit();keep(render);return}
+ if(d.sharefmt){S.share.format=d.sharefmt;openShare(true);return}
+ if(d.sharetog){S.share[d.sharetog]=!S.share[d.sharetog];openShare(true);return}
+ if(d.jumpstep){S.dir=+d.jumpstep<S.step?-1:1;S.step=+d.jumpstep;dockSig='';render(true);return}
+ if(d.closesheet&&(e.target===el||el.classList.contains('iconbtn'))){closeSheet();return}
+ if(d.open){openRecipe(d.open);recipeSeg();return}
+ if(d.back){if(d.back==='ingredients')S.focus=null;go(d.back,-1);recipeSeg();return}
+ if(d.go){if(d.go==='ingredients')S.focus=null;go(d.go);recipeSeg();return}
+ if(d.toast){toast(d.toast);return}
+ if(d.strike){var on=S.struck[d.strike]=!S.struck[d.strike];el.classList.toggle('struck',on);el.setAttribute('aria-pressed',on);
+  var ls=stepLines(STEPS[S.step]),all=ls.every(function(_,j){return S.struck[S.step+':'+j]});
+  var nb=scr.querySelector('[data-act="next"]');if(nb)nb.classList.toggle('glow',all);var h=scr.querySelector('.hint');if(h)h.innerHTML=all?'<b style="color:#111">Step done.</b> On to the next one.':'Tap a line to cross it off. Tap an ingredient to change its units.';return}
+ if(d.ttoggle){var tt=S.timers[d.ttoggle];tt.running=!tt.running;updateTimerDom();return}
+ if(d.tplus){var tp=S.timers[d.tplus];tp.left+=30;tp.total=Math.max(tp.total,tp.left);updateTimerDom();return}
+ if(d.dismiss){S.timers[d.dismiss].ack=true;updateTimerDom();return}
+ if(d.conv){openSheet(d.conv);return}
+ if(d.unit){var pr=d.unit.split(':');S.units[pr[0]]=+pr[1];closeSheet();keep(render);return}
+ if(d.tab){S.tab=d.tab;keep(render);return}
+ if(d.serv){S.servings=Math.max(1,Math.min(12,S.servings+(+d.serv)));keep(render);return}
+ if(d.mode){S.mode=d.mode;keep(render);return}
+ if(d.speed){S.speed=+d.speed;speedSeg();return}
+ if(d.focus){if(!SETS[d.focus]){toast('No swaps for '+shownName(ing(d.focus)).toLowerCase()+' yet');return}S.focus=d.focus;S.picked[d.focus]=S.swaps[d.focus]||null;if(isPad()){showSwapModal();return}render();scr.scrollTop=0;return}
+ if(d.pick&&isPad()){S.picked[S.focus]=d.pick;showSwapModal(true);var zz=document.querySelector('#sheet .zin');if(zz)zz.classList.remove('zin');return}
+ if(d.pick){S.picked[S.focus]=d.pick;keep(render);var z=scr.querySelector('.zin');if(z)z.classList.remove('zin');return}
+ if(d.have){S.have[d.have]=!S.have[d.have];keep(render);var c=scr.querySelector('.cst');if(c)c.classList.remove('zout');return}
+ if(d.cart){S.cart[d.cart]=!S.cart[d.cart];keep(render);return}
+ if(d.rate){S.rating=+d.rate;keep(render);return}
+ switch(d.act){
+  case 'save':S.saved[R.id]=!S.saved[R.id];keep(render);toast(S.saved[R.id]?'Saved to your recipes':'Removed from saved');break;
+  case 'share':openShare();break;
+  case 'sharesend':closeSheet();toast('Sharing is mocked in this prototype');break;
+  case 'sharecopy':toast('Copy link is mocked in this prototype');break;
+  case 'home':if(isPad()){closeSheet();break}S.focus=null;S.zoom='out';render();scr.scrollTop=0;break;
+  case 'use':{var id=S.focus,lf=leafOf(id,S.picked[id]);S.swaps[id]=lf.id;if(isPad()){closeSheet();keep(render);toast(ing(id).name+' → '+lf.name);break}S.focus=null;S.zoom='out';render();scr.scrollTop=0;toast(ing(id).name+' → '+lf.name);break}
+  case 'revert':{var id2=S.focus;delete S.swaps[id2];S.picked[id2]=null;if(isPad()){closeSheet();keep(render);toast('Back to '+ing(id2).name.toLowerCase());break}S.focus=null;S.zoom='out';render();toast('Back to '+ing(id2).name.toLowerCase());break}
+  case 'shopdone':ING.forEach(function(it){if(S.cart[it.id])S.have[it.id]=true});S.cart={};go('ingredients',-1);toast('Shopping done. Everything is ready');break;
+  case 'startcook':S.step=0;S.started=Date.now();S.struck={};go('cook');break;
+  case 'tstart':{var ts=timerOf(S.step);ts.started=true;ts.running=true;var c0=scr.querySelector('.startcard');if(c0){c0.style.transition='all .3s';c0.style.transform='translateY(40px) scale(.6)';c0.style.opacity='0';setTimeout(function(){c0.remove();fitSteps()},300)}updateTimerDom();break}
+  case 'prev':if(S.step>0){S.step--;dockSig='';S.dir=-1;render(true)}break;
+  case 'next':{var cur=S.timers[S.step];if(cur&&cur.left<=0)cur.ack=true;dockSig='';if(S.step<STEPS.length-1){S.step++;S.dir=1;render(true)}else go('done');break}
+  case 'finish':(LOG[R.id]=LOG[R.id]||[]).push({rating:S.rating,swaps:Object.keys(S.swaps).length,note:S.note});Object.keys(S.timers).forEach(function(k){S.timers[k].running=false});toast('Saved to your cooking log');setTimeout(function(){go('home',-1);recipeSeg()},900);break;
+ }
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();var t=e.target;if((e.key==='Enter'||e.key===' ')&&t.dataset&&(t.dataset.strike||t.dataset.conv)&&t.tagName!=='BUTTON'){e.preventDefault();t.click()}});
+document.getElementById('restart').addEventListener('click',function(){closeSheet();LOG={};freshGlobal();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
+
+
+/* ================= DEVICE ================= */
+function fit(){
+ var box=document.getElementById('stagebox'),ph=document.getElementById('phone'),wrap=document.getElementById('devwrap');
+ var aw=box.clientWidth,ah=box.clientHeight,small=window.innerWidth<=760,dw,dh,frame=true;
+ if(isPad()){dw=isLand()?1194:834;dh=isLand()?834:1194}else if(small&&aw&&ah){dw=aw;dh=ah;frame=false}else{dw=390;dh=844}
+ var m=frame?(small?10:14):0;
+ SCALE=frame?Math.min(1,(aw-m*2)/dw,(ah-m*2)/dh):1;if(!(SCALE>0))SCALE=1;
+ ph.style.width=dw+'px';ph.style.height=dh+'px';ph.style.transform='scale('+SCALE+')';
+ wrap.style.width=(dw*SCALE)+'px';wrap.style.height=(dh*SCALE)+'px';
+ ph.className='phone'+(isPad()?' ipad '+(isLand()?'land':'port'):'')+(frame?'':' noframe')+(S.screen==='cook'?' norail':'');
+}
+function devSeg(){
+ document.getElementById('devSeg').innerHTML=[['phone','iPhone'],['ipad','iPad']].map(function(x){return '<button data-device="'+x[0]+'" aria-pressed="'+(D.device===x[0])+'">'+x[1]+'</button>'}).join('');
+ var o=document.getElementById('orientSeg');o.style.display=isPad()?'grid':'none';
+ o.innerHTML=[['landscape','Landscape'],['portrait','Portrait']].map(function(x){return '<button data-orient="'+x[0]+'" aria-pressed="'+(D.orient===x[0])+'">'+x[1]+'</button>'}).join('');
+}
+function padW(){return (isLand()?1194:834)-88-64}
+
+/* ================= iPad: HOME ================= */
+function homePad(){
+ function cooked(id){var n=(LOG[id]||[]).length;return n?'<span class="badge solid" style="height:22px;font-size:11px">Cooked '+n+'×</span>':''}
+ return '<div class="pad">'+
+ '<div class="between" style="gap:20px;flex-wrap:wrap"><div><p class="muted" style="margin:0 0 4px;font-size:14px">Monday evening</p><h1 class="t" style="font-size:40px">What\'s cooking?</h1></div>'+
+ '<div class="row" style="gap:12px;flex:1;justify-content:flex-end;min-width:300px"><label class="row" style="height:48px;padding:0 16px;border-radius:14px;background:var(--counter);gap:10px;flex:1;max-width:380px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search</span><input id="search" type="search" placeholder="Search recipes or ingredients" style="flex:1;border:none;background:transparent;font:inherit;font-size:15px;outline:none;min-width:0"></label>'+
+ '<button class="iconbtn" style="width:48px;height:48px;background:#111;color:#fff;font-family:\'Space Grotesk\';font-weight:700;font-size:18px" aria-label="Profile" data-toast="Profile: avoids mushrooms, allergic to tree nuts">M</button></div></div>'+
+ '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Cook with what you have</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+
+  [['#F2C200','Lemons','piccata'],['#9CBF5A','Lemongrass','thai'],['#2E9E4F','Green onion','cajun'],['#6CBF3A','Limes','thai'],['#E9B98C','Chicken','cajun']].map(function(c){return '<button class="chip" data-open="'+c[2]+'" style="height:40px;font-size:15px"><span class="dot" style="background:'+c[0]+'"></span>'+c[1]+'</button>'}).join('')+'</div></div>'+
+ '<div style="display:flex;flex-direction:column;gap:12px"><p class="kicker">From Ashley’s recipe cards</p><div class="rgrid">'+
+  RECIPE_ORDER.map(function(id,i){var r=RECIPES[id],q=r.card.questions.length;
+   return '<button class="rcard" data-open="'+id+'" aria-label="Open '+esc(r.title)+'">'+fpBar(r,120)+
+   '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;width:100%"><div class="between" style="min-height:22px"><span class="kicker" style="color:#111">'+(i===0?'Tonight\'s pick':r.kicker.split(' · ')[0])+'</span>'+cooked(id)+'</div>'+
+   '<span style="font-family:\'Space Grotesk\';font-size:24px;font-weight:700;line-height:1.15">'+esc(r.title)+'</span><span class="muted" style="font-size:14px">'+r.meta+' · '+r.base+' servings</span>'+
+   '<span style="font-size:14px;line-height:1.45;color:#2B2B28">'+esc(r.desc)+'</span>'+
+   '<span style="font-size:13px;font-weight:600;margin-top:2px">'+Object.keys(r.have).length+' of '+r.ING.length+' in your pantry'+(q?' · '+q+' card question'+(q>1?'s':''):'')+'</span></div></button>'}).join('')+
+ '</div></div></div>';
+}
+
+/* ================= iPad: SANKEY ================= */
+function sankeyWide(W){
+ var M=MODES[S.mode],mode=S.mode,f=F();
+ var vals=ING.map(function(i){return i[mode]*f}),total=vals.reduce(function(a,b){return a+b},0);
+ var GAP=8,MGAP=22,BX=236,PX=W-136,MX=Math.round(BX+(PX-BX)*.5);
+ var spec=ING.map(function(it){return it.icon.map(function(p){return[p[0],Math.max(1,Math.round(p[1]*f))]})});
+ var counts=spec.map(function(sp){return sp.reduce(function(a,p){return a+p[1]},0)});
+ var sizes=counts.map(function(n){return n===1?46:n===2?38:n<=4?28:n<=8?22:18});
+ var MINB=66,H=Math.max(560,ING.length*MINB+(ING.length-1)*GAP+40);
+ var SPAN=H*.72,hs,bh,bt;
+ for(var k=0;k<80;k++){var sc=SPAN/total;hs=vals.map(function(v){return Math.max(2,v*sc)});bh=hs.map(function(h){return Math.max(MINB,h)});bt=bh.reduce(function(a,b){return a+b},0)+GAP*(bh.length-1);if(bt<=H-8)break;SPAN-=10}
+ var y=(H-bt)/2,bp=bh.map(function(h){var o={y0:y,y1:y+h};y+=h+GAP;return o});
+ var gs=GROUPS.map(function(){return 0});ING.forEach(function(it,i){gs[it.g]+=hs[i]});
+ var ph=gs.reduce(function(a,b){return a+b},0),my=(H-(ph+MGAP*(gs.length-1)))/2,mids=gs.map(function(h){var o={y0:my,y1:my+h};my+=h+MGAP;return o}),py=(H-ph)/2;
+ function band(x0,a0,a1,x1,b0,b1){var c=(x0+x1)/2;function q(n){return n.toFixed(1)}return 'M'+x0+','+q(a0)+' C'+c+','+q(a0)+' '+c+','+q(b0)+' '+x1+','+q(b0)+' L'+x1+','+q(b1)+' C'+c+','+q(b1)+' '+c+','+q(a1)+' '+x0+','+q(a1)+' Z'}
+ var cur=mids.map(function(m){return m.y0}),paths='',html='';
+ ING.forEach(function(it,i){
+  var b=bp[i],h=hs[i],c0=cur[it.g];cur[it.g]+=h;var m=(b.y0+b.y1)/2,col=colorOf(it),sw=S.swaps[it.id];
+  paths+='<path d="'+band(BX,m-h/2,m+h/2,MX,c0,c0+h)+'" fill="'+col+'" fill-opacity="'+(/^#(F[237]|E[89])/.test(col)?.6:.42)+'"/>';
+  var icons='',shown=0;spec[i].forEach(function(p){for(var n=0;n<p[1]&&shown<12;n++,shown++)icons+=icon(p[0],sizes[i])});
+  html+='<div class="wblk" style="top:'+b.y0.toFixed(1)+'px;height:'+(b.y1-b.y0).toFixed(1)+'px;width:'+(BX-6)+'px;background:'+col+'24">'+
+   '<span class="wicons">'+icons+'</span><span style="display:flex;flex-direction:column;gap:1px;min-width:0"><b style="font-size:15px;line-height:18px">'+esc(shownName(it))+'</b><span style="font-size:13px;color:#3A3A38">'+M.fmt(vals[i])+'</span>'+(sw?'<span class="swaptag" style="width:max-content">for '+esc(it.name.toLowerCase())+'</span>':'')+'</span></div>'+
+   '<div style="position:absolute;left:'+(BX-6)+'px;top:'+b.y0.toFixed(1)+'px;width:6px;height:'+(b.y1-b.y0).toFixed(1)+'px;background:'+edgeOf(it)+'"></div>';
+ });
+ var pc=py;
+ mids.forEach(function(m,gi){var h=m.y1-m.y0;paths+='<path d="'+band(MX+6,m.y0,m.y1,PX,pc,pc+h)+'" fill="'+GROUPS[gi].color+'" fill-opacity="'+GROUPS[gi].op+'"/>';pc+=h;
+  var gv=0;ING.forEach(function(it,i){if(it.g===gi)gv+=vals[i]});
+  html+='<div style="position:absolute;left:'+MX+'px;top:'+m.y0.toFixed(1)+'px;width:6px;height:'+h.toFixed(1)+'px;background:#111"></div><div style="position:absolute;left:'+(MX+14)+'px;top:'+((m.y0+m.y1)/2-17).toFixed(1)+'px;font-size:14px;line-height:17px;font-weight:700;white-space:nowrap">'+GROUPS[gi].name+'<br><span style="font-weight:500;color:#3A3A38">'+M.fmt(gv)+'</span></div>'});
+ html+='<div style="position:absolute;left:'+PX+'px;top:'+py.toFixed(1)+'px;width:6px;height:'+ph.toFixed(1)+'px;background:#111"></div>'+
+  '<div class="wplate" style="left:'+(PX+14)+'px;top:'+(H/2-58)+'px"><div>'+(S.photo?'<img src="'+S.photo+'" alt="Your plate">':'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Your plate<br>photo</span>')+'</div></div>'+
+  '<div style="position:absolute;left:'+(PX+14)+'px;top:'+(H/2+66)+'px;width:116px;text-align:center;font-size:13px;font-weight:700;line-height:1.3">'+S.servings+' serving'+(S.servings>1?'s':'')+'<br>'+M.fmt(total)+'</div>';
+ var aria='Sankey chart by '+M.label.toLowerCase()+': '+ING.map(function(it,i){return shownName(it)+' '+M.fmt(vals[i])}).join(', ')+'. Total '+M.fmt(total);
+ return '<div role="img" aria-label="'+esc(aria)+'" style="position:relative;width:'+W+'px;height:'+H+'px;margin:0 auto"><svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true" style="position:absolute;left:0;top:0">'+paths+'</svg>'+html+'</div>';
+}
+
+/* ================= iPad: RECIPE ================= */
+function stepTime(st){var on=st.on||0,tot=Math.max(on,Math.round((st.secs||0)/60));return {on:on,wait:tot-on}}
+function timeCard(){
+ var on=0,wait=0,best=null;STEPS.forEach(function(st){var t=stepTime(st);on+=t.on;wait+=t.wait;if(t.wait&&(!best||t.wait>best.w))best={w:t.wait,t:stepTitle(st)}});
+ return '<section class="card acard"><div class="between"><span class="kicker">Time at the stove</span><span style="font-size:13px"><b>'+(on+wait)+' min</b> total</span></div>'+
+  '<div class="hbar" aria-hidden="true"><span style="flex:'+on+';background:#111"></span>'+(wait?'<span class="hatch" style="flex:'+wait+'"></span>':'')+'</div>'+
+  '<div class="between" style="font-size:13px"><span><b>'+on+' min</b> hands-on</span><span style="color:#3A3A38"><b>'+wait+' min</b> waiting</span></div>'+
+  (best?'<span style="font-size:13px;line-height:1.45;color:#3A3A38">Longest free stretch: '+best.w+' min during “'+esc(best.t)+'”.</span>':'')+'</section>';
+}
+function cooksCard(){
+ var log=LOG[R.id]||[];
+ return '<section class="card acard"><span class="kicker">Your cooks</span>'+
+  (log.length?log.slice(-3).reverse().map(function(c,i){return '<div class="row" style="gap:10px;font-size:13px;line-height:1.4;align-items:flex-start"><span class="pnum" style="width:24px;height:24px;font-size:11px">'+(log.length-i)+'</span><span>'+(c.rating?'<b>'+'★★★★★'.slice(0,c.rating)+'</b>':'Not rated')+' · '+c.swaps+' swap'+(c.swaps===1?'':'s')+(c.note?'<br><span class="muted">“'+esc(c.note)+'”</span>':'')+'</span></div>'}).join(''):
+  '<span style="font-size:13px;line-height:1.45;color:#3A3A38">Not cooked yet. Your ratings, swaps and notes will collect here after each cook.</span>')+'</section>';
+}
+function ingRowPad(it){
+ var li=LINE[it.id]?lineInfo(it.id):null,sw=S.swaps[it.id],lf=sw?leafOf(it.id,sw):null,qty=li?li.qty:(lf&&lf.ratio!=='1 : 1'?lf.ratio:scaleQty(it.amt,F()));
+ return '<div class="row" style="gap:12px;padding:10px 0;border-bottom:1px solid #ECECE8">'+icon(it.icon[0][0],38)+
+  '<span style="flex:1;display:flex;flex-direction:column;gap:1px;padding-left:10px;border-left:4px solid '+edgeOf(it)+';min-width:0"><b style="font-size:16px">'+esc(shownName(it))+(sw?' <span class="muted" style="font-weight:500;text-decoration:line-through;font-size:13px">'+esc(it.name)+'</span>':'')+'</b><span class="muted" style="font-size:12px">'+esc(sw?lf.note:it.eq)+'</span></span>'+
+  (li?'<button class="qty'+(li.check?' q':'')+'" data-conv="'+it.id+'" aria-label="'+esc(qty+' '+li.name+'. Change units')+'">'+esc(qty)+SVG.convert+'</button>':'<span class="qty static">'+esc(qty)+'</span>')+
+  (SETS[it.id]?'<button class="swapbtn'+(sw?' on':'')+'" data-focus="'+it.id+'" aria-label="Swap '+esc(shownName(it))+'">'+SVG.swap+(sw?'Swapped':'Swap')+'</button>':'<span style="width:92px"></span>')+'</div>';
+}
+function recipePad(){
+ var M=MODES[S.mode],ins=R.INS[S.mode],saved=!!S.saved[R.id],land=isLand();
+ var W=land?padW()-300-22-34:padW()-34;
+ var nsw=ING.filter(function(it){return S.swaps[it.id]}).length;
+ var method=STEPS.map(function(st,i){var t=stepTime(st);
+  return '<li><span class="mnum">'+(i+1)+'</span><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><div class="between" style="gap:12px;flex-wrap:wrap"><b style="font-family:\'Space Grotesk\';font-size:20px">'+esc(stepTitle(st))+'</b>'+
+   '<span class="row" style="gap:10px"><span class="hbar" style="width:'+((t.on+t.wait)*12)+'px;height:10px" aria-hidden="true"><span style="flex:'+t.on+';background:#111"></span>'+(t.wait?'<span class="hatch" style="flex:'+t.wait+'"></span>':'')+'</span><span style="font-size:12px;color:#3A3A38;white-space:nowrap">'+t.on+' min hands-on'+(t.wait?' · '+t.wait+' wait':'')+'</span>'+(st.secs?'<span class="badge" style="height:24px">'+Math.round(st.secs/60)+' min timer</span>':'')+'</span></div>'+
+   stepLines(st).map(function(l){return '<p class="mline">'+l+'</p>'}).join('')+(st.flag?'<p class="cardnote"><b>Card note:</b> '+esc(st.flag)+'</p>':'')+'</div></li>'}).join('');
+ return '<div class="pad">'+
+ '<div style="border-radius:5px;overflow:hidden;flex-shrink:0">'+fpBar(R,10)+'</div>'+
+ '<header class="phead"><div class="row" style="gap:16px;align-items:flex-start;flex:1;min-width:420px"><button class="iconbtn" data-back="home" aria-label="Back">'+SVG.back+'</button>'+
+  '<div style="display:flex;flex-direction:column;gap:10px;max-width:620px"><p class="kicker">'+R.kicker+'</p><h1 class="t" style="font-size:42px;line-height:1.05">'+esc(R.title)+'</h1>'+
+  '<p style="margin:0;font-size:17px;line-height:1.55;color:#2B2B28">'+esc(R.desc)+'</p>'+
+  '<div style="display:flex;gap:6px;flex-wrap:wrap">'+R.tags.map(function(t){return '<span class="badge'+(t[1]?' solid':'')+'">'+t[0]+'</span>'}).join('')+'</div></div></div>'+
+  '<div class="pctl"><div class="row" style="gap:10px"><button class="iconbtn" style="width:52px;height:52px" aria-label="'+(saved?'Saved':'Save recipe')+'" aria-pressed="'+saved+'" data-act="save">'+(saved?SVG.heartOn:SVG.heart)+'</button>'+
+   '<button class="secondary" data-act="share" style="display:inline-flex;align-items:center;gap:8px;padding:0 18px;border-color:#111">'+SVG.share+'Share</button>'+
+   '<div class="stepper" style="height:52px" role="group" aria-label="Servings"><button data-serv="-1" aria-label="Fewer servings"'+(S.servings<=1?' disabled':'')+'>−</button><span aria-live="polite"><b>'+S.servings+'</b> serving'+(S.servings>1?'s':'')+'</span><button data-serv="1" aria-label="More servings"'+(S.servings>=12?' disabled':'')+'>+</button></div></div>'+
+   '<div class="row" style="gap:10px"><button class="secondary" data-go="ingredients" style="padding:0 18px">Plan this cook'+(nsw?' · '+nsw+' swap'+(nsw>1?'s':''):'')+'</button><button class="primary" data-act="startcook" style="width:auto;height:52px;padding:0 28px;font-size:16px">Start cooking</button></div></div>'+
+ '</header>'+
+ '<div class="stats">'+R.stats.map(function(s){return '<div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'}).join('')+'</div>'+
+ '<div class="ovgrid"><section class="card" style="padding:18px 16px;display:flex;flex-direction:column;gap:14px;min-width:0">'+
+   '<div class="between" style="gap:12px;flex-wrap:wrap"><div><h2 class="h2" style="font-size:20px">Where it all goes</h2><span class="muted" style="font-size:12px;font-weight:600">'+M.cap+'</span></div>'+
+   '<div class="seg" role="group" aria-label="Measure by" style="grid-template-columns:repeat(4,1fr);width:360px">'+Object.keys(MODES).map(function(k){return '<button data-mode="'+k+'" aria-pressed="'+(k===S.mode)+'">'+MODES[k].label+'</button>'}).join('')+'</div></div>'+
+   sankeyWide(W)+'<p class="insight"><strong>'+ins[0]+'</strong> '+ins[1]+'</p></section>'+
+  '<aside class="aside">'+cardSection()+timeCard()+cooksCard()+'</aside></div>'+
+ '<div class="imgrid"><section style="display:flex;flex-direction:column;min-width:0"><div class="shead"><h2 class="h2" style="font-size:22px">Ingredients</h2><span class="muted" style="font-size:12px">for '+S.servings+' · swaps are optional</span></div>'+
+   '<div class="ingcols">'+ING.map(ingRowPad).join('')+'</div></section>'+
+  '<section style="display:flex;flex-direction:column;min-width:0"><div class="shead"><h2 class="h2" style="font-size:22px">Method</h2><span class="row muted" style="gap:12px;font-size:12px"><span class="row" style="gap:6px"><i class="lg" style="background:#111"></i>hands-on</span><span class="row" style="gap:6px"><i class="lg hatch"></i>waiting</span></span></div>'+
+   '<ol class="method">'+method+'</ol></section></div>'+
+ '</div>';
+}
+
+/* ================= iPad: THIS COOK ================= */
+function ingredientsPad(){
+ var ready=ING.filter(function(it){return S.have[it.id]}).length;
+ return '<div class="pad">'+header('recipe','This cook','Optional. Swap anything or tick what you have, then start.')+
+ '<div class="cookplan"><div style="display:flex;flex-direction:column;gap:16px">'+constellation()+profileBar()+'</div>'+
+ '<section style="display:flex;flex-direction:column;min-width:0"><div class="shead"><h2 class="h2" style="font-size:22px">Gather</h2><span style="font-size:13px;font-weight:700">'+ready+' of '+ING.length+' ready</span></div>'+gatherRows()+
+ (ready<ING.length?'<button class="secondary" data-go="shop" style="margin-top:16px">Shop for '+(ING.length-ready)+' missing</button>':'')+'</section></div>'+
+ '</div><div class="bottombar"><button class="primary" data-act="startcook">Start cooking</button></div>';
+}
+function stepListPad(){
+ return '<aside class="steplist"><span class="kicker" style="padding:0 10px 6px">'+esc(R.title)+'</span>'+STEPS.map(function(st,i){var t=S.timers[i],run=t&&t.started&&t.left>0;
+  return '<button data-jumpstep="'+i+'" class="'+(i===S.step?'cur':i<S.step?'past':'')+'"'+(i===S.step?' aria-current="step"':'')+'><span class="mnum" style="width:28px;height:28px;font-size:13px">'+(i+1)+'</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>'+esc(stepTitle(st))+'</b><span>'+(st.secs?Math.round(st.secs/60)+' min timer'+(run?' · running':''):'No timer')+'</span></span></button>'}).join('')+'</aside>';
+}
+
+/* ================= SHARE ================= */
+function shareSheet(){
+ var s=S.share,sw=ING.filter(function(it){return S.swaps[it.id]}),log=LOG[R.id]||[],serv=s.scale?R.base*2:S.servings;
+ var swTxt=sw.map(function(it){return shownName(it).toLowerCase()+' for '+it.name.toLowerCase()}).join(', ');
+ var T=[['swaps','Include swaps',sw.length?swTxt:'No swaps chosen for this cook'],['notes','Include ratings and notes','Your cook log stays private unless this is on'],['card','Include the original card',R.card.photos+' photo'+(R.card.photos>1?'s':'')+' of Ashley’s card'],['scale','Share at '+(R.base*2)+' servings','Amounts are scaled before sending']];
+ var label={card:'Share recipe card',link:'Share link',pdf:'Share PDF',text:'Share as text'}[s.format];
+ return '<div class="sheet sharesheet" role="dialog" aria-modal="true" aria-label="Share '+esc(R.title)+'">'+
+  '<div class="between"><div><span class="kicker">Share</span><h2 class="h2" style="font-size:22px;line-height:1.15">'+esc(R.title)+'</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  '<div class="seg" role="group" aria-label="Share as" style="grid-template-columns:repeat(4,1fr)">'+[['card','Card'],['link','Link'],['pdf','PDF'],['text','Text']].map(function(x){return '<button data-sharefmt="'+x[0]+'" aria-pressed="'+(s.format===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
+  '<div style="padding:14px;border-radius:18px;background:var(--counter);display:flex;justify-content:center"><div style="width:100%;max-width:340px;border-radius:16px;background:#fff;box-shadow:0 10px 24px rgba(0,0,0,.1);overflow:hidden">'+fpBar(R,48)+
+   '<div style="padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px"><span class="kicker" style="font-size:10px">From Ashley’s recipe cards</span><b style="font-family:\'Space Grotesk\';font-size:19px;line-height:1.15">'+esc(R.title)+'</b>'+
+   '<span style="font-size:12px;font-weight:700">'+R.meta.split(' · ')[0]+' · '+serv+' servings · '+ING.length+' ingredients · '+STEPS.length+' steps</span>'+
+   (s.swaps&&sw.length?'<span style="padding:6px 9px;border-radius:9px;background:var(--counter);font-size:12px;line-height:1.4"><b>Our swaps:</b> '+esc(swTxt)+'</span>':'')+
+   (s.notes?'<span class="cardnote" style="font-size:12px;padding:6px 9px">'+(log.length?log.length+' cook'+(log.length>1?'s':'')+' logged'+(log[log.length-1].note?' · “'+esc(log[log.length-1].note)+'”':''):'No cooks logged yet')+'</span>':'')+
+   (s.card?'<span class="muted" style="font-size:12px">Includes '+R.card.photos+' photo'+(R.card.photos>1?'s':'')+' of the original card</span>':'')+'</div></div></div>'+
+  '<div style="display:flex;flex-direction:column">'+T.map(function(t){var on=!!s[t[0]];return '<button class="tog" role="switch" aria-checked="'+on+'" data-sharetog="'+t[0]+'"><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>'+t[1]+'</b><span>'+esc(t[2])+'</span></span><i class="sw'+(on?' on':'')+'"><i></i></i></button>'}).join('')+'</div>'+
+  '<div class="row" style="gap:14px"><span class="kicker">Send to</span>'+['Ashley','Nicole'].map(function(n){return '<button class="who" data-act="sharesend"><i>'+n.charAt(0)+'</i>'+n+'</button>'}).join('')+'</div>'+
+  '<div class="row" style="gap:10px"><button class="secondary" style="flex:1" data-act="sharecopy">Copy link</button><button class="primary" style="flex:2;height:52px;font-size:15px" data-act="sharesend">'+label+'</button></div></div>';
+}
+function openShare(keepPos){
+ var el=document.getElementById('sheet'),old=el.querySelector('.sheet'),y=old?old.scrollTop:0;
+ el.innerHTML='<div class="sheetwrap'+(keepPos?' noanim':'')+'" data-closesheet="1">'+shareSheet()+'</div>';
+ if(keepPos)el.querySelector('.sheet').scrollTop=y;
+}
+function showSwapModal(keepPos){
+ var el=document.getElementById('sheet');
+ el.innerHTML='<div class="sheetwrap'+(keepPos?' noanim':'')+'" data-closesheet="1">'+swapView()+'</div>';
+}
+
+speedSeg();recipeSeg();devSeg();fit();render(true);
+})();
+</script>
+</body>
+</html>
