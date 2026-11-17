@@ -1,0 +1,362 @@
+
+/* ---------- shared additions ---------- */
+.sheet{max-height:100%;overflow-y:auto}
+.noanim,.noanim .sheet{animation:none}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tog{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px;padding:6px 0;border:none;border-bottom:1px solid #ECECE8;background:none;text-align:left}
+.tog b{font-size:15px}.tog span span{font-size:12px;color:var(--muted)}
+.sw{flex-shrink:0;width:52px;height:32px;border-radius:999px;padding:3px;background:var(--soft);display:flex;transition:background .2s}
+.sw i{width:26px;height:26px;border-radius:999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+.sw.on{background:#111}.sw.on i{transform:translateX(20px)}
+.who{display:flex;flex-direction:column;align-items:center;gap:4px;border:none;background:none;font-size:12px;font-weight:600}
+.who i{width:44px;height:44px;border-radius:999px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:17px;font-weight:700;font-style:normal}
+.hatch{background:repeating-linear-gradient(135deg,#D6D6D1 0 3px,#F4F4F1 3px 7px)}
+.hbar{display:flex;height:20px;border-radius:6px;overflow:hidden;gap:2px}
+.swapbtn{display:inline-flex;align-items:center;gap:6px;height:38px;width:92px;justify-content:center;border-radius:999px;border:1.5px solid #111;background:#fff;font-size:13px;font-weight:700;flex-shrink:0}
+.swapbtn.on{background:#111;color:#fff}
+.rail{display:none}
+
+/* ---------- iPad ---------- */
+.ipad .rail{display:flex;flex-direction:column;align-items:center;gap:6px;position:absolute;left:0;top:0;bottom:0;width:88px;padding-top:28px;border-right:1px solid #ECECE8;background:#fff;z-index:6}
+.ipad .rail button{width:68px;height:64px;border:none;border-radius:16px;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;font-weight:500;color:var(--muted)}
+.ipad .rail button.on{background:var(--counter);color:#111;font-weight:700}
+.ipad .screen{left:88px}
+.ipad.norail .rail{display:none}.ipad.norail .screen{left:0}
+.ipad .pad{padding:32px 32px 28px;gap:24px}
+.ipad .tabs{display:none}
+.ipad .toast{left:50%;right:auto;min-width:340px;text-align:center;bottom:40px;transform:translate(-50%,10px)}
+.ipad .toast.show{transform:translate(-50%,0)}
+.ipad .sheetwrap{align-items:center;padding:32px}
+.ipad .sheet{width:460px;padding:22px}
+.ipad .sheet.swapmodal{width:770px;gap:16px}
+.ipad .sheet.sharesheet{width:520px}
+.swapgrid{display:grid;grid-template-columns:350px 1fr;gap:24px;align-items:start}
+.swapmodal [data-act="home"]{display:none}
+.ipad .bottombar{justify-content:flex-end;padding:14px 32px 22px}
+.ipad .bottombar>.primary{max-width:320px}
+.ipad .tiles{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.ipad .donepad{max-width:640px;margin:0 auto;width:100%}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px;align-items:stretch}
+.rgrid .rcard{height:100%;justify-content:flex-start}
+.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:20px 24px;flex-wrap:wrap}
+.pctl{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+.port .pctl{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;width:100%}
+.ovgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
+.port .ovgrid{grid-template-columns:minmax(0,1fr)}
+.aside{display:flex;flex-direction:column;gap:16px}
+.port .aside{display:grid;grid-template-columns:1fr 1fr;align-items:start}
+.port .aside>:first-child{grid-row:span 2}
+.acard{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.imgrid{display:grid;grid-template-columns:400px minmax(0,1fr);gap:32px;align-items:start}
+.port .imgrid{grid-template-columns:minmax(0,1fr)}
+.shead{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:6px;border-bottom:1.5px solid #111}
+.method{list-style:none;margin:0;padding:0}
+.method li{display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px;padding:16px 0;border-bottom:1px solid #ECECE8}
+.mnum{width:36px;height:36px;border-radius:999px;border:2px solid #111;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mline{margin:0;font-family:var(--disp);font-size:19px;font-weight:500;line-height:1.5}
+.lg{display:inline-block;width:18px;height:8px;border-radius:4px}
+.wblk{position:absolute;left:0;border-radius:14px 0 0 14px;display:flex;align-items:center;gap:10px;padding:6px 12px;overflow:hidden}
+.wicons{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;width:92px;flex-shrink:0}
+.wplate{position:absolute;width:116px;height:116px;border-radius:999px;background:#fff;border:2px solid #DCDCD7;box-shadow:0 8px 22px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center}
+.wplate div{width:96px;height:96px;border-radius:999px;overflow:hidden;background:#2B2B28;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;font-size:11px;font-weight:600;line-height:1.2}
+.wplate img{width:100%;height:100%;object-fit:cover}
+.cookplan{display:grid;grid-template-columns:370px minmax(0,1fr);gap:32px;align-items:start}
+.port .cookplan{grid-template-columns:350px minmax(0,1fr);gap:20px}
+.cookwrap{display:flex;min-height:calc(100% - 92px)}
+.cookwrap .cookpad{flex:1;min-width:0;min-height:0}
+.ipad .cookpad{padding:36px 48px 20px}
+.ipad .line{gap:20px;padding:12px 8px}
+.ipad .line .num{width:44px;height:44px;font-size:18px;margin-top:calc((var(--fs,24px)*1.25 - 44px)/2)}
+.ipad .hint{font-size:15px}
+.ipad .startcard{max-width:420px}
+.ipad .cookpad .cardnote{max-width:640px;font-size:15px}
+.steplist{width:280px;flex-shrink:0;border-right:1px solid #ECECE8;padding:36px 14px 20px;display:flex;flex-direction:column;gap:4px}
+.steplist button{display:flex;align-items:center;gap:12px;padding:10px;border:none;border-radius:14px;background:none;text-align:left}
+.steplist button b{font-size:15px;line-height:1.2}.steplist button span span{font-size:12px;color:var(--muted)}
+.steplist .cur{background:var(--counter)}.steplist .cur .mnum{background:#111;color:#fff}
+.steplist .past b{text-decoration:line-through;color:var(--muted)}.steplist .past .mnum{border-color:#BDBDB8;color:var(--muted)}
+.ipad .dock{flex-direction:row;flex-wrap:wrap}.ipad .dockrow{flex:1;min-width:300px;max-width:520px}
+.sheet>*{flex-shrink:0}
+
+.safe{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:max-content;max-width:100%;padding:6px 12px;border-radius:12px;border:1.5px solid #111;background:#fff;font-size:13px;line-height:1.35}
+.safe b{font-family:var(--disp);font-size:15px;white-space:nowrap}
+.safe span{color:#3A3A38}
+.safe svg{flex-shrink:0}
+.safe.big{padding:10px 14px;background:#111;color:#fff;border-color:#111;font-size:14px}
+.safe.big b{font-size:20px}.safe.big span{color:#E4E4E0}
+.ipad .safe.big{font-size:16px}.ipad .safe.big b{font-size:26px}
+
+.tap{cursor:pointer;transition:filter .15s}
+.tap:hover{filter:brightness(.96)}
+.tap::after{content:"";position:absolute;top:6px;right:8px;width:14px;height:14px;opacity:.55;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 8h13l-3-3M20 16H7l3 3'/%3E%3C/svg%3E") center/contain no-repeat}
+
+.ovgrid,.port .ovgrid{grid-template-columns:minmax(0,1fr)}
+.aside{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:16px}
+.port .aside{grid-template-columns:1fr 1fr}
+.wblk .wicons{width:auto;min-width:92px;max-width:130px}
+
+.dock,.ipad .dock{flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px}
+.dockrow{flex:1;min-width:230px}
+.dk{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.clockbtn{position:relative;width:60px;height:60px;padding:2px;border:none;border-radius:999px;background:none;flex-shrink:0;animation:dockin .35s cubic-bezier(.2,.8,.2,1)}
+.clockbtn .mr{display:block}
+.clockbtn .clk2{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:12px;font-variant-numeric:tabular-nums}
+.ringbtn{border:none;background:none;padding:0;display:flex;flex-shrink:0}
+
+.safe{display:inline-flex;align-items:center;gap:6px;flex-wrap:nowrap;width:max-content;height:32px;padding:0 12px 0 9px;border-radius:999px;border:1.5px solid #111;font-size:13px;line-height:1;color:#111;cursor:pointer}
+.safe b{font-family:var(--disp);font-size:15px}
+.safe span{color:#111;font-weight:600}
+.safe.big,.ipad .safe.big{height:40px;padding:0 16px 0 12px;font-size:15px;color:#111}
+.safe.big b,.ipad .safe.big b{font-size:19px}.safe.big span{color:#111}
+.tempbox{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 8px;border-radius:16px;border:1.5px solid #111}
+.tempbox b{font-family:var(--disp);font-size:34px;line-height:1}
+.tempbox span{font-size:12px;font-weight:600;color:#3A3A38}
+
+.nutbox{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--counter)}
+.nutgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.nutgrid div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.nutgrid span{font-size:11px;font-weight:600;color:var(--muted)}
+.nutgrid b{font-family:var(--disp);font-size:17px;white-space:nowrap}
+.nutgrid i{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+.nutgrid i.chg{color:#111;font-weight:700}
+
+.swapbtn{width:36px;height:36px;padding:0;gap:0;border:1.5px solid #D6D6D1;color:#3A3A38;position:relative}
+.swapbtn::before{content:"";position:absolute;inset:-5px}
+.swapbtn:hover{border-color:#111;color:#111}
+.swapbtn.on{background:#111;border-color:#111;color:#fff}
+
+.acard{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.cookrow{border-bottom:1px solid #ECECE8}
+.cookrow:last-child{border-bottom:none}
+.cookrow>button{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:6px 0;border:none;background:none;text-align:left;font-size:13px}
+.cookrow>button svg{transition:transform .2s;flex-shrink:0}
+.cookrow.open>button svg{transform:rotate(180deg)}
+.cookbody{display:flex;flex-direction:column;gap:8px;padding:2px 0 12px 34px;font-size:13px;animation:fade .2s}
+
+button.badge{background:#fff;cursor:pointer;height:30px;padding:0 12px;font-family:inherit}
+button.badge:hover{box-shadow:0 0 0 2px rgba(17,17,17,.15)}
+
+/* ---------- polish pass ---------- */
+.stats div{padding:10px 7px}
+.stats span{font-size:10.5px;white-space:nowrap}
+.ipad .stats div{padding:12px 14px}.ipad .stats span{font-size:12px}
+.star .nm,.star .sub{background:#fff;padding:0 4px;border-radius:5px}
+.primary:disabled{background:#E4E4E0;color:#595954}
+.aisles{display:flex;flex-direction:column;gap:20px}
+.ipad .aisles{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:24px 28px;align-items:start}
+.ipad .aisles .tiles{grid-template-columns:1fr 1fr}
+.cookbar{flex-direction:column}
+.ipad .cookbar{flex-direction:row;align-items:center;justify-content:space-between;gap:20px}
+.ipad .cookbar .dock{flex:1;min-width:0}
+.ipad .cookbar .navrow{flex-shrink:0;width:440px;margin-left:auto}
+.port .pctl{flex-direction:column;align-items:stretch}
+.port .pctl>.row:last-child .primary{flex:1}
+.ipad .ingcols .qty{min-width:64px;justify-content:center}
+.ingt.qd::after{content:none}
+.qm{display:inline-flex;align-items:center;justify-content:center;width:.9em;height:.9em;margin-left:3px;border-radius:99px;background:#111;color:#fff;font-family:Inter,sans-serif;font-size:.5em;font-weight:700;font-style:normal;vertical-align:super}
+/* header actions: two equal-width rows, one height */
+.pctl,.port .pctl{flex-direction:column;align-items:stretch;flex-wrap:nowrap}
+.pctl>.row{align-items:stretch}
+.pctl>.row>*{height:52px!important;box-sizing:border-box}
+.pctl>.row .secondary{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.pctl>.row:first-child .stepper{flex:1;justify-content:space-between}
+.pctl>.row:last-child .secondary{flex:1}
+.pctl>.row:last-child .primary{flex:1.4;width:auto}
+
+/* ---------- profile menu ---------- */
+.profsheet{gap:16px}.ipad .sheet.profsheet{width:520px}
+.pava{width:52px;height:52px;border-radius:999px;background:#111;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;font-size:20px;flex-shrink:0}
+.pava.sm{width:36px;height:36px;font-size:15px}
+.psec{display:flex;flex-direction:column;gap:10px}
+.prow,.plink{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:6px 0;border-bottom:1px solid #ECECE8}
+.plink{border-left:none;border-right:none;border-top:none;background:none;text-align:left;width:100%;cursor:pointer}
+.psec>.prow:last-child,.psec>.plink:last-child,.psec .tog:last-child{border-bottom:none}
+.ptxt{display:flex;flex-direction:column;gap:2px;min-width:0}.ptxt b{font-size:15px}.ptxt span{font-size:12px;color:var(--muted)}
+.pchip{padding-right:4px}.pchip button{width:28px;height:28px;border:none;border-radius:999px;background:var(--counter);display:inline-flex;align-items:center;justify-content:center;margin-left:4px;cursor:pointer}.pchip button svg{width:12px;height:12px}
+.phh{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
+
+/* ---------- collapsed search ---------- */
+.searchf{height:48px;padding:0 6px 0 16px;border-radius:14px;background:var(--counter);gap:10px;animation:sfin .18s ease-out}
+.searchf input{flex:1;min-width:0;border:none;background:transparent;font:inherit;font-size:15px;outline:none}
+.searchf input::-webkit-search-cancel-button{display:none}
+.searchf:focus-within{box-shadow:0 0 0 2px #111}
+@keyframes sfin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.searchf{animation:none}}
+
+/* ---------- full-screen swap on iPad ---------- */
+.ipad .sheetwrap.full{padding:0;background:#fff;align-items:stretch}
+.ipad .sheetwrap.full .sheet.swapmodal{width:100%;height:100%;max-height:none;border-radius:0;box-shadow:none;padding:28px 36px 32px;gap:20px;animation:fade .2s}
+.sheetwrap.full .swapgrid{grid-template-columns:minmax(0,1.15fr) minmax(340px,1fr);gap:36px;align-items:center;flex:1}
+.mapwrap{display:flex;align-items:center;justify-content:center;min-width:0}
+.sheetwrap.full .mapwrap .zin{zoom:1.35}
+.swapside{display:flex;flex-direction:column;gap:14px;min-width:0}
+.port .sheetwrap.full .swapgrid{grid-template-columns:minmax(0,1fr);align-items:start;gap:24px}
+.port .sheetwrap.full .mapwrap .zin{zoom:1.25}
+
+/* ---------- swap nutrition: better / worse ---------- */
+.nd.better b,.nd.better .chg{color:#1F6FD0}
+.nd.worse b,.nd.worse .chg{color:#C2267A}
+.nutkey{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:11.5px;color:var(--muted);line-height:1.3}
+.nutkey i{width:9px;height:9px;border-radius:99px;flex-shrink:0}.nutkey .kb{background:#1F6FD0}.nutkey .kw{background:#C2267A;margin-left:8px}
+.nutkey{gap:4px 12px}.nutkey>span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}.nutkey .kw{margin-left:0}
+
+/* ---------- your cooks, full screen ---------- */
+.ckgrid{display:flex;flex-direction:column;gap:20px}
+.ipad .ckgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:28px;align-items:start}
+.port .ckgrid{grid-template-columns:minmax(0,1fr)}
+.ckchart{display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:4px}
+.ckbar{flex:1;max-width:120px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;border:none;background:none;padding:0;cursor:pointer}
+.ckbar b{font-family:var(--disp);font-size:15px}
+.ckbar i{width:100%;border-radius:8px 8px 3px 3px;background:#C9C9C4;transition:background .2s}
+.ckbar.on i,.ckbar:hover i{background:#111}
+.ckbar span{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.ckentry{padding:16px 18px;display:flex;flex-direction:column;gap:12px;scroll-margin:90px}
+.ckentry.on{border-color:#111;box-shadow:0 0 0 1.5px #111}
+
+/* ---------- full-screen profile ---------- */
+.sheetwrap.full{padding:0;background:#fff;justify-content:flex-start;align-items:stretch}
+.sheetwrap.full .profsheet{width:100%;height:100%;max-height:none;border-radius:0;box-shadow:none;padding:56px 20px 28px;gap:20px;animation:fade .2s}
+.ipad .sheetwrap.full .sheet.profsheet{width:100%;padding:28px 36px 32px;gap:24px}
+.pgrid,.pcol{display:flex;flex-direction:column;gap:22px;min-width:0}
+.ipad .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:28px 48px;align-items:start}
+.port .pgrid{grid-template-columns:minmax(0,1fr)}
+
+/* ---------- recipe actions on their own line ---------- */
+.pcta{align-items:stretch}
+.pcta>*{height:52px;box-sizing:border-box;font-size:16px}
+.pcta .secondary{flex:0 0 220px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.pcta .primary{flex:1;width:auto}
+.port .pcta .secondary{flex:1}.port .pcta .primary{flex:1.4}
+.pctl>.row:last-child .secondary{flex:none}
+
+/* ---------- slim info cards ---------- */
+.acard.slim{padding:12px 16px;gap:8px;justify-content:space-between}
+.cardthumb.sm{width:38px;height:46px;padding:7px 6px;gap:4px;flex-shrink:0}
+.acard.slim .cookrow>button{min-height:34px;padding:2px 0}
+.acard.slim .hbar{height:14px}
+
+/* ---------- recipe action line: heart, share, shopping list, start ---------- */
+.pcta>.iconbtn{width:52px!important;flex:none}
+.pcta .secondary,.port .pcta .secondary{flex:none;padding:0 20px;gap:8px}
+.pcta .primary,.port .pcta .primary{flex:0 0 260px;margin-left:auto;padding:0 20px}
+.port .pcta .primary{flex:1 1 160px;max-width:260px}
+.pctl>.row:first-child .stepper{flex:none}
+
+/* ---------- servings on the action line ---------- */
+.pcta .stepper{margin-left:auto;flex:none;height:52px}
+.pcta .primary,.port .pcta .primary{margin-left:0;flex:0 0 220px}
+.port .pcta .primary{flex:1 1 140px;max-width:220px}
+.port .pcta .lbl{display:none}
+.port .pcta [data-act="share"]{width:52px;padding:0;justify-content:center}
+
+/* ---------- recipes library ---------- */
+.libctl{display:flex;flex-direction:column;gap:8px}
+.ipad .libctl{display:grid;grid-template-columns:1.2fr 1fr;gap:12px}
+.port .libctl{grid-template-columns:minmax(0,1fr)}
+.libctl .seg button{font-size:12.5px;white-space:nowrap}
+.libtags{display:flex;gap:6px;flex-wrap:wrap}
+.libtags .badge{cursor:pointer;height:30px}
+.libgrid{display:flex;flex-direction:column;gap:12px}
+.ipad .libgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.port .libgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.librow{position:relative;border:1.5px solid #ECECE8;border-radius:18px;overflow:hidden;background:#fff}
+.libopen{display:flex;width:100%;border:none;background:none;padding:0;text-align:left;cursor:pointer;align-items:stretch}
+.libfp{flex:0 0 14px;display:flex}.libfp>div{height:100%!important;flex-direction:column}
+.ipad .libopen{flex-direction:column}.ipad .libfp{flex:none}.ipad .libfp>div{height:64px!important;flex-direction:row}
+.libtxt{display:flex;flex-direction:column;gap:4px;padding:14px 60px 14px 14px;min-width:0;flex:1}
+.ipad .libtxt{padding:14px 16px 16px}
+.libtxt b{font-family:var(--disp);font-size:19px;line-height:1.2}
+.libtxt .muted{font-size:13px}
+.libmeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.libmeta .badge{height:24px;font-size:11.5px}
+.libsave{position:absolute;right:10px;top:10px;background:#fff;box-shadow:0 0 0 1.5px #ECECE8}
+.ipad .libsave{top:74px}
+.papergrid{display:grid;grid-template-columns:1fr;gap:0}
+.ipad .papergrid{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:24px}
+.port .papergrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.paperrow{display:flex;align-items:center;gap:10px;min-height:44px;border:none;border-bottom:1px solid #ECECE8;background:none;text-align:left;font-size:14px;color:#3A3A38;cursor:pointer;padding:4px 0}
+/* settings cog at the bottom of the rail */
+.ipad .rail .railcog{margin-top:auto;margin-bottom:22px}
+.ipad .libtxt b{padding-right:50px}
+
+/* ---------- pantry ---------- */
+.ptiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ipad .ptiles{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.ptile{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px 10px;border-radius:14px;border:1.5px dashed #C9C9C4;background:#fff;text-align:left;cursor:pointer;min-width:0}
+.ptile.on{border:1.5px solid transparent}
+.ptile svg{flex-shrink:0}.ptile:not(.on) svg{opacity:.45}
+.ptile .ptxt{flex:1}.ptile .ptxt b{font-size:14px;line-height:1.2;overflow:hidden;text-overflow:ellipsis}.ptile:not(.on) .ptxt b{color:#595954}
+.pchk{width:22px;height:22px;border-radius:999px;border:1.5px solid #BDBDB8;background:#fff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.ptile.on .pchk{background:#111;border-color:#111}
+.canrow{display:grid;grid-template-columns:1fr;gap:8px}
+.ipad .canrow{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.port .canrow{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cancard{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:14px;border:1.5px solid #ECECE8;background:#fff;text-align:left;cursor:pointer;min-width:0}
+.cancard b{font-family:var(--disp);font-size:16px;line-height:1.2}.cancard span{font-size:12.5px;color:var(--muted)}
+.canbar{height:6px;border-radius:99px;background:#E4E4E0;overflow:hidden;display:block}.canbar i{display:block;height:100%;background:#111;border-radius:99px}
+/* ---------- plan ---------- */
+.plangrid{display:flex;flex-direction:column;gap:20px}
+.ipad .plangrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;align-items:start}
+.port .plangrid{grid-template-columns:minmax(0,1fr)}
+.pdays{display:flex;flex-direction:column;gap:10px}
+.pday{display:flex;gap:12px;align-items:stretch}
+.pdate{flex:0 0 48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;border-radius:14px;background:var(--counter);min-height:64px}
+.pdate b{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.pdate span{font-family:var(--disp);font-size:20px;font-weight:700}
+.pdate.today{background:#111}.pdate.today b,.pdate.today span{color:#fff}
+.padd{flex:1;border:1.5px dashed #C9C9C4;border-radius:16px;background:#fff;font-size:14px;font-weight:600;color:#3A3A38;cursor:pointer;min-height:64px}
+.pmeal{flex:1;position:relative;border:1.5px solid #ECECE8;border-radius:16px;overflow:hidden;min-width:0}
+.pmopen{display:flex;width:100%;height:100%;border:none;background:#fff;padding:0;text-align:left;cursor:pointer;align-items:stretch}
+.ipad .pmopen{flex-direction:row}.ipad .pmopen .libfp{flex:0 0 14px}.ipad .pmopen .libfp>div{height:100%!important;flex-direction:column}
+.pdel{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;background:#fff}
+
+/* ================= MARK 2 ================= */
+/* D3: things you tap vs things you read */
+span.badge{border:none;border-radius:7px;background:var(--counter);color:#2B2B28;font-weight:600;padding:0 8px;height:24px}
+span.badge.solid{background:#111;color:#fff}
+span.badge[style*="dashed"]{border:none!important;background:#F7F4EC}
+button.badge,.libtags .badge{cursor:pointer;border:1.5px solid #111;border-radius:999px;background:#fff}
+button.badge.solid{background:#111;color:#fff}
+/* D2 */
+.pinchsub{font-size:11px;line-height:1.25;color:#595954;padding:0 6px;text-align:center;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+/* D6 */
+.servhead{height:40px;padding:3px}.servhead button{width:32px;height:32px;font-size:18px}.servhead span{font-size:14px}
+.pcta .primary,.port .pcta .primary{margin-left:auto}
+/* D7 stronger ingredient highlights */
+.hc .ingt{background:#fff!important;box-shadow:inset 0 0 0 2px #111!important;font-weight:700}
+.hc .line.struck .ingt{box-shadow:none!important}
+
+/* ---- Mark 2 features ---- */
+.costsrc{display:flex;flex-direction:column;gap:6px;padding:0 8px}
+.ipad .costsrc{flex-direction:row;align-items:center;gap:14px;padding:0}.ipad .costsrc .seg{flex:0 0 260px}
+.leaf{overflow:visible}
+.ohtag{position:absolute;right:-6px;top:-9px;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.02em;padding:2px 7px;border-radius:99px;background:var(--good);color:#fff;white-space:nowrap}
+.ohnote{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:#EAF2FC;font-size:13px;line-height:1.35}
+.ohnote i{width:9px;height:9px;border-radius:99px;background:var(--good);flex-shrink:0}
+.ohnote.no{background:var(--counter);color:#3A3A38}.ohnote.no i{background:#8A8A85}
+.hfbtn{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 12px;border-radius:999px;border:1.5px solid #111;background:#fff;font-size:13px;font-weight:700;flex-shrink:0;margin-left:10px;cursor:pointer}
+.hfbtn.on{background:#111;color:#fff}
+.lock{border-radius:18px;background:#1B1B1A;color:#fff;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.locktime{font-family:var(--disp);font-size:34px;font-weight:600;line-height:1;opacity:.9}
+.lockrow{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.12)}
+.lockrow span{display:flex;flex-direction:column}.lockrow b{font-family:var(--disp);font-size:20px;font-variant-numeric:tabular-nums}.lockrow small{font-size:12px;opacity:.8}
+.mytime{font-size:12.5px;line-height:1.4;color:#3A3A38}.mytime b{color:#111}
+.useup{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:18px;border:1.5px solid #ECECE8}
+.uchip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px 0 6px;border-radius:10px;background:var(--counter);font-size:13px}
+.uchip em{font-style:normal;font-weight:700;font-size:12px;color:var(--good)}.uchip.soon em{color:var(--bad)}
+.upick{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;padding:8px 14px;border-radius:14px;border:1.5px solid #111;background:#fff;text-align:left;cursor:pointer}
+.upick span{display:flex;flex-direction:column;gap:2px;min-width:0}.upick b{font-family:var(--disp);font-size:16px}.upick small{font-size:12.5px;color:var(--muted)}
+.ptile .ptxt span.exp{color:var(--good);font-weight:700}.ptile .ptxt span.exp.soon{color:var(--bad)}
+.lane{display:inline-block;width:12px;height:12px;border-radius:99px;flex-shrink:0;background:#111}
+.lane.l1{background:#fff;box-shadow:inset 0 0 0 3px #111}.lane.done{background:var(--good)}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tlrow{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #ECECE8}
+.tlrow .lane{margin-top:5px}
+.tlat{flex:0 0 44px;font-family:var(--disp);font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;padding-top:1px}
+.tltxt{display:flex;flex-direction:column;gap:2px;min-width:0}.tltxt b{font-size:16px;line-height:1.25}.tltxt small{font-size:12.5px;color:var(--muted)}
+.tlrow.end{border-bottom:none}
+.qgrid{display:flex;flex-direction:column;gap:14px}
+.ipad .qgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.port .qgrid{grid-template-columns:minmax(0,1fr)}
+.qrow{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border:none;border-top:1px solid #ECECE8;background:none;text-align:left;font-size:14px;line-height:1.45;cursor:pointer}
+.qrow .pchk{margin-top:1px}.qrow.done span{color:#6B6B66;text-decoration:line-through}
+.hfbtn span{display:none}.ipad .hfbtn span,.hfbtn.on span{display:inline}.hfbtn{padding:0 11px}
+.estnote{font-size:11.5px;color:var(--muted);margin:-8px 0 0}

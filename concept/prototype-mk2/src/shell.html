@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recipes · Mark 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>/*CSS*/</style>
+</head>
+<body>
+<div class="devbar" role="toolbar" aria-label="Device">
+  <div class="seg" id="devSeg" style="grid-template-columns:repeat(2,1fr);width:180px"></div>
+  <div class="seg" id="orientSeg" style="grid-template-columns:repeat(2,1fr);width:200px"></div>
+</div>
+<div class="stage">
+  <aside class="side" aria-label="About this prototype">
+    <h1 id="sideTitle">Recipe flow</h1>
+    <p>Mark 2 of the prototype: the design changes and new features from the review, on nine of Ashley’s real recipe cards. Your profile avoids mushrooms and is allergic to tree nuts.</p>
+    <ol id="steps">
+      <li data-s="home">Pick a recipe</li>
+      <li data-s="recipe">Read about it</li>
+      <li data-s="ingredients">Swap ingredients (optional)</li>
+      <li data-s="shop">Shop for what is missing</li>
+      <li data-s="cook">Cook with timers</li>
+      <li data-s="done">Plate it</li>
+    </ol>
+    <div class="sec">
+      <span class="kicker">Jump to a recipe</span>
+      <div class="seg" style="grid-template-columns:repeat(3,1fr)" id="recipeSeg"></div>
+    </div>
+    <div class="sec">
+      <span class="kicker">Timer speed</span>
+      <div class="seg" style="grid-template-columns:repeat(3,1fr)" id="speedSeg"></div>
+      <span class="muted" style="font-size:12px">30x lets you watch a timer change colour in seconds.</span>
+      <button class="secondary" id="restart" style="height:40px;font-size:13px">Restart prototype</button>
+    </div>
+  </aside>
+  <div id="stagebox"><div class="devwrap" id="devwrap">
+  <div class="phone" id="phone">
+    <nav class="rail" aria-label="Main">
+      <button data-back="home" data-nav="home" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</button><button data-go="library" data-nav="library"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>Recipes</button><button data-go="pantry" data-nav="pantry"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="7" width="12" height="14" rx="2"/><path d="M8 3h8v4H8z"/></svg>Pantry</button><button data-go="plan" data-nav="plan"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button><button data-go="shopall" data-nav="shopall"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.5 12h11L21 8H6.5"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>Shop</button>
+    <button class="railcog" data-act="profile" aria-haspopup="dialog" aria-label="Settings and profile"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button></nav>
+    <div class="screen" id="screen"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div id="sheet"></div>
+  </div></div></div>
+</div>
+<script>
+(function(){
+'use strict';
+/*JS*/
+})();
+</script>
+</body>
+</html>
