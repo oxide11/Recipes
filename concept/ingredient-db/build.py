@@ -5,6 +5,8 @@ Inputs (see README for where they come from):
   raw/official_sr28/*.txt      USDA National Nutrient Database for Standard Reference, official sr28asc.zip
                                (falls back to raw/USDA-SR28, a GitHub mirror of the same files)
   raw/official_sr28upd/*.txt   USDA's May 2016 revision of SR28 (sr28upd0516.zip), applied on top
+  raw/official_srlegacy/*.json USDA SR Legacy, April 2018, FoodData Central JSON: replaces SR28 values food by food
+  raw/official_fndds/*.json    USDA survey foods (FNDDS 2021-2023), FoodData Central JSON: foods as eaten
   raw/official_ff/**/food.csv  USDA Foundation Foods, FoodData Central CSV download (optional)
   raw/official_cnf2026/*.csv   Canadian Nutrient File 2026 (Health Canada), official download
                                (falls back to raw/cnfx, the 2015 edition, for French names only)
@@ -101,6 +103,46 @@ if os.path.isdir(UPD):
             if fname == 'CHG_WGT' and 0 <= idx < len(wl): wl[idx] = row
             else: wl.append(row)
 upd_stats['foods_touched'] = len(upd_stats['foods_touched'])
+
+# ---------------------------------------------------------------- USDA SR Legacy (April 2018, final Standard Reference release)
+import glob
+def one_json(folder):
+    hits = glob.glob(os.path.join(RAW, folder, '**', '*.json'), recursive=True)
+    return hits[0] if hits else None
+def fdc_nutrients(food):
+    out = {}
+    for fn in food.get('foodNutrients') or []:
+        no = (fn.get('nutrient') or {}).get('number')
+        if no in NUTR and fn.get('amount') is not None:
+            f_, _, d_ = NUTR[no]; v = round(float(fn['amount']), d_); out[f_] = int(v) if d_ == 0 else v
+    return out
+legacy_stats = dict(foods=0, replaced_sr28=0, new_foods=0, sr28_foods_dropped=0, energy_changed=0)
+sr_dropped, SRL = set(), one_json('official_srlegacy')
+if SRL:
+    GROUP_CODE = {v: k for k, v in GROUPS.items()}
+    with open(SRL, encoding='utf-8') as f: legacy = json.load(f)['SRLegacyFoods']
+    seen = set()
+    for fd in legacy:
+        ndb = str(fd['ndbNumber']).zfill(5); seen.add(ndb); legacy_stats['foods'] += 1
+        n = fdc_nutrients(fd)
+        if ndb in SR_FOODS:
+            legacy_stats['replaced_sr28'] += 1
+            row = list(SR_FOODS[ndb]); row[2] = fd['description'].strip(); SR_FOODS[ndb] = row
+            if n.get('energy_kcal') != nut.get(ndb, {}).get('energy_kcal'): legacy_stats['energy_changed'] += 1
+        else:
+            legacy_stats['new_foods'] += 1
+            grp = GROUP_CODE.get((fd.get('foodCategory') or {}).get('description', ''), '')
+            SR_FOODS[ndb] = [ndb, grp, fd['description'].strip(), '', '', '', '', '', '', '', '', '', '', '']
+        if n: nut[ndb] = n
+        ports = []
+        for p in sorted(fd.get('foodPortions') or [], key=lambda p: p.get('sequenceNumber') or 0):
+            unit = (p.get('measureUnit') or {}).get('name', '')
+            desc = (p.get('modifier') or '').strip() if unit in ('undetermined', '') else (unit + (', ' + p['modifier'].strip() if p.get('modifier') else ''))
+            if desc and p.get('gramWeight'): ports.append((float(p.get('amount') or p.get('value') or 1), desc, float(p['gramWeight']), 'usda'))
+        if ports: weights[ndb] = ports
+    sr_dropped = set(SR_FOODS) - seen
+    legacy_stats['sr28_foods_dropped'] = len(sr_dropped)
+    del legacy
 
 # ---------------------------------------------------------------- measures
 ML = {'cup': 236.588, 'tbsp': 14.787, 'tsp': 4.929, 'fl oz': 29.574, 'quart': 946.353, 'pint': 473.176,
@@ -483,6 +525,47 @@ for r in cnf_only:
     alt = [a.strip() for a in re.split(r'[,;]', r['Alternate_Description_EN']) if a.strip()]
     if alt: rec['alt_names'] = alt
     if r['USDA_NDB_Code'].strip(): rec['usda_ndb_not_in_sr28'] = r['USDA_NDB_Code'].strip()
+for ndb in sr_dropped:
+    if ndb in foods: foods[ndb]['dropped_in_sr_legacy'] = True
+
+# ---------------------------------------------------------------- USDA survey foods (FNDDS): foods as eaten, with consumer wording
+survey_stats = dict(foods=0, single_ingredient=0)
+FND = one_json('official_fndds')
+if FND:
+    with open(FND, encoding='utf-8') as f: survey = json.load(f)['SurveyFoods']
+    PD = re.compile(r'^(\d+(?:\.\d+)?(?:/\d+)?)\s+(.*)$')
+    for fd in survey:
+        n = fdc_nutrients(fd)
+        if 'energy_kcal' not in n: continue
+        key = 'fndds:' + str(fd['foodCode'])
+        for p in fd.get('foodPortions') or []:
+            m = PD.match((p.get('portionDescription') or '').strip())
+            if not m or not p.get('gramWeight'): continue
+            a = m.group(1)
+            amount = float(a.split('/')[0]) / float(a.split('/')[1]) if '/' in a else float(a)
+            if amount > 0: weights[key].append((amount, m.group(2).strip(), float(p['gramWeight']), 'usda'))
+        state, _ = state_of(fd['description'])
+        portions, density, basis, units = parse_measures(key)
+        rec = OrderedDict(id=key, source='usda-survey', description=fd['description'].strip(),
+                          group=(fd.get('wweiaFoodCategory') or {}).get('wweiaFoodCategoryDescription', ''), kind='survey', state=state, aisle=None)
+        rec['per_100g'] = OrderedDict((f_, n[f_]) for f_, _, _ in NUTR.values() if f_ in n)
+        if density: rec['density_g_per_ml'] = density; rec['density_basis'] = basis
+        if units: rec['unit_weights_g'] = units
+        rec['measures'] = portions
+        made = []
+        for i in sorted(fd.get('inputFoods') or [], key=lambda i: i.get('sequenceNumber') or 0):
+            code = str(i.get('ingredientCode') or '')
+            ref = 'usda:' + code.zfill(5) if code.zfill(5) in foods else ('fndds:' + code if len(code) == 8 else None)
+            made.append(OrderedDict(food=ref, description=(i.get('ingredientDescription') or '').strip(), grams=i.get('ingredientWeight')))
+        if made: rec['made_from'] = made
+        rec['allergens'] = []; rec['diet'] = 'unknown'
+        foods[key] = rec
+        survey_stats['foods'] += 1
+        if len(made) == 1 and made[0]['food'] and made[0]['food'].startswith('usda:'):
+            survey_stats['single_ingredient'] += 1
+            foods[made[0]['food'][5:]].setdefault('survey_names', []).append(rec['description'])
+    del survey
+
 for key, desc, grp, pub in ff_foods:
     if 'energy_kcal' not in ff_nut.get(key, {}): continue
     rec = add_food(key, grp, desc, '', '', None, '', ff_nut[key], 'usda-foundation')
@@ -551,6 +634,7 @@ def variant_score(rec):
     if rec.get('unit_weights_g'): s += 3
     if len(rec['per_100g']) >= 15: s += 3
     low = rec['description'].lower()
+    if rec.get('dropped_in_sr_legacy'): s -= 6
     if re.search(r'\b(low ?fat|nonfat|fat free|reduced|lite|light|imitation|substitute|low sodium|with added|fortified|unsalted|without salt|sweetened|flavored|diet)\b', low): s -= 8
     s -= len(rec['description']) / 12.0
     return s
@@ -658,7 +742,7 @@ kinds = defaultdict(int)
 for r in foods.values(): kinds[r['kind']] += 1
 ing_foods = [r for r in foods.values() if r['kind'] == 'ingredient']
 stats = OrderedDict(
-    foods_total=len(foods), foods_from_usda=sum(1 for r in foods.values() if r['source'] == 'usda'), foods_from_usda_foundation=sum(1 for r in foods.values() if r['source'] == 'usda-foundation'),
+    foods_total=len(foods), foods_from_usda=sum(1 for r in foods.values() if r['source'] == 'usda'), foods_from_usda_survey=sum(1 for r in foods.values() if r['source'] == 'usda-survey'), foods_from_usda_foundation=sum(1 for r in foods.values() if r['source'] == 'usda-foundation'),
     sr28_foods_with_newer_lab_data=sum(1 for r in foods.values() if r.get('newer_lab_data')), foods_from_cnf=sum(1 for r in foods.values() if r['source'] == 'cnf'),
     foods_by_kind=dict(kinds), measures_from_cnf=sum(1 for r in foods.values() for p in r['measures'] if p.get('source') == 'cnf'),
     foods_with_cooking_yield=sum(1 for r in foods.values() if r.get('yields')),
@@ -673,6 +757,6 @@ stats = OrderedDict(
     ingredients_with_shelf_life=sum(1 for i in ingredients if i.get('shelf_life')),
     ingredients_with_allergens=sum(1 for i in ingredients if i['allergens']),
     ingredients_data_gaps=[i['name'] for i in ingredients if i.get('data_gap')],
-    sr28_may_2016_update=upd_stats, curated_unresolved=unresolved)
+    sr28_may_2016_update=upd_stats, sr_legacy_2018=legacy_stats, survey_foods=survey_stats, curated_unresolved=unresolved)
 with open(os.path.join(OUT, 'stats.json'), 'w') as f: json.dump(stats, f, indent=1)
 print(json.dumps(stats, indent=1))

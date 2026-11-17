@@ -7,20 +7,27 @@ the Sankey, nutrition, unit conversion, shopping aisles, allergen flags and pant
 
 | File | Records | What |
 |---|---|---|
-| `out/foods.jsonl` | 10,481 | Every food from both sources, cleaned. Nutrition per 100 g (27 values), household measures with gram weights (US and metric), density, weight per item, state (raw, cooked, canned, frozen, dried), aisle, allergen and diet tags, French description |
-| `out/ingredients.json` | 1,454 | Cooking ingredients. One record per ingredient, with a default food, its other forms, aliases and shelf life |
-| `out/ingredients.csv` | 1,454 | The same, flat, to open in a spreadsheet |
+| `out/foods.jsonl` | 15,941 | Every food from all sources, cleaned. Nutrition per 100 g (27 values), household measures with gram weights (US and metric), density, weight per item, state (raw, cooked, canned, frozen, dried), aisle, allergen and diet tags, French description |
+| `out/ingredients.json` | 1,440 | Cooking ingredients. One record per ingredient, with a default food, its other forms, aliases and shelf life |
+| `out/ingredients.csv` | 1,440 | The same, flat, to open in a spreadsheet |
 | `out/stats.json` | | Counts and coverage from the last build |
+
+Where the 15,941 foods come from (the `source` field, and the id prefix):
+
+| Source | Foods | id | Role |
+|---|---|---|---|
+| USDA Standard Reference | 8,829 | `usda:` | The base. SR Legacy (2018) values wherever it has the food (7,793); the 1,036 foods it dropped keep their SR28 values and are flagged `dropped_in_sr_legacy` |
+| USDA survey foods (FNDDS 2021-2023) | 5,431 | `fndds:` | Foods as eaten, in everyday wording, with consumer portions and what each is made from (`made_from`). Kind `survey`; they do not feed the ingredient list |
+| Canadian Nutrient File 2026 | 1,303 | `cnf:` | Foods USDA does not have. Also supplies French and metric measures to linked USDA foods |
+| USDA Foundation Foods (April 2026) | 378 | `fdc:` | Recent lab analysis. 183 base foods point to one via `newer_lab_data` |
 
 Coverage in this build:
 
-- 8,790 foods from USDA SR28 (with the May 2016 revision applied), 378 from USDA Foundation Foods, and 1,313 that exist only in the Canadian file (ids `usda:…`, `fdc:…`, `cnf:…`).
-- 182 SR28 foods point to newer lab data for the same food in Foundation Foods (`newer_lab_data`).
-- Foods by kind: 6,374 ingredients, 1,525 branded, 1,521 prepared dishes, 434 baby foods, 165 regional, 83 institutional. Only "ingredient" foods feed the ingredient list.
-- 31,333 household measures, 15,895 of them metric measures from the Canadian file (125 ml, 15 ml). 5,108 foods have a density; 5,720 have a weight per item (1 egg, 1 clove, 1 medium onion).
-- French descriptions for 5,825 foods (58%), joined by the USDA code the Canadian file carries, not by guessing from names.
+- 48,181 household measures, 15,895 of them metric measures from the Canadian file. 9,442 foods have a density; 8,900 have a weight per item (1 egg, 1 clove, 1 medium onion).
+- French descriptions for 5,979 foods, joined by the USDA code the Canadian file carries.
 - 1,026 foods carry Canadian cooking-yield figures (`yields`), kept as published and not yet interpreted.
-- Ingredients: 88 curated by hand (87 with data, 1 known gap), 1,329 built automatically. 986 have a density, 781 a weight per item, 322 a shelf life.
+- 1,402 base foods carry `survey_names`: everyday names USDA's survey uses for them ("Milk, whole"). Useful as alias candidates; approximate, so not applied automatically.
+- Ingredients: 88 curated by hand (87 with data, 1 known gap), 1,352 built automatically. 971 have a density, 761 a weight per item, 330 a shelf life.
 
 ## Two tiers of trust
 
@@ -55,31 +62,34 @@ holds for that cut, which matters for vegetables.
 
 | Source | Used for | Licence | Attribution |
 |---|---|---|---|
-| USDA National Nutrient Database for Standard Reference, Release 28 (2015), official `sr28asc.zip` | Foods, nutrition, US measures | Public domain (US government work; FoodData Central is published CC0) | U.S. Department of Agriculture, Agricultural Research Service. FoodData Central. fdc.nal.usda.gov |
-| USDA Foundation Foods, April 2026, official FoodData Central CSV download | 378 foods with recent lab analysis | Public domain (CC0) | as above |
-| Canadian Nutrient File 2026, Health Canada, official download | Canada-only foods, French descriptions, metric measures, cooking yields | Open Government Licence, Canada | Contains information licensed under the Open Government Licence, Canada. Canadian Nutrient File, Health Canada, 2026 |
+| USDA SR Legacy, April 2018 (FoodData Central JSON) | Base foods, nutrition, US measures | Public domain (CC0) | U.S. Department of Agriculture, Agricultural Research Service. FoodData Central. fdc.nal.usda.gov |
+| USDA SR28 (2015, `sr28asc.zip`) with the May 2016 revision (`sr28upd0516.zip`) | The 1,036 foods SR Legacy dropped; inedible-portion and scientific-name fields | Public domain | as above |
+| USDA FNDDS 2021-2023 survey foods (FoodData Central JSON) | Foods as eaten, consumer portions, everyday names | Public domain (CC0) | as above |
+| USDA Foundation Foods, April 2026 (FoodData Central CSV) | 378 foods with recent lab analysis | Public domain (CC0) | as above |
+| Canadian Nutrient File 2026, Health Canada | Canada-only foods, French descriptions, metric measures, cooking yields | Open Government Licence, Canada | Contains information licensed under the Open Government Licence, Canada. Canadian Nutrient File, Health Canada, 2026 |
 | USDA FSIS FoodKeeper (GitHub mirror, unverified copy) | Shelf life | US government work | USDA Food Safety and Inspection Service, FoodKeeper |
+
+All USDA and Health Canada files are the official downloads. Only the shelf-life table is a mirror copy.
 
 The app must show the USDA and Health Canada attribution lines (an About screen is enough).
 
 ## Known limits. Read before relying on it
 
-- **USDA data is the official SR28 release, with USDA's May 2016 revision applied.** Built from `sr28asc.zip` (in `raw/official_sr28/`)
-  plus `sr28upd0516.zip` (in `raw/official_sr28upd/`). The revision touched 40 foods, mostly baby foods; 1 food added, 28 records changed in our output, none of them curated.
-- **Foundation Foods (April 2026) is in, as extra foods, not as the default.** 378 of its 469 foods have an energy value and are
-  included. It is recent lab data but sparse: fewer nutrients and few household measures per food. So curated ingredients still
-  use SR28 values, and `newer_lab_data` marks where a newer analysis exists. Where both cover a food, energy differs by more
-  than 10% in 31 of 181 cases (hummus 166 vs 229 kcal, kale 49 vs 35), so choosing which wins is a real decision, not a formality.
-  Put the unzipped download in `raw/official_ff/`. The October 2026 CSV zip was missing its main tables; April was complete.
-- **SR Legacy (2018) is not in.** It is the final Standard Reference release, one step newer than SR28.
+- **The USDA base is SR Legacy (2018), the final Standard Reference release.** It replaced SR28 values food by food. Against SR28,
+  energy changed for 210 foods. SR Legacy's JSON rounds some values a little more coarsely than the old text files (egg protein 12.6, not 12.56).
+- **Foundation Foods (April 2026) is in as extra foods, not as the default.** It is recent lab data but sparse: fewer nutrients
+  and few household measures per food. Curated ingredients use SR Legacy values, and `newer_lab_data` marks where a newer
+  analysis exists. Choosing which wins is a real decision: where both cover a food, energy often differs by more than 10%.
+- **Survey foods are not ingredients.** They are mixed dishes and foods as eaten. They are in the food table for their portions,
+  names and recipes, and are kept out of the ingredient list. They carry no aisle, allergen or diet tags.
 - **Canadian data is the official 2026 edition**, unzipped into `raw/official_cnf2026/`. Where a Canadian food links to a USDA food,
   the USDA nutrition is used and the Canadian file adds the French description and metric measures. Canadian nutrition values are
   used only for the 1,313 foods USDA does not have.
 - **Shelf-life data is still an unverified mirror copy.**
 - **Allergen and diet tags are rules, not facts.** They come from keywords and food groups. They will miss hidden ingredients
   and can over-flag. Good for a warning that prompts a label check. Not good enough to tell someone a food is safe.
-- **French is the full database description** ("Oignon, cru"), not a short display name. 42% of foods have none.
-- **Shelf life is matched by name** and covers 322 ingredients. Unmatched ones have none.
+- **French is the full database description** ("Oignon, cru"), not a short display name. Survey foods and most Foundation foods have none.
+- **Shelf life is matched by name** and covers 330 ingredients. Unmatched ones have none.
 - **Gaps.** Some real ingredients are not in these sources (`overlay/gaps.csv`, currently red curry paste). They are listed
   without nutrition and must not be filled with guesses.
 - **No prices and no swaps.** Prices come from receipts; swaps are ours to write. Cooking yields are present for 1,026 foods but raw, not yet turned into "what this becomes when cooked".
@@ -88,7 +98,7 @@ The app must show the USDA and Health Canada attribution lines (an About screen 
 ## Rebuild
 
 ```
-# unzip USDA's sr28asc.zip into raw/official_sr28/ and Health Canada's 2026 zip into raw/official_cnf2026/
+# unzip the official downloads into raw/: official_sr28/, official_sr28upd/, official_srlegacy/, official_fndds/, official_ff/, official_cnf2026/
 ./fetch.sh                 # shelf-life table, plus mirror copies used as fallbacks (raw/ is not committed)
 python3 -I build.py        # writes out/
 python3 -I validate.py     # checks; exits non-zero on failure
