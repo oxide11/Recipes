@@ -92,6 +92,16 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 
 - [ ] **Nutritional goals** — Let the user set daily or per-meal targets (calories, protein, carbs, fat) and show how a recipe fits them. Ties into the concept work: the Calories view of the Sankey already splits each dish into macros, and the swap card shows how a substitution changes calories and macros per serving, so a goal could be shown against both. The meal plan already has calorie and protein targets to build on.
 
+### Mise ideas (from conversations, 2026-11-17)
+
+- [ ] **Drinks and water** — Drinks alongside food: what to serve with a meal, and possibly water tracking next to the nutrition goals.
+- [ ] **Wine pairing** — Suggest a wine (or a non-alcoholic match) for a recipe, using its main ingredients and richness.
+- [ ] **Special occasions** — Mark a plan day as an occasion (birthday, anniversary, guests) and get a menu sized for it.
+- [ ] **Food podcast recommender** — Suggest something to listen to while cooking, matched to cook time or cuisine.
+- [ ] **Full family dinner, step by step** — A guided multi-dish dinner. Builds on prep sessions and the cook-together timeline in Mark 2.
+- [ ] **Full holiday dinner, step by step** — The same, across several days: shopping, make-ahead, thawing, and a day-of timeline with oven scheduling.
+- [ ] **Holiday sponsors** — A sponsor for each holiday occasion. A business model question as much as a feature; needs a decision on how sponsorship appears without breaking the "colour means food" and no-clutter principles.
+
 ---
 
-*Last updated: 2026-11-16*
+*Last updated: 2026-11-17*

@@ -427,4 +427,90 @@ function openLibraryMembers(){
   '<button class="secondary" data-toast="Invites are mocked in this prototype. In the app this sends an iCloud share link.">+ Invite someone</button></div></div>';
  var b=el.querySelector('.iconbtn');if(b)b.focus();
 }
+
+/* ---- settings, built out ---- */
+function blockedReason(l){
+ var nm=(l.name||'').toLowerCase();
+ for(var i=0;i<P.never.length;i++){var n=P.never[i],k=n[0].toLowerCase(),al=n[1]==='allergy';
+  if(l.allergen&&l.allergen.toLowerCase()===k)return 'Contains '+k;
+  if(l.dislike&&l.dislike.toLowerCase()===k)return (al?'Contains ':'You dislike ')+k;
+  if(nm.indexOf(k.replace(/s$/,''))>-1)return (al?'Contains ':'You dislike ')+k}
+ return '';
+}
+function perServing(id){var r=RECIPES[id],c=0,p=0;r.ING.forEach(function(it){c+=it.calories||0;p+=(it.macro&&it.macro[0])||0});return {kcal:c/r.base,protein:p/r.base}}
+function subHead(kicker,title){return '<div class="between"><div class="row" style="gap:12px"><button class="iconbtn" data-act="profile" aria-label="Back to settings">'+SVG.back+'</button><div><span class="kicker">'+kicker+'</span><h2 class="h2" style="font-size:20px">'+title+'</h2></div></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'}
+function subWrap(label,inner,keepPos){var el=document.getElementById('sheet'),old=el.querySelector('.sheet'),y=old?old.scrollTop:0;el.innerHTML='<div class="sheetwrap'+(keepPos?' noanim':'')+'" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="'+label+'">'+inner+'</div></div>';if(keepPos)el.querySelector('.sheet').scrollTop=y;else{var b=el.querySelector('.iconbtn');if(b)b.focus()}}
+function openNeverAdd(keepPos){
+ var C=['Peanuts','Tree nuts','Shellfish','Fish','Dairy','Eggs','Gluten','Soy','Sesame','Mushrooms','Cilantro','Olives','Shrimp','Pork'],have={};P.never.forEach(function(n){have[n[0]]=n[1]});
+ subWrap('Add to never suggested',subHead('Never suggested','Add something to avoid')+
+  '<p class="muted" style="margin:0;font-size:13px;line-height:1.45">Dislikes are left out of swaps and picks. Allergies are also flagged wherever they appear.</p>'+
+  '<div style="display:flex;flex-direction:column">'+C.map(function(c){return '<div class="mrow"><span style="flex:1"><b>'+c+'</b>'+(have[c]?'<small>Added as '+have[c]+'</small>':'')+'</span>'+(have[c]?'<span class="badge solid" style="height:24px;font-size:11px">Added</span>':'<button class="chip out" style="height:36px;padding:0 12px" data-never="'+c+':dislike">Dislike</button><button class="chip out" style="height:36px;padding:0 12px;border-width:2px" data-never="'+c+':allergy">Allergy</button>')+'</div>'}).join('')+'</div>'+
+  '<span class="muted" style="font-size:12px;line-height:1.4">In the app you could also type any ingredient. This list is a sample.</span>',keepPos);
+}
+function openGoals(keepPos){
+ var id=(PLAN[0]&&PLAN[0][0])||'cajun',r=RECIPES[id],ps=perServing(id),kp=Math.round(ps.kcal/P.kcal*100),pp=Math.round(ps.protein/P.protein*100);
+ function stp(label,key,step,min,unit){return '<div class="prow"><span class="ptxt"><b>'+label+'</b><span>per day</span></span><div class="stepper" style="height:44px" role="group" aria-label="'+label+'"><button style="width:36px;height:36px" data-pstep="'+key+':-'+step+':'+min+'" aria-label="Less"'+(P[key]<=min?' disabled':'')+'>−</button><span aria-live="polite" style="min-width:92px;text-align:center"><b>'+P[key].toLocaleString('en-US')+'</b> '+unit+'</span><button style="width:36px;height:36px" data-pstep="'+key+':'+step+':'+min+'" aria-label="More">+</button></div></div>'}
+ function bar(label,pct,txt){return '<div style="display:flex;flex-direction:column;gap:6px"><div class="between" style="font-size:13px"><b>'+label+'</b><span class="muted">'+txt+'</span></div><div class="prog"><i style="width:'+Math.min(100,pct)+'%'+(pct>100?';background:var(--bad)':'')+'"></i></div></div>'}
+ subWrap('Nutrition goals',subHead('Settings','Nutrition goals')+
+  '<div style="display:flex;flex-direction:column">'+stp('Calories','kcal',50,1200,'kcal')+stp('Protein','protein',5,30,'g')+'</div>'+
+  '<div class="amt" style="gap:12px"><span class="kicker" style="color:#111">Tonight against your day</span><b style="font-family:var(--disp);font-size:17px">'+esc(r.title)+'</b>'+
+   bar('Calories',kp,'~'+(Math.round(ps.kcal/10)*10).toLocaleString('en-US')+' of '+P.kcal.toLocaleString('en-US')+' kcal · '+kp+'%')+
+   bar('Protein',pp,'~'+Math.round(ps.protein)+' of '+P.protein+' g · '+pp+'%')+
+   '<span class="muted" style="font-size:12px;line-height:1.4">One serving, from estimated nutrition. Swaps change these numbers.</span></div>'+
+  '<span class="muted" style="font-size:12px;line-height:1.45">The goal direction (lighter, protein, gain) is set on the settings screen and decides which swaps count as better. These daily targets are shown here only; they are not yet on the recipe or plan screens.</span>',keepPos);
+}
+function openAisles(keepPos){
+ subWrap('Store order',subHead('Shopping','Your store’s order')+
+  '<p class="muted" style="margin:0;font-size:13px;line-height:1.45">Shopping lists follow this order, so put the aisles the way you walk your store.</p>'+
+  '<div style="display:flex;flex-direction:column">'+AISLES.map(function(a,i){return '<div class="mrow"><span class="pnum" style="width:26px;height:26px;font-size:12px">'+(i+1)+'</span><span style="flex:1"><b>'+a+'</b></span><button class="iconbtn" style="width:40px;height:40px" data-aisle="'+i+':-1" aria-label="Move '+a+' up"'+(i===0?' disabled':'')+'><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></button><button class="iconbtn" style="width:40px;height:40px" data-aisle="'+i+':1" aria-label="Move '+a+' down"'+(i===AISLES.length-1?' disabled':'')+'><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></div>'}).join('')+'</div>',keepPos);
+}
+function openAbout(){
+ subWrap('About',subHead('Settings','About')+
+  '<div style="display:flex;flex-direction:column"><div class="mrow"><span style="flex:1"><b>Recipes, Mark 2</b><small>Design prototype, not the shipping app</small></span></div><div class="mrow"><span style="flex:1"><b>Recipes</b><small>'+RECIPE_ORDER.length+' built from Ashley’s cards, 32 still on paper</small></span></div><div class="mrow"><span style="flex:1"><b>Nutrition, cost and timings</b><small>Estimates. Marked with “~” throughout.</small></span></div><div class="mrow"><span style="flex:1"><b>Ingredient graphics</b><small>Set 2, drawn for this prototype</small></span></div></div>'+
+  '<button class="secondary" data-toast="Feedback is collected through the comments on this prototype">Send feedback</button>');
+}
+function logView(){
+ var pad=isPad(),all=[],mo={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+ Object.keys(LOG).forEach(function(id){LOG[id].forEach(function(c){var d=(c.date||'').split(' ');all.push({id:id,c:c,k:(mo[d[0]]||12)*100+(+d[1]||31)})})});
+ all.sort(function(x,y){return y.k-x.k});
+ return '<div class="pad"><div class="row" style="gap:12px;align-items:flex-start"><button class="iconbtn" data-back="home" aria-label="Back">'+SVG.back+'</button><div><h1 class="t" style="font-size:'+(pad?36:26)+'px">Cooking log</h1><p class="muted" style="margin:2px 0 0;font-size:'+(pad?14:13)+'px">'+all.length+' cooks, newest first</p></div></div>'+
+  '<div class="qgrid">'+all.map(function(x){var c=x.c,r=RECIPES[x.id],sw=c.swapList||[];return '<button class="card ckentry" style="text-align:left;cursor:pointer;background:#fff" data-open="'+x.id+'"><div class="between" style="gap:12px"><div style="min-width:0"><b style="font-family:var(--disp);font-size:17px">'+esc(r.title)+'</b><div class="muted" style="font-size:13px">'+esc(c.date||'Today')+' · '+esc(c.who||'You')+'</div></div><span style="text-align:right;white-space:nowrap"><b style="letter-spacing:1px">'+starsHtml(c.rating)+'</b>'+(c.mins?'<div class="muted" style="font-size:12px">'+c.mins+' min</div>':'')+'</span></div>'+(sw.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+sw.map(function(s){return '<span class="badge" style="height:24px;font-size:12px">'+esc(s)+'</span>'}).join('')+'</div>':'')+(c.note?'<p style="margin:0;font-size:14px;line-height:1.45;color:#2B2B28">“'+esc(c.note)+'”</p>':'')+'</button>'}).join('')+'</div></div>';
+}
+function profileSheet(){
+ var cooks=0,stars=0,rated=0,mins=0;Object.keys(LOG).forEach(function(k){LOG[k].forEach(function(c){cooks++;mins+=c.mins||0;if(c.rating){stars+=c.rating;rated++}})});
+ var saved=Object.keys(S.saved).filter(function(k){return S.saved[k]}).length,K=KITCHENS[KCUR],others=K.members.filter(function(x){return x!=='M'}).map(function(k){return PEOPLE[k]});
+ function seg(key,opts){return '<div class="seg" style="grid-template-columns:repeat('+opts.length+',1fr);min-width:150px">'+opts.map(function(o){return '<button aria-pressed="'+(P[key]===o[0])+'" data-pset="'+key+':'+o[0]+'">'+o[1]+'</button>'}).join('')+'</div>'}
+ function row(t,s,ctl){return '<div class="prow"><span class="ptxt"><b>'+t+'</b><span>'+s+'</span></span>'+ctl+'</div>'}
+ function tog(key,t,s){var on=!!P[key];return '<button class="tog" role="switch" aria-checked="'+on+'" data-ptog="'+key+'"><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>'+t+'</b><span>'+s+'</span></span><i class="sw'+(on?' on':'')+'"><i></i></i></button>'}
+ function nav(t,s,attr,right){return '<button class="plink" '+attr+'><span class="ptxt"><b>'+t+'</b><span>'+s+'</span></span>'+(right||SVG.arrow)+'</button>'}
+ function sec(title,body,flat){return '<section class="psec"'+(flat?' style="gap:0"':'')+'><span class="kicker"'+(flat?' style="margin-bottom:6px"':'')+'>'+title+'</span>'+body+'</section>'}
+ var col1=
+  sec('Never suggested','<p class="muted" style="margin:0;font-size:13px;line-height:1.4">Swaps and recipe picks skip these. Allergies are also flagged wherever they appear.</p>'+
+   '<div style="display:flex;gap:8px;flex-wrap:wrap">'+P.never.map(function(n,i){return '<span class="chip out pchip"'+(n[1]==='allergy'?' style="border-width:1.5px"':'')+'>'+(n[1]==='allergy'?SVG.warn('#111'):'')+esc(n[0])+' <span class="muted" style="font-weight:500">'+n[1]+'</span><button data-pdel="'+i+'" aria-label="Remove '+esc(n[0])+'">'+SVG.close+'</button></span>'}).join('')+
+   '<button class="chip out" style="border-style:dashed" data-act="neveradd">+ Add</button></div>')+
+  sec('Nutrition',nav('Daily goals',P.kcal.toLocaleString('en-US')+' kcal · '+P.protein+' g protein','data-act="goals"')+
+   row('Goal direction','Decides what counts as a better swap',seg('goal',[['lighter','Lighter'],['protein','Protein'],['gain','Gain']])),true)+
+  sec('Measurements',row('Units','Amounts in recipes and the pantry',seg('units',[['us','US'],['metric','Metric']]))+
+   row('Temperature','Oven and safe temperatures',seg('temp',[['F','°F'],['C','°C']]))+
+   row('Default servings','Recipes open scaled to this','<div class="stepper" style="height:44px" role="group" aria-label="Default servings"><button style="width:36px;height:36px" data-pserv="-1" aria-label="Fewer"'+(P.serv<=1?' disabled':'')+'>−</button><span aria-live="polite"><b>'+P.serv+'</b></span><button style="width:36px;height:36px" data-pserv="1" aria-label="More"'+(P.serv>=12?' disabled':'')+'>+</button></div>')+
+   row('Week starts','In the plan',seg('week',[['mon','Monday'],['sun','Sunday']])))+
+  sec('Appearance','<div style="display:flex;flex-direction:column">'+tog('dark','Dark mode','A dark kitchen: black counters, the same ingredient colours')+tog('hc','Stronger ingredient highlights','Outlined ingredients in step text instead of pale tints')+tog('big','Larger text','Bigger type across the app')+'</div>')+
+  sec('While cooking','<div style="display:flex;flex-direction:column">'+tog('awake','Keep screen awake','No dimming while a recipe is open')+tog('hf','Hands-free cooking','Reads each step aloud and moves on when its timer ends')+tog('sound','Timer sounds','A chime when a timer ends')+tog('photo','Ask for a plate photo','Prompt at the end of every cook')+'</div>');
+ var col2=
+  sec('Sharing',nav('Family library',LIBM.length+' people share these recipes','data-act="librarymembers"',avStack(LIBM,4))+
+   nav('Your kitchens',KITCHENS.length+' · currently '+esc(K.name),'data-act="kitchens"',avStack(K.members,4))+
+   '<div class="prow"><span class="ptxt"><b>iCloud sync</b><span>Synced just now · library and '+KITCHENS.length+' kitchens</span></span><span class="badge" style="height:24px;font-size:11px">On</span></div>',true)+
+  sec('Notifications','<div style="display:flex;flex-direction:column">'+tog('nTimer','Timers','When a cooking timer ends')+tog('nShop','Shopping together','When someone in your kitchen ticks or adds an item')+tog('nPlan','Tomorrow’s plan','An evening reminder of what is planned and what to thaw')+tog('nExp','Use it up','When something in the pantry is close to its date')+tog('nCook','Cooking streak','A nudge if you have not cooked in a while')+'</div>')+
+  sec('Shopping',nav('Your store’s order',AISLES.slice(0,3).join(', ')+'…','data-act="aisles"')+row('Currency','For cost estimates',seg('currency',[['CAD','CAD'],['USD','USD']])),true)+
+  sec('Recipes and history',nav('Cooking log',cooks+' cooks across '+Object.keys(LOG).filter(function(k){return LOG[k].length}).length+' recipes','data-go="log"')+
+   nav('Questions for Ashley',openQCount()+' open across her cards','data-go="questions"')+nav('Import recipe cards','Photograph a card to add it','data-act="importcard"'),true)+
+  sec('Privacy and data',row('Recipe help','Where suggestions and card reading run',seg('ai',[['device','On device'],['hybrid','Allow cloud']]))+
+   nav('Export my recipes','A file you can keep or move','data-toast="Export is not built in this prototype"')+nav('About','Version, data sources, feedback','data-act="about"'),true);
+ return '<div class="sheet profsheet" role="dialog" aria-modal="true" aria-label="Settings">'+
+  '<div class="row" style="gap:12px"><button class="iconbtn" data-closesheet="1" aria-label="Back">'+SVG.back+'</button><span class="pava">M</span><div><h2 class="h2" style="font-size:26px">Moussa</h2><p class="muted" style="margin:2px 0 0;font-size:13px">'+(others.length?'Cooking with '+others.join(' and ')+' in '+esc(K.name):esc(K.name))+'</p></div></div>'+
+  '<div class="stats" style="grid-template-columns:repeat(4,1fr)"><div><b>'+cooks+'</b><span>cooks</span></div><div><b>'+(rated?(stars/rated).toFixed(1):'–')+'</b><span>avg rating</span></div><div><b>'+(cooks?Math.round(mins/cooks):0)+' min</b><span>avg cook</span></div><div><b>'+saved+'</b><span>saved</span></div></div>'+
+  '<div class="pgrid"><div class="pcol">'+col1+'</div><div class="pcol">'+col2+'</div></div>'+
+  '<p class="muted" style="margin:0;font-size:12px;line-height:1.45">Prototype: units and temperature, the never-suggested list, goal direction and daily goals, dark mode, stronger highlights, larger text, hands-free, store order and sharing all take effect. Notifications, week start, currency, recipe help, sync and export only remember their state.</p>'+
+ '</div>';
+}
 initMark2();

@@ -528,3 +528,10 @@ body.darkstage #phone{border-color:#000}
 .byav{position:absolute;left:10px;top:10px;width:24px;height:24px;border-radius:999px;background:#111;color:#fff;font-style:normal;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .tile{position:relative}
 .plink .avs{margin-left:auto}
+
+/* ---- settings built out ---- */
+.bigtext #screen{zoom:1.1}
+.bigtext .profsheet{zoom:1.06}
+.plink .ptxt span{overflow:hidden;text-overflow:ellipsis}
+.mrow .chip+.chip{margin-left:6px}
+.prog i{transition:width .2s}

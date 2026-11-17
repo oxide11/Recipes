@@ -34,7 +34,7 @@ function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;
 /* ================= STATE ================= */
 var S;
 var LOG={};
-var P;function freshPrefs(){P={temp:'F',units:'us',serv:2,awake:true,sound:true,photo:true,hf:false,hc:false,dark:false,goal:'lighter',receipts:false,never:[['Mushrooms','dislike'],['Tree nuts','allergy']]}}freshPrefs();
+var P;function freshPrefs(){P={temp:'F',units:'us',serv:2,awake:true,sound:true,photo:true,hf:false,hc:false,dark:false,kcal:2200,protein:110,nExp:true,nPlan:true,nShop:true,nTimer:true,nCook:false,ai:'hybrid',week:'mon',currency:'CAD',big:false,goal:'lighter',receipts:false,never:[['Mushrooms','dislike'],['Tree nuts','allergy']]}}freshPrefs();
 function seedLog(){LOG={
  cajun:[
   {date:'Oct 12',who:'Ashley',mins:29,rating:5,swapList:[],note:'',sample:1},
@@ -496,7 +496,7 @@ function done(){
 }
 
 /* ================= RENDER + EVENTS ================= */
-var VIEWS={home:home,recipe:recipe,ingredients:ingredients,shop:shop,cook:cook,done:done,cooks:function(){return cooksView()},library:function(){return libraryView()},pantry:function(){return pantryView()},plan:function(){return planView()},shopall:function(){return shopAllView()},together:function(){return togetherView()},questions:function(){return questionsView()},prep:function(){return prepView()}};
+var VIEWS={home:home,recipe:recipe,ingredients:ingredients,shop:shop,cook:cook,done:done,cooks:function(){return cooksView()},library:function(){return libraryView()},pantry:function(){return pantryView()},plan:function(){return planView()},shopall:function(){return shopAllView()},together:function(){return togetherView()},questions:function(){return questionsView()},prep:function(){return prepView()},log:function(){return logView()}};
 var PADVIEWS={home:homePad,recipe:recipePad,ingredients:ingredientsPad};
 function render(anim){
  document.getElementById('phone').classList.toggle('norail',S.screen==='cook');
@@ -506,7 +506,7 @@ function render(anim){
  scr.classList.remove('anim','animb');if(anim){void scr.offsetWidth;scr.classList.add(S.dir<0?'animb':'anim')}
  document.querySelectorAll('#steps li').forEach(function(li){li.classList.toggle('on',li.dataset.s===S.screen)});
  document.getElementById('sideTitle').textContent=S.screen==='home'?'Recipe flow':R.title;
- document.getElementById('phone').classList.toggle('hc',!!P.hc);applyTheme();
+ document.getElementById('phone').classList.toggle('hc',!!P.hc);document.getElementById('phone').classList.toggle('bigtext',!!P.big);applyTheme();
  if(S.screen==='cook'){dockSig='';updateTimerDom();hfSpeak();wordify();fitSteps()}
  S.zoom=null;
  var ph=document.getElementById('photo');
@@ -559,8 +559,11 @@ document.addEventListener('click',function(e){
  if(d.libtag){S.lib.tag=S.lib.tag===d.libtag?null:d.libtag;closeSheet();keep(render);return}
  if(d.libsave){S.saved[d.libsave]=!S.saved[d.libsave];keep(render);return}
  if(d.libmore){S.lib.more=!S.lib.more;keep(render);return}
- if(d.ptog){P[d.ptog]=!P[d.ptog];document.getElementById('phone').classList.toggle('hc',!!P.hc);applyTheme();openProfile(true);return}
+ if(d.ptog){P[d.ptog]=!P[d.ptog];document.getElementById('phone').classList.toggle('hc',!!P.hc);document.getElementById('phone').classList.toggle('bigtext',!!P.big);applyTheme();openProfile(true);keepUnder();return}
  if(d.pset){var ps=d.pset.split(':');P[ps[0]]=ps[1];openProfile(true);keepUnder();return}
+ if(d.pstep){var pt=d.pstep.split(':');P[pt[0]]=Math.max(+pt[2],P[pt[0]]+(+pt[1]));openGoals(true);return}
+ if(d.never){var nv=d.never.split(':');if(!P.never.some(function(x){return x[0]===nv[0]}))P.never.push([nv[0],nv[1]]);openNeverAdd(true);keepUnder();return}
+ if(d.aisle){var am=d.aisle.split(':'),ai=+am[0],aj=ai+(+am[1]);if(aj>=0&&aj<AISLES.length){var tmp=AISLES[ai];AISLES[ai]=AISLES[aj];AISLES[aj]=tmp}openAisles(true);keepUnder();return}
  if(d.pserv){P.serv=Math.max(1,Math.min(12,P.serv+(+d.pserv)));openProfile(true);return}
  if(d.pdel!==undefined){P.never.splice(+d.pdel,1);openProfile(true);keepUnder();return}
  if(d.sharetog){S.share[d.sharetog]=!S.share[d.sharetog];openShare(true);return}
@@ -611,6 +614,10 @@ document.addEventListener('click',function(e){
   case 'kitchens':openKitchens();break;
   case 'librarymembers':openLibraryMembers();break;
   case 'newkitchen':KITCHENS.push({name:'New kitchen',members:['M'],st:null});openKitchen(KITCHENS.length-1);break;
+  case 'neveradd':openNeverAdd();break;
+  case 'goals':openGoals();break;
+  case 'aisles':openAisles();break;
+  case 'about':openAbout();break;
   case 'profile':openProfile();break;
   case 'sharesend':closeSheet();toast('Sharing is mocked in this prototype');break;
   case 'sharecopy':toast('Copy link is mocked in this prototype');break;
