@@ -220,3 +220,11 @@ button.badge:hover{box-shadow:0 0 0 2px rgba(17,17,17,.15)}
 .pgrid,.pcol{display:flex;flex-direction:column;gap:22px;min-width:0}
 .ipad .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:28px 48px;align-items:start}
 .port .pgrid{grid-template-columns:minmax(0,1fr)}
+
+/* ---------- recipe actions on their own line ---------- */
+.pcta{align-items:stretch}
+.pcta>*{height:52px;box-sizing:border-box;font-size:16px}
+.pcta .secondary{flex:0 0 220px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.pcta .primary{flex:1;width:auto}
+.port .pcta .secondary{flex:1}.port .pcta .primary{flex:1.4}
+.pctl>.row:last-child .secondary{flex:none}
