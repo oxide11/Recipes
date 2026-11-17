@@ -241,3 +241,10 @@ button.badge:hover{box-shadow:0 0 0 2px rgba(17,17,17,.15)}
 .pcta .primary,.port .pcta .primary{flex:0 0 260px;margin-left:auto;padding:0 20px}
 .port .pcta .primary{flex:1 1 160px;max-width:260px}
 .pctl>.row:first-child .stepper{flex:none}
+
+/* ---------- servings on the action line ---------- */
+.pcta .stepper{margin-left:auto;flex:none;height:52px}
+.pcta .primary,.port .pcta .primary{margin-left:0;flex:0 0 220px}
+.port .pcta .primary{flex:1 1 140px;max-width:220px}
+.port .pcta .lbl{display:none}
+.port .pcta [data-act="share"]{width:52px;padding:0;justify-content:center}
