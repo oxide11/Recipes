@@ -111,3 +111,11 @@
 .tempbox{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 8px;border-radius:16px;border:1.5px solid #111}
 .tempbox b{font-family:'Space Grotesk',sans-serif;font-size:34px;line-height:1}
 .tempbox span{font-size:12px;font-weight:600;color:#3A3A38}
+
+.nutbox{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--counter)}
+.nutgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.nutgrid div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.nutgrid span{font-size:11px;font-weight:600;color:var(--muted)}
+.nutgrid b{font-family:'Space Grotesk',sans-serif;font-size:17px;white-space:nowrap}
+.nutgrid i{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+.nutgrid i.chg{color:#111;font-weight:700}

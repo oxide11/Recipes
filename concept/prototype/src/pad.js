@@ -38,7 +38,7 @@ function homePad(){
 /* ================= iPad: SANKEY ================= */
 function sankeyWide(W){
  var M=MODES[S.mode],mode=S.mode,f=F();
- var vals=ING.map(function(i){return i[mode]*f}),total=vals.reduce(function(a,b){return a+b},0);
+ var vals=ING.map(function(i){return (mode==='calories'?nutOf(i)[0]:i[mode])*f}),total=vals.reduce(function(a,b){return a+b},0);
  var GAP=8,MGAP=22,BX=W>900?300:236,PX=W-136,MX=Math.round(BX+(PX-BX)*.5);
  var spec=ING.map(function(it){return it.icon.map(function(p){return[p[0],Math.max(1,Math.round(p[1]*f))]})});
  var counts=spec.map(function(sp){return sp.reduce(function(a,p){return a+p[1]},0)});
@@ -111,7 +111,7 @@ function recipePad(){
    '<div class="stepper" style="height:52px" role="group" aria-label="Servings"><button data-serv="-1" aria-label="Fewer servings"'+(S.servings<=1?' disabled':'')+'>−</button><span aria-live="polite"><b>'+S.servings+'</b> serving'+(S.servings>1?'s':'')+'</span><button data-serv="1" aria-label="More servings"'+(S.servings>=12?' disabled':'')+'>+</button></div></div>'+
    '<div class="row" style="gap:10px"><button class="secondary" data-go="shop" style="padding:0 18px">Shopping list</button><button class="primary" data-act="startcook" style="width:auto;height:52px;padding:0 28px;font-size:16px">Start cooking</button></div></div>'+
  '</header>'+
- '<div class="stats">'+R.stats.map(function(s){return '<div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'}).join('')+'</div>'+
+ '<div class="stats">'+liveStats().map(function(s){return '<div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'}).join('')+'</div>'+
  '<div class="ovgrid"><section class="card" style="padding:18px 16px;display:flex;flex-direction:column;gap:14px;min-width:0">'+
    '<div class="between" style="gap:12px;flex-wrap:wrap"><div><h2 class="h2" style="font-size:20px">Where it all goes</h2><span class="muted" style="font-size:12px;font-weight:600">'+M.cap+' · tap an ingredient to see its swaps</span></div>'+
    '<div class="seg" role="group" aria-label="Measure by" style="grid-template-columns:repeat(4,1fr);width:360px">'+Object.keys(MODES).map(function(k){return '<button data-mode="'+k+'" aria-pressed="'+(k===S.mode)+'">'+MODES[k].label+'</button>'}).join('')+'</div></div>'+

@@ -254,4 +254,31 @@ RECIPES.piccata={
    L('noparsley','Leave it out','—','Just a little lemon zest instead.',[1,2,1])]}
  }
 };
+/* Estimated nutrition for each swap, for the base recipe amount: [kcal, protein g, carbs g, fat g] */
+var NUT={
+ cajun:{
+  chicken:{thighs:[840,96,0,48],turkey:[540,116,0,6],shrimp2:[400,84,2,4],scallops:[440,82,13,3],tofu2:[580,62,12,34],chickpeas3:[790,42,130,13]},
+  linguine:{penne:[400,15,84,2],fettuccine:[400,15,84,2],gflinguine:[410,8,88,3],ricenoodle:[410,4,91,1],zoodles:[50,4,9,1],spaghettisquash:[125,3,28,2]},
+  cream:{halfhalf:[470,11,16,41],cookingcream:[700,9,14,68],milkflour:[250,13,23,12],cream1:[800,5,7,87],coconutcream:[1190,13,24,125],cashewcream:[900,28,48,70]},
+  sundried:{roastedpep:[8,0,2,0],tomatopaste:[13,1,3,0],cherrytom:[18,1,4,0],freshtom:[16,1,3.5,0]},
+  parm:{pecorino:[97,8,1,7],grana:[98,8,0,7],yeast:[40,5,3,.5],miso2:[12,1,1.5,.3]},
+  butter:{margarine:[200,0,0,22],ghee:[250,0,0,28],oliveoil:[180,0,0,20],avocado:[185,0,0,21]}},
+ thai:{
+  shrimp:{chickencard:[740,139,0,16],thighs2:[945,108,0,54],scallops2:[500,92,15,4],whitefish:[370,80,0,3],tofu3:[580,62,12,34],mushrooms3:[66,9,10,1]},
+  coconut:{lightcoconut:[900,9,18,84],coconutcream2:[2640,29,53,278],twocans:[1600,16,24,167],evap:[1600,82,120,91]},
+  broth:{stockcube:[30,2,3,1],seafoodstock:[40,6,2,1],vegbroth:[45,1,10,0],mushbroth:[40,2,8,0]},
+  fish:{soysauce:[25,4,2,0],tamari:[27,5,2,0],vegfish:[25,1,5,0],misowater:[35,2,5,1]},
+  lemongrass:{lgpaste:[15,0,3,0],lgfrozen:[5,0,1,0],limezest:[3,0,1,0],lemonzest:[2,0,.5,0]},
+  curry:{greencurry:[15,.5,2,.5],yellowcurry:[18,.5,2,1],halfcurry:[8,.3,1,.3],sriracha:[15,0,3,0]},
+  cilantro:{thaibasil:[1,.1,.2,0],mint:[2,.1,.4,0],greenonion2:[8,.5,2,0],parsley2:[1,.1,.2,0]}},
+ piccata:{
+  flour:{wondra:[110,3,23,0],cornstarch:[115,0,27,0],ricefl:[110,2,24,.5],almondfl:[170,6,6,15]},
+  butter:{ghee:[750,0,0,85],halfbutter:[305,.4,0,35],vegbutter:[600,0,0,66],oliveoil2:[750,0,0,85]},
+  lemon:{meyer:[20,.3,6,0],bottled:[18,0,5,0],lime:[20,.3,6,0],whitewine:[55,0,3,0],vinegar:[6,0,0,0],zestonly:[3,0,1,0]},
+  capers:{olives:[25,0,1,2.5],caperberries:[10,.5,2,0],halfcapers:[4,.4,.9,.1],pickles:[4,0,1,0]},
+  stock:{stockcube2:[5,.3,.5,.2],vegstock:[6,0,1.3,0],whitewine2:[100,0,3,0],water2:[100,0,0,11]},
+  parsley:{chives3:[5,.5,.7,.1],basil2:[4,.5,.4,.1],dill:[1,0,.2,0],noparsley:[0,0,0,0]}}
+};
+NUT.piccata.chicken=NUT.cajun.chicken;
+Object.keys(NUT).forEach(function(rid){Object.keys(NUT[rid]).forEach(function(iid){var set=RECIPES[rid].SETS[iid];if(!set)return;set.leaves.forEach(function(l){if(NUT[rid][iid][l.id])l.nut=NUT[rid][iid][l.id]})})});
 var RECIPE_ORDER=['cajun','thai','piccata'];

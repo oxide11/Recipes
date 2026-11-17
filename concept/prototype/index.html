@@ -293,6 +293,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 .tempbox{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 8px;border-radius:16px;border:1.5px solid #111}
 .tempbox b{font-family:'Space Grotesk',sans-serif;font-size:34px;line-height:1}
 .tempbox span{font-size:12px;font-weight:600;color:#3A3A38}
+
+.nutbox{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--counter)}
+.nutgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.nutgrid div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.nutgrid span{font-size:11px;font-weight:600;color:var(--muted)}
+.nutgrid b{font-family:'Space Grotesk',sans-serif;font-size:17px;white-space:nowrap}
+.nutgrid i{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+.nutgrid i.chg{color:#111;font-weight:700}
 </style>
 </head>
 <body>
@@ -661,6 +669,33 @@ RECIPES.piccata={
    L('noparsley','Leave it out','—','Just a little lemon zest instead.',[1,2,1])]}
  }
 };
+/* Estimated nutrition for each swap, for the base recipe amount: [kcal, protein g, carbs g, fat g] */
+var NUT={
+ cajun:{
+  chicken:{thighs:[840,96,0,48],turkey:[540,116,0,6],shrimp2:[400,84,2,4],scallops:[440,82,13,3],tofu2:[580,62,12,34],chickpeas3:[790,42,130,13]},
+  linguine:{penne:[400,15,84,2],fettuccine:[400,15,84,2],gflinguine:[410,8,88,3],ricenoodle:[410,4,91,1],zoodles:[50,4,9,1],spaghettisquash:[125,3,28,2]},
+  cream:{halfhalf:[470,11,16,41],cookingcream:[700,9,14,68],milkflour:[250,13,23,12],cream1:[800,5,7,87],coconutcream:[1190,13,24,125],cashewcream:[900,28,48,70]},
+  sundried:{roastedpep:[8,0,2,0],tomatopaste:[13,1,3,0],cherrytom:[18,1,4,0],freshtom:[16,1,3.5,0]},
+  parm:{pecorino:[97,8,1,7],grana:[98,8,0,7],yeast:[40,5,3,.5],miso2:[12,1,1.5,.3]},
+  butter:{margarine:[200,0,0,22],ghee:[250,0,0,28],oliveoil:[180,0,0,20],avocado:[185,0,0,21]}},
+ thai:{
+  shrimp:{chickencard:[740,139,0,16],thighs2:[945,108,0,54],scallops2:[500,92,15,4],whitefish:[370,80,0,3],tofu3:[580,62,12,34],mushrooms3:[66,9,10,1]},
+  coconut:{lightcoconut:[900,9,18,84],coconutcream2:[2640,29,53,278],twocans:[1600,16,24,167],evap:[1600,82,120,91]},
+  broth:{stockcube:[30,2,3,1],seafoodstock:[40,6,2,1],vegbroth:[45,1,10,0],mushbroth:[40,2,8,0]},
+  fish:{soysauce:[25,4,2,0],tamari:[27,5,2,0],vegfish:[25,1,5,0],misowater:[35,2,5,1]},
+  lemongrass:{lgpaste:[15,0,3,0],lgfrozen:[5,0,1,0],limezest:[3,0,1,0],lemonzest:[2,0,.5,0]},
+  curry:{greencurry:[15,.5,2,.5],yellowcurry:[18,.5,2,1],halfcurry:[8,.3,1,.3],sriracha:[15,0,3,0]},
+  cilantro:{thaibasil:[1,.1,.2,0],mint:[2,.1,.4,0],greenonion2:[8,.5,2,0],parsley2:[1,.1,.2,0]}},
+ piccata:{
+  flour:{wondra:[110,3,23,0],cornstarch:[115,0,27,0],ricefl:[110,2,24,.5],almondfl:[170,6,6,15]},
+  butter:{ghee:[750,0,0,85],halfbutter:[305,.4,0,35],vegbutter:[600,0,0,66],oliveoil2:[750,0,0,85]},
+  lemon:{meyer:[20,.3,6,0],bottled:[18,0,5,0],lime:[20,.3,6,0],whitewine:[55,0,3,0],vinegar:[6,0,0,0],zestonly:[3,0,1,0]},
+  capers:{olives:[25,0,1,2.5],caperberries:[10,.5,2,0],halfcapers:[4,.4,.9,.1],pickles:[4,0,1,0]},
+  stock:{stockcube2:[5,.3,.5,.2],vegstock:[6,0,1.3,0],whitewine2:[100,0,3,0],water2:[100,0,0,11]},
+  parsley:{chives3:[5,.5,.7,.1],basil2:[4,.5,.4,.1],dill:[1,0,.2,0],noparsley:[0,0,0,0]}}
+};
+NUT.piccata.chicken=NUT.cajun.chicken;
+Object.keys(NUT).forEach(function(rid){Object.keys(NUT[rid]).forEach(function(iid){var set=RECIPES[rid].SETS[iid];if(!set)return;set.leaves.forEach(function(l){if(NUT[rid][iid][l.id])l.nut=NUT[rid][iid][l.id]})})});
 var RECIPE_ORDER=['cajun','thai','piccata'];
 
 /* ================= GLOBALS ================= */
@@ -820,17 +855,29 @@ function home(){
 }
 
 /* ================= SANKEY ================= */
+function nutOf(it,leafId){
+ var lid=leafId===undefined?S.swaps[it.id]:leafId,lf=lid?leafOf(it.id,lid):null;
+ if(lf&&lf.nut)return lf.nut;var m=it.macro||[0,0,0];return [it.calories,m[0],m[1],m[2]];
+}
+function dishNut(oid,oleaf){var t=[0,0,0,0];ING.forEach(function(it){var n=it.id===oid?nutOf(it,oleaf):nutOf(it);for(var i=0;i<4;i++)t[i]+=n[i]});return t.map(function(x){return x/R.base})}
+function liveStats(){var n=dishNut();return R.stats.map(function(s){if(/^kcal/.test(s[1]))return [Math.round(n[0]).toLocaleString('en-US'),s[1]];if(/^protein/.test(s[1]))return [Math.round(n[1])+' g',s[1]];return s})}
+function nutDelta(id,leafId){
+ var lf=leafOf(id,leafId);if(!lf||!lf.nut)return '';
+ var cur=S.swaps[id]||null,a=dishNut(),b=dishNut(id,leafId),L=['Calories','Protein','Carbs','Fat'],U=['',' g',' g',' g'];
+ return '<div class="nutbox"><span class="kicker">'+(leafId===cur?'Per serving, as it is now':'Per serving, with this swap')+'</span><div class="nutgrid">'+L.map(function(l,i){var d=Math.round(b[i]-a[i]);
+  return '<div><span>'+l+'</span><b>'+Math.round(b[i]).toLocaleString('en-US')+U[i]+'</b><i class="'+(d?'chg':'')+'">'+(d?(d<0?'▼ ':'▲ ')+Math.abs(d).toLocaleString('en-US')+U[i]:'no change')+'</i></div>'}).join('')+'</div></div>';
+}
 var MACROS=[{name:'Protein',color:'#3A3A38',op:.32},{name:'Carbs',color:'#8A8A85',op:.32},{name:'Fat',color:'#C9C9C4',op:.6}];
 function skGroups(){return S.mode==='calories'?MACROS:GROUPS}
 function skShares(it){
  if(S.mode!=='calories'){var z=GROUPS.map(function(){return 0});z[it.g]=1;return z}
- var m=it.macro||[0,0,0],k=[m[0]*4,m[1]*4,m[2]*9],t=k[0]+k[1]+k[2];if(!t)return [0,1,0];return k.map(function(x){return x/t});
+ var nn=nutOf(it),m=[nn[1],nn[2],nn[3]],k=[m[0]*4,m[1]*4,m[2]*9],t=k[0]+k[1]+k[2];if(!t)return [0,1,0];return k.map(function(x){return x/t});
 }
-function skVal(gi,gv,sep){var M=MODES[S.mode];if(S.mode!=='calories')return M.fmt(gv);var g=0;ING.forEach(function(it){g+=(it.macro||[0,0,0])[gi]*F()});return Math.round(g)+' g'+sep+M.fmt(gv)}
+function skVal(gi,gv,sep){var M=MODES[S.mode];if(S.mode!=='calories')return M.fmt(gv);var g=0;ING.forEach(function(it){g+=nutOf(it)[gi+1]*F()});return Math.round(g)+' g'+sep+M.fmt(gv)}
 function tapAttr(it){return SETS[it.id]?' tap" role="button" tabindex="0" data-focus="'+it.id+'" aria-label="'+esc('Swap '+shownName(it))+'"':'"'}
 function sankey(){
  var M=MODES[S.mode],mode=S.mode,f=F();
- var vals=ING.map(function(i){return i[mode]*f});
+ var vals=ING.map(function(i){return (mode==='calories'?nutOf(i)[0]:i[mode])*f});
  var total=vals.reduce(function(a,b){return a+b},0);
  var GAP=6,MGAP=18,BX=196,MX=262,PX=344,W=350;
  var iconSpec=ING.map(function(it){return it.icon.map(function(p){return[p[0],Math.max(1,Math.round(p[1]*f))]})});
@@ -903,7 +950,7 @@ function recipe(){
  '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">'+R.kicker+'</p><h1 class="t" style="font-size:36px">'+R.title+'</h1>'+
  '<div style="display:flex;gap:6px;flex-wrap:wrap">'+R.tags.map(function(t){return '<span class="badge'+(t[1]?' solid':'')+'">'+t[0]+'</span>'}).join('')+'</div>'+
  '<p style="margin:0;font-size:15px;line-height:1.5;color:#2B2B28">'+R.desc+'</p>'+
- '<div class="stats">'+R.stats.map(function(s){return '<div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'}).join('')+'</div>'+
+ '<div class="stats">'+liveStats().map(function(s){return '<div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'}).join('')+'</div>'+
  '<div class="between" style="gap:10px"><div class="stepper" role="group" aria-label="Servings"><button data-serv="-1" aria-label="Fewer servings"'+(S.servings<=1?' disabled':'')+'>−</button><span aria-live="polite"><b>'+S.servings+'</b> serving'+(S.servings>1?'s':'')+'</span><button data-serv="1" aria-label="More servings"'+(S.servings>=12?' disabled':'')+'>+</button></div><span class="muted" style="font-size:13px">'+STEPS.length+' steps</span></div></div>'+
  '<div class="seg tabs" role="tablist" style="grid-template-columns:repeat(3,1fr)">'+tabs.map(function(t){return '<button role="tab" data-tab="'+t[0]+'" aria-pressed="'+(t[0]===tab)+'" aria-selected="'+(t[0]===tab)+'">'+t[1]+'</button>'}).join('')+'</div>'+
  body+'</div>'+
@@ -970,7 +1017,7 @@ function swapView(){
   '<div class="between"><h2 class="h2" style="font-size:20px">'+esc(s.name)+'</h2><b style="font-size:14px">'+(why?'':esc(s.ratio))+'</b></div>'+
   (why?'<div class="row" style="gap:8px;padding:8px 12px;border-radius:10px;background:#111;color:#fff;font-size:13px;font-weight:600">'+SVG.warn('#fff')+esc(why)+'. Hidden from your suggestions.</div>':'')+
   '<p style="margin:0;font-size:14px;line-height:1.45;color:#2B2B28">'+esc(s.note)+'</p>'+
-  '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+bars+'</div>'+btn+revert+
+  '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+bars+'</div>'+nutDelta(id,picked)+btn+revert+
  '</section>';
  if(isPad())return '<div class="sheet swapmodal" role="dialog" aria-modal="true" aria-label="Swap '+esc(set.center)+'"><div class="between"><div><h2 class="h2" style="font-size:26px">Swap '+esc(set.center.toLowerCase())+'</h2><p class="muted" style="margin:2px 0 0;font-size:13px">'+sub+'</p></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div><div class="swapgrid">'+map+'<div style="display:flex;flex-direction:column;gap:12px;min-width:0">'+profileBar()+detail+'</div></div></div>';
  return '<div class="pad">'+header('ingredients','Swap '+set.center.toLowerCase(),sub)+
@@ -1222,7 +1269,7 @@ function homePad(){
 /* ================= iPad: SANKEY ================= */
 function sankeyWide(W){
  var M=MODES[S.mode],mode=S.mode,f=F();
- var vals=ING.map(function(i){return i[mode]*f}),total=vals.reduce(function(a,b){return a+b},0);
+ var vals=ING.map(function(i){return (mode==='calories'?nutOf(i)[0]:i[mode])*f}),total=vals.reduce(function(a,b){return a+b},0);
  var GAP=8,MGAP=22,BX=W>900?300:236,PX=W-136,MX=Math.round(BX+(PX-BX)*.5);
  var spec=ING.map(function(it){return it.icon.map(function(p){return[p[0],Math.max(1,Math.round(p[1]*f))]})});
  var counts=spec.map(function(sp){return sp.reduce(function(a,p){return a+p[1]},0)});
@@ -1295,7 +1342,7 @@ function recipePad(){
    '<div class="stepper" style="height:52px" role="group" aria-label="Servings"><button data-serv="-1" aria-label="Fewer servings"'+(S.servings<=1?' disabled':'')+'>−</button><span aria-live="polite"><b>'+S.servings+'</b> serving'+(S.servings>1?'s':'')+'</span><button data-serv="1" aria-label="More servings"'+(S.servings>=12?' disabled':'')+'>+</button></div></div>'+
    '<div class="row" style="gap:10px"><button class="secondary" data-go="shop" style="padding:0 18px">Shopping list</button><button class="primary" data-act="startcook" style="width:auto;height:52px;padding:0 28px;font-size:16px">Start cooking</button></div></div>'+
  '</header>'+
- '<div class="stats">'+R.stats.map(function(s){return '<div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'}).join('')+'</div>'+
+ '<div class="stats">'+liveStats().map(function(s){return '<div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'}).join('')+'</div>'+
  '<div class="ovgrid"><section class="card" style="padding:18px 16px;display:flex;flex-direction:column;gap:14px;min-width:0">'+
    '<div class="between" style="gap:12px;flex-wrap:wrap"><div><h2 class="h2" style="font-size:20px">Where it all goes</h2><span class="muted" style="font-size:12px;font-weight:600">'+M.cap+' · tap an ingredient to see its swaps</span></div>'+
    '<div class="seg" role="group" aria-label="Measure by" style="grid-template-columns:repeat(4,1fr);width:360px">'+Object.keys(MODES).map(function(k){return '<button data-mode="'+k+'" aria-pressed="'+(k===S.mode)+'">'+MODES[k].label+'</button>'}).join('')+'</div></div>'+

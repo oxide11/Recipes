@@ -155,17 +155,29 @@ function home(){
 }
 
 /* ================= SANKEY ================= */
+function nutOf(it,leafId){
+ var lid=leafId===undefined?S.swaps[it.id]:leafId,lf=lid?leafOf(it.id,lid):null;
+ if(lf&&lf.nut)return lf.nut;var m=it.macro||[0,0,0];return [it.calories,m[0],m[1],m[2]];
+}
+function dishNut(oid,oleaf){var t=[0,0,0,0];ING.forEach(function(it){var n=it.id===oid?nutOf(it,oleaf):nutOf(it);for(var i=0;i<4;i++)t[i]+=n[i]});return t.map(function(x){return x/R.base})}
+function liveStats(){var n=dishNut();return R.stats.map(function(s){if(/^kcal/.test(s[1]))return [Math.round(n[0]).toLocaleString('en-US'),s[1]];if(/^protein/.test(s[1]))return [Math.round(n[1])+' g',s[1]];return s})}
+function nutDelta(id,leafId){
+ var lf=leafOf(id,leafId);if(!lf||!lf.nut)return '';
+ var cur=S.swaps[id]||null,a=dishNut(),b=dishNut(id,leafId),L=['Calories','Protein','Carbs','Fat'],U=['',' g',' g',' g'];
+ return '<div class="nutbox"><span class="kicker">'+(leafId===cur?'Per serving, as it is now':'Per serving, with this swap')+'</span><div class="nutgrid">'+L.map(function(l,i){var d=Math.round(b[i]-a[i]);
+  return '<div><span>'+l+'</span><b>'+Math.round(b[i]).toLocaleString('en-US')+U[i]+'</b><i class="'+(d?'chg':'')+'">'+(d?(d<0?'▼ ':'▲ ')+Math.abs(d).toLocaleString('en-US')+U[i]:'no change')+'</i></div>'}).join('')+'</div></div>';
+}
 var MACROS=[{name:'Protein',color:'#3A3A38',op:.32},{name:'Carbs',color:'#8A8A85',op:.32},{name:'Fat',color:'#C9C9C4',op:.6}];
 function skGroups(){return S.mode==='calories'?MACROS:GROUPS}
 function skShares(it){
  if(S.mode!=='calories'){var z=GROUPS.map(function(){return 0});z[it.g]=1;return z}
- var m=it.macro||[0,0,0],k=[m[0]*4,m[1]*4,m[2]*9],t=k[0]+k[1]+k[2];if(!t)return [0,1,0];return k.map(function(x){return x/t});
+ var nn=nutOf(it),m=[nn[1],nn[2],nn[3]],k=[m[0]*4,m[1]*4,m[2]*9],t=k[0]+k[1]+k[2];if(!t)return [0,1,0];return k.map(function(x){return x/t});
 }
-function skVal(gi,gv,sep){var M=MODES[S.mode];if(S.mode!=='calories')return M.fmt(gv);var g=0;ING.forEach(function(it){g+=(it.macro||[0,0,0])[gi]*F()});return Math.round(g)+' g'+sep+M.fmt(gv)}
+function skVal(gi,gv,sep){var M=MODES[S.mode];if(S.mode!=='calories')return M.fmt(gv);var g=0;ING.forEach(function(it){g+=nutOf(it)[gi+1]*F()});return Math.round(g)+' g'+sep+M.fmt(gv)}
 function tapAttr(it){return SETS[it.id]?' tap" role="button" tabindex="0" data-focus="'+it.id+'" aria-label="'+esc('Swap '+shownName(it))+'"':'"'}
 function sankey(){
  var M=MODES[S.mode],mode=S.mode,f=F();
- var vals=ING.map(function(i){return i[mode]*f});
+ var vals=ING.map(function(i){return (mode==='calories'?nutOf(i)[0]:i[mode])*f});
  var total=vals.reduce(function(a,b){return a+b},0);
  var GAP=6,MGAP=18,BX=196,MX=262,PX=344,W=350;
  var iconSpec=ING.map(function(it){return it.icon.map(function(p){return[p[0],Math.max(1,Math.round(p[1]*f))]})});
@@ -238,7 +250,7 @@ function recipe(){
  '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">'+R.kicker+'</p><h1 class="t" style="font-size:36px">'+R.title+'</h1>'+
  '<div style="display:flex;gap:6px;flex-wrap:wrap">'+R.tags.map(function(t){return '<span class="badge'+(t[1]?' solid':'')+'">'+t[0]+'</span>'}).join('')+'</div>'+
  '<p style="margin:0;font-size:15px;line-height:1.5;color:#2B2B28">'+R.desc+'</p>'+
- '<div class="stats">'+R.stats.map(function(s){return '<div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'}).join('')+'</div>'+
+ '<div class="stats">'+liveStats().map(function(s){return '<div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'}).join('')+'</div>'+
  '<div class="between" style="gap:10px"><div class="stepper" role="group" aria-label="Servings"><button data-serv="-1" aria-label="Fewer servings"'+(S.servings<=1?' disabled':'')+'>−</button><span aria-live="polite"><b>'+S.servings+'</b> serving'+(S.servings>1?'s':'')+'</span><button data-serv="1" aria-label="More servings"'+(S.servings>=12?' disabled':'')+'>+</button></div><span class="muted" style="font-size:13px">'+STEPS.length+' steps</span></div></div>'+
  '<div class="seg tabs" role="tablist" style="grid-template-columns:repeat(3,1fr)">'+tabs.map(function(t){return '<button role="tab" data-tab="'+t[0]+'" aria-pressed="'+(t[0]===tab)+'" aria-selected="'+(t[0]===tab)+'">'+t[1]+'</button>'}).join('')+'</div>'+
  body+'</div>'+
@@ -305,7 +317,7 @@ function swapView(){
   '<div class="between"><h2 class="h2" style="font-size:20px">'+esc(s.name)+'</h2><b style="font-size:14px">'+(why?'':esc(s.ratio))+'</b></div>'+
   (why?'<div class="row" style="gap:8px;padding:8px 12px;border-radius:10px;background:#111;color:#fff;font-size:13px;font-weight:600">'+SVG.warn('#fff')+esc(why)+'. Hidden from your suggestions.</div>':'')+
   '<p style="margin:0;font-size:14px;line-height:1.45;color:#2B2B28">'+esc(s.note)+'</p>'+
-  '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+bars+'</div>'+btn+revert+
+  '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+bars+'</div>'+nutDelta(id,picked)+btn+revert+
  '</section>';
  if(isPad())return '<div class="sheet swapmodal" role="dialog" aria-modal="true" aria-label="Swap '+esc(set.center)+'"><div class="between"><div><h2 class="h2" style="font-size:26px">Swap '+esc(set.center.toLowerCase())+'</h2><p class="muted" style="margin:2px 0 0;font-size:13px">'+sub+'</p></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div><div class="swapgrid">'+map+'<div style="display:flex;flex-direction:column;gap:12px;min-width:0">'+profileBar()+detail+'</div></div></div>';
  return '<div class="pad">'+header('ingredients','Swap '+set.center.toLowerCase(),sub)+
