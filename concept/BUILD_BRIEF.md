@@ -143,3 +143,30 @@ Each phase ends with something usable on all three platforms.
 - Design changes happen in the prototype first, then in this brief, then in code.
 - Do not port prototype JavaScript. Re-implement behaviour natively.
 - Keep this brief current. When a decision in section 2 or 4 changes, change it here in the same commit.
+
+## Recipe ingestion pipeline
+
+One canonical recipe format, many source adapters. A language model reads and links; lookup tables supply every number. Nothing the Sankey draws comes straight from a model.
+
+| Stage | What it does | How |
+|---|---|---|
+| 1. Capture | Turn any source into plain text plus the original | Photo: Vision text recognition. Website: schema.org Recipe data if the page has it, else the readable page text. Video link: caption or description. Paste, file, typed: the text itself |
+| 2. Extract | Text to a `RecipeDraft`: title, servings, ingredient lines (quantity, unit, name, prep note), steps (text, duration, temperature) | Language model with a fixed output schema. Anything unclear becomes a question, never a guess |
+| 3. Resolve | Match each ingredient line to the ingredient catalogue and convert its amount to grams and millilitres | Deterministic code: alias table, unit conversion, density and per-item weights from the catalogue |
+| 4. Link | Tie steps to ingredients (which step uses how much of what), group ingredients into components (the Sankey's middle column), set timers | Model proposes, a validator checks: every ingredient used, split amounts add up to the total |
+| 5. Review | User confirms, answers questions, fixes matches | Corrections are saved as new aliases so the same fix is never needed twice |
+
+### The ingredient catalogue
+
+The part that makes the Sankey, nutrition, cost, pantry, shopping aisles and swaps work. One record per ingredient: names and aliases, density, weight per countable unit (1 egg, 1 clove), nutrition per 100 g, aisle, colour and graphic, allergen tags, swap set. Ship a few hundred common ingredients; an unknown ingredient still imports, drawn in neutral grey with a generic graphic and flagged as an estimate.
+
+### What is stored
+
+- The original source (photo, link, text), always kept.
+- The structured recipe: ingredients with catalogue id, original text, quantity, unit, grams, millilitres, component; steps with text, timers and ingredient references with amounts.
+- Derived at display time, not stored: the four Sankey views (weight, volume, cost, calories), scaling, unit conversion, nutrition totals.
+
+### To verify first
+
+- Run the 41 real cards through stages 1 to 4 as a fixed test set. Measure how many ingredient lines resolve without a question.
+- Whether the on-device model is good enough for stages 2 and 4 on handwriting, or needs the cloud fallback (the "Recipe help" setting).
