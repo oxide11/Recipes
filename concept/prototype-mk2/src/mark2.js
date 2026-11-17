@@ -513,4 +513,72 @@ function profileSheet(){
   '<p class="muted" style="margin:0;font-size:12px;line-height:1.45">Prototype: units and temperature, the never-suggested list, goal direction and daily goals, dark mode, stronger highlights, larger text, hands-free, store order and sharing all take effect. Notifications, week start, currency, recipe help, sync and export only remember their state.</p>'+
  '</div>';
 }
+
+/* ---- share sheet, completed ---- */
+function shareInit(){var s=S.share;if(!s.to)s.to={};if(s.msg==null)s.msg='';return s}
+function shareServ(){return S.share.serv||S.servings}
+function shareTo(){var s=shareInit();return LIBM.filter(function(k){return k!=='M'&&s.to[k]})}
+function nameList(a){return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1]}
+function shareSwaps(){return ING.filter(function(it){return S.swaps[it.id]})}
+function shareLink(){return 'recipes.example/r/'+R.id+(S.share.swaps&&shareSwaps().length?'?v=mine':'')}
+function atServ(fn){var keepS=S.servings;S.servings=shareServ();try{return fn()}finally{S.servings=keepS}}
+function shareIngs(){var s=S.share,f=shareServ()/R.base;return ING.map(function(it){var sw=s.swaps&&S.swaps[it.id];return {q:scaleQty(it.amt,f),n:sw?shownName(it):it.name,sw:!!sw}})}
+function shareSteps(){return atServ(function(){var keepSw=S.swaps;if(!S.share.swaps)S.swaps={};try{return STEPS.map(function(st){var d=document.createElement('div');d.innerHTML=stepLines(st).join(' ');return {t:stepTitle(st),x:d.textContent.replace(/Change units/g,'').replace(/\s+/g,' ').trim()}})}finally{S.swaps=keepSw}})}
+function shareText(){
+ var s=S.share,log=LOG[R.id]||[],last=log[log.length-1],L=[R.title.toUpperCase(),R.meta.split(' · ')[0]+' · '+shareServ()+' servings','','INGREDIENTS'];
+ shareIngs().forEach(function(x){L.push('- '+x.q+' '+x.n.toLowerCase()+(x.sw?' (our swap)':''))});
+ L.push('','METHOD');shareSteps().forEach(function(x,i){L.push((i+1)+'. '+x.t+'. '+x.x)});
+ if(s.notes&&last)L.push('','OUR NOTES',log.length+' cook'+(log.length>1?'s':'')+(last.rating?', last rated '+last.rating+'/5':'')+(last.note?'. "'+last.note+'"':''));
+ L.push('','From Ashley’s recipe cards');return L.join('\n');
+}
+function sharePreview(){
+ var s=S.share,sw=shareSwaps(),log=LOG[R.id]||[],last=log[log.length-1],serv=shareServ(),ings=shareIngs(),steps;
+ var swTxt=sw.map(function(it){return shownName(it).toLowerCase()+' for '+it.name.toLowerCase()}).join(', ');
+ var facts=R.meta.split(' · ')[0]+' · '+serv+' servings · '+ING.length+' ingredients · '+STEPS.length+' steps';
+ var notes=s.notes?'<span class="cardnote" style="font-size:12px;padding:6px 9px">'+(log.length?log.length+' cook'+(log.length>1?'s':'')+' logged'+(last.note?' · “'+esc(last.note)+'”':''):'No cooks logged yet')+'</span>':'';
+ if(s.format==='link')return '<div class="shprev"><div class="shbubble">'+fpBar(R,40)+'<div style="padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px"><b style="font-family:var(--disp);font-size:16px;line-height:1.15">'+esc(R.title)+'</b><span class="muted" style="font-size:12px">'+esc(facts)+'</span><span style="font-size:12px;font-weight:700;margin-top:2px">'+esc(shareLink())+'</span></div></div>'+
+  '<span class="muted" style="font-size:12px;line-height:1.4;text-align:center">How it looks in Messages. Opens in the app, or as a web page for people without it.</span></div>';
+ if(s.format==='text')return '<div class="shprev"><pre class="shtext" tabindex="0" aria-label="Text preview">'+esc(shareText())+'</pre></div>';
+ if(s.format==='pdf'){steps=shareSteps();return '<div class="shprev"><div class="shpage" aria-label="PDF preview, one page">'+fpBar(R,10)+'<b class="shpt">'+esc(R.title)+'</b><span class="shpm">'+esc(facts)+'</span><div class="shpc"><div><i>Ingredients</i>'+ings.map(function(x){return '<span>'+esc(x.q)+' '+esc(x.n.toLowerCase())+(x.sw?' *':'')+'</span>'}).join('')+(sw.length&&s.swaps?'<span style="margin-top:3px">* our swap</span>':'')+'</div><div><i>Method</i>'+steps.map(function(x,i){return '<span>'+(i+1)+'. '+esc(x.t)+'. '+esc(x.x)+'</span>'}).join('')+'</div></div>'+(s.card?'<span class="shpm" style="margin-top:auto">Page 2: the original card</span>':'')+'</div>'+
+  '<span class="muted" style="font-size:12px">'+(s.card?'2 pages':'1 page')+' · Letter · prints in black and white</span></div>'}
+ return '<div class="shprev"><div class="shcard">'+fpBar(R,48)+
+  '<div style="padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px"><span class="kicker" style="font-size:10px">From Ashley’s recipe cards</span><b style="font-family:var(--disp);font-size:19px;line-height:1.15">'+esc(R.title)+'</b>'+
+  '<span style="font-size:12px;font-weight:700">'+esc(facts)+'</span>'+
+  '<span class="muted" style="font-size:12px;line-height:1.4">'+esc(ings.slice(0,5).map(function(x){return x.n.toLowerCase()}).join(', '))+(ings.length>5?' and '+(ings.length-5)+' more':'')+'</span>'+
+  (s.swaps&&sw.length?'<span style="padding:6px 9px;border-radius:9px;background:var(--counter);font-size:12px;line-height:1.4"><b>Our swaps:</b> '+esc(swTxt)+'</span>':'')+notes+
+  (s.card?'<span class="muted" style="font-size:12px">Includes '+R.card.photos+' photo'+(R.card.photos>1?'s':'')+' of the original card</span>':'')+'</div></div></div>';
+}
+function shareSheet(){
+ var s=shareInit(),sw=shareSwaps(),serv=shareServ(),to=shareTo(),names=to.map(function(k){return PEOPLE[k]});
+ var fmtName={card:'recipe card',link:'link',pdf:'PDF',text:'text'}[s.format];
+ var head='<div class="between"><div><span class="kicker">'+(s.sent?'Shared':'Share')+'</span><h2 class="h2" style="font-size:22px;line-height:1.15">'+esc(R.title)+'</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>';
+ if(s.sent){var inc=[serv+' servings'];if(s.swaps&&sw.length)inc.push(sw.length+' swap'+(sw.length>1?'s':''));if(s.notes)inc.push('ratings and notes');if(s.card&&s.format!=='text')inc.push('the original card');
+  return '<div class="sheet sharesheet" role="dialog" aria-modal="true" aria-label="Shared '+esc(R.title)+'">'+head+
+   '<div class="shdone" role="status"><span class="shtick"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><b style="font-family:var(--disp);font-size:20px;line-height:1.2">Sent to '+esc(nameList(names))+'</b><span class="muted" style="font-size:13px;line-height:1.45">As a '+fmtName+', with '+esc(nameList(inc))+'.'+(s.msg?' Your note went with it.':'')+'</span>'+avStack(to,5)+'</div>'+
+   (s.msg?'<p class="cardnote" style="margin:0">“'+esc(s.msg)+'”</p>':'')+
+   '<div class="row" style="gap:10px"><button class="secondary" style="flex:1" data-act="shareagain">Share again</button><button class="primary" style="flex:1;height:52px;font-size:15px" data-closesheet="1">Done</button></div>'+
+   '<span class="muted" style="font-size:12px;line-height:1.4;text-align:center">Prototype: nothing was actually sent.</span></div>'}
+ var T=[['swaps','Include our swaps',sw.length?sw.map(function(it){return shownName(it).toLowerCase()+' for '+it.name.toLowerCase()}).join(', '):'No swaps chosen on this recipe yet',!sw.length],['notes','Include ratings and notes','Your cook log stays private unless this is on',false],['card','Include the original card',s.format==='text'?'Photos cannot go in plain text':R.card.photos+' photo'+(R.card.photos>1?'s':'')+' of Ashley’s card',s.format==='text']];
+ return '<div class="sheet sharesheet" role="dialog" aria-modal="true" aria-label="Share '+esc(R.title)+'">'+head+
+  '<div class="seg" role="group" aria-label="Share as" style="grid-template-columns:repeat(4,1fr)">'+[['card','Card'],['link','Link'],['pdf','PDF'],['text','Text']].map(function(x){return '<button data-sharefmt="'+x[0]+'" aria-pressed="'+(s.format===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
+  sharePreview()+
+  '<div style="display:flex;flex-direction:column">'+
+   '<div class="prow" style="min-height:54px"><span class="ptxt"><b>Servings</b><span>'+(serv===R.base?'As written on the card':'Amounts scaled from '+R.base)+'</span></span><div class="stepper" style="height:44px" role="group" aria-label="Servings to share"><button style="width:36px;height:36px" data-shareserv="-1" aria-label="Fewer"'+(serv<=1?' disabled':'')+'>−</button><span aria-live="polite"><b>'+serv+'</b></span><button style="width:36px;height:36px" data-shareserv="1" aria-label="More"'+(serv>=24?' disabled':'')+'>+</button></div></div>'+
+   T.map(function(t){var on=!!s[t[0]]&&!t[3];return '<button class="tog" role="switch" aria-checked="'+on+'" data-sharetog="'+t[0]+'"'+(t[3]?' disabled':'')+'><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>'+t[1]+'</b><span>'+esc(t[2])+'</span></span><i class="sw'+(on?' on':'')+'"><i></i></i></button>'}).join('')+'</div>'+
+  '<div style="display:flex;flex-direction:column;gap:10px"><div class="between"><span class="kicker">Send to</span><span class="muted" style="font-size:12px">'+(to.length?esc(nameList(names)):'Tap to choose')+'</span></div>'+
+   '<div class="shwho" role="group" aria-label="Send to">'+LIBM.filter(function(k){return k!=='M'}).map(function(k){var on=!!s.to[k];return '<button class="who'+(on?' on':'')+'" aria-pressed="'+on+'" data-shareto="'+k+'"><i>'+k+(on?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>':'')+'</i>'+PEOPLE[k]+'</button>'}).join('')+
+   '<button class="who other" data-act="shareos"><i>'+SVG.share+'</i>Other</button></div>'+
+   '<input id="sharemsg" class="shmsg" type="text" maxlength="140" placeholder="Add a note (optional)" aria-label="Note to send with the recipe" value="'+esc(s.msg)+'">'+
+   '<span class="muted" style="font-size:12px;line-height:1.4">Everyone here already has this recipe in the family library. Sharing sends your version of it.</span></div>'+
+  '<div class="row" style="gap:10px"><button class="secondary" style="flex:1;white-space:nowrap" data-act="sharecopy">'+(s.copied?'Copied':s.format==='text'?'Copy text':'Copy link')+'</button><button class="primary" style="flex:2;height:52px;font-size:15px" data-act="'+(to.length?'sharesend':'shareos')+'">'+(to.length?'Send to '+(to.length===1?esc(names[0]):to.length+' people'):'Share '+fmtName+'…')+'</button></div></div>';
+}
+function openShare(keepPos){
+ var el=document.getElementById('sheet'),old=el.querySelector('.sheet'),y=old?old.scrollTop:0;
+ if(!keepPos){shareInit();S.share.sent=false;S.share.copied=false}
+ el.innerHTML='<div class="sheetwrap'+(keepPos?' noanim':'')+'" data-closesheet="1">'+shareSheet()+'</div>';
+ if(keepPos)el.querySelector('.sheet').scrollTop=y;else{var b=el.querySelector('.iconbtn');if(b)b.focus()}
+ var mi=document.getElementById('sharemsg');if(mi)mi.addEventListener('input',function(){S.share.msg=mi.value});
+}
+function shareSend(){S.share.sent=true;openShare(true);var sh=document.querySelector('#sheet .sheet');if(sh)sh.scrollTop=0}
+function shareCopy(){var t=S.share.format==='text'?shareText():'https://'+shareLink();try{if(navigator.clipboard)navigator.clipboard.writeText(t).catch(function(){})}catch(e){}S.share.copied=true;openShare(true)}
 initMark2();

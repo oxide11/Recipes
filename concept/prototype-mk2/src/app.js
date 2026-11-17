@@ -535,7 +535,9 @@ document.addEventListener('click',function(e){
  var el=e.target.closest('button,[data-go],[data-closesheet],[data-conv],[data-strike],[data-back],[data-open],[data-focus],[data-act]');if(!el)return;
  var d=el.dataset;
  if(d.device||d.orient){if(d.device)D.device=d.device;if(d.orient)D.orient=d.orient;closeSheet();S.focus=null;devSeg();fit();keep(render);return}
- if(d.sharefmt){S.share.format=d.sharefmt;openShare(true);return}
+ if(d.sharefmt){S.share.format=d.sharefmt;S.share.copied=false;openShare(true);return}
+ if(d.shareto){S.share.to[d.shareto]=!S.share.to[d.shareto];openShare(true);return}
+ if(d.shareserv){S.share.serv=Math.max(1,Math.min(24,shareServ()+(+d.shareserv)));openShare(true);return}
  if(d.hf){P.hf=!P.hf;if(!P.hf&&window.speechSynthesis){try{speechSynthesis.cancel()}catch(e){}}openHf(true);keepUnder();if(P.hf){S.spoken=null;hfSpeak()}return}
  if(d.m2set){var ms=d.m2set.split(':');P[ms[0]]=ms[1]==='toggle'?!P[ms[0]]:ms[1]==='1'?true:ms[1]==='0'?false:ms[1];keep(render);if(ms[0]==='dark'&&document.querySelector('#sheet .profsheet'))openProfile(true);return}
  if(d.withpick){S.with=d.withpick;closeSheet();go('together');return}
@@ -619,8 +621,10 @@ document.addEventListener('click',function(e){
   case 'aisles':openAisles();break;
   case 'about':openAbout();break;
   case 'profile':openProfile();break;
-  case 'sharesend':closeSheet();toast('Sharing is mocked in this prototype');break;
-  case 'sharecopy':toast('Copy link is mocked in this prototype');break;
+  case 'sharesend':shareSend();break;
+  case 'sharecopy':shareCopy();break;
+  case 'shareagain':S.share.sent=false;openShare(true);break;
+  case 'shareos':toast('The system share sheet opens here in the app');break;
   case 'home':if(isPad()){closeSheet();break}S.focus=null;S.zoom='out';render();scr.scrollTop=0;break;
   case 'use':{var id=S.focus,lf=leafOf(id,S.picked[id]);S.swaps[id]=lf.id;S.haveVia[id]=1;S.have[id]=leafOnHand(lf);if(isPad()){closeSheet();keep(render);toast(ing(id).name+' → '+lf.name);break}S.focus=null;S.zoom='out';render();scr.scrollTop=0;toast(ing(id).name+' → '+lf.name);break}
   case 'revert':{var id2=S.focus;delete S.swaps[id2];S.picked[id2]=null;delete S.haveVia[id2];S.have[id2]=!!PAN[pKey(ing(id2))];if(isPad()){closeSheet();keep(render);toast('Back to '+ing(id2).name.toLowerCase());break}S.focus=null;S.zoom='out';render();toast('Back to '+ing(id2).name.toLowerCase());break}
