@@ -63,10 +63,10 @@ noen = [i['name'] for i in ings if 'energy_kcal' not in i['per_100g'] and not i.
 print('  ingredients without energy: %d' % len(noen)); fails += len(noen)
 print('  known gaps (listed, no nutrition yet): %s' % (gaps or 'none'))
 
-print('== 4. Spot values (USDA reference in brackets) ==')
+print('== 4. Spot values: the Standard Reference figure, before any newer lab value replaced it (reference in brackets) ==')
 spot = [('Butter', 'energy_kcal', 717), ('Egg', 'protein_g', 12.56), ('Flour', 'carbs_g', 76.31), ('Olive oil', 'fat_g', 100), ('Sugar', 'energy_kcal', 387)]
 for name, k, ref in spot:
-    v = index[key(name)]['per_100g'].get(k); ok = v is not None and abs(v - ref) <= 0.02 * ref + 0.01
+    it = index[key(name)]; v = (it.get('latest_lab') or {}).get('superseded', {}).get(k, it['per_100g'].get(k)); ok = v is not None and abs(v - ref) <= 0.02 * ref + 0.01
     print('  %-10s %-12s %s [%s] %s' % (name, k, v, ref, 'ok' if ok else 'MISMATCH')); fails += 0 if ok else 1
 cups = [('Flour', 125), ('Sugar', 200), ('Butter', 227), ('Honey', 339), ('Milk', 244)]
 for name, g in cups:

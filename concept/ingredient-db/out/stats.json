@@ -24,12 +24,21 @@
  "ingredients_total": 1440,
  "ingredients_curated": 88,
  "ingredients_with_density": 971,
- "ingredients_with_unit_weights": 761,
+ "ingredients_with_unit_weights": 760,
  "ingredients_with_shelf_life": 330,
  "ingredients_with_allergens": 523,
  "ingredients_data_gaps": [
   "Red curry paste"
  ],
+ "combining_sources": {
+  "latest_lab_foods": 183,
+  "latest_lab_values": 2329,
+  "cnf_filled_foods": 2512,
+  "cnf_filled_values": 6446,
+  "cnf_compared_foods": 4521,
+  "cnf_agree_foods": 3844,
+  "cnf_differ_foods": 677
+ },
  "sr28_may_2016_update": {
   "foods_changed": 9,
   "foods_added": 1,

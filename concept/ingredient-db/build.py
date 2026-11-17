@@ -397,6 +397,7 @@ def shelf(names):
 # ---------------------------------------------------------------- Canadian Nutrient File 2026 (official): second source
 CNF = os.path.join(RAW, 'official_cnf2026')
 cnf_link, cnf_only, cnf_nut, cnf_yield, cnf_refuse = {}, [], defaultdict(dict), defaultdict(list), {}
+cnf_linked_nut = defaultdict(dict)
 CNF_MEAS = re.compile(r'^(\d+(?:[.,]\d+)?)\s*(ml|l|tsp|tbsp|cup|cups|g|kg)?\b\s*(.*)$', re.I)
 def cnf_rows(name):
     with open(os.path.join(CNF, name), encoding='utf-8-sig', newline='') as f:
@@ -433,11 +434,14 @@ if os.path.isdir(CNF):
             weights[key].append((amount, d, val, 'cnf'))
     wanted = set(NUTR)
     for r in cnf_rows('Nutrient_Amount.csv'):
-        if r['Nutrient_Code'] in wanted and target.get(r['Food_Code'], '').startswith('cnf:'):
-            f_, _, d_ = NUTR[r['Nutrient_Code']]
-            try: v = round(float(r['Nutrient_Amount']), d_)
-            except ValueError: continue
-            cnf_nut[target[r['Food_Code']]][f_] = int(v) if d_ == 0 else v
+        key = target.get(r['Food_Code'], '')
+        if r['Nutrient_Code'] not in wanted or not key: continue
+        f_, _, d_ = NUTR[r['Nutrient_Code']]
+        try: v = round(float(r['Nutrient_Amount']), d_)
+        except ValueError: continue
+        v = int(v) if d_ == 0 else v
+        if key.startswith('cnf:'): cnf_nut[key][f_] = v
+        elif cnf_link.get(key, {}).get('Food_Code') == r['Food_Code']: cnf_linked_nut[key][f_] = v
 
 # ---------------------------------------------------------------- USDA Foundation Foods (FoodData Central CSV layout)
 ff_foods, ff_nut, ff_ndb = [], defaultdict(dict), {}
@@ -576,6 +580,44 @@ for key, desc, grp, pub in ff_foods:
         foods[ndb]['newer_lab_data'] = key
         if foods[ndb].get('description_fr'): rec['description_fr'] = foods[ndb]['description_fr']
 
+# ---------------------------------------------------------------- combine the sources, food by food
+# Rule (decided 2026-11-17): USDA is the base. The latest lab analysis always wins where one exists.
+# The Canadian file fills values USDA lacks and is used to corroborate the rest.
+FIELD_ORDER = [f_ for f_, _, _ in NUTR.values()]
+TOL = {'kcal': 10, 'g': 0.5, 'mg': 5, 'mcg': 3}
+UNIT = {f_: u_ for f_, u_, _ in NUTR.values()}
+combine = dict(latest_lab_foods=0, latest_lab_values=0, cnf_filled_foods=0, cnf_filled_values=0, cnf_compared_foods=0, cnf_agree_foods=0, cnf_differ_foods=0)
+for key, rec in foods.items():
+    if rec['source'] != 'usda': continue
+    base = dict(rec['per_100g']); from_lab = set()
+    fkey = rec.get('newer_lab_data')
+    if fkey and fkey in foods:
+        superseded = OrderedDict()
+        for f_, v in foods[fkey]['per_100g'].items():
+            from_lab.add(f_)
+            if base.get(f_) != v:
+                superseded[f_] = base.get(f_); base[f_] = v
+        rec['latest_lab'] = OrderedDict(food=fkey, published=foods[fkey].get('published'), fields=len(from_lab), superseded=superseded)
+        combine['latest_lab_foods'] += 1; combine['latest_lab_values'] += len(superseded)
+    cn = cnf_linked_nut.get(key)
+    if cn:
+        filled = [f_ for f_ in FIELD_ORDER if f_ in cn and f_ not in base]
+        for f_ in filled: base[f_] = cn[f_]
+        if filled:
+            rec['filled_from_cnf'] = filled; combine['cnf_filled_foods'] += 1; combine['cnf_filled_values'] += len(filled)
+        differs, compared = OrderedDict(), 0
+        for f_ in FIELD_ORDER:
+            if f_ in cn and f_ in base and f_ not in from_lab and f_ not in filled:
+                compared += 1
+                a_, c_ = base[f_], cn[f_]
+                if abs(a_ - c_) > TOL[UNIT[f_]] and abs(a_ - c_) > 0.10 * max(abs(a_), abs(c_)): differs[f_] = [a_, c_]
+        if compared:
+            combine['cnf_compared_foods'] += 1
+            rec['cnf_check'] = OrderedDict(compared=compared, agrees=not differs)
+            if differs: rec['cnf_check']['differs'] = differs; combine['cnf_differ_foods'] += 1
+            else: combine['cnf_agree_foods'] += 1
+    rec['per_100g'] = OrderedDict((f_, base[f_]) for f_ in FIELD_ORDER if f_ in base)
+
 # ---------------------------------------------------------------- ingredient concepts (automatic)
 GENERIC_TEMPLATES = {
     'cheese': '{1} cheese', 'cheese food': None, 'spices': '{1}', 'nuts': '{1}', 'seeds': '{1}', 'oil': '{1} oil',
@@ -680,6 +722,8 @@ def build_ingredient(name, default_ndb, variant_ndbs, row=None):
                       default_food=d['id'], default_description=d['description'])
     if d.get('description_fr'): rec['name_fr_source'] = d['description_fr']
     rec['per_100g'] = d['per_100g']
+    for k_ in ('latest_lab', 'filled_from_cnf', 'cnf_check'):
+        if d.get(k_): rec[k_] = d[k_]
     if d.get('density_g_per_ml'): rec['density_g_per_ml'] = d['density_g_per_ml']; rec['density_basis'] = d['density_basis']
     if d.get('unit_weights_g'): rec['unit_weights_g'] = d['unit_weights_g']
     rec['allergens'] = d['allergens']; rec['diet'] = d['diet']
@@ -757,6 +801,6 @@ stats = OrderedDict(
     ingredients_with_shelf_life=sum(1 for i in ingredients if i.get('shelf_life')),
     ingredients_with_allergens=sum(1 for i in ingredients if i['allergens']),
     ingredients_data_gaps=[i['name'] for i in ingredients if i.get('data_gap')],
-    sr28_may_2016_update=upd_stats, sr_legacy_2018=legacy_stats, survey_foods=survey_stats, curated_unresolved=unresolved)
+    combining_sources=combine, sr28_may_2016_update=upd_stats, sr_legacy_2018=legacy_stats, survey_foods=survey_stats, curated_unresolved=unresolved)
 with open(os.path.join(OUT, 'stats.json'), 'w') as f: json.dump(stats, f, indent=1)
 print(json.dumps(stats, indent=1))

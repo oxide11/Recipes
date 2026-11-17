@@ -29,6 +29,23 @@ Coverage in this build:
 - 1,402 base foods carry `survey_names`: everyday names USDA's survey uses for them ("Milk, whole"). Useful as alias candidates; approximate, so not applied automatically.
 - Ingredients: 88 curated by hand (87 with data, 1 known gap), 1,352 built automatically. 971 have a density, 761 a weight per item, 330 a shelf life.
 
+## How the sources combine
+
+Decided 17 November 2026. For every base (USDA) food, value by value:
+
+1. **Start from USDA Standard Reference** (SR Legacy 2018), the most complete record.
+2. **The latest lab analysis always wins.** Where Foundation Foods has the same food, each value it publishes replaces the older one.
+   183 foods, 2,329 values replaced. The replaced figures are kept in `latest_lab.superseded` so the change can be audited.
+3. **Canada fills the gaps.** A value USDA lacks is taken from the linked Canadian food. 2,512 foods, 6,446 values
+   (mostly trans fat and vitamin D). Listed in `filled_from_cnf`.
+4. **Canada corroborates the rest.** Every remaining value is compared with the Canadian one. Of 4,521 foods compared,
+   3,844 agree on every value and 677 differ on at least one by more than 10%. The differences are in `cnf_check.differs`
+   as `[value used, Canadian value]`. Nothing is changed on the strength of a disagreement; it is a flag to review.
+
+Some disagreements are real Canadian differences, not errors: margarine has 26 mcg of vitamin D per 100 g in Canada and none
+in the US figure, because of fortification rules. Others mean the two files describe slightly different products
+(mozzarella, sirloin). If the app should show Canadian label values for fortified foods, those flagged foods are the list to go through.
+
 ## Two tiers of trust
 
 1. **Curated** (`curated: true`, from `overlay/curated.csv`). Named the way people write, with aliases, and mapped by hand to one USDA food. These cover every ingredient in the ten prototype recipes. Treat these as the app's catalogue.
@@ -77,9 +94,8 @@ The app must show the USDA and Health Canada attribution lines (an About screen 
 
 - **The USDA base is SR Legacy (2018), the final Standard Reference release.** It replaced SR28 values food by food. Against SR28,
   energy changed for 210 foods. SR Legacy's JSON rounds some values a little more coarsely than the old text files (egg protein 12.6, not 12.56).
-- **Foundation Foods (April 2026) is in as extra foods, not as the default.** It is recent lab data but sparse: fewer nutrients
-  and few household measures per food. Curated ingredients use SR Legacy values, and `newer_lab_data` marks where a newer
-  analysis exists. Choosing which wins is a real decision: where both cover a food, energy often differs by more than 10%.
+- **Latest lab values are sparser than the records they update.** Foundation Foods publishes fewer nutrients per food, so a
+  food can carry 2026 values for some nutrients and 2018 values for others. Energy and the macronutrients always move together.
 - **Survey foods are not ingredients.** They are mixed dishes and foods as eaten. They are in the food table for their portions,
   names and recipes, and are kept out of the ingredient list. They carry no aisle, allergen or diet tags.
 - **Canadian data is the official 2026 edition**, unzipped into `raw/official_cnf2026/`. Where a Canadian food links to a USDA food,
