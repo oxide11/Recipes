@@ -6,6 +6,9 @@
 var O='stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"';
 function hl(d,w){return '<path d="'+d+'" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="'+(w||1.6)+'" stroke-linecap="round"/>'}
 var N={
+roast:'<path d="M4 15.500c0-5 4.500-8.500 10.500-8.500 5.500 0 9.500 3 9.500 7.500 0 5-4.500 8-10.500 8-5.500 0-9.500-2.500-9.500-7z" fill="#9C4A3C" stroke="#6E2F26" '+O+'/><path d="M9 7.800v14.200M14 7v15.500M19 7.800v13.500" stroke="#F3E2C8" stroke-width="1.300" stroke-linecap="round"/>'+hl('M7 12.500c1-1.800 2.800-3 5-3.300',1.600),
+wine:'<path d="M11.500 3.500h5v5.500c2 1.200 3 3 3 5.500v9a1.500 1.500 0 0 1-1.500 1.500h-8a1.500 1.500 0 0 1-1.500-1.500v-9c0-2.500 1-4.300 3-5.500z" fill="#4E7A52" stroke="#2F5235" '+O+'/><rect x="8.500" y="15" width="11" height="6" fill="#F3EEDF" stroke="#2F5235" stroke-width="1"/><path d="M11 18h6" stroke="#6B1F3A" stroke-width="1.600" stroke-linecap="round"/><path d="M11.500 5.500h5" stroke="#6B1F3A" stroke-width="2.200"/>'+hl('M10.500 11.500c.300-.800.800-1.300 1.500-1.700',1.400),
+bayleaf:'<path d="M5 23C5 13 11 5.500 22.500 4.500 22 15.500 15 22.500 5 23z" fill="#6E8F4E" stroke="#4C6A33" '+O+'/><path d="M5 23L19.500 8M10 18l.500-4.500M14 14l.500-4M11 17l4.500.300M15 13l4-.200" fill="none" stroke="#4C6A33" stroke-width="1.100" stroke-linecap="round"/>'+hl('M8.500 15.500c1.500-3.500 4-6 7.500-7.500',1.400),
 /* ---------- meat, fish, eggs ---------- */
 chicken:'<path d="M5.2 15.6c-.6-5.2 3.3-9.9 8.9-10.4 5.2-.5 9.3 2.6 9.2 7.3-.1 5.6-5 10.300-11.200 10.400-3.800.100-6.500-2.700-6.900-7.300z" fill="#F2C4A0" stroke="#C48A5E" '+O+'/><path d="M9 20.500c3.200.600 7.300-.900 9.800-3.800" fill="none" stroke="#E3A77D" stroke-width="1.300" stroke-linecap="round"/>'+hl('M8.300 13.200c.700-2.900 3.200-5 6.400-5.300',1.800),
 drumstick:'<path d="M9.500 4.800c4.800-1.600 9.900 1.300 10.800 6.200.800 4.300-2 8-6.200 8.500l-2.900 3.300-3-2.600 2.400-3.400C6 13.600 5.900 6 9.500 4.800z" fill="#C98545" stroke="#8F5A26" '+O+'/><path d="M8.300 19.800l-1.500 1.700c-1.300-.600-2.600.500-2.300 1.800.300 1.200 1.600 1.600 2.500.900.200 1.100 1.400 1.800 2.500 1.300 1.200-.600 1.300-2.200.200-3l1.400-1.600z" fill="#FBF6EC" stroke="#B9A98C" '+O+'/>'+hl('M9.600 9c.800-1.700 2.400-2.700 4.300-2.800',1.800)+'<path d="M15.500 14.500c1.400-.400 2.400-1.500 2.800-2.900" fill="none" stroke="#A96A30" stroke-width="1.300" stroke-linecap="round"/>',
@@ -78,7 +81,7 @@ spoon:'<ellipse cx="9.500" cy="10" rx="5.500" ry="6.500" fill="#DDE4E6" stroke="
 N.coconut=N.coconut.replace('#8795 9A','#87959A');
 for(var k in N)ICON[k]=N[k].replace(/(\d)\.(\d)00\b/g,'$1.$2');
 /* which graphic each ingredient uses */
-var MAP={'chicken':'chicken','cooked chicken':'drumstick','shrimp':'shrimp','lean ground beef':'mince','cooked ham':'ham','egg':'egg','eggs':'egg',
+var MAP={'sirloin roast':'roast','red wine':'wine','beef broth':'carton','tomato paste':'paste','bay leaves':'bayleaf','thyme':'herb','smoked paprika':'cajun','chicken':'chicken','cooked chicken':'drumstick','shrimp':'shrimp','lean ground beef':'mince','cooked ham':'ham','egg':'egg','eggs':'egg',
  'butter':'butter','margarine':'margarine','milk':'milk','heavy cream':'cream','half-and-half':'cream','cheddar':'cheddar','parmesan':'wedge',
  'flour':'flour','sugar':'sugar','brown sugar':'brownsugar','baking powder':'bakingpowder','baking soda':'bakingsoda','vanilla':'vanilla','chocolate chips':'choc','pie crusts':'pie',
  'olive oil':'oliveoil','vegetable oil':'vegoil','vinegar':'vinegar','ketchup':'ketchup','worcestershire sauce':'worcestershire','fish sauce':'fishsauce',

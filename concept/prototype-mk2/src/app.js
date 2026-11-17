@@ -112,7 +112,7 @@ function A(key){
 }
 
 /* ================= SAFE TEMPERATURES ================= */
-var SAFE={poultry:{f:165,c:74,note:'thickest part. The juices should run clear'},seafood:{f:145,c:63,note:'thickest piece. It should be opaque and firm all the way through'},beef:{f:160,c:71,note:'centre of the meat. Ground meat should have no pink left'}};
+var SAFE={beefroast:{f:145,c:63,note:'centre of the roast. A braise goes well past this: it is done when a fork slides in easily'},poultry:{f:165,c:74,note:'thickest part. The juices should run clear'},seafood:{f:145,c:63,note:'thickest piece. It should be opaque and firm all the way through'},beef:{f:160,c:71,note:'centre of the meat. Ground meat should have no pink left'}};
 var THERMO='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13.5V5a2 2 0 0 1 4 0v8.5a4.5 4.5 0 1 1-4 0z"/><path d="M12 9v8"/></svg>';
 function safeFor(st){
  if(!st.protein)return null;var it=ing(st.protein);if(!it)return null;
@@ -177,7 +177,7 @@ function home(){
   '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;width:100%"><div class="between"><span class="kicker" style="color:#111">'+(S.tag?'Best match':'Tonight\'s pick')+'</span>'+cooked(feat.id)+'</div>'+
   '<span style="font-family:var(--disp);font-size:24px;font-weight:700;line-height:1.15">'+esc(feat.title)+'</span><span class="muted" style="font-size:14px">'+feat.meta+' · '+feat.base+' servings</span>'+
   '<span style="font-size:14px;font-weight:600;margin-top:2px">'+pantry+' of '+feat.ING.length+' ingredients already in your pantry</span></div></button>'+
- '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">From Ashley’s recipe cards</p>'+
+ '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">From the family library</p>'+
   others.map(function(id){var r=RECIPES[id];return '<button class="listrow" data-open="'+id+'"><div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0"><div class="between"><span style="font-weight:700;font-size:16px">'+esc(r.title)+'</span>'+cooked(id)+'</div><div class="fp">'+fpBar(r,10)+'</div><span class="muted" style="font-size:13px">'+r.meta+' · '+r.base+' servings'+(r.card.questions.length?' · '+r.card.questions.length+' card question'+(r.card.questions.length>1?'s':''):'')+'</span></div>'+SVG.arrow+'</button>'}).join('')+
  '</div></div>'+
  tabbar('home');
@@ -255,7 +255,7 @@ function sankey(){
 
 /* ================= RECIPE ================= */
 function cardSection(){
- var c=R.card;if(!c)return '';var q=c.questions.length;
+ var c=R.card;if(!c||c.own)return '';var q=c.questions.length;
  return '<section class="card acard slim"><div class="row" style="gap:12px;align-items:center"><div class="cardthumb sm" aria-hidden="true"><i style="width:70%;height:4px;background:#8A8A85"></i><i></i><i style="width:80%"></i><i></i></div>'+
   '<div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1"><span class="kicker">From Ashley’s card</span><b style="font-size:15px">'+esc(c.source)+'</b></div></div>'+
   '<div class="between" style="gap:10px;font-size:13px"><button class="linkbtn" data-act="cardinfo">'+(q?q+' to check with Ashley':'Fully transcribed')+'</button><button class="linkbtn" data-toast="The original photos open here in the app">'+c.photos+' photo'+(c.photos>1?'s':'')+'</button></div>'+

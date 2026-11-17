@@ -1683,6 +1683,98 @@ RECIPES.pancakes={
 };
 RECIPE_ORDER=['cajun','scampi','thai','hamsoup','piccata','potpie','shepherd','cookies','pancakes'];
 
+/* ================= RECIPES ADDED BY MOUSSA ================= */
+RECIPES.roast={
+ id:'roast',short:'Braised roast',title:'Red Wine Braised Sirloin Roast with Whipped Mashed Potatoes',kicker:'Dinner · Moussa’s recipe',base:6,
+ desc:'A sirloin roast seared, then braised low in red wine and beef broth with carrots, served over butter-and-cream whipped potatoes with the reduced pan sauce.',
+ tags:[['Comfort food',1],['Serves a crowd'],['Dutch oven'],['Date night']],
+ stats:[['20 min','Prep'],['3 hr','Cook'],['720','kcal/serving'],['47 g','protein/serving']],
+ meta:'3 hr 20 · Medium',plate:'Braised roast',
+ card:{own:true,source:'Typed recipe',credit:'Added by Moussa. About 6 servings from a 1.2 kg roast.',photos:0,questions:[]},
+ ING:[
+  IG('roast','Sirloin roast','#9C4A3C','#6E2F26',0,1200,1150,1900,22.00,'1.2 kg','patted completely dry',[['roast',1]],'Meat and seafood',[250,0,90],{safe:'beefroast'}),
+  IG('paprika','Smoked paprika','#B5452A','#7E2C18',0,2,5,6,.10,'1 tsp','',[['cajun',1]],'Pantry',[.3,1.2,.3]),
+  IG('garlicpowder','Garlic powder','#E8DCC0','#B8A77E',0,3,5,10,.10,'1 tsp','',[['jar',1]],'Pantry',[.5,2.2,0]),
+  IG('oil','Vegetable oil','#E8C84A','#B89A1E',0,28,30,240,.20,'2 tbsp','for searing',[['bottle',1]],'Pantry',[0,0,28]),
+  IG('onion','Onion','#7A4BB5',null,0,150,240,60,.40,'½ large','sliced',[['onion',1]],'Produce',[1.5,14,0]),
+  IG('garlic','Garlic','#EFE6D2','#B8A77E',0,12,15,18,.30,'4 cloves','minced',[['garlic',2]],'Produce',[.8,4,0]),
+  IG('paste','Tomato paste','#C8442F','#8E2A1B',0,16,15,13,.25,'1 tbsp','',[['paste',1]],'Canned',[.7,3,.1]),
+  IG('wine','Red wine','#6B1F3A','#4A1027',0,250,250,210,4.00,'1 cup','dry, 250 ml',[['wine',1]],'Pantry',[.2,6.5,0]),
+  IG('broth','Beef broth','#B98A5A','#8A6238',0,250,250,15,.80,'1 cup','250 ml',[['carton',1]],'Canned',[2.5,1,.5]),
+  IG('bay','Bay leaves','#6E8F4E','#4C6A33',0,1,3,0,.10,'2','',[['bayleaf',2]],'Pantry',[0,0,0]),
+  IG('thyme','Thyme','#7FA35A','#567A38',0,3,8,3,.75,'3 sprigs','fresh',[['herb',1]],'Produce',[.2,.7,0]),
+  IG('carrot','Carrots','#F08A2E','#B95C06',0,180,300,75,.60,'3 medium','cut into 2-inch chunks',[['carrot',3]],'Produce',[1.7,17,.4]),
+  IG('potato','Potatoes','#D9B26A','#A9833A',1,1000,1600,770,3.00,'1 kg','Yukon Gold, peeled and cubed',[['potato',4]],'Produce',[20,175,1]),
+  IG('butter','Butter','#F7D23A','#C9A800',1,85,90,610,1.10,'6 tbsp','',[['butter',1]],'Dairy and eggs',[.7,0,69]),
+  IG('cream','Heavy cream','#F3EEDF','#A89C7E',1,120,125,410,1.20,'½ cup','warmed, 125 ml',[['cream',1]],'Dairy and eggs',[3.4,3.4,43])
+ ],
+ have:{paprika:1,garlicpowder:1,oil:1,onion:1,garlic:1,bay:1,potato:1,butter:1},
+ GROUPS:[{name:'Braise',color:'#9C4A3C',op:.22},{name:'Whipped mash',color:'#D9B26A',op:.3}],
+ INS:{weight:['The roast and the potatoes are three quarters of everything in the pot and on the plate.','The braising liquid is half wine, half broth. It reduces to a few spoonfuls of sauce per plate.'],
+  volume:['Potatoes take the most space; the roast shrinks by about a quarter as it braises.','Use a Dutch oven the roast fits snugly, so the liquid comes about halfway up.'],
+  cost:['The roast is about two thirds of the cost.','A chuck roast braises just as well for less.'],
+  calories:['The roast is under half the calories. Butter and cream in the mash are nearly a quarter.','Half the butter and milk instead of cream takes about 110 kcal off each serving.']},
+ LINE:{
+  roast:{ing:'roast',noun:'sirloin roast',opts:[['1.2 kg','kilograms'],['2⅔ lb','pounds']]},
+  saltrub:SALT_LINE('1 tsp','6 g'),
+  pepper:PEP_LINE('1 tsp'),
+  paprika:{ing:'paprika',noun:'smoked paprika',opts:[['1 tsp','teaspoon'],['2 g','grams']]},
+  garlicpowder:{ing:'garlicpowder',noun:'garlic powder',opts:[['1 tsp','teaspoon'],['3 g','grams']]},
+  oil:{ing:'oil',noun:'oil',opts:[['2 tbsp','tablespoons'],['30 ml','millilitres']]},
+  onion:{ing:'onion',noun:'onion, sliced',opts:[['½ large','onion'],['1 cup','sliced'],['150 g','grams']]},
+  garlic:{ing:'garlic',noun:'garlic, minced',opts:[['4 cloves','cloves'],['4 tsp','minced'],['12 g','grams']]},
+  paste:{ing:'paste',noun:'tomato paste',opts:[['1 tbsp','tablespoon'],['16 g','grams']]},
+  wine:{ing:'wine',noun:'red wine',opts:[['1 cup','cup'],['250 ml','millilitres']]},
+  broth:{ing:'broth',noun:'beef broth',opts:[['1 cup','cup'],['250 ml','millilitres']]},
+  bay:{ing:'bay',noun:'bay leaves',opts:[['2','leaves']]},
+  thyme:{ing:'thyme',noun:'fresh thyme',opts:[['3 sprigs','sprigs'],['1 tsp','dried']]},
+  carrot:{ing:'carrot',noun:'carrots, cut into 2-inch chunks',opts:[['3 medium','carrots'],['180 g','grams']]},
+  potato:{ing:'potato',noun:'Yukon Gold potatoes, peeled and cubed',opts:[['1 kg','kilogram'],['2¼ lb','pounds']]},
+  butter:{ing:'butter',noun:'butter',opts:[['6 tbsp','tablespoons'],['85 g','grams'],['¾ stick','US stick']]},
+  cream:{ing:'cream',noun:'warm heavy cream',opts:[['½ cup','cup'],['125 ml','millilitres']]},
+  saltmash:SALT_LINE('1 tsp','6 g'),
+  whitepepper:{name:'White pepper',noun:'white pepper',color:'#8A8A85',icon:'salt',opts:[['½ tsp','ground'],['1 g','grams']]}
+ },
+ STEPS:[
+  {title:'Heat the oven and season the {roast!}',secs:0,on:5,lines:['Heat the oven to 325°F (160°C).','Pat {roast} completely dry with paper towel.','Season all sides with {saltrub}, {pepper}, {paprika} and {garlicpowder}.']},
+  {title:'Sear',secs:0,on:20,lines:['Heat {oil} in a Dutch oven over medium-high.','Sear the roast 3 to 4 minutes per side, all sides including the ends.','Remove and set aside.']},
+  {title:'Build the base',secs:0,on:6,lines:['Reduce to medium heat.','Add {onion} and cook 3 minutes.','Add {garlic} and cook 1 minute.','Add {paste} and stir 1 minute.']},
+  {title:'Deglaze',secs:0,on:3,lines:['Pour in {wine} and scrape up all the brown bits.','Add {broth}.','Add {bay} and {thyme}.']},
+  {title:'Braise',protein:'beefroast',secs:5400,on:1,label:'Braise',lines:['Nestle the roast back in.','Lid on, into the oven for 1½ hours.']},
+  {title:'Add the {carrot!}',secs:3600,on:3,label:'Braise with carrots',lines:['At the 1½ hour mark, add {carrot}.','Lid back on, and back in the oven for 1 more hour.']},
+  {title:'Whip the {potato!}',secs:1200,on:15,label:'Potatoes',lines:['Start this 45 minutes before serving.','Boil {potato} in salted water until fork tender, about 20 minutes.','Drain completely and return to the pot.','Add {butter} and {cream}.','Whip with a hand mixer until smooth.','Season with {saltmash} and {whitepepper}.']},
+  {title:'Finish and serve',secs:600,on:10,label:'Roast resting',lines:['Remove the roast and rest it 10 minutes before slicing.','Reduce the braising liquid on the stovetop 5 to 10 minutes for a pan sauce.','Plate the roast over the mash and spoon the sauce over top.']}
+ ],
+ SETS:{
+  roast:SN('Sirloin roast',['Closest','Meat-free'],['Tender','Rich','Protein'],[
+   ['rwchuck','Chuck roast','1 : 1','More marbling, so it braises softer. Skim the sauce before reducing.',[5,5,4],[2900,220,0,220],{safe:'beefroast'}],
+   ['rwround','Bottom round roast','1 : 1','Leaner and slices neatly. Give it 20 minutes longer.',[3,3,5],[1800,255,0,75],{safe:'beefroast'}],
+   ['rwcauli','Whole cauliflower','2 heads','Sear cut side down, then braise 45 minutes in total.',[3,2,1],[300,23,60,3]],
+   ['rwmush','King oyster mushrooms','1 kg','Meaty when seared and braised 40 minutes.',[4,3,2],[350,33,60,4],{dislike:'Mushrooms'}]]),
+  wine:SN('Red wine',['Closest','No alcohol'],['Depth','Acidity','Sweet'],[
+   ['rwport','Dry vermouth','1 : 1','Lighter in colour, more herbal.',[3,4,2],[300,0,30,0]],
+   ['rwbrothbal','Beef broth and balsamic','1 cup + 1 tbsp','More broth for the liquid, balsamic vinegar for the acidity.',[3,3,2],[30,2.5,5,.5]],
+   ['rwpom','Pomegranate juice','1 : 1','Fruity and tart. Leave out any added sugar elsewhere.',[3,4,5],[135,.4,33,.7]],
+   ['rwnawine','Alcohol-free red wine','1 : 1','Closest in flavour without the alcohol.',[4,3,3],[60,.5,14,0]]]),
+  cream:SN('Heavy cream',['Closest','Dairy-free'],['Richness','Fluffy','Tang'],[
+   ['rwmilk','Whole milk','1 : 1','Lighter mash. Warm it first.',[2,4,1],[75,4,6,4]],
+   ['rwsour','Sour cream','1 : 1','Tangy and thick. Fold it in at the end.',[4,3,5],[240,3,6,23]],
+   ['rwoatcream','Oat cream','1 : 1','Neutral and close in body.',[3,3,1],[190,1.2,8,17]],
+   ['rwbrothmash','Warm broth and olive oil','⅓ cup + 2 tbsp','Savoury instead of rich.',[2,3,1],[245,1,0,27]]]),
+  potato:SN('Potatoes',['Closest','Lighter'],['Creamy','Fluffy','Sweet'],[
+   ['rwrusset','Russet potatoes','1 : 1','Fluffier and drier. They take a little more cream.',[3,5,1],[790,21,180,1]],
+   ['rwsweet','Sweet potatoes','1 : 1','Sweeter, and good against the wine sauce.',[4,3,5],[860,16,200,.5]],
+   ['rwcaulimash','Cauliflower','1 : 1','Steam instead of boiling so it is not watery.',[3,3,2],[250,19,50,3]],
+   ['rwceleriac','Celery root','1 : 1','Earthy and lighter. Boil 5 minutes longer.',[4,2,2],[420,15,92,3]]]),
+  butter:SN('Butter',['Closest','Dairy-free'],['Flavour','Richness','Silky'],[
+   ['rwbrownb','Browned butter','1 : 1','Nutty and deeper.',[5,4,4],[610,.7,0,69]],
+   ['rwghee','Ghee','5 tbsp','Rich, with almost no lactose.',[4,5,4],[620,0,0,70]],
+   ['rwolive','Olive oil','4 tbsp','Fruity and silky.',[3,3,5],[480,0,0,54]],
+   ['rwvegb','Vegan butter','1 : 1','Behaves like butter.',[3,3,3],[590,0,0,66]]])
+ }
+};
+RECIPE_ORDER.push('roast');
+
 /* ================= INGREDIENT GRAPHICS, SET 2 =================
    One style for every ingredient: a flat body colour, a darker outline of the same hue
    (1.3 wide, round joins), one soft highlight from the top left, and at most one
@@ -1691,6 +1783,9 @@ RECIPE_ORDER=['cajun','scampi','thai','hamsoup','piccata','potpie','shepherd','c
 var O='stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"';
 function hl(d,w){return '<path d="'+d+'" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="'+(w||1.6)+'" stroke-linecap="round"/>'}
 var N={
+roast:'<path d="M4 15.500c0-5 4.500-8.500 10.500-8.500 5.500 0 9.500 3 9.500 7.500 0 5-4.500 8-10.500 8-5.500 0-9.500-2.500-9.500-7z" fill="#9C4A3C" stroke="#6E2F26" '+O+'/><path d="M9 7.800v14.200M14 7v15.500M19 7.800v13.500" stroke="#F3E2C8" stroke-width="1.300" stroke-linecap="round"/>'+hl('M7 12.500c1-1.800 2.800-3 5-3.300',1.600),
+wine:'<path d="M11.500 3.500h5v5.500c2 1.200 3 3 3 5.500v9a1.500 1.500 0 0 1-1.500 1.500h-8a1.500 1.500 0 0 1-1.500-1.500v-9c0-2.500 1-4.300 3-5.500z" fill="#4E7A52" stroke="#2F5235" '+O+'/><rect x="8.500" y="15" width="11" height="6" fill="#F3EEDF" stroke="#2F5235" stroke-width="1"/><path d="M11 18h6" stroke="#6B1F3A" stroke-width="1.600" stroke-linecap="round"/><path d="M11.500 5.500h5" stroke="#6B1F3A" stroke-width="2.200"/>'+hl('M10.500 11.500c.300-.800.800-1.300 1.500-1.700',1.400),
+bayleaf:'<path d="M5 23C5 13 11 5.500 22.500 4.500 22 15.500 15 22.500 5 23z" fill="#6E8F4E" stroke="#4C6A33" '+O+'/><path d="M5 23L19.500 8M10 18l.500-4.500M14 14l.500-4M11 17l4.500.300M15 13l4-.200" fill="none" stroke="#4C6A33" stroke-width="1.100" stroke-linecap="round"/>'+hl('M8.500 15.500c1.500-3.500 4-6 7.500-7.500',1.400),
 /* ---------- meat, fish, eggs ---------- */
 chicken:'<path d="M5.2 15.6c-.6-5.2 3.3-9.9 8.9-10.4 5.2-.5 9.3 2.6 9.2 7.3-.1 5.6-5 10.300-11.200 10.400-3.800.100-6.500-2.700-6.900-7.300z" fill="#F2C4A0" stroke="#C48A5E" '+O+'/><path d="M9 20.500c3.200.600 7.300-.900 9.800-3.800" fill="none" stroke="#E3A77D" stroke-width="1.300" stroke-linecap="round"/>'+hl('M8.300 13.200c.700-2.900 3.200-5 6.400-5.300',1.800),
 drumstick:'<path d="M9.500 4.800c4.800-1.600 9.900 1.300 10.800 6.200.800 4.300-2 8-6.200 8.500l-2.900 3.300-3-2.600 2.400-3.400C6 13.600 5.900 6 9.500 4.800z" fill="#C98545" stroke="#8F5A26" '+O+'/><path d="M8.300 19.800l-1.500 1.700c-1.300-.600-2.600.500-2.300 1.800.300 1.200 1.600 1.600 2.500.900.200 1.100 1.400 1.800 2.500 1.300 1.200-.600 1.300-2.200.200-3l1.400-1.600z" fill="#FBF6EC" stroke="#B9A98C" '+O+'/>'+hl('M9.600 9c.800-1.700 2.400-2.700 4.300-2.800',1.800)+'<path d="M15.500 14.500c1.400-.400 2.400-1.500 2.800-2.900" fill="none" stroke="#A96A30" stroke-width="1.300" stroke-linecap="round"/>',
@@ -1763,7 +1858,7 @@ spoon:'<ellipse cx="9.500" cy="10" rx="5.500" ry="6.500" fill="#DDE4E6" stroke="
 N.coconut=N.coconut.replace('#8795 9A','#87959A');
 for(var k in N)ICON[k]=N[k].replace(/(\d)\.(\d)00\b/g,'$1.$2');
 /* which graphic each ingredient uses */
-var MAP={'chicken':'chicken','cooked chicken':'drumstick','shrimp':'shrimp','lean ground beef':'mince','cooked ham':'ham','egg':'egg','eggs':'egg',
+var MAP={'sirloin roast':'roast','red wine':'wine','beef broth':'carton','tomato paste':'paste','bay leaves':'bayleaf','thyme':'herb','smoked paprika':'cajun','chicken':'chicken','cooked chicken':'drumstick','shrimp':'shrimp','lean ground beef':'mince','cooked ham':'ham','egg':'egg','eggs':'egg',
  'butter':'butter','margarine':'margarine','milk':'milk','heavy cream':'cream','half-and-half':'cream','cheddar':'cheddar','parmesan':'wedge',
  'flour':'flour','sugar':'sugar','brown sugar':'brownsugar','baking powder':'bakingpowder','baking soda':'bakingsoda','vanilla':'vanilla','chocolate chips':'choc','pie crusts':'pie',
  'olive oil':'oliveoil','vegetable oil':'vegoil','vinegar':'vinegar','ketchup':'ketchup','worcestershire sauce':'worcestershire','fish sauce':'fishsauce',
@@ -1889,7 +1984,7 @@ function A(key){
 }
 
 /* ================= SAFE TEMPERATURES ================= */
-var SAFE={poultry:{f:165,c:74,note:'thickest part. The juices should run clear'},seafood:{f:145,c:63,note:'thickest piece. It should be opaque and firm all the way through'},beef:{f:160,c:71,note:'centre of the meat. Ground meat should have no pink left'}};
+var SAFE={beefroast:{f:145,c:63,note:'centre of the roast. A braise goes well past this: it is done when a fork slides in easily'},poultry:{f:165,c:74,note:'thickest part. The juices should run clear'},seafood:{f:145,c:63,note:'thickest piece. It should be opaque and firm all the way through'},beef:{f:160,c:71,note:'centre of the meat. Ground meat should have no pink left'}};
 var THERMO='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13.5V5a2 2 0 0 1 4 0v8.5a4.5 4.5 0 1 1-4 0z"/><path d="M12 9v8"/></svg>';
 function safeFor(st){
  if(!st.protein)return null;var it=ing(st.protein);if(!it)return null;
@@ -1954,7 +2049,7 @@ function home(){
   '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;width:100%"><div class="between"><span class="kicker" style="color:#111">'+(S.tag?'Best match':'Tonight\'s pick')+'</span>'+cooked(feat.id)+'</div>'+
   '<span style="font-family:var(--disp);font-size:24px;font-weight:700;line-height:1.15">'+esc(feat.title)+'</span><span class="muted" style="font-size:14px">'+feat.meta+' · '+feat.base+' servings</span>'+
   '<span style="font-size:14px;font-weight:600;margin-top:2px">'+pantry+' of '+feat.ING.length+' ingredients already in your pantry</span></div></button>'+
- '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">From Ashley’s recipe cards</p>'+
+ '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">From the family library</p>'+
   others.map(function(id){var r=RECIPES[id];return '<button class="listrow" data-open="'+id+'"><div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0"><div class="between"><span style="font-weight:700;font-size:16px">'+esc(r.title)+'</span>'+cooked(id)+'</div><div class="fp">'+fpBar(r,10)+'</div><span class="muted" style="font-size:13px">'+r.meta+' · '+r.base+' servings'+(r.card.questions.length?' · '+r.card.questions.length+' card question'+(r.card.questions.length>1?'s':''):'')+'</span></div>'+SVG.arrow+'</button>'}).join('')+
  '</div></div>'+
  tabbar('home');
@@ -2032,7 +2127,7 @@ function sankey(){
 
 /* ================= RECIPE ================= */
 function cardSection(){
- var c=R.card;if(!c)return '';var q=c.questions.length;
+ var c=R.card;if(!c||c.own)return '';var q=c.questions.length;
  return '<section class="card acard slim"><div class="row" style="gap:12px;align-items:center"><div class="cardthumb sm" aria-hidden="true"><i style="width:70%;height:4px;background:#8A8A85"></i><i></i><i style="width:80%"></i><i></i></div>'+
   '<div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1"><span class="kicker">From Ashley’s card</span><b style="font-size:15px">'+esc(c.source)+'</b></div></div>'+
   '<div class="between" style="gap:10px;font-size:13px"><button class="linkbtn" data-act="cardinfo">'+(q?q+' to check with Ashley':'Fully transcribed')+'</button><button class="linkbtn" data-toast="The original photos open here in the app">'+c.photos+' photo'+(c.photos>1?'s':'')+'</button></div>'+
@@ -2448,7 +2543,7 @@ function homePad(){
  '</div></div>'+
  tagBar()+useItUp()+'<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Cook with what you have</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+
   [['#F2C200','Lemons','piccata'],['#9CBF5A','Lemongrass','thai'],['#2E9E4F','Green onion','cajun'],['#6CBF3A','Limes','thai'],['#E9B98C','Chicken','cajun']].map(function(c){return '<button class="chip" data-open="'+c[2]+'" style="height:40px;font-size:15px"><span class="dot" style="background:'+c[0]+'"></span>'+c[1]+'</button>'}).join('')+'</div></div>'+
- '<div style="display:flex;flex-direction:column;gap:12px"><p class="kicker">From Ashley’s recipe cards</p><div class="rgrid">'+
+ '<div style="display:flex;flex-direction:column;gap:12px"><p class="kicker">From the family library</p><div class="rgrid">'+
   tagList().map(function(id,i){var r=RECIPES[id],q=r.card.questions.length;
    return '<button class="rcard" data-open="'+id+'" aria-label="Open '+esc(r.title)+'">'+fpBar(r,120)+
    '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;width:100%"><div class="between" style="min-height:22px"><span class="kicker" style="color:#111">'+(i===0&&!S.tag?'Tonight\'s pick':r.kicker.split(' · ')[0])+'</span>'+cooked(id)+'</div>'+
@@ -3345,7 +3440,7 @@ function shareText(){
  shareIngs().forEach(function(x){L.push('- '+x.q+' '+x.n.toLowerCase()+(x.sw?' (our swap)':''))});
  L.push('','METHOD');shareSteps().forEach(function(x,i){L.push((i+1)+'. '+x.t+'. '+x.x)});
  if(s.notes&&last)L.push('','OUR NOTES',log.length+' cook'+(log.length>1?'s':'')+(last.rating?', last rated '+last.rating+'/5':'')+(last.note?'. "'+last.note+'"':''));
- L.push('','From Ashley’s recipe cards');return L.join('\n');
+ L.push('',R.card.own?'Moussa’s recipe':'From Ashley’s recipe cards');return L.join('\n');
 }
 function sharePreview(){
  var s=S.share,sw=shareSwaps(),log=LOG[R.id]||[],last=log[log.length-1],serv=shareServ(),ings=shareIngs(),steps;
@@ -3355,26 +3450,26 @@ function sharePreview(){
  if(s.format==='link')return '<div class="shprev"><div class="shbubble">'+fpBar(R,40)+'<div style="padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px"><b style="font-family:var(--disp);font-size:16px;line-height:1.15">'+esc(R.title)+'</b><span class="muted" style="font-size:12px">'+esc(facts)+'</span><span style="font-size:12px;font-weight:700;margin-top:2px">'+esc(shareLink())+'</span></div></div>'+
   '<span class="muted" style="font-size:12px;line-height:1.4;text-align:center">How it looks in Messages. Opens in the app, or as a web page for people without it.</span></div>';
  if(s.format==='text')return '<div class="shprev"><pre class="shtext" tabindex="0" aria-label="Text preview">'+esc(shareText())+'</pre></div>';
- if(s.format==='pdf'){steps=shareSteps();return '<div class="shprev"><div class="shpage" aria-label="PDF preview, one page">'+fpBar(R,10)+'<b class="shpt">'+esc(R.title)+'</b><span class="shpm">'+esc(facts)+'</span><div class="shpc"><div><i>Ingredients</i>'+ings.map(function(x){return '<span>'+esc(x.q)+' '+esc(x.n.toLowerCase())+(x.sw?' *':'')+'</span>'}).join('')+(sw.length&&s.swaps?'<span style="margin-top:3px">* our swap</span>':'')+'</div><div><i>Method</i>'+steps.map(function(x,i){return '<span>'+(i+1)+'. '+esc(x.t)+'. '+esc(x.x)+'</span>'}).join('')+'</div></div>'+(s.card?'<span class="shpm" style="margin-top:auto">Page 2: the original card</span>':'')+'</div>'+
-  '<span class="muted" style="font-size:12px">'+(s.card?'2 pages':'1 page')+' · Letter · prints in black and white</span></div>'}
+ if(s.format==='pdf'){steps=shareSteps();return '<div class="shprev"><div class="shpage" aria-label="PDF preview, one page">'+fpBar(R,10)+'<b class="shpt">'+esc(R.title)+'</b><span class="shpm">'+esc(facts)+'</span><div class="shpc"><div><i>Ingredients</i>'+ings.map(function(x){return '<span>'+esc(x.q)+' '+esc(x.n.toLowerCase())+(x.sw?' *':'')+'</span>'}).join('')+(sw.length&&s.swaps?'<span style="margin-top:3px">* our swap</span>':'')+'</div><div><i>Method</i>'+steps.map(function(x,i){return '<span>'+(i+1)+'. '+esc(x.t)+'. '+esc(x.x)+'</span>'}).join('')+'</div></div>'+(s.card&&R.card.photos?'<span class="shpm" style="margin-top:auto">Page 2: the original card</span>':'')+'</div>'+
+  '<span class="muted" style="font-size:12px">'+(s.card&&R.card.photos?'2 pages':'1 page')+' · Letter · prints in black and white</span></div>'}
  return '<div class="shprev"><div class="shcard">'+fpBar(R,48)+
-  '<div style="padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px"><span class="kicker" style="font-size:10px">From Ashley’s recipe cards</span><b style="font-family:var(--disp);font-size:19px;line-height:1.15">'+esc(R.title)+'</b>'+
+  '<div style="padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px"><span class="kicker" style="font-size:10px">'+(R.card.own?'Moussa’s recipe':'From Ashley’s recipe cards')+'</span><b style="font-family:var(--disp);font-size:19px;line-height:1.15">'+esc(R.title)+'</b>'+
   '<span style="font-size:12px;font-weight:700">'+esc(facts)+'</span>'+
   '<span class="muted" style="font-size:12px;line-height:1.4">'+esc(ings.slice(0,5).map(function(x){return x.n.toLowerCase()}).join(', '))+(ings.length>5?' and '+(ings.length-5)+' more':'')+'</span>'+
   (s.swaps&&sw.length?'<span style="padding:6px 9px;border-radius:9px;background:var(--counter);font-size:12px;line-height:1.4"><b>Our swaps:</b> '+esc(swTxt)+'</span>':'')+notes+
-  (s.card?'<span class="muted" style="font-size:12px">Includes '+R.card.photos+' photo'+(R.card.photos>1?'s':'')+' of the original card</span>':'')+'</div></div></div>';
+  (s.card&&R.card.photos?'<span class="muted" style="font-size:12px">Includes '+R.card.photos+' photo'+(R.card.photos>1?'s':'')+' of the original card</span>':'')+'</div></div></div>';
 }
 function shareSheet(){
  var s=shareInit(),sw=shareSwaps(),serv=shareServ(),to=shareTo(),names=to.map(function(k){return PEOPLE[k]});
  var fmtName={card:'recipe card',link:'link',pdf:'PDF',text:'text'}[s.format];
  var head='<div class="between"><div><span class="kicker">'+(s.sent?'Shared':'Share')+'</span><h2 class="h2" style="font-size:22px;line-height:1.15">'+esc(R.title)+'</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>';
- if(s.sent){var inc=[serv+' servings'];if(s.swaps&&sw.length)inc.push(sw.length+' swap'+(sw.length>1?'s':''));if(s.notes)inc.push('ratings and notes');if(s.card&&s.format!=='text')inc.push('the original card');
+ if(s.sent){var inc=[serv+' servings'];if(s.swaps&&sw.length)inc.push(sw.length+' swap'+(sw.length>1?'s':''));if(s.notes)inc.push('ratings and notes');if(s.card&&s.format!=='text'&&R.card.photos)inc.push('the original card');
   return '<div class="sheet sharesheet" role="dialog" aria-modal="true" aria-label="Shared '+esc(R.title)+'">'+head+
    '<div class="shdone" role="status"><span class="shtick"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><b style="font-family:var(--disp);font-size:20px;line-height:1.2">Sent to '+esc(nameList(names))+'</b><span class="muted" style="font-size:13px;line-height:1.45">As a '+fmtName+', with '+esc(nameList(inc))+'.'+(s.msg?' Your note went with it.':'')+'</span>'+avStack(to,5)+'</div>'+
    (s.msg?'<p class="cardnote" style="margin:0">“'+esc(s.msg)+'”</p>':'')+
    '<div class="row" style="gap:10px"><button class="secondary" style="flex:1" data-act="shareagain">Share again</button><button class="primary" style="flex:1;height:52px;font-size:15px" data-closesheet="1">Done</button></div>'+
    '<span class="muted" style="font-size:12px;line-height:1.4;text-align:center">Prototype: nothing was actually sent.</span></div>'}
- var T=[['swaps','Include our swaps',sw.length?sw.map(function(it){return shownName(it).toLowerCase()+' for '+it.name.toLowerCase()}).join(', '):'No swaps chosen on this recipe yet',!sw.length],['notes','Include ratings and notes','Your cook log stays private unless this is on',false],['card','Include the original card',s.format==='text'?'Photos cannot go in plain text':R.card.photos+' photo'+(R.card.photos>1?'s':'')+' of Ashley’s card',s.format==='text']];
+ var T=[['swaps','Include our swaps',sw.length?sw.map(function(it){return shownName(it).toLowerCase()+' for '+it.name.toLowerCase()}).join(', '):'No swaps chosen on this recipe yet',!sw.length],['notes','Include ratings and notes','Your cook log stays private unless this is on',false],['card','Include the original card',!R.card.photos?'This recipe has no card photos':s.format==='text'?'Photos cannot go in plain text':R.card.photos+' photo'+(R.card.photos>1?'s':'')+' of Ashley’s card',s.format==='text'||!R.card.photos]];
  return '<div class="sheet sharesheet" role="dialog" aria-modal="true" aria-label="Share '+esc(R.title)+'">'+head+
   '<div class="seg" role="group" aria-label="Share as" style="grid-template-columns:repeat(4,1fr)">'+[['card','Card'],['link','Link'],['pdf','PDF'],['text','Text']].map(function(x){return '<button data-sharefmt="'+x[0]+'" aria-pressed="'+(s.format===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
   sharePreview()+

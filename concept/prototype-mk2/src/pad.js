@@ -25,7 +25,7 @@ function homePad(){
  '</div></div>'+
  tagBar()+useItUp()+'<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Cook with what you have</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+
   [['#F2C200','Lemons','piccata'],['#9CBF5A','Lemongrass','thai'],['#2E9E4F','Green onion','cajun'],['#6CBF3A','Limes','thai'],['#E9B98C','Chicken','cajun']].map(function(c){return '<button class="chip" data-open="'+c[2]+'" style="height:40px;font-size:15px"><span class="dot" style="background:'+c[0]+'"></span>'+c[1]+'</button>'}).join('')+'</div></div>'+
- '<div style="display:flex;flex-direction:column;gap:12px"><p class="kicker">From Ashley’s recipe cards</p><div class="rgrid">'+
+ '<div style="display:flex;flex-direction:column;gap:12px"><p class="kicker">From the family library</p><div class="rgrid">'+
   tagList().map(function(id,i){var r=RECIPES[id],q=r.card.questions.length;
    return '<button class="rcard" data-open="'+id+'" aria-label="Open '+esc(r.title)+'">'+fpBar(r,120)+
    '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;width:100%"><div class="between" style="min-height:22px"><span class="kicker" style="color:#111">'+(i===0&&!S.tag?'Tonight\'s pick':r.kicker.split(' · ')[0])+'</span>'+cooked(id)+'</div>'+
