@@ -549,7 +549,7 @@ document.addEventListener('click',function(e){
  if(d.planpick){var pp=d.planpick.split(':');PLAN[pp[0]]=pp[1];closeSheet();keep(render);toast(RECIPES[pp[1]].title+' planned for '+DAYS[+pp[0]][0]);return}
  if(d.libf){S.lib.f=d.libf;keep(render);return}
  if(d.libs){S.lib.s=d.libs;keep(render);return}
- if(d.libtag){S.lib.tag=S.lib.tag===d.libtag?null:d.libtag;keep(render);return}
+ if(d.libtag){S.lib.tag=S.lib.tag===d.libtag?null:d.libtag;closeSheet();keep(render);return}
  if(d.libsave){S.saved[d.libsave]=!S.saved[d.libsave];keep(render);return}
  if(d.libmore){S.lib.more=!S.lib.more;keep(render);return}
  if(d.ptog){P[d.ptog]=!P[d.ptog];document.getElementById('phone').classList.toggle('hc',!!P.hc);applyTheme();openProfile(true);return}
@@ -600,6 +600,7 @@ document.addEventListener('click',function(e){
   case 'hfsheet':openHf();break;
   case 'importcard':openImport();break;
   case 'sendqs':toast('Sent '+openQCount()+' question'+(openQCount()===1?'':'s')+' to Ashley (sharing is mocked)');break;
+  case 'libtags':openLibTags();break;
   case 'profile':openProfile();break;
   case 'sharesend':closeSheet();toast('Sharing is mocked in this prototype');break;
   case 'sharecopy':toast('Copy link is mocked in this prototype');break;

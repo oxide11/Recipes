@@ -401,3 +401,13 @@ button.badge.solid{background:#111;color:#fff}
 #phone.dark .pencil g{stroke:#111}
 #phone.dark .rail{border-right-color:#D6D6D1}
 body.darkstage #phone{border-color:#000}
+
+/* ---- calmer library controls ---- */
+.libctl,.ipad .libctl{display:block}
+.libbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:-6px}
+.libpick{height:36px;padding:0 4px;border:none;background:none;font-size:14px;font-weight:600;cursor:pointer;text-decoration:underline;text-decoration-color:#C9C9C4;text-underline-offset:4px}
+.libpick .muted{font-weight:500;text-decoration:none;display:inline-block}
+.libpick.on{padding:0 12px;border-radius:999px;background:#111;color:#fff;text-decoration:none}
+.tagrow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;border:none;border-bottom:1px solid #ECECE8;background:none;text-align:left;font-size:15px;cursor:pointer;padding:0 4px}
+.tagrow.on b::before{content:"✓ "}
+.tagrow span{font-size:13px}

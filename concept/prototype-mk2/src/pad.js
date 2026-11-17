@@ -281,8 +281,10 @@ function libraryView(){
    '<button class="secondary" style="height:44px;padding:0 16px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border-color:#111" data-act="importcard">+ Add</button></div>'+
   '<label class="row searchf" style="animation:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search your recipes</span><input id="libq" type="search" placeholder="Search by name or ingredient" value="'+esc(L.q||'')+'"></label>'+
   '<div class="libctl"><div class="seg" role="group" aria-label="Show" style="grid-template-columns:repeat(4,1fr)">'+F.map(function(f){return '<button data-libf="'+f[0]+'" aria-pressed="'+(L.f===f[0])+'">'+f[1]+' <span style="opacity:.7;font-weight:500">'+cnt[f[0]]+'</span></button>'}).join('')+'</div>'+
-   '<div class="seg" role="group" aria-label="Sort by" style="grid-template-columns:repeat(3,1fr)">'+SO.map(function(s){return '<button data-libs="'+s[0]+'" aria-pressed="'+(L.s===s[0])+'">'+s[1]+'</button>'}).join('')+'</div></div>'+
-  '<div class="libtags" role="group" aria-label="Filter by tag">'+tk.map(function(t){return '<button class="badge'+(L.tag===t?' solid':'')+'" data-libtag="'+esc(t)+'" aria-pressed="'+(L.tag===t)+'">'+esc(t)+' <span style="opacity:.65;font-weight:500;margin-left:4px">'+tags[t]+'</span></button>'}).join('')+'</div>'+
+   '</div>'+
+  '<div class="libbar"><button class="libpick" data-libs="'+SO[(SO.map(function(s){return s[0]}).indexOf(L.s)+1)%SO.length][0]+'" aria-label="Sort: '+SO.filter(function(s){return s[0]===L.s})[0][1]+'. Tap to change"><span class="muted">Sort</span> '+SO.filter(function(s){return s[0]===L.s})[0][1]+'</button>'+
+   (L.tag?'<button class="libpick on" data-libtag="'+esc(L.tag)+'" aria-label="Remove tag filter '+esc(L.tag)+'">'+esc(L.tag)+' <span aria-hidden="true">×</span></button>':'')+
+   '<button class="libpick" data-act="libtags" aria-haspopup="dialog" style="margin-left:auto">'+(L.tag?'Change tag':'Filter by tag')+'</button></div>'+
   '<div class="libgrid" id="liblist">'+libList()+'</div>'+
   '<section class="card acard" style="gap:12px"><div class="between" style="gap:12px;align-items:flex-start"><div><span class="kicker">Still on paper</span><p style="margin:4px 0 0;font-size:14px;line-height:1.45;color:#2B2B28">'+PAPER.length+' more of Ashley’s cards are transcribed but not built into the app yet.</p></div></div>'+
    '<div class="papergrid">'+paper.map(function(n){return '<button class="paperrow" data-toast="'+esc(n)+' is transcribed but not built yet"><span class="cardthumb sm" aria-hidden="true" style="transform:none;width:26px;height:32px;padding:5px 4px;gap:3px"><i></i><i style="width:70%"></i><i></i></span>'+esc(n)+'</button>'}).join('')+'</div>'+
@@ -373,3 +375,11 @@ function shopAllView(){
   '</div>'+(needs.length?'<div class="bottombar"'+(pad?'':' style="bottom:84px"')+'><button class="primary" data-act="shopalldone"'+(inCart?'':' disabled')+'>'+(inCart?'Add '+inCart+' to pantry':'Tick items as you shop')+'</button></div>':'')+(pad?'':tabbar('shopall'));
 }
 initPantry();
+
+function openLibTags(){
+ var el=document.getElementById('sheet'),tags={};RECIPE_ORDER.forEach(function(id){RECIPES[id].tags.forEach(function(t){tags[t[0]]=(tags[t[0]]||0)+1})});
+ var tk=Object.keys(tags).sort(function(x,y){return tags[y]-tags[x]||x.localeCompare(y)});
+ el.innerHTML='<div class="sheetwrap" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="Filter by tag"><div class="between"><div><span class="kicker">Recipes</span><h2 class="h2" style="font-size:20px">Filter by tag</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  '<div style="display:flex;flex-direction:column">'+tk.map(function(t){var on=S.lib.tag===t;return '<button class="tagrow'+(on?' on':'')+'" data-libtag="'+esc(t)+'" aria-pressed="'+on+'"><b>'+esc(t)+'</b><span class="muted">'+tags[t]+' recipe'+(tags[t]>1?'s':'')+'</span></button>'}).join('')+'</div></div></div>';
+ var b=el.querySelector('.iconbtn');if(b)b.focus();
+}
