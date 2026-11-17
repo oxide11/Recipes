@@ -94,3 +94,20 @@
 .aside{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:16px}
 .port .aside{grid-template-columns:1fr 1fr}
 .wblk .wicons{width:auto;min-width:92px;max-width:130px}
+
+.dock,.ipad .dock{flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px}
+.dockrow{flex:1;min-width:230px}
+.dk{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.clockbtn{position:relative;width:60px;height:60px;padding:2px;border:none;border-radius:999px;background:none;flex-shrink:0;animation:dockin .35s cubic-bezier(.2,.8,.2,1)}
+.clockbtn .mr{display:block}
+.clockbtn .clk2{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:12px;font-variant-numeric:tabular-nums}
+.ringbtn{border:none;background:none;padding:0;display:flex;flex-shrink:0}
+
+.safe{display:inline-flex;align-items:center;gap:6px;flex-wrap:nowrap;width:max-content;height:32px;padding:0 12px 0 9px;border-radius:999px;border:1.5px solid #111;font-size:13px;line-height:1;color:#111;cursor:pointer}
+.safe b{font-family:'Space Grotesk',sans-serif;font-size:15px}
+.safe span{color:#111;font-weight:600}
+.safe.big,.ipad .safe.big{height:40px;padding:0 16px 0 12px;font-size:15px;color:#111}
+.safe.big b,.ipad .safe.big b{font-size:19px}.safe.big span{color:#111}
+.tempbox{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 8px;border-radius:16px;border:1.5px solid #111}
+.tempbox b{font-family:'Space Grotesk',sans-serif;font-size:34px;line-height:1}
+.tempbox span{font-size:12px;font-weight:600;color:#3A3A38}

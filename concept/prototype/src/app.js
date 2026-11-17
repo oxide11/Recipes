@@ -95,7 +95,7 @@ function A(key){
 }
 
 /* ================= SAFE TEMPERATURES ================= */
-var SAFE={poultry:{f:165,c:74,note:'thickest part, juices run clear'},seafood:{f:145,c:63,note:'opaque and firm all the way through'}};
+var SAFE={poultry:{f:165,c:74,note:'thickest part. The juices should run clear'},seafood:{f:145,c:63,note:'thickest piece. It should be opaque and firm all the way through'}};
 var THERMO='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13.5V5a2 2 0 0 1 4 0v8.5a4.5 4.5 0 1 1-4 0z"/><path d="M12 9v8"/></svg>';
 function safeFor(st){
  if(!st.protein)return null;var it=ing(st.protein);if(!it)return null;
@@ -104,8 +104,18 @@ function safeFor(st){
  return {name:shownName(it),f:SAFE[key].f,c:SAFE[key].c,note:SAFE[key].note};
 }
 function safeBadge(st,big){
- var s=safeFor(st);if(!s)return '';
- return '<div class="safe'+(big?' big':'')+'" role="note" aria-label="Safe temperature for '+esc(s.name)+': '+s.f+' degrees Fahrenheit, '+s.c+' Celsius">'+THERMO+'<b>'+s.f+'°F / '+s.c+'°C</b><span>'+esc(s.name)+' is safe at this internal temperature: '+esc(s.note)+'</span></div>';
+ var s=safeFor(st);if(!s)return '';var it=ing(st.protein);
+ return '<button class="safe'+(big?' big':'')+'" data-safe="'+STEPS.indexOf(st)+'" style="background:'+colorOf(it)+'40;border-color:'+edgeOf(it)+'" aria-label="Safe temperature for '+esc(s.name)+': '+s.f+' degrees Fahrenheit, '+s.c+' Celsius. Show details">'+THERMO+'<b>'+s.f+'°F</b><span>'+esc(s.name)+'</span></button>';
+}
+function openSafe(i){
+ var st=STEPS[i],s=safeFor(st);if(!s)return;var it=ing(st.protein),el=document.getElementById('sheet');
+ el.innerHTML='<div class="sheetwrap" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="Safe temperature for '+esc(s.name)+'">'+
+  '<div class="between"><div class="row" style="gap:10px">'+icon(it.icon[0][0],34)+'<div><span class="kicker">Safe temperature</span><h2 class="h2" style="font-size:20px">'+esc(s.name)+'</h2></div></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="tempbox" style="background:'+colorOf(it)+'40;border-color:'+edgeOf(it)+'"><b>'+s.f+'°F</b><span>Fahrenheit</span></div><div class="tempbox" style="background:'+colorOf(it)+'40;border-color:'+edgeOf(it)+'"><b>'+s.c+'°C</b><span>Celsius</span></div></div>'+
+  '<p style="margin:0;font-size:15px;line-height:1.5">Measure the internal temperature at the '+esc(s.note)+'.</p>'+
+  '<p class="muted" style="margin:0;font-size:13px;line-height:1.45">Step '+(i+1)+', “'+esc(stepTitle(st))+'”. USDA minimum internal temperature. Changes automatically if you swap the protein.</p>'+
+ '</div></div>';
+ var c=el.querySelector('.iconbtn');if(c)c.focus();
 }
 
 /* ================= SHELL ================= */
@@ -361,13 +371,16 @@ function updateTimerDom(){
  if(S.screen!=='cook')return;
  var dock=document.getElementById('dock');if(!dock)return;
  var keys=activeTimers();
- var sig=keys.map(function(k){var t=S.timers[k];return k+(t.running?'r':'p')+(t.left<=0?'d':'')}).join(',')+'|'+S.step;
+ var n=keys.length;
+ function open(k){var t=S.timers[k];return n===1||S.dockOpen===k||t.left<=0||t.left/t.total<=.25||t.left<=20}
+ var sig=keys.map(function(k){var t=S.timers[k];return k+(t.running?'r':'p')+(t.left<=0?'d':'')+(open(k)?'o':'c')}).join(',')+'|'+S.step;
  if(sig!==dockSig||!dock.dataset.built){
   dockSig=sig;dock.dataset.built='1';setTimeout(fitSteps,0);
-  dock.innerHTML=keys.map(function(k){var t=S.timers[k],v=timerView(t),here=+k===S.step;
+  dock.innerHTML=keys.map(function(k){var t=S.timers[k],v=timerView(t),here=+k===S.step,soon=!v.done&&(t.left/t.total<=.25||t.left<=20);
+   if(!open(k))return '<button class="clockbtn" data-k="'+k+'" data-dockopen="'+k+'" aria-label="'+esc(STEPS[k].label+' timer, step '+(+k+1)+'. Show details')+'"><span class="mr mot">'+miniRing(56,v.col,v.f)+'</span><b class="clk2"></b></button>';
    return '<div class="dockrow'+(v.done?' done':'')+'" data-k="'+k+'">'+
-    '<span class="mr mot">'+miniRing(here?52:40,v.col,v.f)+'</span>'+
-    '<span style="flex:1;display:flex;flex-direction:column;min-width:0"><b class="clk2" style="font-family:\'Space Grotesk\';font-size:'+(here?24:18)+'px;font-variant-numeric:tabular-nums;line-height:1.1"></b><span style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(STEPS[k].label)+(here?'':' · step '+(+k+1))+'</span></span>'+
+    '<button class="ringbtn" data-dockopen="'+k+'" aria-label="Collapse timer"><span class="mr mot">'+miniRing(52,v.col,v.f)+'</span></button>'+
+    '<span style="flex:1;display:flex;flex-direction:column;min-width:0"><span class="dk">'+(v.done?'Time is up':soon?'Almost done':t.running?'Running':'Paused')+' · step '+(+k+1)+'</span><b class="clk2" style="font-family:\'Space Grotesk\';font-size:24px;font-variant-numeric:tabular-nums;line-height:1.1"></b><span style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(STEPS[k].label)+' · '+esc(stepTitle(STEPS[k]))+'</span></span>'+
     (v.done?'<button class="dbtn" data-dismiss="'+k+'" aria-label="Dismiss timer" style="background:#fff;color:#111;width:auto;padding:0 16px;font-weight:700;font-size:14px">OK</button>':
     '<button class="dbtn light" data-tplus="'+k+'" aria-label="Add 30 seconds">+30</button><button class="dbtn" data-ttoggle="'+k+'" aria-label="'+(t.running?'Pause':'Resume')+' timer">'+playIcon(t.running)+'</button>')+'</div>'}).join('');
  }
@@ -467,6 +480,8 @@ document.addEventListener('click',function(e){
  if(d.strike){var on=S.struck[d.strike]=!S.struck[d.strike];el.classList.toggle('struck',on);el.setAttribute('aria-pressed',on);
   var ls=stepLines(STEPS[S.step]),all=ls.every(function(_,j){return S.struck[S.step+':'+j]});
   var nb=scr.querySelector('[data-act="next"]');if(nb)nb.classList.toggle('glow',all);var h=scr.querySelector('.hint');if(h)h.innerHTML=all?'<b style="color:#111">Step done.</b> On to the next one.':'Tap a line to cross it off. Tap an ingredient to change its units.';return}
+ if(d.safe){openSafe(+d.safe);return}
+ if(d.dockopen){S.dockOpen=S.dockOpen===d.dockopen?null:d.dockopen;updateTimerDom();return}
  if(d.ttoggle){var tt=S.timers[d.ttoggle];tt.running=!tt.running;updateTimerDom();return}
  if(d.tplus){var tp=S.timers[d.tplus];tp.left+=30;tp.total=Math.max(tp.total,tp.left);updateTimerDom();return}
  if(d.dismiss){S.timers[d.dismiss].ack=true;updateTimerDom();return}
@@ -492,7 +507,7 @@ document.addEventListener('click',function(e){
   case 'revert':{var id2=S.focus;delete S.swaps[id2];S.picked[id2]=null;if(isPad()){closeSheet();keep(render);toast('Back to '+ing(id2).name.toLowerCase());break}S.focus=null;S.zoom='out';render();toast('Back to '+ing(id2).name.toLowerCase());break}
   case 'shopdone':ING.forEach(function(it){if(S.cart[it.id])S.have[it.id]=true});S.cart={};go(isPad()?'recipe':'ingredients',-1);toast('Shopping done. Everything is ready');break;
   case 'startcook':S.step=0;S.started=Date.now();S.struck={};go('cook');break;
-  case 'tstart':{var ts=timerOf(S.step);ts.started=true;ts.running=true;var c0=scr.querySelector('.startcard');if(c0){c0.style.transition='all .3s';c0.style.transform='translateY(40px) scale(.6)';c0.style.opacity='0';setTimeout(function(){c0.remove();fitSteps()},300)}updateTimerDom();break}
+  case 'tstart':{var ts=timerOf(S.step);ts.started=true;ts.running=true;S.dockOpen=null;var c0=scr.querySelector('.startcard');if(c0){c0.style.transition='all .3s';c0.style.transform='translateY(40px) scale(.6)';c0.style.opacity='0';setTimeout(function(){c0.remove();fitSteps()},300)}updateTimerDom();break}
   case 'prev':if(S.step>0){S.step--;dockSig='';S.dir=-1;render(true)}break;
   case 'next':{var cur=S.timers[S.step];if(cur&&cur.left<=0)cur.ack=true;dockSig='';if(S.step<STEPS.length-1){S.step++;S.dir=1;render(true)}else go('done');break}
   case 'finish':(LOG[R.id]=LOG[R.id]||[]).push({rating:S.rating,swaps:Object.keys(S.swaps).length,note:S.note});Object.keys(S.timers).forEach(function(k){S.timers[k].running=false});toast('Saved to your cooking log');setTimeout(function(){go('home',-1);recipeSeg()},900);break;
