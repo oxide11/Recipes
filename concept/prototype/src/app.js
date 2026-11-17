@@ -34,6 +34,16 @@ function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;
 /* ================= STATE ================= */
 var S;
 var LOG={};
+function seedLog(){LOG={
+ cajun:[
+  {date:'Oct 12',who:'Ashley',mins:29,rating:5,swapList:[],note:'',sample:1},
+  {date:'Oct 24',who:'Moussa',mins:34,rating:4,swapList:[],note:'Chicken strips were too thick. Slice thinner.',sample:1},
+  {date:'Nov 2',who:'Ashley',mins:31,rating:4,swapList:['Penne for linguine','1 cup cream for 1½ cups'],note:'Less cream next time.',sample:1},
+  {date:'Nov 9',who:'Moussa',mins:27,rating:5,swapList:['Penne for linguine'],note:'Sauce reduced nicely. Keep the heat low once the cream goes in.',sample:1}],
+ thai:[
+  {date:'Nov 5',who:'Moussa',mins:38,rating:4,swapList:['Chicken for shrimp'],note:'The chicken needed 8 minutes in the broth.',sample:1}]
+}}
+seedLog();
 var D={device:'phone',orient:'landscape'},SCALE=1;
 function isPad(){return D.device==='ipad'}
 function isLand(){return isPad()&&D.orient==='landscape'}
@@ -44,7 +54,7 @@ function loadRecipe(id){
  var sw={};ING.forEach(function(it){if(it.profile)sw[it.id]=it.profile});
  var have={};for(var k in R.have)have[k]=true;
  S.recipe=id;S.mode='weight';S.swaps=sw;S.have=have;S.focus=null;S.picked={};S.zoom=null;S.cart={};S.units={};S.struck={};
- S.servings=R.base;S.tab='overview';S.step=0;S.timers={};S.rating=0;S.photo=null;S.started=null;S.note='';S.share={format:'card',swaps:true,notes:false,card:true,scale:false};
+ S.servings=R.base;S.tab='overview';S.step=0;S.timers={};S.cookOpen=null;S.cooksAll=false;S.rating=0;S.photo=null;S.started=null;S.note='';S.share={format:'card',swaps:true,notes:false,card:true,scale:false};
 }
 loadRecipe('cajun');
 function F(){return S.servings/R.base}
@@ -228,7 +238,7 @@ function recipe(){
   body='<section class="card" style="padding:18px 10px 20px;margin:0 -10px;display:flex;flex-direction:column;gap:14px">'+
   '<div class="between" style="padding:0 8px"><h2 class="h2">Where it all goes</h2><span class="muted" style="font-size:12px;font-weight:600">'+M.cap+' · total '+sk.total+'</span></div>'+
   '<div class="seg" role="group" aria-label="Measure by" style="grid-template-columns:repeat(4,1fr)">'+Object.keys(MODES).map(function(k){return '<button data-mode="'+k+'" aria-pressed="'+(k===S.mode)+'">'+MODES[k].label+'</button>'}).join('')+'</div>'+
-  '<span class="muted" style="font-size:12px;padding:0 8px;margin-top:-6px">Tap an ingredient to see its swaps.</span>'+sk.html+'<p class="insight"><strong>'+ins[0]+'</strong> '+ins[1]+'</p></section>'+cardSection();
+  '<span class="muted" style="font-size:12px;padding:0 8px;margin-top:-6px">Tap an ingredient to see its swaps.</span>'+sk.html+'<p class="insight"><strong>'+ins[0]+'</strong> '+ins[1]+'</p></section>'+cardSection()+cooksCard();
  } else if(tab==='ingredients'){
   var prof=ING.filter(function(it){return it.profile&&S.swaps[it.id]===it.profile});
   body='<section style="display:flex;flex-direction:column"><div class="between" style="padding-bottom:4px"><span class="kicker">For '+S.servings+' serving'+(S.servings>1?'s':'')+'</span><span class="muted" style="font-size:12px">Tap an amount to convert</span></div>'+
@@ -492,6 +502,7 @@ document.addEventListener('click',function(e){
  if(d.strike){var on=S.struck[d.strike]=!S.struck[d.strike];el.classList.toggle('struck',on);el.setAttribute('aria-pressed',on);
   var ls=stepLines(STEPS[S.step]),all=ls.every(function(_,j){return S.struck[S.step+':'+j]});
   var nb=scr.querySelector('[data-act="next"]');if(nb)nb.classList.toggle('glow',all);var h=scr.querySelector('.hint');if(h)h.innerHTML=all?'<b style="color:#111">Step done.</b> On to the next one.':'Tap a line to cross it off. Tap an ingredient to change its units.';return}
+ if(d.cook){S.cookOpen=S.cookOpen===+d.cook?null:+d.cook;keep(render);return}
  if(d.safe){openSafe(+d.safe);return}
  if(d.dockopen){S.dockOpen=S.dockOpen===d.dockopen?null:d.dockopen;updateTimerDom();return}
  if(d.ttoggle){var tt=S.timers[d.ttoggle];tt.running=!tt.running;updateTimerDom();return}
@@ -511,6 +522,7 @@ document.addEventListener('click',function(e){
  if(d.rate){S.rating=+d.rate;keep(render);return}
  switch(d.act){
   case 'save':S.saved[R.id]=!S.saved[R.id];keep(render);toast(S.saved[R.id]?'Saved to your recipes':'Removed from saved');break;
+  case 'cooksall':S.cooksAll=!S.cooksAll;keep(render);break;
   case 'share':openShare();break;
   case 'sharesend':closeSheet();toast('Sharing is mocked in this prototype');break;
   case 'sharecopy':toast('Copy link is mocked in this prototype');break;
@@ -522,9 +534,9 @@ document.addEventListener('click',function(e){
   case 'tstart':{var ts=timerOf(S.step);ts.started=true;ts.running=true;S.dockOpen=null;var c0=scr.querySelector('.startcard');if(c0){c0.style.transition='all .3s';c0.style.transform='translateY(40px) scale(.6)';c0.style.opacity='0';setTimeout(function(){c0.remove();fitSteps()},300)}updateTimerDom();break}
   case 'prev':if(S.step>0){S.step--;dockSig='';S.dir=-1;render(true)}break;
   case 'next':{var cur=S.timers[S.step];if(cur&&cur.left<=0)cur.ack=true;dockSig='';if(S.step<STEPS.length-1){S.step++;S.dir=1;render(true)}else go('done');break}
-  case 'finish':(LOG[R.id]=LOG[R.id]||[]).push({rating:S.rating,swaps:Object.keys(S.swaps).length,note:S.note});Object.keys(S.timers).forEach(function(k){S.timers[k].running=false});toast('Saved to your cooking log');setTimeout(function(){go('home',-1);recipeSeg()},900);break;
+  case 'finish':(LOG[R.id]=LOG[R.id]||[]).push({date:'Today',who:'You',mins:S.started?Math.max(1,Math.round((Date.now()-S.started)/60000)):0,rating:S.rating,swapList:ING.filter(function(it){return S.swaps[it.id]}).map(function(it){return shownName(it)+' for '+it.name.toLowerCase()}),note:S.note});Object.keys(S.timers).forEach(function(k){S.timers[k].running=false});toast('Saved to your cooking log');setTimeout(function(){go('home',-1);recipeSeg()},900);break;
  }
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();var t=e.target;if((e.key==='Enter'||e.key===' ')&&t.dataset&&(t.dataset.strike||t.dataset.conv||t.dataset.focus)&&t.tagName!=='BUTTON'){e.preventDefault();t.click()}});
-document.getElementById('restart').addEventListener('click',function(){closeSheet();LOG={};freshGlobal();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
+document.getElementById('restart').addEventListener('click',function(){closeSheet();seedLog();freshGlobal();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
 speedSeg();recipeSeg();devSeg();fit();render(true);

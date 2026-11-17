@@ -279,6 +279,51 @@ var NUT={
   stock:{stockcube2:[5,.3,.5,.2],vegstock:[6,0,1.3,0],whitewine2:[100,0,3,0],water2:[100,0,0,11]},
   parsley:{chives3:[5,.5,.7,.1],basil2:[4,.5,.4,.1],dill:[1,0,.2,0],noparsley:[0,0,0,0]}}
 };
+/* Swap sets for the smaller ingredients, so every ingredient can be swapped */
+function S4(center,branches,traits,rows){return {center:center,branches:branches,traits:traits,leaves:rows.map(function(x){return L(x[0],x[1],x[2],x[3],x[4])})}}
+function addSet(rid,iid,set,nut){RECIPES[rid].SETS[iid]=set;NUT[rid][iid]=nut}
+addSet('cajun','greenonion',S4('Green onion',['Closest','Sweeter'],['Sharp','Sweet','Fresh'],[
+ ['chives','Chives','2 tbsp','Milder and grassy. Stir in at the very end.',[2,2,5]],
+ ['redonion','Red onion','2 tbsp, minced','Sharper. Cook it for a minute in the butter first.',[4,3,3]],
+ ['shallotg','Shallot','1 small','Sweet and gentle. Soften it before the cream goes in.',[2,5,3]],
+ ['leekg','Leek','¼ cup, sliced','Soft and sweet. Use the pale part.',[1,4,3]]]),
+ {chives:[2,.2,.3,0],redonion:[8,.2,2,0],shallotg:[20,.7,4.5,0],leekg:[14,.3,3,0]});
+addSet('cajun','cajun',S4('Cajun seasoning',['Closest','Pantry'],['Heat','Smoke','Salt'],[
+ ['creole','Creole seasoning','1 : 1','More herbs, a little less heat.',[3,2,4]],
+ ['blackened','Blackening spice','1 : 1','Smokier, with more paprika.',[4,4,3]],
+ ['paprikacay','Paprika + cayenne','1½ tsp + ¼ tsp','Add a pinch of garlic powder and salt.',[4,3,1]],
+ ['oldbay','Old Bay','2 tsp','Celery-salt forward. Skip the added salt.',[2,1,5]]]),
+ {creole:[15,.5,2,.3],blackened:[15,.5,2,.3],paprikacay:[14,.6,2.5,.5],oldbay:[5,0,1,0]});
+addSet('thai','oil',S4('Vegetable oil',['Closest','Richer'],['Flavour','Heat limit','Richness'],[
+ ['avocadoo','Avocado oil','1 : 1','Neutral and handles high heat well.',[1,5,3]],
+ ['peanut','Peanut oil','1 : 1','Classic for Thai cooking. A peanut, not a tree nut.',[3,5,3]],
+ ['coconutoil','Coconut oil','1 : 1','Echoes the coconut milk.',[4,3,4]],
+ ['gheeo','Ghee','1 : 1','Buttery and tolerant of heat.',[4,4,5]]]),
+ {avocadoo:[124,0,0,14],peanut:[119,0,0,14],coconutoil:[121,0,0,14],gheeo:[125,0,0,14]});
+addSet('thai','ginger',S4('Ginger',['Closest','Pantry'],['Heat','Citrus','Fresh'],[
+ ['galangal','Galangal','1 : 1','The traditional choice. Sharper and more citrusy.',[3,5,4]],
+ ['frozenginger','Frozen ginger','1 : 1','Grate it straight from the freezer.',[4,3,4]],
+ ['gingerpaste','Ginger paste','1 tbsp','From a tube or jar.',[3,2,2]],
+ ['groundginger','Ground ginger','½ tsp','Warmer and flatter. Add it with the broth.',[3,1,1]]]),
+ {galangal:[9,.1,2,0],frozenginger:[10,.2,2,0],gingerpaste:[10,.2,2,0],groundginger:[3,.1,.6,0]});
+addSet('thai','sugar',S4('Brown sugar',['Closest','Liquid'],['Sweet','Caramel','Dissolves'],[
+ ['palm','Palm sugar','1 : 1','The traditional choice. Deeper and less sharp.',[4,5,3]],
+ ['white','White sugar','1 : 1','Clean sweetness, no caramel note.',[5,1,5]],
+ ['honey','Honey','2 tsp','Floral. Stir in at the end.',[5,2,5]],
+ ['maple','Maple syrup','1 tbsp','Round and mellow.',[4,4,5]]]),
+ {palm:[48,0,12,0],white:[49,0,13,0],honey:[43,0,12,0],maple:[52,0,13,0]});
+addSet('thai','lime',S4('Lime juice',['Closest','Pantry'],['Sour','Aroma','Sweet'],[
+ ['lemonj','Lemon juice','1 : 1','Softer and less floral.',[4,3,2]],
+ ['bottledlime','Bottled lime juice','1 : 1','Fine in a pinch.',[4,1,2]],
+ ['ricevin','Rice vinegar','1 tbsp','Sour without the citrus. Add slowly.',[4,1,2]],
+ ['tamarind','Tamarind paste','1 tsp','Fruity and tangy.',[4,3,4]]]),
+ {lemonj:[7,0,2,0],bottledlime:[8,0,3,0],ricevin:[3,0,0,0],tamarind:[12,0,3,0]});
+addSet('piccata','oil',S4('Olive oil',['Closest','Lighter'],['Flavour','Heat limit','Richness'],[
+ ['avocadop','Avocado oil','1 : 1','Neutral and handles the frying heat well.',[1,5,3]],
+ ['gheep','Ghee','1 : 1','Buttery, and it will not burn.',[4,4,5]],
+ ['rapeseedp','Rapeseed oil','1 : 1','Clean, neutral and inexpensive.',[1,4,3]],
+ ['sprayp','Oil spray','a light coat','Much lighter. Lean on the butter for flavour.',[1,3,1]]]),
+ {avocadop:[620,0,0,70],gheep:[625,0,0,70],rapeseedp:[620,0,0,70],sprayp:[30,0,0,3]});
 NUT.piccata.chicken=NUT.cajun.chicken;
 Object.keys(NUT).forEach(function(rid){Object.keys(NUT[rid]).forEach(function(iid){var set=RECIPES[rid].SETS[iid];if(!set)return;set.leaves.forEach(function(l){if(NUT[rid][iid][l.id])l.nut=NUT[rid][iid][l.id]})})});
 var RECIPE_ORDER=['cajun','thai','piccata'];

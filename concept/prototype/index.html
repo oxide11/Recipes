@@ -306,6 +306,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 .swapbtn::before{content:"";position:absolute;inset:-5px}
 .swapbtn:hover{border-color:#111;color:#111}
 .swapbtn.on{background:#111;border-color:#111;color:#fff}
+
+.acard{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.cookrow{border-bottom:1px solid #ECECE8}
+.cookrow:last-child{border-bottom:none}
+.cookrow>button{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:6px 0;border:none;background:none;text-align:left;font-size:13px}
+.cookrow>button svg{transition:transform .2s;flex-shrink:0}
+.cookrow.open>button svg{transform:rotate(180deg)}
+.cookbody{display:flex;flex-direction:column;gap:8px;padding:2px 0 12px 34px;font-size:13px;animation:fade .2s}
 </style>
 </head>
 <body>
@@ -699,6 +707,51 @@ var NUT={
   stock:{stockcube2:[5,.3,.5,.2],vegstock:[6,0,1.3,0],whitewine2:[100,0,3,0],water2:[100,0,0,11]},
   parsley:{chives3:[5,.5,.7,.1],basil2:[4,.5,.4,.1],dill:[1,0,.2,0],noparsley:[0,0,0,0]}}
 };
+/* Swap sets for the smaller ingredients, so every ingredient can be swapped */
+function S4(center,branches,traits,rows){return {center:center,branches:branches,traits:traits,leaves:rows.map(function(x){return L(x[0],x[1],x[2],x[3],x[4])})}}
+function addSet(rid,iid,set,nut){RECIPES[rid].SETS[iid]=set;NUT[rid][iid]=nut}
+addSet('cajun','greenonion',S4('Green onion',['Closest','Sweeter'],['Sharp','Sweet','Fresh'],[
+ ['chives','Chives','2 tbsp','Milder and grassy. Stir in at the very end.',[2,2,5]],
+ ['redonion','Red onion','2 tbsp, minced','Sharper. Cook it for a minute in the butter first.',[4,3,3]],
+ ['shallotg','Shallot','1 small','Sweet and gentle. Soften it before the cream goes in.',[2,5,3]],
+ ['leekg','Leek','¼ cup, sliced','Soft and sweet. Use the pale part.',[1,4,3]]]),
+ {chives:[2,.2,.3,0],redonion:[8,.2,2,0],shallotg:[20,.7,4.5,0],leekg:[14,.3,3,0]});
+addSet('cajun','cajun',S4('Cajun seasoning',['Closest','Pantry'],['Heat','Smoke','Salt'],[
+ ['creole','Creole seasoning','1 : 1','More herbs, a little less heat.',[3,2,4]],
+ ['blackened','Blackening spice','1 : 1','Smokier, with more paprika.',[4,4,3]],
+ ['paprikacay','Paprika + cayenne','1½ tsp + ¼ tsp','Add a pinch of garlic powder and salt.',[4,3,1]],
+ ['oldbay','Old Bay','2 tsp','Celery-salt forward. Skip the added salt.',[2,1,5]]]),
+ {creole:[15,.5,2,.3],blackened:[15,.5,2,.3],paprikacay:[14,.6,2.5,.5],oldbay:[5,0,1,0]});
+addSet('thai','oil',S4('Vegetable oil',['Closest','Richer'],['Flavour','Heat limit','Richness'],[
+ ['avocadoo','Avocado oil','1 : 1','Neutral and handles high heat well.',[1,5,3]],
+ ['peanut','Peanut oil','1 : 1','Classic for Thai cooking. A peanut, not a tree nut.',[3,5,3]],
+ ['coconutoil','Coconut oil','1 : 1','Echoes the coconut milk.',[4,3,4]],
+ ['gheeo','Ghee','1 : 1','Buttery and tolerant of heat.',[4,4,5]]]),
+ {avocadoo:[124,0,0,14],peanut:[119,0,0,14],coconutoil:[121,0,0,14],gheeo:[125,0,0,14]});
+addSet('thai','ginger',S4('Ginger',['Closest','Pantry'],['Heat','Citrus','Fresh'],[
+ ['galangal','Galangal','1 : 1','The traditional choice. Sharper and more citrusy.',[3,5,4]],
+ ['frozenginger','Frozen ginger','1 : 1','Grate it straight from the freezer.',[4,3,4]],
+ ['gingerpaste','Ginger paste','1 tbsp','From a tube or jar.',[3,2,2]],
+ ['groundginger','Ground ginger','½ tsp','Warmer and flatter. Add it with the broth.',[3,1,1]]]),
+ {galangal:[9,.1,2,0],frozenginger:[10,.2,2,0],gingerpaste:[10,.2,2,0],groundginger:[3,.1,.6,0]});
+addSet('thai','sugar',S4('Brown sugar',['Closest','Liquid'],['Sweet','Caramel','Dissolves'],[
+ ['palm','Palm sugar','1 : 1','The traditional choice. Deeper and less sharp.',[4,5,3]],
+ ['white','White sugar','1 : 1','Clean sweetness, no caramel note.',[5,1,5]],
+ ['honey','Honey','2 tsp','Floral. Stir in at the end.',[5,2,5]],
+ ['maple','Maple syrup','1 tbsp','Round and mellow.',[4,4,5]]]),
+ {palm:[48,0,12,0],white:[49,0,13,0],honey:[43,0,12,0],maple:[52,0,13,0]});
+addSet('thai','lime',S4('Lime juice',['Closest','Pantry'],['Sour','Aroma','Sweet'],[
+ ['lemonj','Lemon juice','1 : 1','Softer and less floral.',[4,3,2]],
+ ['bottledlime','Bottled lime juice','1 : 1','Fine in a pinch.',[4,1,2]],
+ ['ricevin','Rice vinegar','1 tbsp','Sour without the citrus. Add slowly.',[4,1,2]],
+ ['tamarind','Tamarind paste','1 tsp','Fruity and tangy.',[4,3,4]]]),
+ {lemonj:[7,0,2,0],bottledlime:[8,0,3,0],ricevin:[3,0,0,0],tamarind:[12,0,3,0]});
+addSet('piccata','oil',S4('Olive oil',['Closest','Lighter'],['Flavour','Heat limit','Richness'],[
+ ['avocadop','Avocado oil','1 : 1','Neutral and handles the frying heat well.',[1,5,3]],
+ ['gheep','Ghee','1 : 1','Buttery, and it will not burn.',[4,4,5]],
+ ['rapeseedp','Rapeseed oil','1 : 1','Clean, neutral and inexpensive.',[1,4,3]],
+ ['sprayp','Oil spray','a light coat','Much lighter. Lean on the butter for flavour.',[1,3,1]]]),
+ {avocadop:[620,0,0,70],gheep:[625,0,0,70],rapeseedp:[620,0,0,70],sprayp:[30,0,0,3]});
 NUT.piccata.chicken=NUT.cajun.chicken;
 Object.keys(NUT).forEach(function(rid){Object.keys(NUT[rid]).forEach(function(iid){var set=RECIPES[rid].SETS[iid];if(!set)return;set.leaves.forEach(function(l){if(NUT[rid][iid][l.id])l.nut=NUT[rid][iid][l.id]})})});
 var RECIPE_ORDER=['cajun','thai','piccata'];
@@ -739,6 +792,16 @@ function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;
 /* ================= STATE ================= */
 var S;
 var LOG={};
+function seedLog(){LOG={
+ cajun:[
+  {date:'Oct 12',who:'Ashley',mins:29,rating:5,swapList:[],note:'',sample:1},
+  {date:'Oct 24',who:'Moussa',mins:34,rating:4,swapList:[],note:'Chicken strips were too thick. Slice thinner.',sample:1},
+  {date:'Nov 2',who:'Ashley',mins:31,rating:4,swapList:['Penne for linguine','1 cup cream for 1½ cups'],note:'Less cream next time.',sample:1},
+  {date:'Nov 9',who:'Moussa',mins:27,rating:5,swapList:['Penne for linguine'],note:'Sauce reduced nicely. Keep the heat low once the cream goes in.',sample:1}],
+ thai:[
+  {date:'Nov 5',who:'Moussa',mins:38,rating:4,swapList:['Chicken for shrimp'],note:'The chicken needed 8 minutes in the broth.',sample:1}]
+}}
+seedLog();
 var D={device:'phone',orient:'landscape'},SCALE=1;
 function isPad(){return D.device==='ipad'}
 function isLand(){return isPad()&&D.orient==='landscape'}
@@ -749,7 +812,7 @@ function loadRecipe(id){
  var sw={};ING.forEach(function(it){if(it.profile)sw[it.id]=it.profile});
  var have={};for(var k in R.have)have[k]=true;
  S.recipe=id;S.mode='weight';S.swaps=sw;S.have=have;S.focus=null;S.picked={};S.zoom=null;S.cart={};S.units={};S.struck={};
- S.servings=R.base;S.tab='overview';S.step=0;S.timers={};S.rating=0;S.photo=null;S.started=null;S.note='';S.share={format:'card',swaps:true,notes:false,card:true,scale:false};
+ S.servings=R.base;S.tab='overview';S.step=0;S.timers={};S.cookOpen=null;S.cooksAll=false;S.rating=0;S.photo=null;S.started=null;S.note='';S.share={format:'card',swaps:true,notes:false,card:true,scale:false};
 }
 loadRecipe('cajun');
 function F(){return S.servings/R.base}
@@ -933,7 +996,7 @@ function recipe(){
   body='<section class="card" style="padding:18px 10px 20px;margin:0 -10px;display:flex;flex-direction:column;gap:14px">'+
   '<div class="between" style="padding:0 8px"><h2 class="h2">Where it all goes</h2><span class="muted" style="font-size:12px;font-weight:600">'+M.cap+' · total '+sk.total+'</span></div>'+
   '<div class="seg" role="group" aria-label="Measure by" style="grid-template-columns:repeat(4,1fr)">'+Object.keys(MODES).map(function(k){return '<button data-mode="'+k+'" aria-pressed="'+(k===S.mode)+'">'+MODES[k].label+'</button>'}).join('')+'</div>'+
-  '<span class="muted" style="font-size:12px;padding:0 8px;margin-top:-6px">Tap an ingredient to see its swaps.</span>'+sk.html+'<p class="insight"><strong>'+ins[0]+'</strong> '+ins[1]+'</p></section>'+cardSection();
+  '<span class="muted" style="font-size:12px;padding:0 8px;margin-top:-6px">Tap an ingredient to see its swaps.</span>'+sk.html+'<p class="insight"><strong>'+ins[0]+'</strong> '+ins[1]+'</p></section>'+cardSection()+cooksCard();
  } else if(tab==='ingredients'){
   var prof=ING.filter(function(it){return it.profile&&S.swaps[it.id]===it.profile});
   body='<section style="display:flex;flex-direction:column"><div class="between" style="padding-bottom:4px"><span class="kicker">For '+S.servings+' serving'+(S.servings>1?'s':'')+'</span><span class="muted" style="font-size:12px">Tap an amount to convert</span></div>'+
@@ -1197,6 +1260,7 @@ document.addEventListener('click',function(e){
  if(d.strike){var on=S.struck[d.strike]=!S.struck[d.strike];el.classList.toggle('struck',on);el.setAttribute('aria-pressed',on);
   var ls=stepLines(STEPS[S.step]),all=ls.every(function(_,j){return S.struck[S.step+':'+j]});
   var nb=scr.querySelector('[data-act="next"]');if(nb)nb.classList.toggle('glow',all);var h=scr.querySelector('.hint');if(h)h.innerHTML=all?'<b style="color:#111">Step done.</b> On to the next one.':'Tap a line to cross it off. Tap an ingredient to change its units.';return}
+ if(d.cook){S.cookOpen=S.cookOpen===+d.cook?null:+d.cook;keep(render);return}
  if(d.safe){openSafe(+d.safe);return}
  if(d.dockopen){S.dockOpen=S.dockOpen===d.dockopen?null:d.dockopen;updateTimerDom();return}
  if(d.ttoggle){var tt=S.timers[d.ttoggle];tt.running=!tt.running;updateTimerDom();return}
@@ -1216,6 +1280,7 @@ document.addEventListener('click',function(e){
  if(d.rate){S.rating=+d.rate;keep(render);return}
  switch(d.act){
   case 'save':S.saved[R.id]=!S.saved[R.id];keep(render);toast(S.saved[R.id]?'Saved to your recipes':'Removed from saved');break;
+  case 'cooksall':S.cooksAll=!S.cooksAll;keep(render);break;
   case 'share':openShare();break;
   case 'sharesend':closeSheet();toast('Sharing is mocked in this prototype');break;
   case 'sharecopy':toast('Copy link is mocked in this prototype');break;
@@ -1227,11 +1292,11 @@ document.addEventListener('click',function(e){
   case 'tstart':{var ts=timerOf(S.step);ts.started=true;ts.running=true;S.dockOpen=null;var c0=scr.querySelector('.startcard');if(c0){c0.style.transition='all .3s';c0.style.transform='translateY(40px) scale(.6)';c0.style.opacity='0';setTimeout(function(){c0.remove();fitSteps()},300)}updateTimerDom();break}
   case 'prev':if(S.step>0){S.step--;dockSig='';S.dir=-1;render(true)}break;
   case 'next':{var cur=S.timers[S.step];if(cur&&cur.left<=0)cur.ack=true;dockSig='';if(S.step<STEPS.length-1){S.step++;S.dir=1;render(true)}else go('done');break}
-  case 'finish':(LOG[R.id]=LOG[R.id]||[]).push({rating:S.rating,swaps:Object.keys(S.swaps).length,note:S.note});Object.keys(S.timers).forEach(function(k){S.timers[k].running=false});toast('Saved to your cooking log');setTimeout(function(){go('home',-1);recipeSeg()},900);break;
+  case 'finish':(LOG[R.id]=LOG[R.id]||[]).push({date:'Today',who:'You',mins:S.started?Math.max(1,Math.round((Date.now()-S.started)/60000)):0,rating:S.rating,swapList:ING.filter(function(it){return S.swaps[it.id]}).map(function(it){return shownName(it)+' for '+it.name.toLowerCase()}),note:S.note});Object.keys(S.timers).forEach(function(k){S.timers[k].running=false});toast('Saved to your cooking log');setTimeout(function(){go('home',-1);recipeSeg()},900);break;
  }
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();var t=e.target;if((e.key==='Enter'||e.key===' ')&&t.dataset&&(t.dataset.strike||t.dataset.conv||t.dataset.focus)&&t.tagName!=='BUTTON'){e.preventDefault();t.click()}});
-document.getElementById('restart').addEventListener('click',function(){closeSheet();LOG={};freshGlobal();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
+document.getElementById('restart').addEventListener('click',function(){closeSheet();seedLog();freshGlobal();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
 
 
 /* ================= DEVICE ================= */
@@ -1316,10 +1381,19 @@ function timeCard(){
   (best?'<span style="font-size:13px;line-height:1.45;color:#3A3A38">Longest free stretch: '+best.w+' min during “'+esc(best.t)+'”.</span>':'')+'</section>';
 }
 function cooksCard(){
- var log=LOG[R.id]||[];
- return '<section class="card acard"><span class="kicker">Your cooks</span>'+
-  (log.length?log.slice(-3).reverse().map(function(c,i){return '<div class="row" style="gap:10px;font-size:13px;line-height:1.4;align-items:flex-start"><span class="pnum" style="width:24px;height:24px;font-size:11px">'+(log.length-i)+'</span><span>'+(c.rating?'<b>'+'★★★★★'.slice(0,c.rating)+'</b>':'Not rated')+' · '+c.swaps+' swap'+(c.swaps===1?'':'s')+(c.note?'<br><span class="muted">“'+esc(c.note)+'”</span>':'')+'</span></div>'}).join(''):
-  '<span style="font-size:13px;line-height:1.45;color:#3A3A38">Not cooked yet. Your ratings, swaps and notes will collect here after each cook.</span>')+'</section>';
+ var log=LOG[R.id]||[],n=log.length;
+ if(!n)return '<section class="card acard"><span class="kicker">Your cooks</span><span style="font-size:13px;line-height:1.45;color:#3A3A38">Not cooked yet. Your ratings, swaps and notes will collect here after each cook.</span></section>';
+ var rated=log.filter(function(c){return c.rating}),avg=rated.length?(rated.reduce(function(a,c){return a+c.rating},0)/rated.length).toFixed(1):'–';
+ var timed=log.filter(function(c){return c.mins}),am=timed.length?Math.round(timed.reduce(function(a,c){return a+c.mins},0)/timed.length):0;
+ var idx=log.map(function(_,i){return i}).reverse();if(!S.cooksAll)idx=idx.slice(0,3);
+ return '<section class="card acard"><div class="between"><span class="kicker">Your cooks</span><span style="font-size:13px"><b>'+n+'</b> cook'+(n>1?'s':'')+' · <b>★ '+avg+'</b>'+(am?' · '+am+' min avg':'')+'</span></div>'+
+  '<div style="display:flex;flex-direction:column">'+idx.map(function(i){var c=log[i],open=S.cookOpen===i,sw=c.swapList||[];
+   return '<div class="cookrow'+(open?' open':'')+'"><button data-cook="'+i+'" aria-expanded="'+open+'"><span class="pnum" style="width:24px;height:24px;font-size:11px">'+(i+1)+'</span><span style="flex:1;min-width:0"><b>'+(c.rating?'★★★★★'.slice(0,c.rating)+'<span style="color:#BDBDB8">'+'★★★★★'.slice(c.rating)+'</span>':'Not rated')+'</b> · '+esc(c.date||'')+' · '+esc(c.who||'You')+'</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>'+
+    (open?'<div class="cookbody">'+(c.mins?'<span><b>'+c.mins+' min</b> start to plate</span>':'')+
+     (sw.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+sw.map(function(x){return '<span class="badge" style="height:24px;font-size:11px">'+esc(x)+'</span>'}).join('')+'</div>':'<span class="muted">Cooked as written, no swaps</span>')+
+     (c.note?'<p class="cardnote" style="margin:0">“'+esc(c.note)+'”</p>':'')+'</div>':'')+'</div>'}).join('')+'</div>'+
+  (n>3?'<button class="linkbtn" data-act="cooksall">'+(S.cooksAll?'Show fewer':'Show all '+n+' cooks')+'</button>':'')+
+  (log.some(function(c){return c.sample})?'<span class="muted" style="font-size:11px">Earlier entries are sample data for the prototype.</span>':'')+'</section>';
 }
 function ingRowPad(it){
  var li=LINE[it.id]?lineInfo(it.id):null,sw=S.swaps[it.id],lf=sw?leafOf(it.id,sw):null,qty=li?li.qty:(lf&&lf.ratio!=='1 : 1'?lf.ratio:scaleQty(it.amt,F()));
