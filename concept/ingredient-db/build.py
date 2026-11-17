@@ -4,7 +4,8 @@
 Inputs (see README for where they come from):
   raw/official_sr28/*.txt      USDA National Nutrient Database for Standard Reference, official sr28asc.zip
                                (falls back to raw/USDA-SR28, a GitHub mirror of the same files)
-  raw/cnfx/*.csv               Canadian Nutrient File (Health Canada)
+  raw/official_cnf2026/*.csv   Canadian Nutrient File 2026 (Health Canada), official download
+                               (falls back to raw/cnfx, the 2015 edition, for French names only)
   raw/food-shelflife-db/...    USDA FSIS FoodKeeper shelf-life table
   overlay/curated.csv          our hand-kept list: canonical ingredients, aliases, which USDA food each maps to
 
@@ -59,7 +60,7 @@ for r in sr('NUT_DATA'):
 weights = defaultdict(list)
 for r in sr('WEIGHT'):
     try:
-        weights[r[0]].append((float(r[2]), r[3].strip(), float(r[4])))
+        weights[r[0]].append((float(r[2]), r[3].strip(), float(r[4]), 'usda'))
     except ValueError:
         pass
 
@@ -87,11 +88,12 @@ def clean_form(s):
 def parse_measures(ndb):
     """-> (portions list, density g/ml or None, density basis, unit weights dict)"""
     portions, dens, units = [], [], {}
-    for amount, desc, grams in weights.get(ndb, []):
+    for amount, desc, grams, src in weights.get(ndb, []):
         if amount <= 0 or grams <= 0:
             continue
         d = desc.strip()
         p = {'amount': amount if amount != int(amount) else int(amount), 'measure': d, 'grams': round(grams, 2)}
+        if src != 'usda': p['source'] = src
         m = VOL_RE.match(d)
         if m:
             u = m.group(1).lower().replace('.', '')
@@ -312,29 +314,94 @@ def shelf(names):
             if skey(kk) == skey(nm): return rec
     return None
 
+# ---------------------------------------------------------------- Canadian Nutrient File 2026 (official): second source
+CNF = os.path.join(RAW, 'official_cnf2026')
+cnf_link, cnf_only, cnf_nut, cnf_yield, cnf_refuse = {}, [], defaultdict(dict), defaultdict(list), {}
+CNF_MEAS = re.compile(r'^(\d+(?:[.,]\d+)?)\s*(ml|l|tsp|tbsp|cup|cups|g|kg)?\b\s*(.*)$', re.I)
+def cnf_rows(name):
+    with open(os.path.join(CNF, name), encoding='utf-8-sig', newline='') as f:
+        for row in csv.DictReader(f): yield row
+if os.path.isdir(CNF):
+    sr_ids = {r[0] for r in sr('FOOD_DES')}
+    mname = {r['Measure_Code']: r['Measure_Description_and_Unit_EN'].strip() for r in cnf_rows('Measure_Name.csv')}
+    cnf_foods = {r['Food_Code']: r for r in cnf_rows('Food_Name.csv')}
+    target = {}                                   # CNF food code -> key in our foods table
+    for code, r in cnf_foods.items():
+        ndb = r['USDA_NDB_Code'].strip().zfill(5) if r['USDA_NDB_Code'].strip() else ''
+        if ndb in sr_ids:
+            target[code] = ndb
+            cnf_link.setdefault(ndb, r)           # first Canadian food linked to this USDA food
+        else:
+            target[code] = 'cnf:' + code
+            cnf_only.append(r)
+    for r in cnf_rows('Measure_Weight_Conversion.csv'):
+        code, kind, desc = r['Food_Code'], r['Measure_Type_Code'], mname.get(r['Measure_Code'], '')
+        if code not in target or not desc: continue
+        try: val = float(r['Measure_Weight_Conversion'])
+        except ValueError: continue
+        key = target[code]
+        if kind == '3': cnf_refuse[key] = (val, desc)
+        elif kind == '9': cnf_yield[key].append({'description': desc, 'value': round(val, 2)})
+        elif kind == '6' and val > 0:
+            if not key.startswith('cnf:') and cnf_link.get(key, {}).get('Food_Code') != code: continue
+            m = CNF_MEAS.match(desc)
+            if not m: continue
+            amount = float(m.group(1).replace(',', '.')); unit = (m.group(2) or '').lower(); rest = m.group(3).strip(' ,')
+            if unit in ('g', 'kg') or amount <= 0: continue
+            if unit: d = {'l': 'liter', 'cups': 'cup'}.get(unit, unit) + (', ' + rest if rest else '')
+            else: d = rest or 'item'
+            weights[key].append((amount, d, val, 'cnf'))
+    wanted = set(NUTR)
+    for r in cnf_rows('Nutrient_Amount.csv'):
+        if r['Nutrient_Code'] in wanted and target.get(r['Food_Code'], '').startswith('cnf:'):
+            f_, _, d_ = NUTR[r['Nutrient_Code']]
+            try: v = round(float(r['Nutrient_Amount']), d_)
+            except ValueError: continue
+            cnf_nut[target[r['Food_Code']]][f_] = int(v) if d_ == 0 else v
+
 # ---------------------------------------------------------------- foods table
 foods = OrderedDict()
-for r in sr('FOOD_DES'):
-    ndb, grp, long_desc, manuf, sci = r[0], r[1], r[2].strip(), r[5].strip(), r[9].strip()
-    refuse = r[8]
+def add_food(key, grp, long_desc, manuf, sci, refuse, refuse_note, n, source):
     state, states = state_of(long_desc)
-    portions, density, basis, units = parse_measures(ndb)
-    n = nut.get(ndb, {})
-    rec = OrderedDict(id='usda:' + ndb, description=long_desc, group=GROUPS.get(grp, grp),
+    portions, density, basis, units = parse_measures(key)
+    rec = OrderedDict(id=key if ':' in key else 'usda:' + key, source=source, description=long_desc, group=GROUPS.get(grp, grp),
                       kind=kind_of(grp, long_desc, manuf), state=state, aisle=aisle_of(grp, long_desc, state))
     if sci: rec['scientific_name'] = sci
-    fr = french(long_desc)
-    if fr: rec['description_fr'] = fr[0]; rec['cnf_food_id'] = int(fr[1])
-    if refuse not in ('', '0'):
-        try: rec['refuse_pct'] = int(float(refuse)); rec['refuse_note'] = r[7].strip()
+    link = cnf_link.get(key)
+    if source == 'cnf':
+        link = None
+    if link:
+        rec['description_fr'] = link['Food_Description_FR'].strip(); rec['cnf_food_code'] = int(link['Food_Code'])
+        alt = [a.strip() for a in re.split(r'[,;]', link['Alternate_Description_EN']) if a.strip()]
+        if alt: rec['alt_names'] = alt
+    elif source == 'usda' and not os.path.isdir(CNF):
+        fr = french(long_desc)
+        if fr: rec['description_fr'] = fr[0]; rec['cnf_food_code'] = int(fr[1])
+    if refuse not in ('', '0', None):
+        try: rec['refuse_pct'] = int(float(refuse)); rec['refuse_note'] = refuse_note
         except ValueError: pass
     rec['per_100g'] = OrderedDict((f, n[f]) for f, _, _ in NUTR.values() if f in n)
     if density: rec['density_g_per_ml'] = density; rec['density_basis'] = basis
     if units: rec['unit_weights_g'] = units
     rec['measures'] = portions
+    if cnf_yield.get(key): rec['yields'] = cnf_yield[key]
     rec['allergens'] = allergens_of(grp, long_desc)
     rec['diet'] = diet_of(grp, long_desc)
-    foods[ndb] = rec
+    foods[key] = rec
+    return rec
+
+for r in sr('FOOD_DES'):
+    add_food(r[0], r[1], r[2].strip(), r[5].strip(), r[9].strip(), r[8], r[7].strip(), nut.get(r[0], {}), 'usda')
+for r in cnf_only:
+    key = 'cnf:' + r['Food_Code']
+    if 'energy_kcal' not in cnf_nut.get(key, {}): continue
+    grp = '%02d00' % int(r['CNF_Food_Group_Code'])
+    ref = cnf_refuse.get(key)
+    rec = add_food(key, grp, r['Food_Description_EN'].strip(), '', r['ScientificName'].strip(), ref[0] if ref else None, ref[1] if ref else '', cnf_nut[key], 'cnf')
+    rec['description_fr'] = r['Food_Description_FR'].strip(); rec['cnf_food_code'] = int(r['Food_Code'])
+    alt = [a.strip() for a in re.split(r'[,;]', r['Alternate_Description_EN']) if a.strip()]
+    if alt: rec['alt_names'] = alt
+    if r['USDA_NDB_Code'].strip(): rec['usda_ndb_not_in_sr28'] = r['USDA_NDB_Code'].strip()
 
 # ---------------------------------------------------------------- ingredient concepts (automatic)
 GENERIC_TEMPLATES = {
@@ -409,6 +476,8 @@ def find_food(expr):
     """expr: 'usda:01001' or words that must all appear / '!word' must not. Picks the best-scoring match."""
     if expr.startswith('usda:'):
         return expr[5:] if expr[5:] in foods else None
+    if expr.startswith('cnf:'):
+        return expr if expr in foods else None
     must = [w.lower() for w in expr.split() if not w.startswith('!')]
     mustnot = [w[1:].lower() for w in expr.split() if w.startswith('!')]
     best = None
@@ -499,7 +568,9 @@ kinds = defaultdict(int)
 for r in foods.values(): kinds[r['kind']] += 1
 ing_foods = [r for r in foods.values() if r['kind'] == 'ingredient']
 stats = OrderedDict(
-    foods_total=len(foods), foods_by_kind=dict(kinds),
+    foods_total=len(foods), foods_from_usda=sum(1 for r in foods.values() if r['source'] == 'usda'), foods_from_cnf=sum(1 for r in foods.values() if r['source'] == 'cnf'),
+    foods_by_kind=dict(kinds), measures_from_cnf=sum(1 for r in foods.values() for p in r['measures'] if p.get('source') == 'cnf'),
+    foods_with_cooking_yield=sum(1 for r in foods.values() if r.get('yields')),
     foods_with_density=sum(1 for r in foods.values() if r.get('density_g_per_ml')),
     foods_with_unit_weights=sum(1 for r in foods.values() if r.get('unit_weights_g')),
     foods_with_french=sum(1 for r in foods.values() if r.get('description_fr')),
