@@ -685,4 +685,107 @@ function draftsSection(){
 }
 var libraryView0=libraryView;
 libraryView=function(){var h=libraryView0(),mk='<section class="card acard" style="gap:12px"><div class="between" style="gap:12px;align-items:flex-start"><div><span class="kicker">Still on paper</span>',j=h.indexOf(mk);return j<0?h:h.slice(0,j)+draftsSection()+h.slice(j)};
+
+/* ---- plan: use it up, leftovers, plan the week ---- */
+var LEFT={},XTRA={},AUTO=[];
+var COOKX={'cooked chicken':{from:{cajun:1,piccata:1},how:'2 extra chicken breasts, cooked plain'}};
+function leftN(id){var r=RECIPES[id];return r.base>12?0:Math.max(0,r.base-P.serv)}
+function dayOf(id){var out=-1;Object.keys(PLAN).forEach(function(d){if(PLAN[d].indexOf(id)>-1&&out<0)out=+d});return out}
+function leftClean(){Object.keys(LEFT).forEach(function(k){var p=k.split(':');if(!PLAN[p[0]]||PLAN[p[0]].indexOf(p[1])<0)delete LEFT[k]});Object.keys(XTRA).forEach(function(k){var p=k.split(':'),t=XTRA[k].split(':');if(!PLAN[p[0]]||PLAN[p[0]].indexOf(p[1])<0||!PLAN[t[0]]||PLAN[t[0]].indexOf(t[1])<0)delete XTRA[k]})}
+function leftOn(day){var out=[];Object.keys(LEFT).forEach(function(k){if(LEFT[k].to===day){var p=k.split(':');out.push({from:+p[0],id:p[1]})}});return out}
+function dayFree(i){return !(PLAN[i]&&PLAN[i].length)&&!leftOn(i).length}
+function xtraFor(day,id){var r=RECIPES[id],out=null;Object.keys(COOKX).forEach(function(key){if(!COOKX[key].from[id])return;Object.keys(PLAN).forEach(function(d){if(+d<=day)return;PLAN[d].forEach(function(t){if(!out&&RECIPES[t].ING.some(function(it){return pKey(it)===key}))out={key:key,day:+d,id:t,gap:+d-day}})})});return out}
+function xtraCovered(day,id){var hit=null;Object.keys(XTRA).forEach(function(k){if(XTRA[k]===day+':'+id)hit=k});return hit}
+function expKeys(){return Object.keys(EXP).filter(function(k){return PAN[k]}).sort(function(a,b){return EXP[a]-EXP[b]})}
+function expCover(key,extra){var hit=null;DAYS.forEach(function(D0,d){if(hit||d>EXP[key])return;(PLAN[d]||[]).concat(extra&&extra[d]?[extra[d]]:[]).forEach(function(id){if(!hit&&RECIPES[id].ING.some(function(it){return pKey(it)===key}))hit={day:d,id:id}})});return hit}
+function expPick(key,taken,free){
+ var best=null,keys=expKeys();RECIPE_ORDER.forEach(function(id){if(taken[id])return;var r=RECIPES[id];if(!r.ING.some(function(it){return pKey(it)===key}))return;
+  var hits=keys.filter(function(k){return r.ING.some(function(it){return pKey(it)===k})}),c=coverage(id),sc=hits.length*10+c[0]/c[1]*5-(r.base>12?20:0);if(!best||sc>best.sc)best={id:id,sc:sc,hits:hits,miss:c[1]-c[0]}});
+ if(!best)return null;var day=-1;for(var d=0;d<DAYS.length&&d<=EXP[key];d++){if(free(d)){day=d;break}}
+ if(day<0)return null;best.day=day;return best;
+}
+function shortT(id){var r=RECIPES[id];return r.short||r.title}
+function useUpPlan(){
+ var keys=expKeys();if(!keys.length)return '';var taken={};planIds().forEach(function(id){taken[id]=1});
+ var open=0,rows=keys.map(function(k){var it=catItem(k);if(!it)return '';var cv=expCover(k),sug=cv?null:expPick(k,taken,dayFree),n=EXP[k];if(!cv)open++;
+  return '<div class="uprow"><span class="upic">'+icon(it.icon[0][0],30)+'</span><span class="uptxt"><b>'+esc(it.name)+' <em'+(n<=2?' class="soon"':'')+'>'+(n===0?'today':n+' day'+(n>1?'s':''))+'</em></b><span>'+(cv?'Used '+(cv.day===0?'tonight':DAYS[cv.day][1])+' in '+esc(shortT(cv.id)):sug?'Nothing planned before it turns':'Nothing planned, and no free day in time')+'</span></span>'+
+   (cv?'<span class="upok" aria-label="Covered"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.500 4.500L19 7.500"/></svg></span>':sug?'<button class="chip out upadd" data-planpick="'+sug.day+':'+sug.id+'">+ '+esc(shortT(sug.id))+' '+DAYS[sug.day][1]+'</button>':'')+'</div>'}).join('');
+ return '<section class="card acard" style="gap:6px"><div class="between"><span class="kicker" style="color:#111">Use it up</span><span class="muted" style="font-size:12px">'+(open?open+' of '+keys.length+' not in the plan yet':'All '+keys.length+' covered by the plan')+'</span></div>'+rows+'</section>';
+}
+function autoBuild(){
+ var out=[],taken={},byDay={},freeSet={};planIds().forEach(function(id){taken[id]=1});DAYS.forEach(function(D0,d){freeSet[d]=dayFree(d)});
+ function free(d){return freeSet[d]}
+ expKeys().forEach(function(k){if(expCover(k,byDay))return;var s=expPick(k,taken,free);if(!s)return;var it=s.hits.map(function(h){var c=catItem(h);return c?c.name.toLowerCase():h});
+  out.push({day:s.day,id:s.id,why:'Uses your '+nameList(it)+' before '+(it.length>1?'they turn':'it turns')});taken[s.id]=1;byDay[s.day]=s.id;freeSet[s.day]=false});
+ var cooked=[];DAYS.forEach(function(D0,d){(PLAN[d]||[]).concat(byDay[d]?[byDay[d]]:[]).forEach(function(id){cooked.push({day:d,id:id})})});
+ cooked.sort(function(x,y){return leftN(y.id)-leftN(x.id)||x.day-y.day});
+ cooked.forEach(function(c){var n=leftN(c.id);if(n<2||LEFT[c.day+':'+c.id])return;for(var d=c.day+1;d<=c.day+3&&d<DAYS.length;d++){if(free(d)){out.push({day:d,left:c.id,from:c.day,n:n,why:n+' servings left from '+DAYS[c.day][0]+', no cooking'});freeSet[d]=false;return}}});
+ var buy={};planNeeds().forEach(function(x){buy[pKey(x.it)]=x.it.name.toLowerCase()});
+ DAYS.forEach(function(D0,d){if(!free(d))return;var best=null;RECIPE_ORDER.forEach(function(id){if(taken[id]||RECIPES[id].base>12)return;var r=RECIPES[id],c=coverage(id),sh=r.ING.filter(function(it){return buy[pKey(it)]&&!PAN[pKey(it)]}).map(function(it){return it.name.toLowerCase()}),sc=c[0]/c[1]*10+sh.length*2;if(!best||sc>best.sc)best={id:id,sc:sc,c:c,sh:sh}});
+  if(!best)return;out.push({day:d,id:best.id,why:best.c[0]+' of '+best.c[1]+' already in the pantry'+(best.sh.length?', shares '+nameList(best.sh.slice(0,2))+' with the rest of the week':'')});taken[best.id]=1;freeSet[d]=false});
+ out.sort(function(x,y){return x.day-y.day});return out;
+}
+function openAuto(){
+ AUTO=autoBuild();var el=document.getElementById('sheet'),body;
+ if(!AUTO.length)body='<p class="insight" style="margin:0">The week is already full. Remove a day’s recipe to get suggestions for it.</p>';
+ else body='<p class="muted" style="margin:0;font-size:13px;line-height:1.45">Only empty days are filled. Order of priority: food close to its date, then leftovers, then what your pantry already covers.</p>'+
+  '<div style="display:flex;flex-direction:column">'+AUTO.map(function(s){var D0=DAYS[s.day],t=s.left?'Leftover '+shortT(s.left):RECIPES[s.id].title;return '<div class="mrow" style="align-items:flex-start;padding:10px 0"><div class="pdate" style="min-height:48px;flex:0 0 44px"><b>'+D0[1]+'</b><span style="font-size:16px">'+D0[2]+'</span></div><span style="flex:1;min-width:0"><b>'+esc(t)+'</b><small style="display:block;line-height:1.4">'+esc(s.why)+'</small></span>'+(s.left?'<span class="badge" style="height:22px;font-size:11px;flex-shrink:0;border-style:dashed">Leftovers</span>':'')+'</div>'}).join('')+'</div>'+
+  '<button class="primary" data-act="planapply">Use this plan</button>';
+ el.innerHTML='<div class="sheetwrap" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="Suggested week"><div class="between"><div><span class="kicker">'+esc(KITCHENS[KCUR].name)+'</span><h2 class="h2" style="font-size:20px">Suggested for the empty days</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+body+'</div></div>';
+ var b=el.querySelector('.iconbtn');if(b)b.focus();
+}
+function autoApply(){AUTO.forEach(function(s){if(s.left){LEFT[s.from+':'+s.left]={to:s.day}}else{(PLAN[s.day]=PLAN[s.day]||[]).push(s.id);PLANBY[s.day+':'+s.id]='M'}});var n=AUTO.length;AUTO=[];closeSheet();keep(render);toast(n+' day'+(n===1?'':'s')+' filled in')}
+function openLeft(day,id){
+ var r=RECIPES[id],n=leftN(id),cur=LEFT[day+':'+id],x=xtraFor(day,id),xon=XTRA[day+':'+id],el=document.getElementById('sheet'),h='';
+ if(n){var opts=[];for(var d=day+1;d<=day+3&&d<DAYS.length;d++)opts.push(d);
+  h+='<p style="margin:0;font-size:15px;line-height:1.5">Makes '+r.base+', and you plan for '+P.serv+'. That leaves <b>'+n+' servings</b>.</p>'+
+   '<div style="display:flex;flex-direction:column;gap:8px"><span class="kicker" style="color:#111">Eat them again</span>'+(opts.length?'<div class="row" style="gap:8px;flex-wrap:wrap">'+opts.map(function(d){var on=cur&&cur.to===d,fr=dayFree(d)||on;return '<button class="chip'+(on?'':' out')+'" style="height:44px" aria-pressed="'+!!on+'" data-left="meal:'+day+':'+id+':'+d+'">'+DAYS[d][0]+(fr?'':' <span class="muted" style="font-weight:500">has a meal</span>')+'</button>'}).join('')+'</div><span class="muted" style="font-size:12px;line-height:1.4">Within three days, kept chilled.</span>':'<span class="muted" style="font-size:13px">The week ends here. Freeze them, or plan them next week.</span>')+'</div>'+
+   '<button class="opt" style="height:auto;min-height:52px;padding:8px 14px;text-align:left" aria-pressed="'+!!(cur&&cur.freeze)+'" data-left="freeze:'+day+':'+id+'"><span style="display:flex;flex-direction:column;gap:2px"><b style="font-size:15px">Freeze them</b><span class="muted" style="font-size:12px">'+n+' portions go into the pantry as a ready meal</span></span>'+(cur&&cur.freeze?'<span class="badge solid" style="height:22px;font-size:11px">Chosen</span>':'')+'</button>'}
+ if(x){var tr=RECIPES[x.id];h+='<div style="display:flex;flex-direction:column;gap:8px"><span class="kicker" style="color:#111">Cook extra for another recipe</span><button class="opt" style="height:auto;min-height:52px;padding:8px 14px;text-align:left;gap:10px" aria-pressed="'+!!xon+'" data-left="xtra:'+day+':'+id+':'+x.day+':'+x.id+'"><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b style="font-size:15px">'+esc(shortT(x.id))+' on '+DAYS[x.day][0]+'</b><span class="muted" style="font-size:12px;line-height:1.4">It needs '+x.key+'. Make '+COOKX[x.key].how+' while you are at it. '+(x.gap>3?x.gap+' days apart, so freeze it and thaw it on '+DAYS[x.day-1][0]+'.':'Keeps chilled until then.')+'</span></span>'+(xon?'<span class="badge solid" style="height:22px;font-size:11px;flex-shrink:0">Linked</span>':'')+'</button></div>'}
+ if(!n&&!x)h+='<p class="insight" style="margin:0">Nothing left over at '+P.serv+' servings, and no other recipe this week can use part of this one.</p>';
+ if(cur||xon)h+='<button class="secondary" data-left="clear:'+day+':'+id+'">Clear</button>';
+ el.innerHTML='<div class="sheetwrap" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="Leftovers from '+esc(r.title)+'"><div class="between"><div><span class="kicker">Leftovers · '+DAYS[day][0]+'</span><h2 class="h2" style="font-size:20px">'+esc(r.title)+'</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+h+'</div></div>';
+ var b=el.querySelector('.iconbtn');if(b)b.focus();
+}
+function leftAct(v){
+ var p=v.split(':'),k=p[0],key=p[1]+':'+p[2];
+ if(k==='open'){openLeft(+p[1],p[2]);return}
+ if(k==='meal'){LEFT[key]={to:+p[3]};closeSheet();keep(render);toast('Leftover '+shortT(p[2])+' planned for '+DAYS[+p[3]][0]);return}
+ if(k==='freeze'){LEFT[key]={freeze:true};closeSheet();keep(render);toast('Leftovers marked for the freezer');return}
+ if(k==='xtra'){if(XTRA[key])delete XTRA[key];else XTRA[key]=p[3]+':'+p[4];closeSheet();keep(render);return}
+ if(k==='clear'){delete LEFT[key];delete XTRA[key];closeSheet();keep(render);return}
+}
+var planNeeds0=planNeeds;
+planNeeds=function(){var got={};Object.keys(XTRA).forEach(function(k){var t=XTRA[k].split(':')[1];Object.keys(COOKX).forEach(function(key){got[key+'|'+RECIPES[t].title]=1;got[key+'|'+shortT(t)]=1})});
+ return planNeeds0().filter(function(x){var key=pKey(x.it);if(!COOKX[key])return true;x.for=x.for.filter(function(f){return !got[key+'|'+f]});return x.for.length>0})};
+function planView(){
+ leftClean();
+ var pad=isPad(),ids=planIds(),needs=planNeeds(),mins=0,nights=0;ids.forEach(function(id){mins+=myMins(id).m});DAYS.forEach(function(D0,i){if(!dayFree(i))nights++});
+ var anyFree=nights<DAYS.length;
+ var days=DAYS.map(function(D0,i){var list=PLAN[i]||[],lo=leftOn(i),today=i===0,prep=list.length>1,pm=prep?mergePlan(list.map(function(id){return RECIPES[id]})):null;
+  var date='<div class="pdate'+(today?' today':'')+'"><b>'+D0[1]+'</b><span>'+D0[2]+'</span></div>';
+  if(!list.length&&!lo.length)return '<div class="pday empty">'+date+'<button class="padd" data-planadd="'+i+'" aria-label="Add a recipe for '+D0[0]+'">+ Add a recipe</button></div>';
+  var lrows=lo.map(function(l){var r=RECIPES[l.id];return '<div class="pmeal pleftm"><button class="pmopen" data-left="open:'+l.from+':'+l.id+'" aria-label="Leftover '+esc(r.title)+'"><span class="libtxt" style="padding:11px 52px 11px 14px"><b style="font-size:16px">Leftover '+esc(shortT(l.id))+'</b><span class="muted">'+leftN(l.id)+' servings from '+DAYS[l.from][0]+' · reheat, no cooking</span></span></button><button class="iconbtn pdel" data-left="clear:'+l.from+':'+l.id+'" aria-label="Remove leftover '+esc(r.title)+' from '+D0[0]+'">'+SVG.close+'</button></div>'}).join('');
+  var meals=list.map(function(id,j){var r=RECIPES[id],c=coverage(id),t=myMins(id),cov=xtraCovered(i,id),miss=c[1]-c[0]-(cov?1:0),n=leftN(id),cur=LEFT[i+':'+id],x=xtraFor(i,id),xon=XTRA[i+':'+id],lt='';
+   if(xon)lt='Cooking extra for '+DAYS[+xon.split(':')[0]][1]+'’s '+esc(shortT(xon.split(':')[1]));
+   else if(cur&&cur.freeze)lt=n+' servings left · going in the freezer';
+   else if(cur)lt=n+' servings left · eating them '+DAYS[cur.to][0];
+   else if(n)lt=n+' servings left over';
+   else if(x)lt='Can cook extra for '+DAYS[x.day][1]+'’s '+esc(shortT(x.id));
+   var covFrom=cov?DAYS[+cov.split(':')[0]][0]:'';
+   return '<div class="pmeal"><button class="pmopen" data-open="'+id+'" aria-label="Open '+esc(r.title)+'"><span class="libfp">'+fpBar(r,60)+'</span><span class="libtxt" style="padding:11px 52px 11px 14px"><b style="font-size:17px">'+esc(r.title)+'</b><span class="muted">'+(t.yours?'':'~')+fmtMin(t.m)+' for you · '+(miss>0?miss+' to buy':'everything on hand')+(cov?' · cooked chicken from '+covFrom:'')+(KITCHENS[KCUR].members.length>1?' · added by '+PEOPLE[PLANBY[i+':'+id]||'M']:'')+'</span></span></button><button class="iconbtn pdel" data-plandel="'+i+':'+j+'" aria-label="Remove '+esc(r.title)+' from '+D0[0]+'">'+SVG.close+'</button></div>'+
+    (lt?'<div class="pleft"><span>'+lt+'</span><button class="linkbtn" style="font-size:13px" data-left="open:'+i+':'+id+'">'+(cur||xon?'Change':n?'Plan them':'Set up')+'</button></div>':'')}).join('');
+  var head='<div class="pdhead"><span class="kicker" style="color:#111">'+(today?'Tonight':D0[0])+(prep?' · prep day':!list.length?' · leftovers':'')+'</span>'+(prep?'<span class="muted" style="font-size:12px">'+list.length+' recipes · '+fmtS(pm.end)+'</span>':'')+'</div>';
+  return '<div class="pday'+(prep?' prep':'')+'">'+date+'<div class="pdcol">'+head+meals+lrows+
+   '<div class="pdfoot">'+(prep?'<button class="primary" style="height:44px;font-size:14px;width:auto;padding:0 18px" data-prep="'+i+'">Open prep session</button>':'')+'<button class="linkbtn" style="font-size:13px" data-planadd="'+i+'" aria-label="Add '+(list.length?'another':'a')+' recipe for '+D0[0]+'">'+(list.length?'+ Add another':'+ Add a recipe')+'</button></div></div></div>'}).join('');
+ var buy='<section class="card acard" style="gap:12px"><div class="between"><span class="kicker">To buy for this week</span><span style="font-size:13px"><b>'+needs.length+'</b> item'+(needs.length===1?'':'s')+'</span></div>'+
+  (needs.length?'<div style="display:flex;flex-direction:column">'+needs.slice(0,pad?99:6).map(function(x){return '<div class="row" style="gap:10px;min-height:44px;border-bottom:1px solid #ECECE8">'+icon(x.it.icon[0][0],28)+'<span style="flex:1;min-width:0;font-size:15px;font-weight:600;padding-left:8px;border-left:4px solid '+(x.it.edge||x.it.color)+'">'+esc(x.it.name)+'</span><span class="muted" style="font-size:12px;text-align:right">'+esc(x.for.join(', '))+'</span></div>'}).join('')+'</div>'+(!pad&&needs.length>6?'<span class="muted" style="font-size:13px">and '+(needs.length-6)+' more</span>':''):'<span style="font-size:14px">Nothing. The pantry covers the whole week.</span>')+
+  (needs.length?'<button class="secondary" style="height:44px;font-size:14px" data-go="shopall">Open the shopping list</button>':'')+'</section>';
+ return '<div class="pad">'+
+  kitchenBar()+'<div class="between" style="gap:12px;align-items:flex-end"><div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">November 16 to 22</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Plan</h1></div>'+(anyFree?'<button class="secondary" style="width:auto;height:44px;padding:0 16px;font-size:14px;white-space:nowrap;border-color:#111" data-act="planauto">Fill the week</button>':'')+'</div>'+
+  '<div class="stats" style="grid-template-columns:repeat(4,1fr)"><div><b>'+nights+' of 7</b><span>days planned</span></div><div><b>'+ids.length+'</b><span>recipes</span></div><div><b>'+fmtS(mins)+'</b><span>at your pace</span></div><div><b>'+needs.length+'</b><span>to buy</span></div></div>'+
+  '<div class="plangrid"><div class="pdays">'+days+'</div><div class="pside">'+useUpPlan()+buy+'</div></div>'+
+  '<p class="muted" style="margin:0;font-size:12px;line-height:1.45">Add more than one recipe to a day to make it a prep day. Leftovers assume you eat '+P.serv+' servings a meal (your default in Settings). The week is sample data.</p>'+
+  '</div>'+(pad?'':tabbar('plan'));
+}
 initMark2();

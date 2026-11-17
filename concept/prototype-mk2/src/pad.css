@@ -578,3 +578,27 @@ body.darkstage #phone{border-color:#000}
 .impspin{width:34px;height:34px;border-radius:999px;border:3px solid #D9D9D3;border-top-color:#111;animation:impspin .8s linear infinite;margin-bottom:6px}
 @keyframes impspin{to{transform:rotate(360deg)}}
 .ipad .sheet.impsheet{width:560px}
+
+/* ---- plan: use it up, leftovers ---- */
+.pside{display:flex;flex-direction:column;gap:20px;min-width:0}
+#screen .plangrid .pside{order:-1}
+.ipad #screen .plangrid .pside{order:0}
+.port #screen .plangrid .pside{order:-1}
+.uprow{display:flex;align-items:center;gap:10px;min-height:54px;padding:6px 0;border-bottom:1px solid #ECECE8}
+.uprow:last-child{border-bottom:none}
+.upic{flex-shrink:0;width:36px;display:flex;justify-content:center}
+.uptxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.uptxt b{font-size:15px}.uptxt b em{font-style:normal;font-weight:600;font-size:12px;color:var(--muted);margin-left:4px}
+.uptxt b em.soon{color:var(--bad)}
+.uptxt span{font-size:12px;color:var(--muted);line-height:1.35}
+.upok{flex-shrink:0;width:26px;height:26px;border-radius:999px;background:#111;display:flex;align-items:center;justify-content:center}
+.upadd{flex-shrink:0;height:40px;padding:0 12px;font-size:13px;border-color:#111;white-space:nowrap}
+.pleft{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 4px 2px 14px;font-size:13px;color:#3A3A38;min-height:28px}
+.pleft span{min-width:0}
+.pmeal.pleftm{border-style:dashed;border-color:#BDBDB6}
+.pmeal.pleftm .pmopen{background:#FBFBF8}
+
+/* ---- heart: no circle, larger ---- */
+.iconbtn[data-act="save"],.iconbtn.libsave{background:none!important;box-shadow:none;border:none}
+.iconbtn[data-act="save"] svg,.iconbtn.libsave svg{width:30px;height:30px}
+.ipad .iconbtn[data-act="save"] svg{width:32px;height:32px}
