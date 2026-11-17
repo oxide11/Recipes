@@ -88,10 +88,10 @@ Audit completed 2026-04-26. Items are grouped by category and sorted by severity
 - [ ] **MEDIUM** `DashboardView.swift:97-100` — `currentMealType` depends on `.now`, recalculated every render.
 - [ ] **LOW** `DashboardView.swift:41-44` — Cached state renders empty before `.task` populates; brief flicker on first render.
 
----
-
-*Last updated: 2026-10-21*
-
 ## Feature Ideas
 
 - [ ] **Nutritional goals** — Let the user set daily or per-meal targets (calories, protein, carbs, fat) and show how a recipe fits them. Ties into the concept work: the Calories view of the Sankey already splits each dish into macros, and the swap card shows how a substitution changes calories and macros per serving, so a goal could be shown against both. The meal plan already has calorie and protein targets to build on.
+
+---
+
+*Last updated: 2026-11-16*
