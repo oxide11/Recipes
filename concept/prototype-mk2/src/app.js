@@ -535,6 +535,7 @@ document.addEventListener('click',function(e){
  var el=e.target.closest('button,[data-go],[data-closesheet],[data-conv],[data-strike],[data-back],[data-open],[data-focus],[data-act]');if(!el)return;
  var d=el.dataset;
  if(d.device||d.orient){if(d.device)D.device=d.device;if(d.orient)D.orient=d.orient;closeSheet();S.focus=null;devSeg();fit();keep(render);return}
+ if(d.imp){impAct(d.imp);return}
  if(d.sharefmt){S.share.format=d.sharefmt;S.share.copied=false;openShare(true);return}
  if(d.shareto){S.share.to[d.shareto]=!S.share.to[d.shareto];openShare(true);return}
  if(d.shareserv){S.share.serv=Math.max(1,Math.min(24,shareServ()+(+d.shareserv)));openShare(true);return}
@@ -637,5 +638,5 @@ document.addEventListener('click',function(e){
  }
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();var t=e.target;if((e.key==='Enter'||e.key===' ')&&t.dataset&&(t.dataset.strike||t.dataset.conv||t.dataset.focus||t.dataset.act)&&t.tagName!=='BUTTON'){e.preventDefault();t.click()}});
-document.getElementById('restart').addEventListener('click',function(){closeSheet();seedLog();freshPrefs();freshGlobal();initPantry();initMark2();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
+document.getElementById('restart').addEventListener('click',function(){closeSheet();seedLog();freshPrefs();freshGlobal();initPantry();initMark2();DRAFTS=[];loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
 speedSeg();recipeSeg();devSeg();fit();render(true);

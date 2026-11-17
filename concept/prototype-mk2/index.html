@@ -745,6 +745,21 @@ body.darkstage #phone{border-color:#000}
 .shdone{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:22px 16px;border-radius:18px;background:var(--counter)}
 .shtick{width:52px;height:52px;border-radius:999px;background:#111;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
 .ipad .sheet.sharesheet{width:560px}
+
+/* ---- import methods ---- */
+.implink{gap:12px}
+.implink .ptxt{flex:1}
+.impic{flex-shrink:0;width:44px;height:44px;border-radius:14px;background:var(--counter);display:flex;align-items:center;justify-content:center}
+.impdrop{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:26px 16px;border-radius:18px;border:1.5px dashed #C9C9C2;background:var(--counter)}
+.impdrop .impic{background:#fff;margin-bottom:4px}
+.implab{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.implab input,.implab textarea{text-transform:none;letter-spacing:0;font-weight:500;color:#111}
+.imptext{min-height:190px;border-radius:14px;border:1.5px solid #D9D9D3;padding:12px 14px;font:inherit;font-size:15px;line-height:1.5;background:#fff;width:100%;box-sizing:border-box;resize:vertical}
+.imptext:focus{outline:none;border-color:#111}
+.improw{display:grid;grid-template-columns:96px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid #ECECE8;font-size:14px;line-height:1.35}
+.impspin{width:34px;height:34px;border-radius:999px;border:3px solid #D9D9D3;border-top-color:#111;animation:impspin .8s linear infinite;margin-bottom:6px}
+@keyframes impspin{to{transform:rotate(360deg)}}
+.ipad .sheet.impsheet{width:560px}
 </style>
 </head>
 <body>
@@ -2273,6 +2288,7 @@ document.addEventListener('click',function(e){
  var el=e.target.closest('button,[data-go],[data-closesheet],[data-conv],[data-strike],[data-back],[data-open],[data-focus],[data-act]');if(!el)return;
  var d=el.dataset;
  if(d.device||d.orient){if(d.device)D.device=d.device;if(d.orient)D.orient=d.orient;closeSheet();S.focus=null;devSeg();fit();keep(render);return}
+ if(d.imp){impAct(d.imp);return}
  if(d.sharefmt){S.share.format=d.sharefmt;S.share.copied=false;openShare(true);return}
  if(d.shareto){S.share.to[d.shareto]=!S.share.to[d.shareto];openShare(true);return}
  if(d.shareserv){S.share.serv=Math.max(1,Math.min(24,shareServ()+(+d.shareserv)));openShare(true);return}
@@ -2375,7 +2391,7 @@ document.addEventListener('click',function(e){
  }
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();var t=e.target;if((e.key==='Enter'||e.key===' ')&&t.dataset&&(t.dataset.strike||t.dataset.conv||t.dataset.focus||t.dataset.act)&&t.tagName!=='BUTTON'){e.preventDefault();t.click()}});
-document.getElementById('restart').addEventListener('click',function(){closeSheet();seedLog();freshPrefs();freshGlobal();initPantry();initMark2();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
+document.getElementById('restart').addEventListener('click',function(){closeSheet();seedLog();freshPrefs();freshGlobal();initPantry();initMark2();DRAFTS=[];loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
 
 
 /* ================= DEVICE ================= */
@@ -3276,7 +3292,7 @@ function profileSheet(){
   sec('Notifications','<div style="display:flex;flex-direction:column">'+tog('nTimer','Timers','When a cooking timer ends')+tog('nShop','Shopping together','When someone in your kitchen ticks or adds an item')+tog('nPlan','Tomorrow’s plan','An evening reminder of what is planned and what to thaw')+tog('nExp','Use it up','When something in the pantry is close to its date')+tog('nCook','Cooking streak','A nudge if you have not cooked in a while')+'</div>')+
   sec('Shopping',nav('Your store’s order',AISLES.slice(0,3).join(', ')+'…','data-act="aisles"')+row('Currency','For cost estimates',seg('currency',[['CAD','CAD'],['USD','USD']])),true)+
   sec('Recipes and history',nav('Cooking log',cooks+' cooks across '+Object.keys(LOG).filter(function(k){return LOG[k].length}).length+' recipes','data-go="log"')+
-   nav('Questions for Ashley',openQCount()+' open across her cards','data-go="questions"')+nav('Import recipe cards','Photograph a card to add it','data-act="importcard"'),true)+
+   nav('Questions for Ashley',openQCount()+' open across her cards','data-go="questions"')+nav('Import a recipe','Photo, website, pasted text or a file','data-act="importcard"'),true)+
   sec('Privacy and data',row('Recipe help','Where suggestions and card reading run',seg('ai',[['device','On device'],['hybrid','Allow cloud']]))+
    nav('Export my recipes','A file you can keep or move','data-toast="Export is not built in this prototype"')+nav('About','Version, data sources, feedback','data-act="about"'),true);
  return '<div class="sheet profsheet" role="dialog" aria-modal="true" aria-label="Settings">'+
@@ -3354,6 +3370,110 @@ function openShare(keepPos){
 }
 function shareSend(){S.share.sent=true;openShare(true);var sh=document.querySelector('#sheet .sheet');if(sh)sh.scrollTop=0}
 function shareCopy(){var t=S.share.format==='text'?shareText():'https://'+shareLink();try{if(navigator.clipboard)navigator.clipboard.writeText(t).catch(function(){})}catch(e){}S.share.copied=true;openShare(true)}
+
+/* ---- import: photo, website, pasted text, file, or typed in ---- */
+var DRAFTS=[],IMP={step:'pick'},IMPT=0;
+var IMPM={
+ photo:{t:'Photo of a card or page',s:'Recipe cards, cookbook pages, handwriting',k:'From a photo'},
+ web:{t:'Website or video link',s:'Paste a link; the recipe is pulled out of the page',k:'From a website'},
+ paste:{t:'Paste text',s:'From a message, an email or your notes',k:'From pasted text'},
+ file:{t:'File',s:'A PDF or document from Files',k:'From a file'},
+ type:{t:'Type it in',s:'Write a recipe from scratch',k:'Typed in'}};
+var IMPIC={photo:'<rect x="3" y="6" width="18" height="14" rx="3"/><circle cx="12" cy="13" r="3.5"/><path d="M8.5 6l1.2-2h4.6l1.2 2"/>',web:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.800 0 18M12 3c-3 3.2-3 14.800 0 18"/>',paste:'<rect x="5" y="4" width="14" height="17" rx="2.500"/><path d="M9 4.500h6V7H9zM8.500 11.500h7M8.500 15h5"/>',file:'<path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M14 3v5h5"/>',type:'<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.500 6.500l4 4"/>'};
+function impIcon(k){return '<span class="impic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+IMPIC[k]+'</svg></span>'}
+var IMPSAMPLE='Nora’s Pasta Salad\n\nIngredients\n1 lb rotini\n2 cups cherry tomatoes, halved\n1 cucumber, diced\n1/2 cup olive oil\n3 tbsp red wine vinegar\nfeta\nsalt and pepper\n\nMethod\n1. Boil the rotini until just tender. Drain and rinse under cold water.\n2. Whisk the oil and vinegar with salt and pepper.\n3. Toss everything together and chill for an hour before serving.';
+var IMPUNIT='cups?|tbsp|tsp|tablespoons?|teaspoons?|g|kg|ml|l|oz|lbs?|pounds?|cloves?|cans?|sticks?|pinch(?:es)?|slices?|bunch(?:es)?|packages?|pkg';
+function impParse(txt,kicker,src){
+ var lines=txt.split(/\r?\n/).map(function(l){return l.trim()}).filter(function(l){return l}),title=lines.length?lines.shift().replace(/^#+\s*/,''):'Untitled recipe',mode='',ings=[],steps=[],flags=[];
+ var qre=new RegExp('^((?:about\\s+)?[\\d¼½¾⅓⅔⅛⅜⅝⅞][\\d¼½¾⅓⅔⅛⅜⅝⅞\\s/.,-]*(?:(?:'+IMPUNIT+')\\b\\.?)?)\\s*(.*)$','i');
+ lines.forEach(function(l){
+  if(/^(ingredients?|you(’|')?ll need|what you need)\b.{0,12}$/i.test(l)){mode='i';return}
+  if(/^(method|instructions?|directions?|steps?|preparation|how to make it)\b.{0,12}$/i.test(l)){mode='s';return}
+  var bare=l.replace(/^[-•*·]\s*/,''),isNum=/^(step\s*)?\d+\s*[.):]\s+/i.test(l),m2=qre.exec(bare);
+  var asIng=mode==='i'||(mode===''&&!isNum&&(l!==bare||(m2&&bare.length<70)));
+  if(asIng){if(m2&&m2[2])ings.push({q:m2[1].trim(),n:m2[2].trim()});else{ings.push({q:'',n:bare})}}
+  else steps.push(bare.replace(/^(step\s*)?\d+\s*[.):]\s+/i,''));
+ });
+ ings.forEach(function(x){if(!x.q&&!/salt|pepper|to taste/i.test(x.n))flags.push('No amount given for '+x.n.toLowerCase()+'.')});
+ if(!ings.length)flags.push('No ingredients found. Check the text has one ingredient per line.');
+ if(!steps.length)flags.push('No method found. Add the steps before cooking from this.');
+ return {title:title,kicker:kicker,src:src,ings:ings,steps:steps,flags:flags};
+}
+function impSample(method){
+ if(method==='photo'){var d=impParse('Udon Noodles\nIngredients\n2 packages udon noodles\n1 tbsp sesame oil\n2 cloves garlic, minced\n3 tbsp soy sauce\n1 tbsp brown sugar\n2 green onions, sliced\nMethod\nCook the noodles as the package says. Drain.\nWarm the sesame oil and cook the garlic for 30 seconds.\nStir in the soy sauce and brown sugar, then toss with the noodles.\nTop with green onions.',IMPM.photo.k,'Ashley’s card, 1 photo');d.flags=['“Brown sugar” could read 1 tbsp or 1 tsp. The handwriting is unclear.','The card does not say how many it serves.'];d.sample=true;return d}
+ if(method==='file'){var f=impParse('Sunday Pot Roast\nIngredients\n3 lb chuck roast\n2 tbsp olive oil\n1 onion, quartered\n4 carrots, in chunks\n2 cups beef stock\n2 sprigs thyme\nMethod\nSeason the roast and brown it in the oil on all sides.\nAdd the onion, carrots, stock and thyme. Cover.\nCook at 300°F for 3 hours, until it pulls apart.',IMPM.file.k,'pot-roast.pdf, 1 page');f.flags=[];f.sample=true;return f}
+ var u=(IMP.url||'').trim(),host=u.replace(/^https?:\/\//i,'').split(/[/?#]/)[0].replace(/^www\./,'')||'example.com',slug=u.replace(/[?#].*$/,'').replace(/\/+$/,'').split('/').pop()||'',t=slug&&slug.indexOf('.')<0?slug.replace(/[-_]+/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase()}):'Weeknight Sheet-Pan Chicken';
+ var w=impParse(t+'\nIngredients\n1½ lb chicken thighs\n1 lb baby potatoes, halved\n2 tbsp olive oil\n1 tsp smoked paprika\n1 lemon, sliced\nsalt and pepper\nMethod\nHeat the oven to 425°F.\nToss the potatoes with half the oil and roast for 15 minutes.\nRub the chicken with the rest of the oil and the paprika. Add to the pan with the lemon.\nRoast 25 minutes, until the chicken reaches 165°F.',IMPM.web.k,host);w.flags=[];w.sample=true;w.web=true;return w;
+}
+function impSheet(){
+ var st=IMP.step,M=IMPM[IMP.method]||{},back='<button class="iconbtn" data-imp="back" aria-label="Back">'+SVG.back+'</button>',close='<button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button>';
+ function head(k,t,b){return '<div class="between"><div class="row" style="gap:12px">'+(b?back:'')+'<div><span class="kicker">'+k+'</span><h2 class="h2" style="font-size:20px">'+t+'</h2></div></div>'+close+'</div>'}
+ if(st==='pick')return head('Add a recipe','How do you want to add it?')+
+  '<div style="display:flex;flex-direction:column">'+['photo','web','paste','file','type'].map(function(k){return '<button class="plink implink" data-imp="method:'+k+'">'+impIcon(k)+'<span class="ptxt"><b>'+IMPM[k].t+'</b><span>'+IMPM[k].s+'</span></span>'+SVG.arrow+'</button>'}).join('')+'</div>'+
+  '<span class="muted" style="font-size:12px;line-height:1.45">Whatever the source, you review the result before it joins the library. Anything unclear is flagged as a question rather than guessed.</span>';
+ if(st==='input'){
+  if(IMP.method==='photo')return head('Add a recipe',M.t,1)+'<div class="impdrop">'+impIcon('photo')+'<b>Front and back, if there is one</b><span class="muted" style="font-size:13px;line-height:1.4">Handwriting is fine. Several photos become one recipe.</span></div>'+
+   '<div class="row" style="gap:10px"><button class="secondary" style="flex:1" data-imp="read">Choose photos</button><button class="primary" style="flex:1;height:52px;font-size:15px" data-imp="read">Take a photo</button></div>'+
+   '<span class="muted" style="font-size:12px;line-height:1.4">Prototype: no camera here, so both buttons load a sample card (Udon Noodles, one of the 32 still on paper).</span>';
+  if(IMP.method==='file')return head('Add a recipe',M.t,1)+'<div class="impdrop">'+impIcon('file')+'<b>PDF, Word or a text file</b><span class="muted" style="font-size:13px;line-height:1.4">A file with several recipes is split into one draft each.</span></div>'+
+   '<button class="primary" data-imp="read">Choose a file</button><span class="muted" style="font-size:12px;line-height:1.4">Prototype: this loads a sample file (pot-roast.pdf).</span>';
+  if(IMP.method==='web')return head('Add a recipe',M.t,1)+'<label class="implab">Link<input id="impurl" class="shmsg" type="url" inputmode="url" placeholder="https://…" value="'+esc(IMP.url||'')+'" aria-label="Recipe link"></label>'+
+   '<span class="muted" style="font-size:13px;line-height:1.45">Only the recipe is kept: ingredients, amounts and steps. The life story and the ads stay behind. Video links use the recipe in the caption or description.</span>'+
+   '<button class="primary" data-imp="read">Read the page</button><span class="muted" style="font-size:12px;line-height:1.4">Prototype: nothing is fetched. The title comes from your link; the recipe itself is a sample.</span>';
+  var ty=IMP.method==='type';
+  return head('Add a recipe',M.t,1)+'<label class="implab">'+(ty?'Recipe':'Pasted text')+'<textarea id="imptext" class="imptext" placeholder="'+(ty?'Title on the first line, then ingredients one per line, then the steps.':'Paste the recipe here. A title, an ingredient per line, then the steps.')+'" aria-label="Recipe text">'+esc(IMP.text||'')+'</textarea></label>'+
+   '<div class="row" style="gap:10px">'+(ty?'':'<button class="secondary" style="flex:1" data-imp="sample">Use sample text</button>')+'<button class="primary" style="flex:1;height:52px;font-size:15px" data-imp="read">'+(ty?'Review':'Read it')+'</button></div>'+
+   '<span class="muted" style="font-size:12px;line-height:1.4">This one is real in the prototype: whatever you '+(ty?'type':'paste')+' is sorted into a title, ingredients and steps.</span>';
+ }
+ if(st==='reading')return head('Add a recipe',IMP.method==='photo'?'Reading the card':IMP.method==='web'?'Reading the page':'Reading it')+'<div class="impdrop" role="status"><span class="impspin" aria-hidden="true"></span><b>Finding the ingredients and steps</b><span class="muted" style="font-size:13px">A few seconds</span></div>';
+ var d=IMP.draft;
+ if(st==='done')return head('Added','In your library')+'<div class="shdone" role="status"><span class="shtick"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><b style="font-family:var(--disp);font-size:20px;line-height:1.2">'+esc(d.title)+'</b><span class="muted" style="font-size:13px;line-height:1.45">Saved as a draft'+(d.flags.length?' with '+d.flags.length+' thing'+(d.flags.length>1?'s':'')+' to check':'')+'. The family sees it once you publish it.</span></div>'+
+  '<div class="row" style="gap:10px"><button class="secondary" style="flex:1" data-imp="again">Add another</button><button class="primary" style="flex:1;height:52px;font-size:15px" data-imp="lib">See it in Recipes</button></div>';
+ var saved=IMP.saved!=null;
+ return head(esc(d.kicker)+' · '+esc(d.src),esc(d.title),!saved)+
+  '<div class="row" style="gap:6px;flex-wrap:wrap"><span class="badge">'+d.ings.length+' ingredient'+(d.ings.length===1?'':'s')+'</span><span class="badge">'+d.steps.length+' step'+(d.steps.length===1?'':'s')+'</span>'+(d.flags.length?'<span class="badge" style="border-style:dashed">'+d.flags.length+' to check</span>':'<span class="badge solid">Nothing to check</span>')+(d.sample?'<span class="badge">Sample result</span>':'')+'</div>'+
+  (d.flags.length?'<div style="display:flex;flex-direction:column;gap:6px"><span class="kicker" style="color:#111">To check</span>'+d.flags.map(function(q){return '<p class="cardnote" style="margin:0">'+esc(q)+'</p>'}).join('')+'</div>':'')+
+  (d.ings.length?'<div style="display:flex;flex-direction:column"><span class="kicker" style="margin-bottom:4px">Ingredients</span>'+d.ings.map(function(x){return '<div class="improw"><b>'+(x.q?esc(x.q):'<span class="muted" style="font-weight:600">'+(/salt|pepper|to taste/i.test(x.n)?'to taste':'amount?')+'</span>')+'</b><span>'+esc(x.n)+'</span></div>'}).join('')+'</div>':'')+
+  (d.steps.length?'<div style="display:flex;flex-direction:column;gap:10px"><span class="kicker">Method</span>'+d.steps.map(function(x,i){return '<div class="row" style="gap:10px;align-items:flex-start"><span class="pnum" style="width:26px;height:26px;font-size:12px">'+(i+1)+'</span><span style="font-size:14px;line-height:1.5;flex:1">'+esc(x)+'</span></div>'}).join('')+'</div>':'')+
+  (d.sample?'<span class="muted" style="font-size:12px;line-height:1.4">Prototype: '+(d.web?'the title comes from your link, but the ingredients and steps are a stand-in, so they may not match it.':'this is a stand-in result, not read from a real '+(d.kicker==='From a file'?'file':'photo')+'.')+'</span>':'')+
+  (d.web?'<span class="muted" style="font-size:12px;line-height:1.4">Source kept with the recipe: '+esc(d.src)+'. Credit and a link back stay attached when you share it.</span>':'')+
+  (saved?'<div class="row" style="gap:10px"><button class="secondary" style="flex:1" data-imp="del:'+IMP.saved+'">Remove draft</button><button class="primary" style="flex:1;height:52px;font-size:15px" data-toast="Publishing a draft to the family library is not built in this prototype">Publish</button></div><span class="muted" style="font-size:12px;line-height:1.4">Drafts cannot be cooked from in this prototype; the nine built recipes can.</span>'
+   :'<div class="row" style="gap:10px"><button class="secondary" style="flex:1" data-imp="back">Back</button><button class="primary" style="flex:2;height:52px;font-size:15px" data-imp="save">Save to library</button></div>');
+}
+function impRender(keepPos){
+ var el=document.getElementById('sheet'),old=el.querySelector('.sheet'),y=old?old.scrollTop:0;
+ el.innerHTML='<div class="sheetwrap'+(keepPos?' noanim':'')+'" data-closesheet="1"><div class="sheet impsheet" role="dialog" aria-modal="true" aria-label="Add a recipe">'+impSheet()+'</div></div>';
+ if(keepPos===2)el.querySelector('.sheet').scrollTop=y;
+ var u=document.getElementById('impurl'),t=document.getElementById('imptext');
+ if(u){u.addEventListener('input',function(){IMP.url=u.value});if(keepPos)u.focus()}
+ if(t){t.addEventListener('input',function(){IMP.text=t.value});if(keepPos&&!IMP.text)t.focus()}
+ if(!keepPos){var b=el.querySelector('.iconbtn');if(b)b.focus()}
+}
+function openImport(){IMPT++;IMP={step:'pick'};impRender()}
+function impAct(v){
+ var p=v.split(':'),k=p[0];
+ if(k==='method'){IMP.method=p[1];IMP.step='input';if(p[1]==='type')IMP.text='';impRender(1);return}
+ if(k==='back'){IMPT++;IMP.step=IMP.step==='review'?'input':'pick';impRender(1);return}
+ if(k==='sample'){IMP.text=IMPSAMPLE;impRender(1);return}
+ if(k==='read'){
+  var mth=IMP.method;
+  if((mth==='paste'||mth==='type')&&!(IMP.text||'').trim()){toast(mth==='type'?'Type the recipe first':'Paste some text first');return}
+  if(mth==='web'&&!(IMP.url||'').trim()){toast('Paste a link first');return}
+  if(mth==='type'){IMP.draft=impParse(IMP.text,IMPM.type.k,'by you');IMP.step='review';impRender(1);return}
+  IMP.step='reading';impRender(1);var tk=++IMPT;
+  setTimeout(function(){if(tk!==IMPT||!document.querySelector('#sheet .impsheet'))return;IMP.draft=mth==='paste'?impParse(IMP.text,IMPM.paste.k,'your clipboard'):impSample(mth);IMP.step='review';impRender(1)},900);return}
+ if(k==='save'){DRAFTS.unshift(IMP.draft);IMP.step='done';impRender(1);if(S.screen==='library')keepUnder();return}
+ if(k==='again'){openImport();return}
+ if(k==='lib'){closeSheet();go('library');return}
+ if(k==='open'){IMPT++;IMP={step:'review',draft:DRAFTS[+p[1]],saved:+p[1]};impRender();return}
+ if(k==='del'){DRAFTS.splice(+p[1],1);closeSheet();toast('Draft removed');if(S.screen==='library')keep(render);return}
+}
+function draftsSection(){
+ if(!DRAFTS.length)return '';
+ return '<section class="card acard" style="gap:4px"><div class="between"><span class="kicker">Imported drafts</span><span class="muted" style="font-size:12px">Only you see these</span></div>'+DRAFTS.map(function(d,i){return '<button class="plink" data-imp="open:'+i+'"><span class="ptxt"><b>'+esc(d.title)+'</b><span>'+esc(d.kicker)+' · '+d.ings.length+' ingredients · '+d.steps.length+' steps'+(d.flags.length?' · '+d.flags.length+' to check':'')+'</span></span>'+SVG.arrow+'</button>'}).join('')+'</section>';
+}
+var libraryView0=libraryView;
+libraryView=function(){var h=libraryView0(),mk='<section class="card acard" style="gap:12px"><div class="between" style="gap:12px;align-items:flex-start"><div><span class="kicker">Still on paper</span>',j=h.indexOf(mk);return j<0?h:h.slice(0,j)+draftsSection()+h.slice(j)};
 initMark2();
 
 speedSeg();recipeSeg();devSeg();fit();render(true);
