@@ -1,0 +1,91 @@
+# Hand-kept list. name = what the app shows. aliases = other names people write, separated by |.
+# usda = words that must appear in the USDA description (prefix ! for must not), or usda:NDB for an exact food.
+# aisle = leave empty to use the automatic one.
+name,aliases,usda,aisle
+Butter,salted butter,butter salted !whipped !oil !light,
+Unsalted butter,sweet butter,butter without salt,
+Margarine,,usda:04610,
+Milk,whole milk|homo milk,milk whole 3.25% milkfat with added vitamin d,
+Heavy cream,whipping cream|heavy whipping cream|35% cream,cream fluid heavy whipping,
+Half-and-half,half and half|10% cream|cereal cream,cream fluid half and half !fat,
+Sour cream,,cream sour cultured !reduced !light,
+Egg,eggs|large egg|large eggs,egg whole raw fresh,
+Cheddar,cheddar cheese|sharp cheddar|old cheddar,cheese cheddar !low !reduced !nonfat !sharp,
+Parmesan,parmesan cheese|parmigiano|parmigiano reggiano|grated parmesan,cheese parmesan grated !low !topping,
+Feta,feta cheese,cheese feta,
+Mozzarella,mozzarella cheese,cheese mozzarella whole milk !low,
+Chicken breast,chicken|chicken breasts|boneless skinless chicken breast,usda:05062,Meat and seafood
+Chicken thighs,chicken thigh|boneless chicken thighs,chicken broilers thigh meat only raw,Meat and seafood
+Cooked chicken,rotisserie chicken|leftover chicken|shredded chicken,chicken broilers meat only roasted !light !dark,Meat and seafood
+Lean ground beef,ground beef|hamburger|minced beef|beef mince,beef ground 90% lean raw,Meat and seafood
+Sirloin roast,top sirloin roast|sirloin tip roast|beef sirloin,beef top sirloin separable lean and fat trimmed to 1/8 all grades raw,Meat and seafood
+Chuck roast,pot roast|beef chuck,beef chuck arm pot roast separable lean and fat trimmed to 1/8 all grades raw,Meat and seafood
+Cooked ham,ham|diced ham|leftover ham,ham sliced regular 11% fat,Meat and seafood
+Bacon,,pork cured bacon unprepared,Meat and seafood
+Shrimp,prawns|raw shrimp|large shrimp,crustaceans shrimp raw !mixed,Meat and seafood
+Salmon,salmon fillet|atlantic salmon,fish salmon atlantic farmed raw,Meat and seafood
+Onion,onions|yellow onion|cooking onion|white onion,onions raw !spring !sweet !young !welsh,
+Red onion,,onions raw !spring !sweet !young !welsh,
+Green onion,green onions|scallion|scallions|spring onion,onions spring or scallions raw,
+Garlic,garlic clove|garlic cloves|minced garlic,garlic raw,
+Ginger,fresh ginger|ginger root,ginger root raw,
+Potatoes,potato|russet potatoes|yukon gold potatoes|white potatoes,potatoes flesh and skin raw !russet !red !white,
+Sweet potatoes,sweet potato|yam,sweet potato raw unprepared,
+Carrots,carrot,carrots raw !baby,
+Celery,celery stalk|celery stalks,celery raw,
+Tomatoes,tomato|roma tomatoes,tomatoes red ripe raw year round average,
+Cherry tomatoes,grape tomatoes,tomatoes red ripe raw year round average,
+Sun-dried tomatoes,sundried tomatoes,tomatoes sun-dried !oil,Pantry
+Tomato paste,,tomato products canned paste without salt added,
+Bell pepper,red pepper|green pepper|sweet pepper|bell peppers,peppers sweet red raw,
+Cucumber,english cucumber,cucumber with peel raw,
+Spinach,baby spinach,spinach raw,
+Mushrooms,white mushrooms|button mushrooms|cremini,mushrooms white raw,
+Lemongrass,lemon grass,lemon grass citronella raw,
+Parsley,fresh parsley|flat-leaf parsley,parsley fresh,
+Cilantro,fresh cilantro|coriander leaves|fresh coriander,coriander cilantro leaves raw,
+Thyme,fresh thyme|thyme sprigs,thyme fresh,
+Basil,fresh basil,basil fresh,
+Bay leaves,bay leaf,spices bay leaf,
+Lemon juice,juice of a lemon|fresh lemon juice,lemon juice raw,Produce
+Lemon peel,lemon zest,usda:09156,Produce
+Lime juice,juice of a lime|fresh lime juice,lime juice raw,Produce
+Frozen peas and carrots,peas and carrots,peas and carrots frozen unprepared,
+Capers,,capers canned,Pantry
+Flour,all-purpose flour|all purpose flour|plain flour|AP flour,wheat flour white all-purpose enriched bleached,
+Sugar,white sugar|granulated sugar,sugars granulated,Dry goods
+Brown sugar,light brown sugar|dark brown sugar,sugars brown,Dry goods
+Baking soda,bicarbonate of soda|bicarb,leavening agents baking soda,Dry goods
+Baking powder,,leavening agents baking powder double-acting sodium aluminum sulfate,Dry goods
+Vanilla,vanilla extract|pure vanilla,vanilla extract !imitation,Dry goods
+Chocolate chips,semi-sweet chocolate chips|semisweet chocolate chips,candies semisweet chocolate !butter,Dry goods
+Linguine,spaghetti|fettuccine|dry pasta,pasta dry enriched,
+Angel hair,angel hair pasta|capellini,pasta dry enriched,
+Rotini,fusilli|penne|macaroni|short pasta,pasta dry enriched,
+Rice,white rice|long grain rice,rice white long-grain regular raw enriched,
+Pie crusts,pie crust|pie shell|pastry shell,pie crust standard-type frozen ready-to-bake enriched,Frozen
+Olive oil,extra virgin olive oil|EVOO,oil olive salad or cooking,
+Vegetable oil,canola oil|cooking oil|neutral oil|oil,oil canola,
+Sesame oil,toasted sesame oil,oil sesame salad or cooking,
+Vinegar,white vinegar|distilled vinegar,vinegar distilled,
+Red wine vinegar,,vinegar red wine,
+Soy sauce,shoyu,soy sauce made from soy and wheat shoyu !low,
+Fish sauce,nam pla,sauce fish ready-to-serve,
+Worcestershire sauce,worcestershire,sauce worcestershire,
+Ketchup,catsup|tomato ketchup,catsup !low,
+Chicken broth,chicken stock,soup stock chicken home-prepared,Canned
+Beef broth,beef stock,soup stock beef home-prepared,Canned
+Chicken bouillon,bouillon cube|chicken bouillon cube|stock cube,soup chicken broth cubes dry,Pantry
+Brown gravy,gravy|beef gravy,gravy beef canned,
+Coconut milk,canned coconut milk,nuts coconut milk canned,Canned
+Red wine,dry red wine,alcoholic beverage wine table red !merlot !cabernet !pinot !syrah !zinfandel !barbera !burgundy !claret !gamay !lemberger !mouvedre !petite !sangiovese !carignane !franc,
+Salt,table salt|sea salt|kosher salt|fine salt,salt table,
+Black pepper,pepper|ground pepper|ground black pepper,spices pepper black,
+White pepper,ground white pepper,spices pepper white,
+Red pepper flakes,chili flakes|crushed red pepper|chilli flakes,spices pepper red or cayenne,
+Smoked paprika,paprika,spices paprika,
+Garlic powder,,spices garlic powder,
+Cajun seasoning,creole seasoning,spices poultry seasoning,
+Seasonings,italian seasoning|dried herbs|mixed herbs,spices oregano dried,
+Honey,,honey,
+Water,,water tap drinking,

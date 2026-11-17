@@ -1,0 +1,794 @@
+[
+ {
+  "recipe": "cajun",
+  "name": "Chicken",
+  "amt": "2 breasts",
+  "grams": 400,
+  "ml": 450,
+  "kcal": 660
+ },
+ {
+  "recipe": "cajun",
+  "name": "Cajun seasoning",
+  "amt": "2 tsp",
+  "grams": 6,
+  "ml": 10,
+  "kcal": 15
+ },
+ {
+  "recipe": "cajun",
+  "name": "Butter",
+  "amt": "2 tbsp",
+  "grams": 28,
+  "ml": 30,
+  "kcal": 200
+ },
+ {
+  "recipe": "cajun",
+  "name": "Green onion",
+  "amt": "1",
+  "grams": 15,
+  "ml": 20,
+  "kcal": 5
+ },
+ {
+  "recipe": "cajun",
+  "name": "Heavy cream",
+  "amt": "1½ cups",
+  "grams": 360,
+  "ml": 360,
+  "kcal": 1200
+ },
+ {
+  "recipe": "cajun",
+  "name": "Sun-dried tomatoes",
+  "amt": "2 tbsp",
+  "grams": 15,
+  "ml": 30,
+  "kcal": 20
+ },
+ {
+  "recipe": "cajun",
+  "name": "Seasonings",
+  "amt": "1 tsp",
+  "grams": 3,
+  "ml": 5,
+  "kcal": 3
+ },
+ {
+  "recipe": "cajun",
+  "name": "Linguine",
+  "amt": "4 oz",
+  "grams": 113,
+  "ml": 200,
+  "kcal": 400
+ },
+ {
+  "recipe": "cajun",
+  "name": "Parmesan",
+  "amt": "¼ cup",
+  "grams": 25,
+  "ml": 50,
+  "kcal": 110
+ },
+ {
+  "recipe": "scampi",
+  "name": "Butter",
+  "amt": "⅓ cup",
+  "grams": 75,
+  "ml": 80,
+  "kcal": 540
+ },
+ {
+  "recipe": "scampi",
+  "name": "Green onions",
+  "amt": "2",
+  "grams": 30,
+  "ml": 40,
+  "kcal": 10
+ },
+ {
+  "recipe": "scampi",
+  "name": "Garlic",
+  "amt": "2 tbsp",
+  "grams": 18,
+  "ml": 30,
+  "kcal": 27
+ },
+ {
+  "recipe": "scampi",
+  "name": "Red pepper flakes",
+  "amt": "2 tsp",
+  "grams": 4,
+  "ml": 10,
+  "kcal": 12
+ },
+ {
+  "recipe": "scampi",
+  "name": "Lemon peel",
+  "amt": "1 tbsp",
+  "grams": 6,
+  "ml": 15,
+  "kcal": 3
+ },
+ {
+  "recipe": "scampi",
+  "name": "Lemon juice",
+  "amt": "½ cup",
+  "grams": 120,
+  "ml": 120,
+  "kcal": 27
+ },
+ {
+  "recipe": "scampi",
+  "name": "Shrimp",
+  "amt": "2 lb",
+  "grams": 900,
+  "ml": 1000,
+  "kcal": 900
+ },
+ {
+  "recipe": "scampi",
+  "name": "Angel hair",
+  "amt": "12 oz",
+  "grams": 340,
+  "ml": 700,
+  "kcal": 1200
+ },
+ {
+  "recipe": "scampi",
+  "name": "Parsley",
+  "amt": "¼ cup",
+  "grams": 15,
+  "ml": 60,
+  "kcal": 5
+ },
+ {
+  "recipe": "scampi",
+  "name": "Parmesan",
+  "amt": "¼ cup",
+  "grams": 25,
+  "ml": 50,
+  "kcal": 110
+ },
+ {
+  "recipe": "thai",
+  "name": "Vegetable oil",
+  "amt": "1 tbsp",
+  "grams": 14,
+  "ml": 15,
+  "kcal": 120
+ },
+ {
+  "recipe": "thai",
+  "name": "Ginger",
+  "amt": "2 tbsp",
+  "grams": 12,
+  "ml": 30,
+  "kcal": 10
+ },
+ {
+  "recipe": "thai",
+  "name": "Lemongrass",
+  "amt": "1 stalk",
+  "grams": 20,
+  "ml": 40,
+  "kcal": 5
+ },
+ {
+  "recipe": "thai",
+  "name": "Red curry paste",
+  "amt": "2 tsp",
+  "grams": 12,
+  "ml": 10,
+  "kcal": 15
+ },
+ {
+  "recipe": "thai",
+  "name": "Chicken broth",
+  "amt": "4 cups",
+  "grams": 950,
+  "ml": 950,
+  "kcal": 40
+ },
+ {
+  "recipe": "thai",
+  "name": "Fish sauce",
+  "amt": "3 tbsp",
+  "grams": 54,
+  "ml": 45,
+  "kcal": 30
+ },
+ {
+  "recipe": "thai",
+  "name": "Brown sugar",
+  "amt": "1 tbsp",
+  "grams": 13,
+  "ml": 15,
+  "kcal": 50
+ },
+ {
+  "recipe": "thai",
+  "name": "Coconut milk",
+  "amt": "3 cans",
+  "grams": 1200,
+  "ml": 1200,
+  "kcal": 2400
+ },
+ {
+  "recipe": "thai",
+  "name": "Shrimp",
+  "amt": "1 lb",
+  "grams": 450,
+  "ml": 500,
+  "kcal": 450
+ },
+ {
+  "recipe": "thai",
+  "name": "Lime juice",
+  "amt": "2 tbsp",
+  "grams": 30,
+  "ml": 30,
+  "kcal": 8
+ },
+ {
+  "recipe": "thai",
+  "name": "Cilantro",
+  "amt": "¼ cup",
+  "grams": 5,
+  "ml": 15,
+  "kcal": 1
+ },
+ {
+  "recipe": "hamsoup",
+  "name": "Potatoes",
+  "amt": "3½ cups",
+  "grams": 525,
+  "ml": 830,
+  "kcal": 400
+ },
+ {
+  "recipe": "hamsoup",
+  "name": "Celery",
+  "amt": "⅓ cup",
+  "grams": 35,
+  "ml": 80,
+  "kcal": 5
+ },
+ {
+  "recipe": "hamsoup",
+  "name": "Onion",
+  "amt": "⅓ cup",
+  "grams": 50,
+  "ml": 80,
+  "kcal": 20
+ },
+ {
+  "recipe": "hamsoup",
+  "name": "Cooked ham",
+  "amt": "¾ cup",
+  "grams": 105,
+  "ml": 180,
+  "kcal": 150
+ },
+ {
+  "recipe": "hamsoup",
+  "name": "Water",
+  "amt": "3¼ cups",
+  "grams": 770,
+  "ml": 770,
+  "kcal": 0
+ },
+ {
+  "recipe": "hamsoup",
+  "name": "Chicken bouillon",
+  "amt": "2 tbsp",
+  "grams": 24,
+  "ml": 30,
+  "kcal": 40
+ },
+ {
+  "recipe": "hamsoup",
+  "name": "Butter",
+  "amt": "5 tbsp",
+  "grams": 70,
+  "ml": 75,
+  "kcal": 500
+ },
+ {
+  "recipe": "hamsoup",
+  "name": "Flour",
+  "amt": "5 tbsp",
+  "grams": 40,
+  "ml": 75,
+  "kcal": 145
+ },
+ {
+  "recipe": "hamsoup",
+  "name": "Milk",
+  "amt": "2 cups",
+  "grams": 490,
+  "ml": 480,
+  "kcal": 300
+ },
+ {
+  "recipe": "piccata",
+  "name": "Chicken",
+  "amt": "2 breasts",
+  "grams": 400,
+  "ml": 450,
+  "kcal": 660
+ },
+ {
+  "recipe": "piccata",
+  "name": "Flour",
+  "amt": "¼ cup",
+  "grams": 30,
+  "ml": 60,
+  "kcal": 110
+ },
+ {
+  "recipe": "piccata",
+  "name": "Butter",
+  "amt": "6 tbsp",
+  "grams": 85,
+  "ml": 90,
+  "kcal": 610
+ },
+ {
+  "recipe": "piccata",
+  "name": "Olive oil",
+  "amt": "5 tbsp",
+  "grams": 70,
+  "ml": 75,
+  "kcal": 600
+ },
+ {
+  "recipe": "piccata",
+  "name": "Lemon juice",
+  "amt": "⅓ cup",
+  "grams": 80,
+  "ml": 80,
+  "kcal": 18
+ },
+ {
+  "recipe": "piccata",
+  "name": "Chicken stock",
+  "amt": "½ cup",
+  "grams": 120,
+  "ml": 120,
+  "kcal": 5
+ },
+ {
+  "recipe": "piccata",
+  "name": "Capers",
+  "amt": "¼ cup",
+  "grams": 35,
+  "ml": 60,
+  "kcal": 8
+ },
+ {
+  "recipe": "piccata",
+  "name": "Parsley",
+  "amt": "⅓ cup",
+  "grams": 15,
+  "ml": 80,
+  "kcal": 5
+ },
+ {
+  "recipe": "potpie",
+  "name": "Onions",
+  "amt": "1 cup",
+  "grams": 160,
+  "ml": 240,
+  "kcal": 64
+ },
+ {
+  "recipe": "potpie",
+  "name": "Celery",
+  "amt": "1 cup",
+  "grams": 100,
+  "ml": 240,
+  "kcal": 16
+ },
+ {
+  "recipe": "potpie",
+  "name": "Carrots",
+  "amt": "1 cup",
+  "grams": 130,
+  "ml": 240,
+  "kcal": 53
+ },
+ {
+  "recipe": "potpie",
+  "name": "Potatoes",
+  "amt": "1 cup",
+  "grams": 150,
+  "ml": 240,
+  "kcal": 115
+ },
+ {
+  "recipe": "potpie",
+  "name": "Margarine",
+  "amt": "⅓ cup",
+  "grams": 75,
+  "ml": 80,
+  "kcal": 540
+ },
+ {
+  "recipe": "potpie",
+  "name": "Flour",
+  "amt": "½ cup",
+  "grams": 60,
+  "ml": 120,
+  "kcal": 220
+ },
+ {
+  "recipe": "potpie",
+  "name": "Chicken broth",
+  "amt": "2 cups",
+  "grams": 480,
+  "ml": 480,
+  "kcal": 20
+ },
+ {
+  "recipe": "potpie",
+  "name": "Half-and-half",
+  "amt": "1 cup",
+  "grams": 240,
+  "ml": 240,
+  "kcal": 315
+ },
+ {
+  "recipe": "potpie",
+  "name": "Cooked chicken",
+  "amt": "4 cups",
+  "grams": 560,
+  "ml": 950,
+  "kcal": 925
+ },
+ {
+  "recipe": "potpie",
+  "name": "Pie crusts",
+  "amt": "2",
+  "grams": 400,
+  "ml": 500,
+  "kcal": 1600
+ },
+ {
+  "recipe": "shepherd",
+  "name": "Potatoes",
+  "amt": "4 large",
+  "grams": 1200,
+  "ml": 1900,
+  "kcal": 920
+ },
+ {
+  "recipe": "shepherd",
+  "name": "Butter",
+  "amt": "1 tbsp",
+  "grams": 14,
+  "ml": 15,
+  "kcal": 100
+ },
+ {
+  "recipe": "shepherd",
+  "name": "Cheddar",
+  "amt": "½ cup",
+  "grams": 56,
+  "ml": 120,
+  "kcal": 225
+ },
+ {
+  "recipe": "shepherd",
+  "name": "Onion",
+  "amt": "1 medium",
+  "grams": 150,
+  "ml": 240,
+  "kcal": 60
+ },
+ {
+  "recipe": "shepherd",
+  "name": "Vegetable oil",
+  "amt": "1 tbsp",
+  "grams": 14,
+  "ml": 15,
+  "kcal": 120
+ },
+ {
+  "recipe": "shepherd",
+  "name": "Lean ground beef",
+  "amt": "1 lb",
+  "grams": 454,
+  "ml": 480,
+  "kcal": 800
+ },
+ {
+  "recipe": "shepherd",
+  "name": "Flour",
+  "amt": "2 tbsp",
+  "grams": 16,
+  "ml": 30,
+  "kcal": 58
+ },
+ {
+  "recipe": "shepherd",
+  "name": "Ketchup",
+  "amt": "1 tbsp",
+  "grams": 17,
+  "ml": 15,
+  "kcal": 17
+ },
+ {
+  "recipe": "shepherd",
+  "name": "Brown gravy",
+  "amt": "1 cup",
+  "grams": 240,
+  "ml": 240,
+  "kcal": 60
+ },
+ {
+  "recipe": "shepherd",
+  "name": "Worcestershire sauce",
+  "amt": "1 tbsp",
+  "grams": 17,
+  "ml": 15,
+  "kcal": 13
+ },
+ {
+  "recipe": "shepherd",
+  "name": "Frozen peas and carrots",
+  "amt": "2 cups",
+  "grams": 280,
+  "ml": 480,
+  "kcal": 140
+ },
+ {
+  "recipe": "cookies",
+  "name": "Flour",
+  "amt": "2¼ cups",
+  "grams": 280,
+  "ml": 530,
+  "kcal": 1020
+ },
+ {
+  "recipe": "cookies",
+  "name": "Baking soda",
+  "amt": "1 tsp",
+  "grams": 5,
+  "ml": 5,
+  "kcal": 0
+ },
+ {
+  "recipe": "cookies",
+  "name": "Butter",
+  "amt": "2 sticks",
+  "grams": 226,
+  "ml": 240,
+  "kcal": 1620
+ },
+ {
+  "recipe": "cookies",
+  "name": "Sugar",
+  "amt": "¾ cup",
+  "grams": 150,
+  "ml": 180,
+  "kcal": 580
+ },
+ {
+  "recipe": "cookies",
+  "name": "Brown sugar",
+  "amt": "¾ cup",
+  "grams": 165,
+  "ml": 180,
+  "kcal": 630
+ },
+ {
+  "recipe": "cookies",
+  "name": "Vanilla",
+  "amt": "1 tsp",
+  "grams": 4,
+  "ml": 5,
+  "kcal": 12
+ },
+ {
+  "recipe": "cookies",
+  "name": "Eggs",
+  "amt": "2",
+  "grams": 100,
+  "ml": 100,
+  "kcal": 143
+ },
+ {
+  "recipe": "cookies",
+  "name": "Chocolate chips",
+  "amt": "2 cups",
+  "grams": 340,
+  "ml": 480,
+  "kcal": 1630
+ },
+ {
+  "recipe": "pancakes",
+  "name": "Milk",
+  "amt": "¾ cup",
+  "grams": 180,
+  "ml": 180,
+  "kcal": 110
+ },
+ {
+  "recipe": "pancakes",
+  "name": "Vinegar",
+  "amt": "2 tbsp",
+  "grams": 30,
+  "ml": 30,
+  "kcal": 5
+ },
+ {
+  "recipe": "pancakes",
+  "name": "Flour",
+  "amt": "1 cup",
+  "grams": 125,
+  "ml": 240,
+  "kcal": 455
+ },
+ {
+  "recipe": "pancakes",
+  "name": "Sugar",
+  "amt": "2 tbsp",
+  "grams": 25,
+  "ml": 30,
+  "kcal": 97
+ },
+ {
+  "recipe": "pancakes",
+  "name": "Baking powder",
+  "amt": "1 tsp",
+  "grams": 5,
+  "ml": 5,
+  "kcal": 2
+ },
+ {
+  "recipe": "pancakes",
+  "name": "Baking soda",
+  "amt": "½ tsp",
+  "grams": 3,
+  "ml": 3,
+  "kcal": 0
+ },
+ {
+  "recipe": "pancakes",
+  "name": "Egg",
+  "amt": "1",
+  "grams": 50,
+  "ml": 50,
+  "kcal": 72
+ },
+ {
+  "recipe": "pancakes",
+  "name": "Butter",
+  "amt": "2 tbsp",
+  "grams": 28,
+  "ml": 30,
+  "kcal": 200
+ },
+ {
+  "recipe": "roast",
+  "name": "Sirloin roast",
+  "amt": "1.2 kg",
+  "grams": 1200,
+  "ml": 1150,
+  "kcal": 1900
+ },
+ {
+  "recipe": "roast",
+  "name": "Smoked paprika",
+  "amt": "1 tsp",
+  "grams": 2,
+  "ml": 5,
+  "kcal": 6
+ },
+ {
+  "recipe": "roast",
+  "name": "Garlic powder",
+  "amt": "1 tsp",
+  "grams": 3,
+  "ml": 5,
+  "kcal": 10
+ },
+ {
+  "recipe": "roast",
+  "name": "Vegetable oil",
+  "amt": "2 tbsp",
+  "grams": 28,
+  "ml": 30,
+  "kcal": 240
+ },
+ {
+  "recipe": "roast",
+  "name": "Onion",
+  "amt": "½ large",
+  "grams": 150,
+  "ml": 240,
+  "kcal": 60
+ },
+ {
+  "recipe": "roast",
+  "name": "Garlic",
+  "amt": "4 cloves",
+  "grams": 12,
+  "ml": 15,
+  "kcal": 18
+ },
+ {
+  "recipe": "roast",
+  "name": "Tomato paste",
+  "amt": "1 tbsp",
+  "grams": 16,
+  "ml": 15,
+  "kcal": 13
+ },
+ {
+  "recipe": "roast",
+  "name": "Red wine",
+  "amt": "1 cup",
+  "grams": 250,
+  "ml": 250,
+  "kcal": 210
+ },
+ {
+  "recipe": "roast",
+  "name": "Beef broth",
+  "amt": "1 cup",
+  "grams": 250,
+  "ml": 250,
+  "kcal": 15
+ },
+ {
+  "recipe": "roast",
+  "name": "Bay leaves",
+  "amt": "2",
+  "grams": 1,
+  "ml": 3,
+  "kcal": 0
+ },
+ {
+  "recipe": "roast",
+  "name": "Thyme",
+  "amt": "3 sprigs",
+  "grams": 3,
+  "ml": 8,
+  "kcal": 3
+ },
+ {
+  "recipe": "roast",
+  "name": "Carrots",
+  "amt": "3 medium",
+  "grams": 180,
+  "ml": 300,
+  "kcal": 75
+ },
+ {
+  "recipe": "roast",
+  "name": "Potatoes",
+  "amt": "1 kg",
+  "grams": 1000,
+  "ml": 1600,
+  "kcal": 770
+ },
+ {
+  "recipe": "roast",
+  "name": "Butter",
+  "amt": "6 tbsp",
+  "grams": 85,
+  "ml": 90,
+  "kcal": 610
+ },
+ {
+  "recipe": "roast",
+  "name": "Heavy cream",
+  "amt": "½ cup",
+  "grams": 120,
+  "ml": 125,
+  "kcal": 410
+ }
+]

@@ -1,0 +1,26 @@
+{
+ "foods_total": 8789,
+ "foods_by_kind": {
+  "ingredient": 5649,
+  "institutional": 83,
+  "branded": 1427,
+  "baby": 367,
+  "prepared": 1098,
+  "regional": 165
+ },
+ "foods_with_density": 3529,
+ "foods_with_unit_weights": 4725,
+ "foods_with_french": 1249,
+ "foods_with_energy": 8789,
+ "measures_total": 15438,
+ "ingredients_total": 1289,
+ "ingredients_curated": 88,
+ "ingredients_with_density": 836,
+ "ingredients_with_unit_weights": 600,
+ "ingredients_with_shelf_life": 304,
+ "ingredients_with_allergens": 435,
+ "ingredients_data_gaps": [
+  "Red curry paste"
+ ],
+ "curated_unresolved": []
+}

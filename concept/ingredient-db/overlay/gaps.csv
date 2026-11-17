@@ -1,0 +1,4 @@
+# Ingredients our recipes use that the open sources do not cover. They import and display, but carry no nutrition
+# until someone adds sourced values. Do not fill these with guesses.
+name,aliases,aisle,note
+Red curry paste,thai red curry paste|curry paste,Pantry,Not in USDA SR or the Canadian Nutrient File. Brand labels vary widely.
