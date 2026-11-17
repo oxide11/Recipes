@@ -344,7 +344,7 @@ function ingredients(){
 function swapView(){
  var id=S.focus,it=ing(id),set=SETS[id],idx=ING.indexOf(it),p=starPos(idx,ING.length);
  var cur=S.swaps[id]||null,picked=S.picked[id]||cur||set.leaves[0].id;
- var lines=set.branches.map(function(b,i){return '<path d="'+BLINES[i]+'" stroke="#111" stroke-width="3"/>'}).join('')+set.leaves.map(function(l,i){return '<path d="'+LEAFLINES[i]+'" stroke="#BDBDB8" stroke-width="2"/>'}).join('');
+ var lines=set.branches.map(function(b,i){return '<path d="'+BLINES[i]+'" stroke="#111" stroke-width="3"/>'}).join('')+set.leaves.map(function(l,i){var sel=l.id===picked;return '<path d="'+LEAFLINES[i]+'" pathLength="1"'+(sel?' class="lsel" stroke="#111" stroke-width="3.5"':' stroke="#BDBDB8" stroke-width="2"')+'/>'}).join('');
  var leaves=set.leaves.map(function(l,i){
   var on=l.id===picked,why=blockedReason(l),isCur=l.id===cur;
   return '<button class="leaf'+(on?' on':'')+(why?' blk':'')+(isCur?' cur':'')+'" data-pick="'+l.id+'" aria-pressed="'+on+'" aria-label="'+esc(l.name+', '+(why||l.ratio))+'" style="left:'+POS[i][0]+'px;top:'+POS[i][1]+'px"><b>'+esc(l.name)+'</b><small>'+esc(why||l.ratio)+'</small>'+(!why&&leafOnHand(l)?'<em class="ohtag">On hand</em>':'')+'</button>';
@@ -358,7 +358,7 @@ function swapView(){
  var sub=it.profile?(it.why==='allergy'?'Your allergy profile swapped these out':'You dislike them, so a swap is already in'):'In '+esc(R.title)+' · '+esc(scaleQty(it.amt,F()));
  var map='<div class="zin" style="position:relative;width:350px;height:470px;margin:0 auto;transform-origin:'+p[0]+'px '+p[1]+'px">'+
   '<svg width="350" height="470" viewBox="0 0 350 470" aria-hidden="true" style="position:absolute;inset:0" fill="none" stroke-linecap="round">'+lines+'</svg>'+
-  '<div class="hub2"><span class="dot" style="width:14px;height:14px;background:'+it.color+(it.edge?';border:1px solid '+it.edge:'')+'"></span><span style="font-family:var(--disp);font-size:16px;font-weight:700;line-height:1.1">'+esc(set.center)+'</span><span class="muted" style="font-size:11px">'+esc(scaleQty(it.amt,F()))+'</span></div>'+
+  '<div class="hub2" style="--hc:'+it.color+'"><span class="hubic">'+icon(it.icon[0][0],40)+'</span><span style="font-family:var(--disp);font-size:16px;font-weight:700;line-height:1.1">'+esc(set.center)+'</span><span class="muted" style="font-size:11px">'+esc(scaleQty(it.amt,F()))+'</span></div>'+
   branches+leaves+
  '</div>';
  var detail='<section class="card" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">'+

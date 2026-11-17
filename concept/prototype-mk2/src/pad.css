@@ -494,3 +494,19 @@ body.darkstage #phone{border-color:#000}
 .uchipb{height:36px;min-width:52px;padding:0 12px;border-radius:999px;border:1.5px solid #C9C9C4;background:#fff;font-size:13px;font-weight:700;cursor:pointer}
 .uchipb[aria-pressed="true"]{background:#111;color:#fff;border-color:#111}
 .amtfield{align-items:center}.amtfield input{line-height:1}
+
+/* ---- swap map: stays large, more alive ---- */
+.sheetwrap.full .mapwrap>div,.sheetwrap.full .mapwrap .zin{zoom:1.5}
+.port .sheetwrap.full .mapwrap>div,.port .sheetwrap.full .mapwrap .zin{zoom:1.55}
+.sheetwrap.full .swapgrid{grid-template-columns:minmax(0,1.3fr) minmax(330px,1fr);gap:28px}
+.hub2{width:128px!important;height:128px!important;gap:2px!important;box-shadow:0 0 0 6px color-mix(in srgb,var(--hc,#E4E4E0) 45%,#fff)}
+.hub2::before{content:"";position:absolute;inset:-6px;border-radius:999px;border:2px solid var(--hc,#BDBDB8);animation:hubpulse 2.8s ease-out infinite;pointer-events:none}
+@keyframes hubpulse{0%{transform:scale(1);opacity:.7}70%,100%{transform:scale(1.22);opacity:0}}
+.hubic{display:flex;margin-bottom:-2px}
+.leaf{transition:transform .18s,box-shadow .18s;cursor:pointer}
+.leaf:hover{transform:translate(-50%,-50%) scale(1.04)}
+.leaf.on{animation:leafpop .32s cubic-bezier(.3,1.6,.5,1) both;z-index:2}
+@keyframes leafpop{from{transform:translate(-50%,-50%) scale(.9)}to{transform:translate(-50%,-50%) scale(1.08)}}
+.lsel{stroke-dasharray:1;stroke-dashoffset:1;animation:ldraw .4s ease-out .05s forwards}
+@keyframes ldraw{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.hub2::before,.leaf.on,.lsel{animation:none}.lsel{stroke-dashoffset:0}.leaf.on{transform:translate(-50%,-50%) scale(1.08)}}
