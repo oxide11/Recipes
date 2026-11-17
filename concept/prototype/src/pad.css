@@ -119,3 +119,8 @@
 .nutgrid b{font-family:'Space Grotesk',sans-serif;font-size:17px;white-space:nowrap}
 .nutgrid i{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
 .nutgrid i.chg{color:#111;font-weight:700}
+
+.swapbtn{width:36px;height:36px;padding:0;gap:0;border:1.5px solid #D6D6D1;color:#3A3A38;position:relative}
+.swapbtn::before{content:"";position:absolute;inset:-5px}
+.swapbtn:hover{border-color:#111;color:#111}
+.swapbtn.on{background:#111;border-color:#111;color:#fff}

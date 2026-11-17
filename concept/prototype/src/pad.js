@@ -90,7 +90,7 @@ function ingRowPad(it){
  return '<div class="row" style="gap:12px;padding:10px 0;border-bottom:1px solid #ECECE8">'+icon(it.icon[0][0],38)+
   '<span style="flex:1;display:flex;flex-direction:column;gap:1px;padding-left:10px;border-left:4px solid '+edgeOf(it)+';min-width:0"><b style="font-size:16px">'+esc(shownName(it))+(sw?' <span class="muted" style="font-weight:500;text-decoration:line-through;font-size:13px">'+esc(it.name)+'</span>':'')+'</b><span class="muted" style="font-size:12px">'+esc(sw?lf.note:it.eq)+'</span></span>'+
   (li?'<button class="qty'+(li.check?' q':'')+'" data-conv="'+it.id+'" aria-label="'+esc(qty+' '+li.name+'. Change units')+'">'+esc(qty)+SVG.convert+'</button>':'<span class="qty static">'+esc(qty)+'</span>')+
-  (SETS[it.id]?'<button class="swapbtn'+(sw?' on':'')+'" data-focus="'+it.id+'" aria-label="Swap '+esc(shownName(it))+'">'+SVG.swap+(sw?'Swapped':'Swap')+'</button>':'<span style="width:92px"></span>')+'</div>';
+  (SETS[it.id]?'<button class="swapbtn'+(sw?' on':'')+'" data-focus="'+it.id+'" aria-label="'+(sw?'Swapped. Change swap for ':'Swap ')+esc(shownName(it))+'">'+SVG.swap+'</button>':'<span style="width:36px;flex-shrink:0"></span>')+'</div>';
 }
 function recipePad(){
  var M=MODES[S.mode],ins=R.INS[S.mode],saved=!!S.saved[R.id],land=isLand();
