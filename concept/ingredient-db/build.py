@@ -2,7 +2,8 @@
 """Build the ingredient database from open sources.
 
 Inputs (see README for where they come from):
-  raw/USDA-SR28/*.txt          USDA National Nutrient Database for Standard Reference (ASCII release files)
+  raw/official_sr28/*.txt      USDA National Nutrient Database for Standard Reference, official sr28asc.zip
+                               (falls back to raw/USDA-SR28, a GitHub mirror of the same files)
   raw/cnfx/*.csv               Canadian Nutrient File (Health Canada)
   raw/food-shelflife-db/...    USDA FSIS FoodKeeper shelf-life table
   overlay/curated.csv          our hand-kept list: canonical ingredients, aliases, which USDA food each maps to
@@ -25,7 +26,8 @@ os.makedirs(OUT, exist_ok=True)
 
 # ---------------------------------------------------------------- USDA load
 def sr(name):
-    path = os.path.join(RAW, 'USDA-SR28', name + '.txt')
+    d = 'official_sr28' if os.path.isdir(os.path.join(RAW, 'official_sr28')) else 'USDA-SR28'   # official USDA zip first, mirror as fallback
+    path = os.path.join(RAW, d, name + '.txt')
     with open(path, encoding='latin-1') as f:
         for line in f:
             line = line.rstrip('\r\n')

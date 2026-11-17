@@ -60,12 +60,13 @@ The app must show the USDA and Health Canada attribution lines (an About screen 
 
 ## Known limits. Read before relying on it
 
-- **Older releases, via mirrors.** The official sites could not be reached from the machine that made this build, so it used
-  GitHub mirrors (see `fetch.sh`): SR28 from 2015, not the final SR Legacy release (2018) or Foundation Foods, and the
-  Canadian file from 2015, not 2026. The build script reads the official SR Legacy ASCII files unchanged. Rebuild from the official
-  downloads before shipping: https://fdc.nal.usda.gov/download-datasets and
+- **USDA data is the official SR28 release (2015).** Built from USDA's own `sr28asc.zip`. The GitHub mirror used for the very
+  first build was compared with it and is identical apart from line endings. Put the unzipped official files in `raw/official_sr28/`.
+- **Not yet the newest USDA data.** SR Legacy (2018, the final Standard Reference release) and Foundation Foods (2026) are not in.
+  The current download site (https://fdc.nal.usda.gov/download-datasets) publishes them in a different table layout
+  (`food.csv`, `food_nutrient.csv`, `food_portion.csv`), which needs a second reader in `build.py`.
+- **Canadian data is still a mirror copy of the 2015 edition**, used only for French names. Health Canada has a 2026 edition:
   https://www.canada.ca/en/health-canada/services/food-nutrition/healthy-eating/nutrient-data.html
-- **Mirrors are unverified copies.** The spot checks in `validate.py` match published USDA values, but that is a sample, not proof the copies are intact.
 - **Allergen and diet tags are rules, not facts.** They come from keywords and food groups. They will miss hidden ingredients
   and can over-flag. Good for a warning that prompts a label check. Not good enough to tell someone a food is safe.
 - **French coverage is thin** (14% of foods). The Canadian file words its descriptions differently, so only close matches are kept.
@@ -78,7 +79,7 @@ The app must show the USDA and Health Canada attribution lines (an About screen 
 ## Rebuild
 
 ```
-./fetch.sh                 # source data into raw/ (not committed)
+./fetch.sh                 # mirrors into raw/ (not committed); or unzip USDA's sr28asc.zip into raw/official_sr28/
 python3 -I build.py        # writes out/
 python3 -I validate.py     # checks; exits non-zero on failure
 ```
