@@ -299,7 +299,7 @@ function syncHave(){RECIPE_ORDER.forEach(function(id){var r=RECIPES[id];r.have={
 function pantryFromS(){var via=S.haveVia||{};ING.forEach(function(it){if(via[it.id])return;if(S.have[it.id])PAN[pKey(it)]=1;else delete PAN[pKey(it)]});syncHave()}
 function initPantry(){
  if(!PAN0){PAN0={};RECIPE_ORDER.forEach(function(id){var r=RECIPES[id];r.ING.forEach(function(it){if(r.have[it.id])PAN0[pKey(it)]=1})})}
- PAN={};for(var k in PAN0)PAN[k]=1;PLAN={0:'cajun',2:'thai',4:'scampi',6:'shepherd'};CART={};syncHave();
+ PAN={};for(var k in PAN0)PAN[k]=1;PLAN={0:['cajun'],2:['thai'],4:['scampi'],5:['hamsoup','potpie','cookies']};CART={};syncHave();
 }
 function catalog(){var m={},out=[];RECIPE_ORDER.forEach(function(id){RECIPES[id].ING.forEach(function(it){var k=pKey(it);if(!m[k]){m[k]={key:k,it:it,n:0};out.push(m[k])}m[k].n++})});return out}
 function coverage(id){var r=RECIPES[id];return [Object.keys(r.have).length,r.ING.length]}
@@ -364,10 +364,10 @@ function openPlanPick(i){
 /* ================= SHOP (weekly list) ================= */
 var CART={};
 function shopAllView(){
- var pad=isPad(),needs=planNeeds(),n=Object.keys(PLAN).length;
+ var pad=isPad(),needs=planNeeds(),n=planIds().length;
  Object.keys(CART).forEach(function(k){if(!needs.some(function(x){return pKey(x.it)===k}))delete CART[k]});
  var inCart=needs.filter(function(x){return CART[pKey(x.it)]}).length;
- var planned=DAYS.map(function(D0,i){return PLAN[i]?'<button class="chip out" data-open="'+PLAN[i]+'" style="height:36px"><span class="muted" style="font-weight:600">'+D0[1]+'</span> '+esc(RECIPES[PLAN[i]].short||RECIPES[PLAN[i]].title)+'</button>':''}).join('');
+ var planned=DAYS.map(function(D0,i){return (PLAN[i]||[]).map(function(id){return '<button class="chip out" data-open="'+id+'" style="height:36px"><span class="muted" style="font-weight:600">'+D0[1]+'</span> '+esc(RECIPES[id].short||RECIPES[id].title)+'</button>'}).join('')}).join('');
  var secs=AISLES.map(function(a){var items=needs.filter(function(x){return x.it.aisle===a});if(!items.length)return '';
   var left=items.filter(function(x){return !CART[pKey(x.it)]}).length;
   return '<section style="display:flex;flex-direction:column;gap:10px"><div class="between" style="border-bottom:1.5px solid #111;padding-bottom:6px"><h2 class="h2">'+a+'</h2><span class="muted" style="font-size:12px;font-weight:600">'+(left?left+' to get':'All in cart')+'</span></div><div class="tiles">'+

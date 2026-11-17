@@ -432,3 +432,24 @@ body.darkstage #phone{border-color:#000}
 .ipad .canrow,.port .canrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0;padding:0;overflow:visible}
 .port .canrow{grid-template-columns:repeat(2,minmax(0,1fr))}
 .ipad .cancard{flex:none}
+
+/* ---- plan polish + prep days ---- */
+.pday{align-items:flex-start}
+.pday .pdate{position:sticky;top:8px}
+.pday.empty{align-items:stretch}.pday.empty .pdate{min-height:48px;position:static}
+.pday.empty .pdate span{font-size:17px}
+.padd{min-height:48px;border-color:#D6D6D1;color:#595954;font-weight:600;font-size:13px}
+.pdcol{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.pdhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;min-height:20px}
+.pdfoot{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pday.prep .pdcol{padding:12px;border-radius:18px;background:var(--counter)}
+.pday.prep .pmeal{background:#fff}
+.pmeal{min-height:60px}
+.lane.l2{background:#8A8A85}.lane.l3{background:#fff;box-shadow:inset 0 0 0 2px #111;border-radius:3px}
+.lanes{display:grid;grid-template-columns:1fr;gap:8px}
+.ipad .lanes{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.port .lanes{grid-template-columns:repeat(2,minmax(0,1fr))}
+.lanechip{display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 14px;border-radius:14px;border:1.5px solid #ECECE8;background:#fff;text-align:left;cursor:pointer;min-width:0}
+.lanechip span{display:flex;flex-direction:column;gap:1px;min-width:0}.lanechip b{font-size:15px}.lanechip small{font-size:12px;color:var(--muted)}
+.prepgrid{display:flex;flex-direction:column;gap:20px}
+.ipad .prepgrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:32px;align-items:start}.port .prepgrid{grid-template-columns:minmax(0,1fr)}
+.pdhead .kicker{white-space:nowrap}

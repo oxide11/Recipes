@@ -496,11 +496,11 @@ function done(){
 }
 
 /* ================= RENDER + EVENTS ================= */
-var VIEWS={home:home,recipe:recipe,ingredients:ingredients,shop:shop,cook:cook,done:done,cooks:function(){return cooksView()},library:function(){return libraryView()},pantry:function(){return pantryView()},plan:function(){return planView()},shopall:function(){return shopAllView()},together:function(){return togetherView()},questions:function(){return questionsView()}};
+var VIEWS={home:home,recipe:recipe,ingredients:ingredients,shop:shop,cook:cook,done:done,cooks:function(){return cooksView()},library:function(){return libraryView()},pantry:function(){return pantryView()},plan:function(){return planView()},shopall:function(){return shopAllView()},together:function(){return togetherView()},questions:function(){return questionsView()},prep:function(){return prepView()}};
 var PADVIEWS={home:homePad,recipe:recipePad,ingredients:ingredientsPad};
 function render(anim){
  document.getElementById('phone').classList.toggle('norail',S.screen==='cook');
- document.querySelectorAll('.rail [data-nav]').forEach(function(b){var cur=({library:1,pantry:1,plan:1,shopall:1})[S.screen]?S.screen:'home',on=b.dataset.nav===cur;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+ document.querySelectorAll('.rail [data-nav]').forEach(function(b){var cur=({library:1,pantry:1,plan:1,shopall:1})[S.screen]?S.screen:S.screen==='prep'?'plan':'home',on=b.dataset.nav===cur;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
  var lq=document.getElementById('libq');if(false)lq=null;
  scr.innerHTML=((isPad()&&PADVIEWS[S.screen])||VIEWS[S.screen])();
  scr.classList.remove('anim','animb');if(anim){void scr.offsetWidth;scr.classList.add(S.dir<0?'animb':'anim')}
@@ -544,9 +544,10 @@ document.addEventListener('click',function(e){
  if(d.wcart){if(CART[d.wcart])delete CART[d.wcart];else CART[d.wcart]=1;keep(render);return}
  if(d.pan){var was=!!PAN[d.pan];if(was)delete PAN[d.pan];else PAN[d.pan]=1;syncHave();keep(render);var pb=el.querySelector('b');toast((pb?pb.textContent:'Item')+(was?' marked used up':' added to your pantry'));return}
  if(d.panf){S.pan.f=d.panf;keep(render);return}
- if(d.plandel!==undefined){delete PLAN[d.plandel];keep(render);return}
+ if(d.plandel!==undefined){var pd=d.plandel.split(':');PLAN[pd[0]].splice(+pd[1],1);if(!PLAN[pd[0]].length)delete PLAN[pd[0]];keep(render);return}
+ if(d.prep!==undefined){S.prepDay=+d.prep;go('prep');return}
  if(d.planadd!==undefined){openPlanPick(+d.planadd);return}
- if(d.planpick){var pp=d.planpick.split(':');PLAN[pp[0]]=pp[1];closeSheet();keep(render);toast(RECIPES[pp[1]].title+' planned for '+DAYS[+pp[0]][0]);return}
+ if(d.planpick){var pp=d.planpick.split(':');(PLAN[pp[0]]=PLAN[pp[0]]||[]).push(pp[1]);closeSheet();keep(render);toast(RECIPES[pp[1]].title+' planned for '+DAYS[+pp[0]][0]);return}
  if(d.libf){S.lib.f=d.libf;keep(render);return}
  if(d.libs){S.lib.s=d.libs;keep(render);return}
  if(d.libtag){S.lib.tag=S.lib.tag===d.libtag?null:d.libtag;closeSheet();keep(render);return}

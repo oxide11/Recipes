@@ -86,17 +86,17 @@ function useItUp(){
 /* ---- F3 cook two recipes together (plan only) ---- */
 function plainTitle(r,st){return st.title.replace(/\{(\w+)!?\}/g,function(_,k){var li=r.LINE[k],it=li&&li.ing?r.ING.filter(function(x){return x.id===li.ing})[0]:r.ING.filter(function(x){return x.id===k})[0];return it?it.name.toLowerCase():k})}
 function mergePlan(A0,B0){
- var Q=[{r:A0,i:0,ready:0},{r:B0,i:0,ready:0}],busy=0,rows=[];
+ var list=Array.isArray(A0)?A0:[A0,B0],Q=list.map(function(r){return {r:r,i:0,ready:0}}),busy=0,rows=[];
  function left(q){var s=0;for(var j=q.i;j<q.r.STEPS.length;j++){var t=stepTime(q.r.STEPS[j]);s+=t.on+t.wait}return s}
- while(Q[0].i<Q[0].r.STEPS.length||Q[1].i<Q[1].r.STEPS.length){
-  var c=Q.filter(function(q){return q.i<q.r.STEPS.length});
-  c.sort(function(x,y){var sx=Math.max(busy,x.ready),sy=Math.max(busy,y.ready);return sx-sy||left(y)-left(x)});
+ function open(){return Q.filter(function(q){return q.i<q.r.STEPS.length})}
+ while(open().length){
+  var c=open();c.sort(function(x,y){var sx=Math.max(busy,x.ready),sy=Math.max(busy,y.ready);return sx-sy||left(y)-left(x)});
   var q=c[0],st=q.r.STEPS[q.i],t=stepTime(st),s=Math.max(busy,q.ready);
   rows.push({at:s,lane:Q.indexOf(q),r:q.r,n:q.i+1,title:plainTitle(q.r,st),on:t.on,wait:t.wait});
   busy=s+t.on;q.ready=s+t.on+t.wait;q.i++;
  }
- var tot=function(r){return r.STEPS.reduce(function(s,st){var t=stepTime(st);return s+t.on+t.wait},0)};
- return {rows:rows,end:Math.max(Q[0].ready,Q[1].ready,busy),apart:tot(A0)+tot(B0)};
+ var apart=0;list.forEach(function(r){r.STEPS.forEach(function(st){var t=stepTime(st);apart+=t.on+t.wait})});
+ return {rows:rows,end:Math.max.apply(null,Q.map(function(q){return q.ready}).concat([busy])),apart:apart,done:Q.map(function(q){return q.ready})};
 }
 function openWith(){
  var el=document.getElementById('sheet');
@@ -176,4 +176,60 @@ function pencil(fresh){
 
 /* ---- dark mode ---- */
 function applyTheme(){var on=!!P.dark;document.getElementById('phone').classList.toggle('dark',on);document.body.classList.toggle('darkstage',on);var b=document.getElementById('themeBtn');if(b){b.setAttribute('aria-checked',on);b.querySelector('.sw').classList.toggle('on',on)}}
+
+/* ---- plan: several recipes a day, and prep sessions ---- */
+function planIds(){var out=[];Object.keys(PLAN).forEach(function(d){PLAN[d].forEach(function(id){out.push(id)})});return out}
+function planNeeds(){var m={},out=[];planIds().forEach(function(id){var r=RECIPES[id];r.ING.forEach(function(it){var k=pKey(it);if(PAN[k])return;if(!m[k]){m[k]={it:it,for:[],amts:[]};out.push(m[k])}if(m[k].for.indexOf(r.short||r.title)<0){m[k].for.push(r.short||r.title);m[k].amts.push(it.amt)}})});return out}
+function fmtS(x){return x>=60?Math.floor(x/60)+'h'+(x%60?' '+x%60+'m':''):x+' min'}
+function fmtMin(x){return x>=60?Math.floor(x/60)+' hr'+(x%60?' '+x%60+' min':''):x+' min'}
+function planView(){
+ var pad=isPad(),ids=planIds(),needs=planNeeds(),mins=0,nights=Object.keys(PLAN).length;ids.forEach(function(id){mins+=myMins(id).m});
+ var days=DAYS.map(function(D0,i){var list=PLAN[i]||[],today=i===0,prep=list.length>1,pm=prep?mergePlan(list.map(function(id){return RECIPES[id]})):null;
+  var date='<div class="pdate'+(today?' today':'')+'"><b>'+D0[1]+'</b><span>'+D0[2]+'</span></div>';
+  if(!list.length)return '<div class="pday empty">'+date+'<button class="padd" data-planadd="'+i+'" aria-label="Add a recipe for '+D0[0]+'">+ Add a recipe</button></div>';
+  var meals=list.map(function(id,j){var r=RECIPES[id],c=coverage(id),miss=c[1]-c[0],t=myMins(id);
+   return '<div class="pmeal"><button class="pmopen" data-open="'+id+'" aria-label="Open '+esc(r.title)+'"><span class="libfp">'+fpBar(r,60)+'</span><span class="libtxt" style="padding:11px 52px 11px 14px"><b style="font-size:17px">'+esc(r.title)+'</b><span class="muted">'+(t.yours?'':'~')+fmtMin(t.m)+' for you · '+(miss?miss+' to buy':'everything on hand')+'</span></span></button><button class="iconbtn pdel" data-plandel="'+i+':'+j+'" aria-label="Remove '+esc(r.title)+' from '+D0[0]+'">'+SVG.close+'</button></div>'}).join('');
+  var head='<div class="pdhead"><span class="kicker" style="color:#111">'+(today?'Tonight':D0[0])+(prep?' · prep day':'')+'</span>'+(prep?'<span class="muted" style="font-size:12px">'+list.length+' recipes · '+fmtS(pm.end)+'</span>':'')+'</div>';
+  return '<div class="pday'+(prep?' prep':'')+'">'+date+'<div class="pdcol">'+head+meals+
+   '<div class="pdfoot">'+(prep?'<button class="primary" style="height:44px;font-size:14px;width:auto;padding:0 18px" data-prep="'+i+'">Open prep session</button>':'')+'<button class="linkbtn" style="font-size:13px" data-planadd="'+i+'" aria-label="Add another recipe for '+D0[0]+'">+ Add another</button></div></div></div>'}).join('');
+ var buy='<section class="card acard" style="gap:12px"><div class="between"><span class="kicker">To buy for this week</span><span style="font-size:13px"><b>'+needs.length+'</b> item'+(needs.length===1?'':'s')+'</span></div>'+
+  (needs.length?'<div style="display:flex;flex-direction:column">'+needs.slice(0,pad?99:6).map(function(x){return '<div class="row" style="gap:10px;min-height:44px;border-bottom:1px solid #ECECE8">'+icon(x.it.icon[0][0],28)+'<span style="flex:1;min-width:0;font-size:15px;font-weight:600;padding-left:8px;border-left:4px solid '+(x.it.edge||x.it.color)+'">'+esc(x.it.name)+'</span><span class="muted" style="font-size:12px;text-align:right">'+esc(x.for.join(', '))+'</span></div>'}).join('')+'</div>'+(!pad&&needs.length>6?'<span class="muted" style="font-size:13px">and '+(needs.length-6)+' more</span>':''):'<span style="font-size:14px">Nothing. The pantry covers the whole week.</span>')+
+  (needs.length?'<button class="secondary" style="height:44px;font-size:14px" data-go="shopall">Open the shopping list</button>':'')+'</section>';
+ return '<div class="pad">'+
+  '<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">November 16 to 22</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Plan</h1></div>'+
+  '<div class="stats" style="grid-template-columns:repeat(4,1fr)"><div><b>'+nights+' of 7</b><span>days planned</span></div><div><b>'+ids.length+'</b><span>recipes</span></div><div><b>'+fmtS(mins)+'</b><span>at your pace</span></div><div><b>'+needs.length+'</b><span>to buy</span></div></div>'+
+  '<div class="plangrid"><div class="pdays">'+days+'</div>'+buy+'</div>'+
+  '<p class="muted" style="margin:0;font-size:12px;line-height:1.45">Add more than one recipe to a day to make it a prep day. The week is sample data.</p>'+
+  '</div>'+(pad?'':tabbar('plan'));
+}
+function openPlanPick(i){
+ var el=document.getElementById('sheet'),used={},here=PLAN[i]||[];Object.keys(PLAN).forEach(function(d){PLAN[d].forEach(function(id){used[id]=DAYS[d][1]})});
+ var cur=here.map(function(id){return RECIPES[id]});
+ el.innerHTML='<div class="sheetwrap" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="Choose a recipe for '+DAYS[i][0]+'">'+
+  '<div class="between"><div><span class="kicker">'+DAYS[i][0]+', November '+DAYS[i][2]+'</span><h2 class="h2" style="font-size:20px">'+(here.length?'Add to this prep day':'Choose a recipe')+'</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  '<div style="display:flex;flex-direction:column;gap:8px">'+RECIPE_ORDER.filter(function(id){return here.indexOf(id)<0}).map(function(id){var r=RECIPES[id],c=coverage(id),miss=c[1]-c[0],extra='';
+   if(cur.length){var mm=mergePlan(cur.concat([r])),m0=cur.length>1?mergePlan(cur).end:cur[0].STEPS.reduce(function(s,st){var t=stepTime(st);return s+t.on+t.wait},0);extra=' · adds '+fmtMin(Math.max(0,mm.end-m0))}
+   return '<button class="opt" style="height:auto;min-height:56px;padding:8px 14px;text-align:left;gap:10px" data-planpick="'+i+':'+id+'"><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b style="font-size:15px">'+esc(r.title)+'</b><span class="muted" style="font-size:12px">'+r.meta+' · '+(miss?miss+' to buy':'everything on hand')+extra+'</span></span>'+(used[id]?'<span class="badge" style="height:22px;font-size:11px;flex-shrink:0">'+used[id]+'</span>':'')+'</button>'}).join('')+'</div></div></div>';
+ var b=el.querySelector('.iconbtn');if(b)b.focus();
+}
+function prepView(){
+ var i=S.prepDay,list=(PLAN[i]||[]).map(function(id){return RECIPES[id]}),pad=isPad();
+ if(list.length<2)return '<div class="pad"><div class="row" style="gap:12px"><button class="iconbtn" data-go="plan" aria-label="Back to plan">'+SVG.back+'</button><h1 class="t" style="font-size:26px">Prep session</h1></div><p class="insight">A prep session needs two or more recipes on the same day.</p></div>';
+ var m=mergePlan(list),names=list.map(function(r){return r.short||r.title}),D0=DAYS[i];
+ function hm(x){return Math.floor(x/60)+':'+(x%60<10?'0':'')+x%60}
+ var share={};list.forEach(function(r,ri){r.ING.forEach(function(it){var k=pKey(it);(share[k]=share[k]||{it:it,rs:[],amts:[]});if(share[k].rs.indexOf(ri)<0){share[k].rs.push(ri);share[k].amts.push(it.amt)}})});
+ var shared=Object.keys(share).map(function(k){return share[k]}).filter(function(x){return x.rs.length>1}).sort(function(x,y){return y.rs.length-x.rs.length});
+ var hands=m.rows.reduce(function(s,x){return s+x.on},0);
+ var lanes='<div class="lanes">'+list.map(function(r,ri){return '<button class="lanechip" data-open="'+r.id+'"><i class="lane l'+ri+'"></i><span><b>'+esc(r.title)+'</b><small>done at '+hm(m.done[ri])+' · '+r.base+' servings</small></span></button>'}).join('')+'</div>';
+ var sharedCard=shared.length?'<section class="card acard" style="gap:10px"><span class="kicker">Get out once</span><p class="muted" style="margin:0;font-size:13px;line-height:1.4">These go into more than one recipe today. Measure or chop them together.</p><div style="display:flex;flex-direction:column">'+shared.map(function(x){return '<div class="row" style="gap:10px;min-height:44px;border-bottom:1px solid #ECECE8">'+icon(x.it.icon[0][0],28)+'<span style="flex:1;min-width:0;font-size:15px;font-weight:600;padding-left:8px;border-left:4px solid '+(x.it.edge||x.it.color)+'">'+esc(x.it.name)+'</span><span class="muted" style="font-size:12px;text-align:right">'+esc(x.amts.join(' + '))+'</span><span class="row" style="gap:3px">'+x.rs.map(function(ri){return '<i class="lane l'+ri+'"></i>'}).join('')+'</span></div>'}).join('')+'</div></section>':'';
+ var tl='<ol class="tl">'+m.rows.map(function(x){return '<li class="tlrow"><span class="tlat">'+hm(x.at)+'</span><i class="lane l'+x.lane+'"></i><span class="tltxt"><b>'+esc(x.title)+'</b><small>'+esc(names[x.lane])+' · step '+x.n+' · '+x.on+' min hands-on'+(x.wait?' · then '+x.wait+' min on a timer':'')+'</small></span></li>'}).join('')+
+  '<li class="tlrow end"><span class="tlat">'+hm(m.end)+'</span><i class="lane done"></i><span class="tltxt"><b>Everything done</b></span></li></ol>';
+ return '<div class="pad">'+
+  '<div class="row" style="gap:12px;align-items:flex-start"><button class="iconbtn" data-go="plan" aria-label="Back to plan">'+SVG.back+'</button><div><h1 class="t" style="font-size:'+(pad?36:26)+'px">Prep session</h1><p class="muted" style="margin:2px 0 0;font-size:'+(pad?14:13)+'px">'+D0[0]+', November '+D0[2]+' · '+list.length+' recipes</p></div></div>'+
+  '<div class="stats" style="grid-template-columns:repeat(4,1fr)"><div><b>'+fmtS(m.end)+'</b><span>start to finish</span></div><div><b>'+fmtS(hands)+'</b><span>hands-on</span></div><div><b>'+fmtS(m.apart)+'</b><span>one at a time</span></div><div><b>'+fmtS(m.apart-m.end)+'</b><span>saved</span></div></div>'+
+  lanes+
+  '<div class="prepgrid"><div style="display:flex;flex-direction:column;gap:12px;min-width:0"><span class="kicker">One timeline</span>'+tl+'</div><div style="display:flex;flex-direction:column;gap:16px;min-width:0">'+sharedCard+
+   '<p class="muted" style="margin:0;font-size:12px;line-height:1.45">Steps are ordered so your hands are on one thing at a time and waits overlap. It does not yet account for oven space or the number of burners. This is a plan only: cooking mode still runs one recipe at a time.</p></div></div>'+
+  '</div><div class="bottombar"><button class="primary" data-open="'+m.rows[0].r.id+'">Start with '+esc(names[m.rows[0].lane])+'</button></div>';
+}
 initMark2();
