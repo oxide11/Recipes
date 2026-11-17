@@ -1328,7 +1328,7 @@ turkey,Turkey,,,Meat and seafood,Poultry Products,usda:05167,"Turkey, whole, mea
 turkey-and-gravy,Turkey and gravy,,,Meat and seafood,Poultry Products,usda:05286,"Turkey and gravy, frozen",67,5.88,2.63,4.61,0.0,,554,1.014,package=142.0,,contains meat or fish,,,,1
 turkey-and-pork-sausage,Turkey and pork sausage,,,Meat and seafood,Sausages and Luncheon Meats,usda:42173,"Turkey and pork sausage, fresh, bulk, patty or link, cooked",307,22.7,23.0,0.7,0.0,0.0,878,0.549,"patty, cooked=25.0",,contains meat or fish,,,,1
 turkey-bacon,Turkey bacon,,,Meat and seafood,Sausages and Luncheon Meats,usda:07254,"Turkey bacon, unprepared",226,15.94,16.93,1.89,,,1069,,serving=14.0; slice 12 oz pkg=16.0; slice 6 oz pkg=9.8,,contains meat or fish,14-14,,60-120,2
-turkey-breast,Turkey breast,,,Meat and seafood,Sausages and Luncheon Meats,usda:07081,"Turkey breast, sliced, prepackaged",100,16.33,2.37,2.34,0.0,3.28,922,0.342,slice=15.0,,contains meat or fish,,,,19
+turkey-breast,Turkey breast,,,Meat and seafood,Sausages and Luncheon Meats,usda:07081,"Turkey breast, sliced, prepackaged",106,14.81,3.77,2.2,0.0,0.91,898,0.342,slice=16.0,,contains meat or fish,,,,19
 turkey-dark-meat,Turkey dark meat,,,Meat and seafood,Poultry Products,usda:05183,"Turkey, dark meat, meat and skin, raw",161,19.81,8.97,0.15,0.0,0.1,113,,/2 bird=807.5; food guide serving = 90g=90.0,,contains meat or fish,,,,12
 turkey-drumstick,Turkey drumstick,,,Meat and seafood,Poultry Products,usda:05716,"Turkey, retail parts, drumstick, meat only, raw",118,20.52,3.97,0.0,0.0,0.0,87,,drumstick=356.0; food guide serving = 90g=90.0,,contains meat or fish,,,,9
 turkey-fat,Turkey fat,,,Pantry,Fats and Oils,usda:04575,"Fat, turkey",900,0.0,99.8,0.0,0.0,0.0,0,0.866,,,contains meat or fish,,,,1
@@ -1395,7 +1395,7 @@ whale,Whale,,,Meat and seafood,"Lamb, Veal, and Game Products",cnf:3648,"Game me
 wheat,Wheat,,,Dry goods,Cereal Grains and Pasta,usda:20076,"Wheat, durum",339,13.68,2.47,71.13,,,2,0.812,serving=20.0,wheat or gluten,vegan,,90-180,,7
 wheat-bran,Wheat bran,,,Dry goods,Cereal Grains and Pasta,usda:20077,"Wheat bran, crude",216,15.55,4.25,64.51,42.8,0.41,2,0.245,serving=26.7,wheat or gluten,vegan,,,,1
 wheat-bran-bread,Wheat bran bread,,,Bakery,Baked Products,usda:18066,"Bread, wheat bran",248,8.8,3.4,47.8,4.0,9.68,486,,slice=36.0,wheat or gluten,vegan,,,,1
-wheat-bread,Wheat bread,,,Bakery,Baked Products,usda:18064,"Bread, wheat",267,10.72,3.24,48.68,4.0,5.91,508,,slice=29.0,wheat or gluten,vegan,,3-5,90-90,4
+wheat-bread,Wheat bread,,,Bakery,Baked Products,usda:18064,"Bread, wheat",274,10.67,4.53,47.54,4.0,5.73,473,,slice=29.0,wheat or gluten,vegan,,3-5,90-90,4
 wheat-flours,Wheat flours,,,Dry goods,Cereal Grains and Pasta,usda:20129,"Wheat flours, bread, unenriched",361,11.98,1.66,72.53,2.4,0.31,2,0.579,,wheat or gluten,vegan,730-730,360-360,730-730,1
 wheat-germ,Wheat germ,,,Dry goods,Cereal Grains and Pasta,usda:20078,"Wheat germ, crude",360,23.15,9.72,51.8,13.2,,12,0.486,serving=26.7,wheat or gluten,vegan,,,,1
 wheat-germ-bread,Wheat germ bread,,,Bakery,Baked Products,cnf:3731,"Bread, wheat germ",261,9.6,2.9,48.3,2.1,3.73,553,,slice=28.4; slice = food guide portion=35.0,wheat or gluten,vegan,,,,2

@@ -1,6 +1,6 @@
 {
- "foods_total": 10480,
- "foods_from_usda": 8789,
+ "foods_total": 10481,
+ "foods_from_usda": 8790,
  "foods_from_usda_foundation": 378,
  "sr28_foods_with_newer_lab_data": 182,
  "foods_from_cnf": 1313,
@@ -8,17 +8,17 @@
   "ingredient": 6747,
   "institutional": 83,
   "branded": 1525,
-  "baby": 434,
+  "baby": 435,
   "prepared": 1526,
   "regional": 165
  },
  "measures_from_cnf": 15895,
  "foods_with_cooking_yield": 1026,
- "foods_with_density": 5159,
+ "foods_with_density": 5160,
  "foods_with_unit_weights": 5780,
  "foods_with_french": 5978,
- "foods_with_energy": 10480,
- "measures_total": 31515,
+ "foods_with_energy": 10481,
+ "measures_total": 31517,
  "ingredients_total": 1454,
  "ingredients_curated": 88,
  "ingredients_with_density": 978,
@@ -28,5 +28,15 @@
  "ingredients_data_gaps": [
   "Red curry paste"
  ],
+ "sr28_may_2016_update": {
+  "foods_changed": 9,
+  "foods_added": 1,
+  "nutrient_values_changed": 963,
+  "nutrient_values_added": 193,
+  "nutrient_values_deleted": 84,
+  "measures_changed": 9,
+  "measures_added": 1,
+  "foods_touched": 40
+ },
  "curated_unresolved": []
 }

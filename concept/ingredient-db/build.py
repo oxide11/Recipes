@@ -4,6 +4,7 @@
 Inputs (see README for where they come from):
   raw/official_sr28/*.txt      USDA National Nutrient Database for Standard Reference, official sr28asc.zip
                                (falls back to raw/USDA-SR28, a GitHub mirror of the same files)
+  raw/official_sr28upd/*.txt   USDA's May 2016 revision of SR28 (sr28upd0516.zip), applied on top
   raw/official_ff/**/food.csv  USDA Foundation Foods, FoodData Central CSV download (optional)
   raw/official_cnf2026/*.csv   Canadian Nutrient File 2026 (Health Canada), official download
                                (falls back to raw/cnfx, the 2015 edition, for French names only)
@@ -64,6 +65,42 @@ for r in sr('WEIGHT'):
         weights[r[0]].append((float(r[2]), r[3].strip(), float(r[4]), 'usda'))
     except ValueError:
         pass
+
+# ---------------------------------------------------------------- USDA SR28 revision of May 2016 (official update files)
+UPD = os.path.join(RAW, 'official_sr28upd')
+def upd(name):
+    path = os.path.join(UPD, name + '.txt')
+    if not os.path.exists(path): return
+    with open(path, encoding='latin-1') as f:
+        for line in f:
+            line = line.rstrip('\r\n')
+            if line:
+                yield [c[1:-1] if len(c) >= 2 and c[0] == '~' and c[-1] == '~' else c for c in line.split('^')]
+SR_FOODS = OrderedDict((r[0], r) for r in sr('FOOD_DES'))
+upd_stats = dict(foods_changed=0, foods_added=0, nutrient_values_changed=0, nutrient_values_added=0, nutrient_values_deleted=0, measures_changed=0, measures_added=0, foods_touched=set())
+if os.path.isdir(UPD):
+    for r in upd('CHG_FOOD'):
+        SR_FOODS[r[0]] = r; upd_stats['foods_changed'] += 1; upd_stats['foods_touched'].add(r[0])
+    for r in upd('ADD_FOOD'):
+        SR_FOODS[r[0]] = r; upd_stats['foods_added'] += 1; upd_stats['foods_touched'].add(r[0])
+    for fname, k in (('CHG_NUTR', 'nutrient_values_changed'), ('ADD_NUTR', 'nutrient_values_added')):
+        for r in upd(fname):
+            upd_stats[k] += 1; upd_stats['foods_touched'].add(r[0])
+            if r[1] in NUTR:
+                f_, _, d_ = NUTR[r[1]]; v = round(float(r[2]), d_); nut[r[0]][f_] = int(v) if d_ == 0 else v
+    for r in upd('DEL_NUTR'):
+        upd_stats['nutrient_values_deleted'] += 1; upd_stats['foods_touched'].add(r[0])
+        if r[1] in NUTR: nut[r[0]].pop(NUTR[r[1]][0], None)
+    for fname, k in (('CHG_WGT', 'measures_changed'), ('ADD_WGT', 'measures_added')):
+        for r in upd(fname):
+            upd_stats[k] += 1; upd_stats['foods_touched'].add(r[0])
+            try: seq, row = r[1], (float(r[2]), r[3].strip(), float(r[4]), 'usda')
+            except ValueError: continue
+            wl = weights[r[0]]
+            idx = int(seq) - 1 if seq.isdigit() else len(wl)
+            if fname == 'CHG_WGT' and 0 <= idx < len(wl): wl[idx] = row
+            else: wl.append(row)
+upd_stats['foods_touched'] = len(upd_stats['foods_touched'])
 
 # ---------------------------------------------------------------- measures
 ML = {'cup': 236.588, 'tbsp': 14.787, 'tsp': 4.929, 'fl oz': 29.574, 'quart': 946.353, 'pint': 473.176,
@@ -323,7 +360,7 @@ def cnf_rows(name):
     with open(os.path.join(CNF, name), encoding='utf-8-sig', newline='') as f:
         for row in csv.DictReader(f): yield row
 if os.path.isdir(CNF):
-    sr_ids = {r[0] for r in sr('FOOD_DES')}
+    sr_ids = set(SR_FOODS)
     mname = {r['Measure_Code']: r['Measure_Description_and_Unit_EN'].strip() for r in cnf_rows('Measure_Name.csv')}
     cnf_foods = {r['Food_Code']: r for r in cnf_rows('Food_Name.csv')}
     target = {}                                   # CNF food code -> key in our foods table
@@ -434,7 +471,7 @@ def add_food(key, grp, long_desc, manuf, sci, refuse, refuse_note, n, source):
     foods[key] = rec
     return rec
 
-for r in sr('FOOD_DES'):
+for r in SR_FOODS.values():
     add_food(r[0], r[1], r[2].strip(), r[5].strip(), r[9].strip(), r[8], r[7].strip(), nut.get(r[0], {}), 'usda')
 for r in cnf_only:
     key = 'cnf:' + r['Food_Code']
@@ -636,6 +673,6 @@ stats = OrderedDict(
     ingredients_with_shelf_life=sum(1 for i in ingredients if i.get('shelf_life')),
     ingredients_with_allergens=sum(1 for i in ingredients if i['allergens']),
     ingredients_data_gaps=[i['name'] for i in ingredients if i.get('data_gap')],
-    curated_unresolved=unresolved)
+    sr28_may_2016_update=upd_stats, curated_unresolved=unresolved)
 with open(os.path.join(OUT, 'stats.json'), 'w') as f: json.dump(stats, f, indent=1)
 print(json.dumps(stats, indent=1))

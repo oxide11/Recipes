@@ -7,14 +7,14 @@ the Sankey, nutrition, unit conversion, shopping aisles, allergen flags and pant
 
 | File | Records | What |
 |---|---|---|
-| `out/foods.jsonl` | 10,480 | Every food from both sources, cleaned. Nutrition per 100 g (27 values), household measures with gram weights (US and metric), density, weight per item, state (raw, cooked, canned, frozen, dried), aisle, allergen and diet tags, French description |
+| `out/foods.jsonl` | 10,481 | Every food from both sources, cleaned. Nutrition per 100 g (27 values), household measures with gram weights (US and metric), density, weight per item, state (raw, cooked, canned, frozen, dried), aisle, allergen and diet tags, French description |
 | `out/ingredients.json` | 1,454 | Cooking ingredients. One record per ingredient, with a default food, its other forms, aliases and shelf life |
 | `out/ingredients.csv` | 1,454 | The same, flat, to open in a spreadsheet |
 | `out/stats.json` | | Counts and coverage from the last build |
 
 Coverage in this build:
 
-- 8,789 foods from USDA SR28, 378 from USDA Foundation Foods, and 1,313 that exist only in the Canadian file (ids `usda:…`, `fdc:…`, `cnf:…`).
+- 8,790 foods from USDA SR28 (with the May 2016 revision applied), 378 from USDA Foundation Foods, and 1,313 that exist only in the Canadian file (ids `usda:…`, `fdc:…`, `cnf:…`).
 - 182 SR28 foods point to newer lab data for the same food in Foundation Foods (`newer_lab_data`).
 - Foods by kind: 6,374 ingredients, 1,525 branded, 1,521 prepared dishes, 434 baby foods, 165 regional, 83 institutional. Only "ingredient" foods feed the ingredient list.
 - 31,333 household measures, 15,895 of them metric measures from the Canadian file (125 ml, 15 ml). 5,108 foods have a density; 5,720 have a weight per item (1 egg, 1 clove, 1 medium onion).
@@ -64,7 +64,8 @@ The app must show the USDA and Health Canada attribution lines (an About screen 
 
 ## Known limits. Read before relying on it
 
-- **USDA data is the official SR28 release (2015).** Built from USDA's own `sr28asc.zip`, unzipped into `raw/official_sr28/`.
+- **USDA data is the official SR28 release, with USDA's May 2016 revision applied.** Built from `sr28asc.zip` (in `raw/official_sr28/`)
+  plus `sr28upd0516.zip` (in `raw/official_sr28upd/`). The revision touched 40 foods, mostly baby foods; 1 food added, 28 records changed in our output, none of them curated.
 - **Foundation Foods (April 2026) is in, as extra foods, not as the default.** 378 of its 469 foods have an energy value and are
   included. It is recent lab data but sparse: fewer nutrients and few household measures per food. So curated ingredients still
   use SR28 values, and `newer_lab_data` marks where a newer analysis exists. Where both cover a food, energy differs by more
