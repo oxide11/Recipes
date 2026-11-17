@@ -156,7 +156,7 @@ function pencil(fresh){
   if(!rows.length)return;
   var W=pl.offsetWidth,H=pl.offsetHeight,out='',anim=fresh===key;
   rows.forEach(function(row,ri){
-   var R=rng(seed+ri*977),style=(hashStr(key)+ri*2+Math.floor(R()*3))%6,h=row.h,y=row.top+h*(.5+(R()-.5)*.14),ov=h*(.08+R()*.18),x0=row.x0-ov,x1=row.x1+ov*(.6+R()),len=x1-x0;
+   var R=rng(seed+ri*977),style=[0,1,3,4,5][(hashStr(key)+ri*2+Math.floor(R()*3))%5],h=row.h,y=row.top+h*(.5+(R()-.5)*.14),ov=h*(.08+R()*.18),x0=row.x0-ov,x1=row.x1+ov*(.6+R()),len=x1-x0;
    var slope=(R()-.5)*h*.16,amp=h*(.03+R()*.05),sw=h*(.055+R()*.045),op=.72+R()*.2,paths=[];
    function wob(a,b,ya,yb,k){var n=Math.max(3,Math.round(Math.abs(b-a)/(h*1.1))),d='M'+a.toFixed(1)+' '+ya.toFixed(1);for(var i=1;i<=n;i++){var t=i/n,x=a+(b-a)*t,yy=ya+(yb-ya)*t+(R()-.5)*2*amp*(k||1),cx=a+(b-a)*(t-.5/n),cy=ya+(yb-ya)*(t-.5/n)+(R()-.5)*2*amp*(k||1);d+=' Q'+cx.toFixed(1)+' '+cy.toFixed(1)+' '+x.toFixed(1)+' '+yy.toFixed(1)}return d}
    if(style===0){paths.push([wob(x0,x1,y-slope/2,y+slope/2),sw,op])}
