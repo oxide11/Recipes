@@ -361,3 +361,12 @@ button.badge.solid{background:#111;color:#fff}
 .hfbtn span{display:none}.ipad .hfbtn span,.hfbtn.on span{display:inline}.hfbtn{padding:0 11px}
 .estnote{font-size:11.5px;color:var(--muted);margin:-8px 0 0}
 .skctl{flex-wrap:wrap;justify-content:flex-end}.port .skctl .seg{width:300px!important}
+
+/* ---- pencil strike-outs ---- */
+.struck .w::after{display:none!important}
+.pl{position:relative}
+.pencil{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.pdraw{stroke-dasharray:1;stroke-dashoffset:1;animation:pdraw .32s cubic-bezier(.3,.1,.3,1) forwards}
+@keyframes pdraw{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.pdraw{animation:none;stroke-dashoffset:0}}
+.line.struck .pl,.line.struck .ingt{color:#7A7A75}

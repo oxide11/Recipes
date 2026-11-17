@@ -464,6 +464,7 @@ function fitSteps(){
  var lo=22,hi=isPad()?68:36,best=lo;
  while(lo<=hi){var mid=(lo+hi)>>1;ol.style.setProperty('--fs',mid+'px');if(ol.scrollHeight<=avail){best=mid;lo=mid+1}else hi=mid-1}
  ol.style.setProperty('--fs',best+'px');
+ pencil();
 }
 window.addEventListener('resize',function(){fit();if(S.screen==='cook')fitSteps()});
 function wordify(){
@@ -561,7 +562,7 @@ document.addEventListener('click',function(e){
  if(d.back){if(d.back==='ingredients')S.focus=null;go(d.back,-1);recipeSeg();return}
  if(d.go){if(d.go==='ingredients')S.focus=null;go(d.go);recipeSeg();return}
  if(d.toast){toast(d.toast);return}
- if(d.strike){var on=S.struck[d.strike]=!S.struck[d.strike];el.classList.toggle('struck',on);el.setAttribute('aria-pressed',on);
+ if(d.strike){var on=S.struck[d.strike]=!S.struck[d.strike];el.classList.toggle('struck',on);el.setAttribute('aria-pressed',on);pencil(on?d.strike:null);
   var ls=stepLines(STEPS[S.step]),all=ls.every(function(_,j){return S.struck[S.step+':'+j]});
   var nb=scr.querySelector('[data-act="next"]');if(nb)nb.classList.toggle('glow',all);var h=scr.querySelector('.hint');if(h)h.innerHTML=all?'<b style="color:#111">Step done.</b> On to the next one.':'Tap a line to cross it off. Tap an ingredient to change its units.';return}
  if(d.tag){S.tag=d.tag;go('home',-1);recipeSeg();toast('Showing recipes tagged '+d.tag);return}
