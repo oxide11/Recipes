@@ -284,3 +284,87 @@ function libraryView(){
    '<button class="linkbtn" style="font-size:13px" data-libmore="1">'+(L.more?'Show fewer':'Show all '+PAPER.length)+'</button></section>'+
   '</div>'+(pad?'':tabbar('library'));
 }
+
+/* ================= PANTRY ================= */
+var PAN={},PAN0=null,PLAN={};
+function pKey(it){return it.name.toLowerCase().replace(/oes$/,'o').replace(/s$/,'')}
+function syncHave(){RECIPE_ORDER.forEach(function(id){var r=RECIPES[id];r.have={};r.ING.forEach(function(it){if(PAN[pKey(it)])r.have[it.id]=1})});if(S&&S.recipe&&typeof ING!=='undefined'&&ING){S.have={};ING.forEach(function(it){if(PAN[pKey(it)])S.have[it.id]=true})}}
+function pantryFromS(){ING.forEach(function(it){if(S.have[it.id])PAN[pKey(it)]=1;else delete PAN[pKey(it)]});syncHave()}
+function initPantry(){
+ if(!PAN0){PAN0={};RECIPE_ORDER.forEach(function(id){var r=RECIPES[id];r.ING.forEach(function(it){if(r.have[it.id])PAN0[pKey(it)]=1})})}
+ PAN={};for(var k in PAN0)PAN[k]=1;PLAN={0:'cajun',2:'thai',4:'scampi',6:'shepherd'};CART={};syncHave();
+}
+function catalog(){var m={},out=[];RECIPE_ORDER.forEach(function(id){RECIPES[id].ING.forEach(function(it){var k=pKey(it);if(!m[k]){m[k]={key:k,it:it,n:0};out.push(m[k])}m[k].n++})});return out}
+function coverage(id){var r=RECIPES[id];return [Object.keys(r.have).length,r.ING.length]}
+function panList(){
+ var q=(S.pan.q||'').toLowerCase().trim(),f=S.pan.f,cat=catalog().filter(function(c){if(f==='have'&&!PAN[c.key])return false;if(f==='out'&&PAN[c.key])return false;if(q&&c.key.indexOf(q)<0)return false;return true});
+ if(!cat.length)return '<p class="insight">Nothing matches. Try another filter or clear the search.</p>';
+ return AISLES.map(function(a){var items=cat.filter(function(c){return c.it.aisle===a});if(!items.length)return '';
+  items.sort(function(x,y){return x.it.name.localeCompare(y.it.name)});
+  var on=items.filter(function(c){return PAN[c.key]}).length;
+  return '<section style="display:flex;flex-direction:column;gap:10px"><div class="shead"><h2 class="h2" style="font-size:18px">'+a+'</h2><span class="muted" style="font-size:12px;font-weight:600">'+on+' of '+items.length+' on hand</span></div><div class="ptiles">'+
+   items.map(function(c){var h=!!PAN[c.key],it=c.it;return '<button class="ptile'+(h?' on':'')+'" data-pan="'+esc(c.key)+'" aria-pressed="'+h+'" aria-label="'+esc(it.name)+(h?', on hand':', not in the pantry')+'" style="'+(h?'background:'+it.color+'24':'')+'">'+icon(it.icon[0][0],30)+'<span class="ptxt"><b>'+esc(it.name)+'</b><span>'+c.n+' recipe'+(c.n>1?'s':'')+'</span></span><i class="pchk" aria-hidden="true">'+(h?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>':'')+'</i></button>'}).join('')+'</div></section>'}).join('');
+}
+function pantryView(){
+ var pad=isPad(),cat=catalog(),on=cat.filter(function(c){return PAN[c.key]}).length;
+ var rank=RECIPE_ORDER.slice().sort(function(x,y){var a=coverage(x),b=coverage(y);return (a[1]-a[0])-(b[1]-b[0])||b[0]/b[1]-a[0]/a[1]}).slice(0,pad?4:3);
+ var F=[['all','All',cat.length],['have','On hand',on],['out','Missing',cat.length-on]];
+ return '<div class="pad">'+
+  '<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">'+on+' of '+cat.length+' ingredients on hand</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Pantry</h1></div>'+
+  '<section style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Closest to ready</p><div class="canrow">'+rank.map(function(id){var c=coverage(id),miss=c[1]-c[0],r=RECIPES[id];
+   return '<button class="cancard" data-open="'+id+'" aria-label="Open '+esc(r.title)+'"><span class="canbar" aria-hidden="true"><i style="width:'+Math.round(c[0]/c[1]*100)+'%"></i></span><b>'+esc(r.title)+'</b><span>'+(miss?miss+' to buy':'Everything on hand')+' · '+c[0]+' of '+c[1]+'</span></button>'}).join('')+'</div></section>'+
+  '<div class="libctl"><label class="row searchf" style="animation:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search the pantry</span><input id="panq" type="search" placeholder="Search ingredients" value="'+esc(S.pan.q||'')+'"></label>'+
+   '<div class="seg" role="group" aria-label="Show" style="grid-template-columns:repeat(3,1fr)">'+F.map(function(f){return '<button data-panf="'+f[0]+'" aria-pressed="'+(S.pan.f===f[0])+'">'+f[1]+' <span style="opacity:.7;font-weight:500">'+f[2]+'</span></button>'}).join('')+'</div></div>'+
+  '<p class="muted" style="margin:-6px 0 0;font-size:13px">Tap an ingredient to mark it on hand or used up. Recipes and shopping lists update to match.</p>'+
+  '<div id="panlist" style="display:flex;flex-direction:column;gap:22px">'+panList()+'</div>'+
+  '</div>'+(pad?'':tabbar('pantry'));
+}
+
+/* ================= PLAN ================= */
+var DAYS=[['Monday','Mon',16],['Tuesday','Tue',17],['Wednesday','Wed',18],['Thursday','Thu',19],['Friday','Fri',20],['Saturday','Sat',21],['Sunday','Sun',22]];
+function planNeeds(){var m={},out=[];Object.keys(PLAN).forEach(function(d){var r=RECIPES[PLAN[d]];r.ING.forEach(function(it){var k=pKey(it);if(PAN[k])return;if(!m[k]){m[k]={it:it,for:[],amts:[]};out.push(m[k])}if(m[k].for.indexOf(r.short||r.title)<0){m[k].for.push(r.short||r.title);m[k].amts.push(it.amt)}})});return out}
+function planView(){
+ var pad=isPad(),n=Object.keys(PLAN).length,needs=planNeeds(),mins=0;Object.keys(PLAN).forEach(function(d){mins+=libMins(RECIPES[PLAN[d]])});
+ var days=DAYS.map(function(D0,i){var id=PLAN[i],today=i===0;
+  if(!id)return '<div class="pday"><div class="pdate'+(today?' today':'')+'"><b>'+D0[1]+'</b><span>'+D0[2]+'</span></div><button class="padd" data-planadd="'+i+'" aria-label="Add a recipe for '+D0[0]+'">+ Add a recipe</button></div>';
+  var r=RECIPES[id],c=coverage(id),miss=c[1]-c[0];
+  return '<div class="pday"><div class="pdate'+(today?' today':'')+'"><b>'+D0[1]+'</b><span>'+D0[2]+'</span></div><div class="pmeal"><button class="pmopen" data-open="'+id+'" aria-label="Open '+esc(r.title)+'"><span class="libfp">'+fpBar(r,60)+'</span><span class="libtxt" style="padding:12px 52px 12px 14px"><span class="kicker">'+(today?'Tonight · ':'')+r.kicker.split(' · ')[0]+'</span><b style="font-size:17px">'+esc(r.title)+'</b><span class="muted">'+r.meta+' · '+(miss?miss+' to buy':'everything on hand')+'</span></span></button><button class="iconbtn pdel" data-plandel="'+i+'" aria-label="Remove '+esc(r.title)+' from '+D0[0]+'">'+SVG.close+'</button></div></div>'}).join('');
+ var buy='<section class="card acard" style="gap:12px"><div class="between"><span class="kicker">To buy for this week</span><span style="font-size:13px"><b>'+needs.length+'</b> item'+(needs.length===1?'':'s')+'</span></div>'+
+  (needs.length?'<div style="display:flex;flex-direction:column">'+needs.map(function(x){return '<div class="row" style="gap:10px;min-height:44px;border-bottom:1px solid #ECECE8">'+icon(x.it.icon[0][0],28)+'<span style="flex:1;min-width:0;font-size:15px;font-weight:600;padding-left:8px;border-left:4px solid '+(x.it.edge||x.it.color)+'">'+esc(x.it.name)+'</span><span class="muted" style="font-size:12px;text-align:right">'+esc(x.for.join(', '))+'</span></div>'}).join('')+'</div>':'<span style="font-size:14px">Nothing. The pantry covers the whole week.</span>')+
+  (needs.length?'<button class="secondary" style="height:44px;font-size:14px" data-go="shopall">Open the shopping list</button>':'')+'<span class="muted" style="font-size:12px;line-height:1.4">Based on your pantry.</span></section>';
+ return '<div class="pad">'+
+  '<div class="between" style="gap:16px;align-items:flex-end"><div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">Week of November 16</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Plan</h1></div></div>'+
+  '<div class="stats" style="grid-template-columns:repeat(3,1fr)"><div><b>'+n+' of 7</b><span>nights planned</span></div><div><b>'+(mins>=60?Math.floor(mins/60)+' hr '+(mins%60?mins%60+' min':''):mins+' min')+'</b><span>cooking time</span></div><div><b>'+needs.length+'</b><span>to buy</span></div></div>'+
+  '<div class="plangrid"><div class="pdays">'+days+'</div>'+buy+'</div>'+
+  '</div>'+(pad?'':tabbar('plan'));
+}
+function openPlanPick(i){
+ var el=document.getElementById('sheet'),used={};Object.keys(PLAN).forEach(function(d){used[PLAN[d]]=DAYS[d][1]});
+ el.innerHTML='<div class="sheetwrap" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="Choose a recipe for '+DAYS[i][0]+'">'+
+  '<div class="between"><div><span class="kicker">'+DAYS[i][0]+', November '+DAYS[i][2]+'</span><h2 class="h2" style="font-size:20px">Choose a recipe</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  '<div style="display:flex;flex-direction:column;gap:8px">'+RECIPE_ORDER.map(function(id){var r=RECIPES[id],c=coverage(id),miss=c[1]-c[0];
+   return '<button class="opt" style="height:auto;min-height:56px;padding:8px 14px;text-align:left;gap:10px" data-planpick="'+i+':'+id+'"><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b style="font-size:15px">'+esc(r.title)+'</b><span class="muted" style="font-size:12px">'+r.meta+' · '+(miss?miss+' to buy':'everything on hand')+'</span></span>'+(used[id]?'<span class="badge" style="height:22px;font-size:11px;flex-shrink:0">'+used[id]+'</span>':'')+'</button>'}).join('')+'</div></div></div>';
+ var b=el.querySelector('.iconbtn');if(b)b.focus();
+}
+
+/* ================= SHOP (weekly list) ================= */
+var CART={};
+function shopAllView(){
+ var pad=isPad(),needs=planNeeds(),n=Object.keys(PLAN).length;
+ Object.keys(CART).forEach(function(k){if(!needs.some(function(x){return pKey(x.it)===k}))delete CART[k]});
+ var inCart=needs.filter(function(x){return CART[pKey(x.it)]}).length;
+ var planned=DAYS.map(function(D0,i){return PLAN[i]?'<button class="chip out" data-open="'+PLAN[i]+'" style="height:36px"><span class="muted" style="font-weight:600">'+D0[1]+'</span> '+esc(RECIPES[PLAN[i]].short||RECIPES[PLAN[i]].title)+'</button>':''}).join('');
+ var secs=AISLES.map(function(a){var items=needs.filter(function(x){return x.it.aisle===a});if(!items.length)return '';
+  var left=items.filter(function(x){return !CART[pKey(x.it)]}).length;
+  return '<section style="display:flex;flex-direction:column;gap:10px"><div class="between" style="border-bottom:1.5px solid #111;padding-bottom:6px"><h2 class="h2">'+a+'</h2><span class="muted" style="font-size:12px;font-weight:600">'+(left?left+' to get':'All in cart')+'</span></div><div class="tiles">'+
+   items.map(function(x){var it=x.it,k=pKey(it),g=!!CART[k],cnt=Math.min(4,it.icon[0][1]),size=cnt===1?56:Math.min(36,Math.floor(140/cnt)),ic='';for(var j=0;j<cnt;j++)ic+=icon(it.icon[0][0],size);
+    return '<button class="tile'+(g?' got':'')+'" data-wcart="'+esc(k)+'" aria-pressed="'+g+'" aria-label="'+esc(it.name+', '+it.amt+', for '+x.for.join(' and ')+(g?', in cart':''))+'" style="background:'+(g?'#fff':it.color+'24')+'"><span class="tchk">'+(g?SVG.tick:'')+'</span><span class="ticons">'+ic+'</span><b>'+esc(it.name)+'</b><span style="font-size:12px;color:#3A3A38">'+esc(x.amts.join(' + '))+'</span><span class="ttag">'+esc(x.for.join(', '))+'</span></button>'}).join('')+'</div></section>'}).join('');
+ return '<div class="pad">'+
+  '<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">For this week’s plan · '+n+' recipe'+(n===1?'':'s')+'</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Shopping</h1></div>'+
+  (planned?'<div style="display:flex;gap:8px;flex-wrap:wrap">'+planned+'</div>':'')+
+  (needs.length?'<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:14px">'+inCart+' of '+needs.length+' in your cart</b><div class="prog"><i style="width:'+Math.round(100*inCart/needs.length)+'%"></i></div></div><div class="aisles">'+secs+'</div>'
+   :'<p class="insight"><strong>Nothing to buy.</strong> '+(n?'Your pantry covers everything planned this week.':'Nothing is planned yet.')+'</p><button class="secondary" data-go="plan">Open the plan</button>')+
+  '<p class="muted" style="margin:0;font-size:12px;line-height:1.4">Built from the Plan tab and your pantry. Amounts are listed per recipe at each recipe’s base servings; they are not added together yet.</p>'+
+  '</div>'+(needs.length?'<div class="bottombar"'+(pad?'':' style="bottom:84px"')+'><button class="primary" data-act="shopalldone"'+(inCart?'':' disabled')+'>'+(inCart?'Add '+inCart+' to pantry':'Tick items as you shop')+'</button></div>':'')+(pad?'':tabbar('shopall'));
+}
+initPantry();

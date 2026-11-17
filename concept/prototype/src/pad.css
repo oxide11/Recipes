@@ -278,3 +278,33 @@ button.badge:hover{box-shadow:0 0 0 2px rgba(17,17,17,.15)}
 /* settings cog at the bottom of the rail */
 .ipad .rail .railcog{margin-top:auto;margin-bottom:22px}
 .ipad .libtxt b{padding-right:50px}
+
+/* ---------- pantry ---------- */
+.ptiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ipad .ptiles{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.ptile{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px 10px;border-radius:14px;border:1.5px dashed #C9C9C4;background:#fff;text-align:left;cursor:pointer;min-width:0}
+.ptile.on{border:1.5px solid transparent}
+.ptile svg{flex-shrink:0}.ptile:not(.on) svg{opacity:.45}
+.ptile .ptxt{flex:1}.ptile .ptxt b{font-size:14px;line-height:1.2;overflow:hidden;text-overflow:ellipsis}.ptile:not(.on) .ptxt b{color:#595954}
+.pchk{width:22px;height:22px;border-radius:999px;border:1.5px solid #BDBDB8;background:#fff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.ptile.on .pchk{background:#111;border-color:#111}
+.canrow{display:grid;grid-template-columns:1fr;gap:8px}
+.ipad .canrow{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.port .canrow{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cancard{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:14px;border:1.5px solid #ECECE8;background:#fff;text-align:left;cursor:pointer;min-width:0}
+.cancard b{font-family:var(--disp);font-size:16px;line-height:1.2}.cancard span{font-size:12.5px;color:var(--muted)}
+.canbar{height:6px;border-radius:99px;background:#E4E4E0;overflow:hidden;display:block}.canbar i{display:block;height:100%;background:#111;border-radius:99px}
+/* ---------- plan ---------- */
+.plangrid{display:flex;flex-direction:column;gap:20px}
+.ipad .plangrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;align-items:start}
+.port .plangrid{grid-template-columns:minmax(0,1fr)}
+.pdays{display:flex;flex-direction:column;gap:10px}
+.pday{display:flex;gap:12px;align-items:stretch}
+.pdate{flex:0 0 48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;border-radius:14px;background:var(--counter);min-height:64px}
+.pdate b{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.pdate span{font-family:var(--disp);font-size:20px;font-weight:700}
+.pdate.today{background:#111}.pdate.today b,.pdate.today span{color:#fff}
+.padd{flex:1;border:1.5px dashed #C9C9C4;border-radius:16px;background:#fff;font-size:14px;font-weight:600;color:#3A3A38;cursor:pointer;min-height:64px}
+.pmeal{flex:1;position:relative;border:1.5px solid #ECECE8;border-radius:16px;overflow:hidden;min-width:0}
+.pmopen{display:flex;width:100%;height:100%;border:none;background:#fff;padding:0;text-align:left;cursor:pointer;align-items:stretch}
+.ipad .pmopen{flex-direction:row}.ipad .pmopen .libfp{flex:0 0 14px}.ipad .pmopen .libfp>div{height:100%!important;flex-direction:column}
+.pdel{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;background:#fff}

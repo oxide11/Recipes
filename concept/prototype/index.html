@@ -460,6 +460,36 @@ button.badge:hover{box-shadow:0 0 0 2px rgba(17,17,17,.15)}
 /* settings cog at the bottom of the rail */
 .ipad .rail .railcog{margin-top:auto;margin-bottom:22px}
 .ipad .libtxt b{padding-right:50px}
+
+/* ---------- pantry ---------- */
+.ptiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ipad .ptiles{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.ptile{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px 10px;border-radius:14px;border:1.5px dashed #C9C9C4;background:#fff;text-align:left;cursor:pointer;min-width:0}
+.ptile.on{border:1.5px solid transparent}
+.ptile svg{flex-shrink:0}.ptile:not(.on) svg{opacity:.45}
+.ptile .ptxt{flex:1}.ptile .ptxt b{font-size:14px;line-height:1.2;overflow:hidden;text-overflow:ellipsis}.ptile:not(.on) .ptxt b{color:#595954}
+.pchk{width:22px;height:22px;border-radius:999px;border:1.5px solid #BDBDB8;background:#fff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.ptile.on .pchk{background:#111;border-color:#111}
+.canrow{display:grid;grid-template-columns:1fr;gap:8px}
+.ipad .canrow{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.port .canrow{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cancard{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:14px;border:1.5px solid #ECECE8;background:#fff;text-align:left;cursor:pointer;min-width:0}
+.cancard b{font-family:var(--disp);font-size:16px;line-height:1.2}.cancard span{font-size:12.5px;color:var(--muted)}
+.canbar{height:6px;border-radius:99px;background:#E4E4E0;overflow:hidden;display:block}.canbar i{display:block;height:100%;background:#111;border-radius:99px}
+/* ---------- plan ---------- */
+.plangrid{display:flex;flex-direction:column;gap:20px}
+.ipad .plangrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;align-items:start}
+.port .plangrid{grid-template-columns:minmax(0,1fr)}
+.pdays{display:flex;flex-direction:column;gap:10px}
+.pday{display:flex;gap:12px;align-items:stretch}
+.pdate{flex:0 0 48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;border-radius:14px;background:var(--counter);min-height:64px}
+.pdate b{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.pdate span{font-family:var(--disp);font-size:20px;font-weight:700}
+.pdate.today{background:#111}.pdate.today b,.pdate.today span{color:#fff}
+.padd{flex:1;border:1.5px dashed #C9C9C4;border-radius:16px;background:#fff;font-size:14px;font-weight:600;color:#3A3A38;cursor:pointer;min-height:64px}
+.pmeal{flex:1;position:relative;border:1.5px solid #ECECE8;border-radius:16px;overflow:hidden;min-width:0}
+.pmopen{display:flex;width:100%;height:100%;border:none;background:#fff;padding:0;text-align:left;cursor:pointer;align-items:stretch}
+.ipad .pmopen{flex-direction:row}.ipad .pmopen .libfp{flex:0 0 14px}.ipad .pmopen .libfp>div{height:100%!important;flex-direction:column}
+.pdel{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;background:#fff}
 </style>
 </head>
 <body>
@@ -493,7 +523,7 @@ button.badge:hover{box-shadow:0 0 0 2px rgba(17,17,17,.15)}
   <div id="stagebox"><div class="devwrap" id="devwrap">
   <div class="phone" id="phone">
     <nav class="rail" aria-label="Main">
-      <button data-back="home" data-nav="home" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</button><button data-go="library" data-nav="library"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>Recipes</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="7" width="12" height="14" rx="2"/><path d="M8 3h8v4H8z"/></svg>Pantry</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button><button data-toast="Only the cooking flow is wired up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.5 12h11L21 8H6.5"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>Shop</button>
+      <button data-back="home" data-nav="home" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</button><button data-go="library" data-nav="library"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>Recipes</button><button data-go="pantry" data-nav="pantry"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="7" width="12" height="14" rx="2"/><path d="M8 3h8v4H8z"/></svg>Pantry</button><button data-go="plan" data-nav="plan"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button><button data-go="shopall" data-nav="shopall"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.5 12h11L21 8H6.5"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>Shop</button>
     <button class="railcog" data-act="profile" aria-haspopup="dialog" aria-label="Settings and profile"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button></nav>
     <div class="screen" id="screen"></div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1414,7 +1444,7 @@ seedLog();
 var D={device:'phone',orient:'landscape'},SCALE=1;
 function isPad(){return D.device==='ipad'}
 function isLand(){return isPad()&&D.orient==='landscape'}
-function freshGlobal(){S={screen:'home',speed:30,saved:{cajun:true},dir:1,lib:{f:'all',s:'cooked',tag:null,q:'',more:false}};}
+function freshGlobal(){S={screen:'home',speed:30,saved:{cajun:true},dir:1,lib:{f:'all',s:'cooked',tag:null,q:'',more:false},pan:{f:'all',q:''}};}
 freshGlobal();
 function loadRecipe(id){
  R=RECIPES[id];ING=R.ING;GROUPS=R.GROUPS;LINE=R.LINE;STEPS=R.STEPS;SETS=R.SETS;
@@ -1521,7 +1551,7 @@ function tagBar(){
  return '<div class="row" style="gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:14px;background:var(--counter)"><span style="font-size:14px"><b>'+n+'</b> recipe'+(n===1?'':'s')+' tagged</span><span class="badge solid">'+esc(S.tag)+'</span><button class="linkbtn" data-act="cleartag" style="margin-left:auto">Show all</button></div>';
 }
 
-function tabbar(cur){return '<nav class="tabbar" aria-label="Main">'+[['Home',SVG.tabHome,'home'],['Recipes',SVG.tabBook,'library'],['Pantry',SVG.tabJar],['Plan',SVG.tabCal],['Shop',SVG.tabCart]].map(function(t){var on=t[2]===cur;return '<button class="'+(on?'on':'')+'"'+(on?' aria-current="page"':t[2]==='home'?' data-back="home"':t[2]?' data-go="'+t[2]+'"':' data-toast="Not built yet in this prototype"')+'>'+t[1]+t[0]+'</button>'}).join('')+'</nav>'}
+function tabbar(cur){return '<nav class="tabbar" aria-label="Main">'+[['Home',SVG.tabHome,'home'],['Recipes',SVG.tabBook,'library'],['Pantry',SVG.tabJar,'pantry'],['Plan',SVG.tabCal,'plan'],['Shop',SVG.tabCart,'shopall']].map(function(t){var on=t[2]===cur;return '<button class="'+(on?'on':'')+'"'+(on?' aria-current="page"':t[2]==='home'?' data-back="home"':t[2]?' data-go="'+t[2]+'"':' data-toast="Not built yet in this prototype"')+'>'+t[1]+t[0]+'</button>'}).join('')+'</nav>'}
 /* ================= HOME ================= */
 function home(){
  var list=tagList(),feat=RECIPES[list[0]],others=list.slice(1);
@@ -1844,11 +1874,11 @@ function done(){
 }
 
 /* ================= RENDER + EVENTS ================= */
-var VIEWS={home:home,recipe:recipe,ingredients:ingredients,shop:shop,cook:cook,done:done,cooks:function(){return cooksView()},library:function(){return libraryView()}};
+var VIEWS={home:home,recipe:recipe,ingredients:ingredients,shop:shop,cook:cook,done:done,cooks:function(){return cooksView()},library:function(){return libraryView()},pantry:function(){return pantryView()},plan:function(){return planView()},shopall:function(){return shopAllView()}};
 var PADVIEWS={home:homePad,recipe:recipePad,ingredients:ingredientsPad};
 function render(anim){
  document.getElementById('phone').classList.toggle('norail',S.screen==='cook');
- document.querySelectorAll('.rail [data-nav]').forEach(function(b){var on=(S.screen==='library')===(b.dataset.nav==='library');b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+ document.querySelectorAll('.rail [data-nav]').forEach(function(b){var cur=({library:1,pantry:1,plan:1,shopall:1})[S.screen]?S.screen:'home',on=b.dataset.nav===cur;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
  var lq=document.getElementById('libq');if(false)lq=null;
  scr.innerHTML=((isPad()&&PADVIEWS[S.screen])||VIEWS[S.screen])();
  scr.classList.remove('anim','animb');if(anim){void scr.offsetWidth;scr.classList.add(S.dir<0?'animb':'anim')}
@@ -1859,6 +1889,7 @@ function render(anim){
  var ph=document.getElementById('photo');
  if(ph)ph.addEventListener('change',function(){var f=ph.files&&ph.files[0];if(!f)return;if(S.photo)URL.revokeObjectURL(S.photo);S.photo=URL.createObjectURL(f);render()});
  var nt=document.getElementById('note');if(nt)nt.addEventListener('input',function(){S.note=nt.value});
+ var pq=document.getElementById('panq');if(pq)pq.addEventListener('input',function(){S.pan.q=pq.value;var pl=document.getElementById('panlist');if(pl)pl.innerHTML=panList()});
  var lq2=document.getElementById('libq');if(lq2)lq2.addEventListener('input',function(){S.lib.q=lq2.value;var ll=document.getElementById('liblist');if(ll)ll.innerHTML=libList()});
  var se=document.getElementById('search');if(se)se.addEventListener('keydown',function(e){if(e.key==='Escape'){e.stopPropagation();S.search=false;render();return}if(e.key==='Enter'){var q=se.value.toLowerCase().trim();var hit=RECIPE_ORDER.filter(function(id){var r=RECIPES[id];return r.title.toLowerCase().indexOf(q)>-1||r.ING.some(function(it){return it.name.toLowerCase().indexOf(q)>-1})})[0];if(q&&hit){openRecipe(hit)}else if(q){toast('No recipe matches "'+q+'" yet')}}});
 }
@@ -1882,6 +1913,12 @@ document.addEventListener('click',function(e){
  var d=el.dataset;
  if(d.device||d.orient){if(d.device)D.device=d.device;if(d.orient)D.orient=d.orient;closeSheet();S.focus=null;devSeg();fit();keep(render);return}
  if(d.sharefmt){S.share.format=d.sharefmt;openShare(true);return}
+ if(d.wcart){if(CART[d.wcart])delete CART[d.wcart];else CART[d.wcart]=1;keep(render);return}
+ if(d.pan){if(PAN[d.pan])delete PAN[d.pan];else PAN[d.pan]=1;syncHave();keep(render);return}
+ if(d.panf){S.pan.f=d.panf;keep(render);return}
+ if(d.plandel!==undefined){delete PLAN[d.plandel];keep(render);return}
+ if(d.planadd!==undefined){openPlanPick(+d.planadd);return}
+ if(d.planpick){var pp=d.planpick.split(':');PLAN[pp[0]]=pp[1];closeSheet();keep(render);toast(RECIPES[pp[1]].title+' planned for '+DAYS[+pp[0]][0]);return}
  if(d.libf){S.lib.f=d.libf;keep(render);return}
  if(d.libs){S.lib.s=d.libs;keep(render);return}
  if(d.libtag){S.lib.tag=S.lib.tag===d.libtag?null:d.libtag;keep(render);return}
@@ -1918,7 +1955,7 @@ document.addEventListener('click',function(e){
  if(d.focus){if(!SETS[d.focus]){toast('No swaps for '+shownName(ing(d.focus)).toLowerCase()+' yet');return}S.focus=d.focus;S.picked[d.focus]=S.swaps[d.focus]||null;if(isPad()){showSwapModal();return}if(S.screen==='recipe'){S.screen='ingredients';S.dir=1;render(true)}else render();scr.scrollTop=0;return}
  if(d.pick&&isPad()){S.picked[S.focus]=d.pick;showSwapModal(true);var zz=document.querySelector('#sheet .zin');if(zz)zz.classList.remove('zin');return}
  if(d.pick){S.picked[S.focus]=d.pick;keep(render);var z=scr.querySelector('.zin');if(z)z.classList.remove('zin');return}
- if(d.have){S.have[d.have]=!S.have[d.have];keep(render);var c=scr.querySelector('.cst');if(c)c.classList.remove('zout');return}
+ if(d.have){S.have[d.have]=!S.have[d.have];pantryFromS();keep(render);var c=scr.querySelector('.cst');if(c)c.classList.remove('zout');return}
  if(d.cart){S.cart[d.cart]=!S.cart[d.cart];keep(render);return}
  if(d.rate){S.rating=+d.rate;keep(render);return}
  switch(d.act){
@@ -1929,13 +1966,14 @@ document.addEventListener('click',function(e){
   case 'searchopen':S.search=true;render();var sf=document.getElementById('search');if(sf)sf.focus();break;
   case 'searchclose':S.search=false;render();var sb=document.querySelector('[data-act="searchopen"]');if(sb)sb.focus();break;
   case 'cardinfo':openCard();break;
+  case 'shopalldone':{var nn=0;Object.keys(CART).forEach(function(k){PAN[k]=1;nn++});CART={};syncHave();keep(render);toast(nn+' item'+(nn===1?'':'s')+' added to your pantry');break}
   case 'profile':openProfile();break;
   case 'sharesend':closeSheet();toast('Sharing is mocked in this prototype');break;
   case 'sharecopy':toast('Copy link is mocked in this prototype');break;
   case 'home':if(isPad()){closeSheet();break}S.focus=null;S.zoom='out';render();scr.scrollTop=0;break;
   case 'use':{var id=S.focus,lf=leafOf(id,S.picked[id]);S.swaps[id]=lf.id;if(isPad()){closeSheet();keep(render);toast(ing(id).name+' → '+lf.name);break}S.focus=null;S.zoom='out';render();scr.scrollTop=0;toast(ing(id).name+' → '+lf.name);break}
   case 'revert':{var id2=S.focus;delete S.swaps[id2];S.picked[id2]=null;if(isPad()){closeSheet();keep(render);toast('Back to '+ing(id2).name.toLowerCase());break}S.focus=null;S.zoom='out';render();toast('Back to '+ing(id2).name.toLowerCase());break}
-  case 'shopdone':ING.forEach(function(it){if(S.cart[it.id])S.have[it.id]=true});S.cart={};go(isPad()?'recipe':'ingredients',-1);toast('Shopping done. Everything is ready');break;
+  case 'shopdone':ING.forEach(function(it){if(S.cart[it.id])S.have[it.id]=true});pantryFromS();S.cart={};go(isPad()?'recipe':'ingredients',-1);toast('Shopping done. Everything is ready');break;
   case 'startcook':S.step=0;S.started=Date.now();S.struck={};go('cook');break;
   case 'tstart':{var ts=timerOf(S.step);ts.started=true;ts.running=true;S.dockOpen=null;var c0=scr.querySelector('.startcard');if(c0){c0.style.transition='all .3s';c0.style.transform='translateY(40px) scale(.6)';c0.style.opacity='0';setTimeout(function(){c0.remove();fitSteps()},300)}updateTimerDom();break}
   case 'prev':if(S.step>0){S.step--;dockSig='';S.dir=-1;render(true)}break;
@@ -1944,7 +1982,7 @@ document.addEventListener('click',function(e){
  }
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();var t=e.target;if((e.key==='Enter'||e.key===' ')&&t.dataset&&(t.dataset.strike||t.dataset.conv||t.dataset.focus)&&t.tagName!=='BUTTON'){e.preventDefault();t.click()}});
-document.getElementById('restart').addEventListener('click',function(){closeSheet();seedLog();freshPrefs();freshGlobal();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
+document.getElementById('restart').addEventListener('click',function(){closeSheet();seedLog();freshPrefs();freshGlobal();initPantry();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
 
 
 /* ================= DEVICE ================= */
@@ -2233,6 +2271,90 @@ function libraryView(){
    '<button class="linkbtn" style="font-size:13px" data-libmore="1">'+(L.more?'Show fewer':'Show all '+PAPER.length)+'</button></section>'+
   '</div>'+(pad?'':tabbar('library'));
 }
+
+/* ================= PANTRY ================= */
+var PAN={},PAN0=null,PLAN={};
+function pKey(it){return it.name.toLowerCase().replace(/oes$/,'o').replace(/s$/,'')}
+function syncHave(){RECIPE_ORDER.forEach(function(id){var r=RECIPES[id];r.have={};r.ING.forEach(function(it){if(PAN[pKey(it)])r.have[it.id]=1})});if(S&&S.recipe&&typeof ING!=='undefined'&&ING){S.have={};ING.forEach(function(it){if(PAN[pKey(it)])S.have[it.id]=true})}}
+function pantryFromS(){ING.forEach(function(it){if(S.have[it.id])PAN[pKey(it)]=1;else delete PAN[pKey(it)]});syncHave()}
+function initPantry(){
+ if(!PAN0){PAN0={};RECIPE_ORDER.forEach(function(id){var r=RECIPES[id];r.ING.forEach(function(it){if(r.have[it.id])PAN0[pKey(it)]=1})})}
+ PAN={};for(var k in PAN0)PAN[k]=1;PLAN={0:'cajun',2:'thai',4:'scampi',6:'shepherd'};CART={};syncHave();
+}
+function catalog(){var m={},out=[];RECIPE_ORDER.forEach(function(id){RECIPES[id].ING.forEach(function(it){var k=pKey(it);if(!m[k]){m[k]={key:k,it:it,n:0};out.push(m[k])}m[k].n++})});return out}
+function coverage(id){var r=RECIPES[id];return [Object.keys(r.have).length,r.ING.length]}
+function panList(){
+ var q=(S.pan.q||'').toLowerCase().trim(),f=S.pan.f,cat=catalog().filter(function(c){if(f==='have'&&!PAN[c.key])return false;if(f==='out'&&PAN[c.key])return false;if(q&&c.key.indexOf(q)<0)return false;return true});
+ if(!cat.length)return '<p class="insight">Nothing matches. Try another filter or clear the search.</p>';
+ return AISLES.map(function(a){var items=cat.filter(function(c){return c.it.aisle===a});if(!items.length)return '';
+  items.sort(function(x,y){return x.it.name.localeCompare(y.it.name)});
+  var on=items.filter(function(c){return PAN[c.key]}).length;
+  return '<section style="display:flex;flex-direction:column;gap:10px"><div class="shead"><h2 class="h2" style="font-size:18px">'+a+'</h2><span class="muted" style="font-size:12px;font-weight:600">'+on+' of '+items.length+' on hand</span></div><div class="ptiles">'+
+   items.map(function(c){var h=!!PAN[c.key],it=c.it;return '<button class="ptile'+(h?' on':'')+'" data-pan="'+esc(c.key)+'" aria-pressed="'+h+'" aria-label="'+esc(it.name)+(h?', on hand':', not in the pantry')+'" style="'+(h?'background:'+it.color+'24':'')+'">'+icon(it.icon[0][0],30)+'<span class="ptxt"><b>'+esc(it.name)+'</b><span>'+c.n+' recipe'+(c.n>1?'s':'')+'</span></span><i class="pchk" aria-hidden="true">'+(h?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>':'')+'</i></button>'}).join('')+'</div></section>'}).join('');
+}
+function pantryView(){
+ var pad=isPad(),cat=catalog(),on=cat.filter(function(c){return PAN[c.key]}).length;
+ var rank=RECIPE_ORDER.slice().sort(function(x,y){var a=coverage(x),b=coverage(y);return (a[1]-a[0])-(b[1]-b[0])||b[0]/b[1]-a[0]/a[1]}).slice(0,pad?4:3);
+ var F=[['all','All',cat.length],['have','On hand',on],['out','Missing',cat.length-on]];
+ return '<div class="pad">'+
+  '<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">'+on+' of '+cat.length+' ingredients on hand</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Pantry</h1></div>'+
+  '<section style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Closest to ready</p><div class="canrow">'+rank.map(function(id){var c=coverage(id),miss=c[1]-c[0],r=RECIPES[id];
+   return '<button class="cancard" data-open="'+id+'" aria-label="Open '+esc(r.title)+'"><span class="canbar" aria-hidden="true"><i style="width:'+Math.round(c[0]/c[1]*100)+'%"></i></span><b>'+esc(r.title)+'</b><span>'+(miss?miss+' to buy':'Everything on hand')+' · '+c[0]+' of '+c[1]+'</span></button>'}).join('')+'</div></section>'+
+  '<div class="libctl"><label class="row searchf" style="animation:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search the pantry</span><input id="panq" type="search" placeholder="Search ingredients" value="'+esc(S.pan.q||'')+'"></label>'+
+   '<div class="seg" role="group" aria-label="Show" style="grid-template-columns:repeat(3,1fr)">'+F.map(function(f){return '<button data-panf="'+f[0]+'" aria-pressed="'+(S.pan.f===f[0])+'">'+f[1]+' <span style="opacity:.7;font-weight:500">'+f[2]+'</span></button>'}).join('')+'</div></div>'+
+  '<p class="muted" style="margin:-6px 0 0;font-size:13px">Tap an ingredient to mark it on hand or used up. Recipes and shopping lists update to match.</p>'+
+  '<div id="panlist" style="display:flex;flex-direction:column;gap:22px">'+panList()+'</div>'+
+  '</div>'+(pad?'':tabbar('pantry'));
+}
+
+/* ================= PLAN ================= */
+var DAYS=[['Monday','Mon',16],['Tuesday','Tue',17],['Wednesday','Wed',18],['Thursday','Thu',19],['Friday','Fri',20],['Saturday','Sat',21],['Sunday','Sun',22]];
+function planNeeds(){var m={},out=[];Object.keys(PLAN).forEach(function(d){var r=RECIPES[PLAN[d]];r.ING.forEach(function(it){var k=pKey(it);if(PAN[k])return;if(!m[k]){m[k]={it:it,for:[],amts:[]};out.push(m[k])}if(m[k].for.indexOf(r.short||r.title)<0){m[k].for.push(r.short||r.title);m[k].amts.push(it.amt)}})});return out}
+function planView(){
+ var pad=isPad(),n=Object.keys(PLAN).length,needs=planNeeds(),mins=0;Object.keys(PLAN).forEach(function(d){mins+=libMins(RECIPES[PLAN[d]])});
+ var days=DAYS.map(function(D0,i){var id=PLAN[i],today=i===0;
+  if(!id)return '<div class="pday"><div class="pdate'+(today?' today':'')+'"><b>'+D0[1]+'</b><span>'+D0[2]+'</span></div><button class="padd" data-planadd="'+i+'" aria-label="Add a recipe for '+D0[0]+'">+ Add a recipe</button></div>';
+  var r=RECIPES[id],c=coverage(id),miss=c[1]-c[0];
+  return '<div class="pday"><div class="pdate'+(today?' today':'')+'"><b>'+D0[1]+'</b><span>'+D0[2]+'</span></div><div class="pmeal"><button class="pmopen" data-open="'+id+'" aria-label="Open '+esc(r.title)+'"><span class="libfp">'+fpBar(r,60)+'</span><span class="libtxt" style="padding:12px 52px 12px 14px"><span class="kicker">'+(today?'Tonight · ':'')+r.kicker.split(' · ')[0]+'</span><b style="font-size:17px">'+esc(r.title)+'</b><span class="muted">'+r.meta+' · '+(miss?miss+' to buy':'everything on hand')+'</span></span></button><button class="iconbtn pdel" data-plandel="'+i+'" aria-label="Remove '+esc(r.title)+' from '+D0[0]+'">'+SVG.close+'</button></div></div>'}).join('');
+ var buy='<section class="card acard" style="gap:12px"><div class="between"><span class="kicker">To buy for this week</span><span style="font-size:13px"><b>'+needs.length+'</b> item'+(needs.length===1?'':'s')+'</span></div>'+
+  (needs.length?'<div style="display:flex;flex-direction:column">'+needs.map(function(x){return '<div class="row" style="gap:10px;min-height:44px;border-bottom:1px solid #ECECE8">'+icon(x.it.icon[0][0],28)+'<span style="flex:1;min-width:0;font-size:15px;font-weight:600;padding-left:8px;border-left:4px solid '+(x.it.edge||x.it.color)+'">'+esc(x.it.name)+'</span><span class="muted" style="font-size:12px;text-align:right">'+esc(x.for.join(', '))+'</span></div>'}).join('')+'</div>':'<span style="font-size:14px">Nothing. The pantry covers the whole week.</span>')+
+  (needs.length?'<button class="secondary" style="height:44px;font-size:14px" data-go="shopall">Open the shopping list</button>':'')+'<span class="muted" style="font-size:12px;line-height:1.4">Based on your pantry.</span></section>';
+ return '<div class="pad">'+
+  '<div class="between" style="gap:16px;align-items:flex-end"><div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">Week of November 16</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Plan</h1></div></div>'+
+  '<div class="stats" style="grid-template-columns:repeat(3,1fr)"><div><b>'+n+' of 7</b><span>nights planned</span></div><div><b>'+(mins>=60?Math.floor(mins/60)+' hr '+(mins%60?mins%60+' min':''):mins+' min')+'</b><span>cooking time</span></div><div><b>'+needs.length+'</b><span>to buy</span></div></div>'+
+  '<div class="plangrid"><div class="pdays">'+days+'</div>'+buy+'</div>'+
+  '</div>'+(pad?'':tabbar('plan'));
+}
+function openPlanPick(i){
+ var el=document.getElementById('sheet'),used={};Object.keys(PLAN).forEach(function(d){used[PLAN[d]]=DAYS[d][1]});
+ el.innerHTML='<div class="sheetwrap" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="Choose a recipe for '+DAYS[i][0]+'">'+
+  '<div class="between"><div><span class="kicker">'+DAYS[i][0]+', November '+DAYS[i][2]+'</span><h2 class="h2" style="font-size:20px">Choose a recipe</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  '<div style="display:flex;flex-direction:column;gap:8px">'+RECIPE_ORDER.map(function(id){var r=RECIPES[id],c=coverage(id),miss=c[1]-c[0];
+   return '<button class="opt" style="height:auto;min-height:56px;padding:8px 14px;text-align:left;gap:10px" data-planpick="'+i+':'+id+'"><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b style="font-size:15px">'+esc(r.title)+'</b><span class="muted" style="font-size:12px">'+r.meta+' · '+(miss?miss+' to buy':'everything on hand')+'</span></span>'+(used[id]?'<span class="badge" style="height:22px;font-size:11px;flex-shrink:0">'+used[id]+'</span>':'')+'</button>'}).join('')+'</div></div></div>';
+ var b=el.querySelector('.iconbtn');if(b)b.focus();
+}
+
+/* ================= SHOP (weekly list) ================= */
+var CART={};
+function shopAllView(){
+ var pad=isPad(),needs=planNeeds(),n=Object.keys(PLAN).length;
+ Object.keys(CART).forEach(function(k){if(!needs.some(function(x){return pKey(x.it)===k}))delete CART[k]});
+ var inCart=needs.filter(function(x){return CART[pKey(x.it)]}).length;
+ var planned=DAYS.map(function(D0,i){return PLAN[i]?'<button class="chip out" data-open="'+PLAN[i]+'" style="height:36px"><span class="muted" style="font-weight:600">'+D0[1]+'</span> '+esc(RECIPES[PLAN[i]].short||RECIPES[PLAN[i]].title)+'</button>':''}).join('');
+ var secs=AISLES.map(function(a){var items=needs.filter(function(x){return x.it.aisle===a});if(!items.length)return '';
+  var left=items.filter(function(x){return !CART[pKey(x.it)]}).length;
+  return '<section style="display:flex;flex-direction:column;gap:10px"><div class="between" style="border-bottom:1.5px solid #111;padding-bottom:6px"><h2 class="h2">'+a+'</h2><span class="muted" style="font-size:12px;font-weight:600">'+(left?left+' to get':'All in cart')+'</span></div><div class="tiles">'+
+   items.map(function(x){var it=x.it,k=pKey(it),g=!!CART[k],cnt=Math.min(4,it.icon[0][1]),size=cnt===1?56:Math.min(36,Math.floor(140/cnt)),ic='';for(var j=0;j<cnt;j++)ic+=icon(it.icon[0][0],size);
+    return '<button class="tile'+(g?' got':'')+'" data-wcart="'+esc(k)+'" aria-pressed="'+g+'" aria-label="'+esc(it.name+', '+it.amt+', for '+x.for.join(' and ')+(g?', in cart':''))+'" style="background:'+(g?'#fff':it.color+'24')+'"><span class="tchk">'+(g?SVG.tick:'')+'</span><span class="ticons">'+ic+'</span><b>'+esc(it.name)+'</b><span style="font-size:12px;color:#3A3A38">'+esc(x.amts.join(' + '))+'</span><span class="ttag">'+esc(x.for.join(', '))+'</span></button>'}).join('')+'</div></section>'}).join('');
+ return '<div class="pad">'+
+  '<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">For this week’s plan · '+n+' recipe'+(n===1?'':'s')+'</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Shopping</h1></div>'+
+  (planned?'<div style="display:flex;gap:8px;flex-wrap:wrap">'+planned+'</div>':'')+
+  (needs.length?'<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:14px">'+inCart+' of '+needs.length+' in your cart</b><div class="prog"><i style="width:'+Math.round(100*inCart/needs.length)+'%"></i></div></div><div class="aisles">'+secs+'</div>'
+   :'<p class="insight"><strong>Nothing to buy.</strong> '+(n?'Your pantry covers everything planned this week.':'Nothing is planned yet.')+'</p><button class="secondary" data-go="plan">Open the plan</button>')+
+  '<p class="muted" style="margin:0;font-size:12px;line-height:1.4">Built from the Plan tab and your pantry. Amounts are listed per recipe at each recipe’s base servings; they are not added together yet.</p>'+
+  '</div>'+(needs.length?'<div class="bottombar"'+(pad?'':' style="bottom:84px"')+'><button class="primary" data-act="shopalldone"'+(inCart?'':' disabled')+'>'+(inCart?'Add '+inCart+' to pantry':'Tick items as you shop')+'</button></div>':'')+(pad?'':tabbar('shopall'));
+}
+initPantry();
 
 speedSeg();recipeSeg();devSeg();fit();render(true);
 })();

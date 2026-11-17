@@ -54,7 +54,7 @@ seedLog();
 var D={device:'phone',orient:'landscape'},SCALE=1;
 function isPad(){return D.device==='ipad'}
 function isLand(){return isPad()&&D.orient==='landscape'}
-function freshGlobal(){S={screen:'home',speed:30,saved:{cajun:true},dir:1,lib:{f:'all',s:'cooked',tag:null,q:'',more:false}};}
+function freshGlobal(){S={screen:'home',speed:30,saved:{cajun:true},dir:1,lib:{f:'all',s:'cooked',tag:null,q:'',more:false},pan:{f:'all',q:''}};}
 freshGlobal();
 function loadRecipe(id){
  R=RECIPES[id];ING=R.ING;GROUPS=R.GROUPS;LINE=R.LINE;STEPS=R.STEPS;SETS=R.SETS;
@@ -161,7 +161,7 @@ function tagBar(){
  return '<div class="row" style="gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:14px;background:var(--counter)"><span style="font-size:14px"><b>'+n+'</b> recipe'+(n===1?'':'s')+' tagged</span><span class="badge solid">'+esc(S.tag)+'</span><button class="linkbtn" data-act="cleartag" style="margin-left:auto">Show all</button></div>';
 }
 
-function tabbar(cur){return '<nav class="tabbar" aria-label="Main">'+[['Home',SVG.tabHome,'home'],['Recipes',SVG.tabBook,'library'],['Pantry',SVG.tabJar],['Plan',SVG.tabCal],['Shop',SVG.tabCart]].map(function(t){var on=t[2]===cur;return '<button class="'+(on?'on':'')+'"'+(on?' aria-current="page"':t[2]==='home'?' data-back="home"':t[2]?' data-go="'+t[2]+'"':' data-toast="Not built yet in this prototype"')+'>'+t[1]+t[0]+'</button>'}).join('')+'</nav>'}
+function tabbar(cur){return '<nav class="tabbar" aria-label="Main">'+[['Home',SVG.tabHome,'home'],['Recipes',SVG.tabBook,'library'],['Pantry',SVG.tabJar,'pantry'],['Plan',SVG.tabCal,'plan'],['Shop',SVG.tabCart,'shopall']].map(function(t){var on=t[2]===cur;return '<button class="'+(on?'on':'')+'"'+(on?' aria-current="page"':t[2]==='home'?' data-back="home"':t[2]?' data-go="'+t[2]+'"':' data-toast="Not built yet in this prototype"')+'>'+t[1]+t[0]+'</button>'}).join('')+'</nav>'}
 /* ================= HOME ================= */
 function home(){
  var list=tagList(),feat=RECIPES[list[0]],others=list.slice(1);
@@ -484,11 +484,11 @@ function done(){
 }
 
 /* ================= RENDER + EVENTS ================= */
-var VIEWS={home:home,recipe:recipe,ingredients:ingredients,shop:shop,cook:cook,done:done,cooks:function(){return cooksView()},library:function(){return libraryView()}};
+var VIEWS={home:home,recipe:recipe,ingredients:ingredients,shop:shop,cook:cook,done:done,cooks:function(){return cooksView()},library:function(){return libraryView()},pantry:function(){return pantryView()},plan:function(){return planView()},shopall:function(){return shopAllView()}};
 var PADVIEWS={home:homePad,recipe:recipePad,ingredients:ingredientsPad};
 function render(anim){
  document.getElementById('phone').classList.toggle('norail',S.screen==='cook');
- document.querySelectorAll('.rail [data-nav]').forEach(function(b){var on=(S.screen==='library')===(b.dataset.nav==='library');b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+ document.querySelectorAll('.rail [data-nav]').forEach(function(b){var cur=({library:1,pantry:1,plan:1,shopall:1})[S.screen]?S.screen:'home',on=b.dataset.nav===cur;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
  var lq=document.getElementById('libq');if(false)lq=null;
  scr.innerHTML=((isPad()&&PADVIEWS[S.screen])||VIEWS[S.screen])();
  scr.classList.remove('anim','animb');if(anim){void scr.offsetWidth;scr.classList.add(S.dir<0?'animb':'anim')}
@@ -499,6 +499,7 @@ function render(anim){
  var ph=document.getElementById('photo');
  if(ph)ph.addEventListener('change',function(){var f=ph.files&&ph.files[0];if(!f)return;if(S.photo)URL.revokeObjectURL(S.photo);S.photo=URL.createObjectURL(f);render()});
  var nt=document.getElementById('note');if(nt)nt.addEventListener('input',function(){S.note=nt.value});
+ var pq=document.getElementById('panq');if(pq)pq.addEventListener('input',function(){S.pan.q=pq.value;var pl=document.getElementById('panlist');if(pl)pl.innerHTML=panList()});
  var lq2=document.getElementById('libq');if(lq2)lq2.addEventListener('input',function(){S.lib.q=lq2.value;var ll=document.getElementById('liblist');if(ll)ll.innerHTML=libList()});
  var se=document.getElementById('search');if(se)se.addEventListener('keydown',function(e){if(e.key==='Escape'){e.stopPropagation();S.search=false;render();return}if(e.key==='Enter'){var q=se.value.toLowerCase().trim();var hit=RECIPE_ORDER.filter(function(id){var r=RECIPES[id];return r.title.toLowerCase().indexOf(q)>-1||r.ING.some(function(it){return it.name.toLowerCase().indexOf(q)>-1})})[0];if(q&&hit){openRecipe(hit)}else if(q){toast('No recipe matches "'+q+'" yet')}}});
 }
@@ -522,6 +523,12 @@ document.addEventListener('click',function(e){
  var d=el.dataset;
  if(d.device||d.orient){if(d.device)D.device=d.device;if(d.orient)D.orient=d.orient;closeSheet();S.focus=null;devSeg();fit();keep(render);return}
  if(d.sharefmt){S.share.format=d.sharefmt;openShare(true);return}
+ if(d.wcart){if(CART[d.wcart])delete CART[d.wcart];else CART[d.wcart]=1;keep(render);return}
+ if(d.pan){if(PAN[d.pan])delete PAN[d.pan];else PAN[d.pan]=1;syncHave();keep(render);return}
+ if(d.panf){S.pan.f=d.panf;keep(render);return}
+ if(d.plandel!==undefined){delete PLAN[d.plandel];keep(render);return}
+ if(d.planadd!==undefined){openPlanPick(+d.planadd);return}
+ if(d.planpick){var pp=d.planpick.split(':');PLAN[pp[0]]=pp[1];closeSheet();keep(render);toast(RECIPES[pp[1]].title+' planned for '+DAYS[+pp[0]][0]);return}
  if(d.libf){S.lib.f=d.libf;keep(render);return}
  if(d.libs){S.lib.s=d.libs;keep(render);return}
  if(d.libtag){S.lib.tag=S.lib.tag===d.libtag?null:d.libtag;keep(render);return}
@@ -558,7 +565,7 @@ document.addEventListener('click',function(e){
  if(d.focus){if(!SETS[d.focus]){toast('No swaps for '+shownName(ing(d.focus)).toLowerCase()+' yet');return}S.focus=d.focus;S.picked[d.focus]=S.swaps[d.focus]||null;if(isPad()){showSwapModal();return}if(S.screen==='recipe'){S.screen='ingredients';S.dir=1;render(true)}else render();scr.scrollTop=0;return}
  if(d.pick&&isPad()){S.picked[S.focus]=d.pick;showSwapModal(true);var zz=document.querySelector('#sheet .zin');if(zz)zz.classList.remove('zin');return}
  if(d.pick){S.picked[S.focus]=d.pick;keep(render);var z=scr.querySelector('.zin');if(z)z.classList.remove('zin');return}
- if(d.have){S.have[d.have]=!S.have[d.have];keep(render);var c=scr.querySelector('.cst');if(c)c.classList.remove('zout');return}
+ if(d.have){S.have[d.have]=!S.have[d.have];pantryFromS();keep(render);var c=scr.querySelector('.cst');if(c)c.classList.remove('zout');return}
  if(d.cart){S.cart[d.cart]=!S.cart[d.cart];keep(render);return}
  if(d.rate){S.rating=+d.rate;keep(render);return}
  switch(d.act){
@@ -569,13 +576,14 @@ document.addEventListener('click',function(e){
   case 'searchopen':S.search=true;render();var sf=document.getElementById('search');if(sf)sf.focus();break;
   case 'searchclose':S.search=false;render();var sb=document.querySelector('[data-act="searchopen"]');if(sb)sb.focus();break;
   case 'cardinfo':openCard();break;
+  case 'shopalldone':{var nn=0;Object.keys(CART).forEach(function(k){PAN[k]=1;nn++});CART={};syncHave();keep(render);toast(nn+' item'+(nn===1?'':'s')+' added to your pantry');break}
   case 'profile':openProfile();break;
   case 'sharesend':closeSheet();toast('Sharing is mocked in this prototype');break;
   case 'sharecopy':toast('Copy link is mocked in this prototype');break;
   case 'home':if(isPad()){closeSheet();break}S.focus=null;S.zoom='out';render();scr.scrollTop=0;break;
   case 'use':{var id=S.focus,lf=leafOf(id,S.picked[id]);S.swaps[id]=lf.id;if(isPad()){closeSheet();keep(render);toast(ing(id).name+' → '+lf.name);break}S.focus=null;S.zoom='out';render();scr.scrollTop=0;toast(ing(id).name+' → '+lf.name);break}
   case 'revert':{var id2=S.focus;delete S.swaps[id2];S.picked[id2]=null;if(isPad()){closeSheet();keep(render);toast('Back to '+ing(id2).name.toLowerCase());break}S.focus=null;S.zoom='out';render();toast('Back to '+ing(id2).name.toLowerCase());break}
-  case 'shopdone':ING.forEach(function(it){if(S.cart[it.id])S.have[it.id]=true});S.cart={};go(isPad()?'recipe':'ingredients',-1);toast('Shopping done. Everything is ready');break;
+  case 'shopdone':ING.forEach(function(it){if(S.cart[it.id])S.have[it.id]=true});pantryFromS();S.cart={};go(isPad()?'recipe':'ingredients',-1);toast('Shopping done. Everything is ready');break;
   case 'startcook':S.step=0;S.started=Date.now();S.struck={};go('cook');break;
   case 'tstart':{var ts=timerOf(S.step);ts.started=true;ts.running=true;S.dockOpen=null;var c0=scr.querySelector('.startcard');if(c0){c0.style.transition='all .3s';c0.style.transform='translateY(40px) scale(.6)';c0.style.opacity='0';setTimeout(function(){c0.remove();fitSteps()},300)}updateTimerDom();break}
   case 'prev':if(S.step>0){S.step--;dockSig='';S.dir=-1;render(true)}break;
@@ -584,5 +592,5 @@ document.addEventListener('click',function(e){
  }
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();var t=e.target;if((e.key==='Enter'||e.key===' ')&&t.dataset&&(t.dataset.strike||t.dataset.conv||t.dataset.focus)&&t.tagName!=='BUTTON'){e.preventDefault();t.click()}});
-document.getElementById('restart').addEventListener('click',function(){closeSheet();seedLog();freshPrefs();freshGlobal();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
+document.getElementById('restart').addEventListener('click',function(){closeSheet();seedLog();freshPrefs();freshGlobal();initPantry();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
 speedSeg();recipeSeg();devSeg();fit();render(true);
