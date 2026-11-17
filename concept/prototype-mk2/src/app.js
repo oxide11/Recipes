@@ -28,13 +28,13 @@ var SVG={
  tabCal:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
  tabCart:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.5 12h11L21 8H6.5"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>'
 };
-function icon(t,size){return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 28 28" aria-hidden="true">'+(ICON[t]||'')+'</svg>'}
+function icon(t,size){return '<svg class="ic" width="'+size+'" height="'+size+'" viewBox="0 0 28 28" aria-hidden="true">'+(ICON[t]||'')+'</svg>'}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 
 /* ================= STATE ================= */
 var S;
 var LOG={};
-var P;function freshPrefs(){P={temp:'F',units:'us',serv:2,awake:true,sound:true,photo:true,hf:false,hc:false,goal:'lighter',receipts:false,never:[['Mushrooms','dislike'],['Tree nuts','allergy']]}}freshPrefs();
+var P;function freshPrefs(){P={temp:'F',units:'us',serv:2,awake:true,sound:true,photo:true,hf:false,hc:false,dark:false,goal:'lighter',receipts:false,never:[['Mushrooms','dislike'],['Tree nuts','allergy']]}}freshPrefs();
 function seedLog(){LOG={
  cajun:[
   {date:'Oct 12',who:'Ashley',mins:29,rating:5,swapList:[],note:'',sample:1},
@@ -151,7 +151,7 @@ function profileBar(){
  return '<div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--counter)"><span class="kicker" style="color:var(--ink)">Never suggested</span>'+
  '<div style="display:flex;gap:8px;flex-wrap:wrap">'+(P.never.length?P.never.map(neverChip).join(''):'<span class="muted" style="font-size:13px">Nothing excluded.</span>')+'</div></div>';
 }
-function fpBar(r,h){var tot=0;r.ING.forEach(function(it){tot+=it.weight});return '<div style="display:flex;height:'+h+'px;width:100%" aria-hidden="true">'+r.ING.map(function(it){return '<span style="flex:'+it.weight+';background:'+(it.profile==='aubergine'?'#4B2E83':it.color)+'"></span>'}).join('')+'</div>'}
+function fpBar(r,h){var tot=0;r.ING.forEach(function(it){tot+=it.weight});return '<div class="fp" style="display:flex;height:'+h+'px;width:100%" aria-hidden="true">'+r.ING.map(function(it){return '<span style="flex:'+it.weight+';background:'+(it.profile==='aubergine'?'#4B2E83':it.color)+'"></span>'}).join('')+'</div>'}
 
 /* ================= TAGS ================= */
 function tagBadges(){return R.tags.map(function(t){return '<button class="badge'+(t[1]?' solid':'')+'" data-tag="'+esc(t[0])+'" aria-label="Show recipes tagged '+esc(t[0])+'">'+t[0]+'</button>'}).join('')}
@@ -506,7 +506,7 @@ function render(anim){
  scr.classList.remove('anim','animb');if(anim){void scr.offsetWidth;scr.classList.add(S.dir<0?'animb':'anim')}
  document.querySelectorAll('#steps li').forEach(function(li){li.classList.toggle('on',li.dataset.s===S.screen)});
  document.getElementById('sideTitle').textContent=S.screen==='home'?'Recipe flow':R.title;
- document.getElementById('phone').classList.toggle('hc',!!P.hc);
+ document.getElementById('phone').classList.toggle('hc',!!P.hc);applyTheme();
  if(S.screen==='cook'){dockSig='';updateTimerDom();hfSpeak();wordify();fitSteps()}
  S.zoom=null;
  var ph=document.getElementById('photo');
@@ -537,7 +537,7 @@ document.addEventListener('click',function(e){
  if(d.device||d.orient){if(d.device)D.device=d.device;if(d.orient)D.orient=d.orient;closeSheet();S.focus=null;devSeg();fit();keep(render);return}
  if(d.sharefmt){S.share.format=d.sharefmt;openShare(true);return}
  if(d.hf){P.hf=!P.hf;if(!P.hf&&window.speechSynthesis){try{speechSynthesis.cancel()}catch(e){}}openHf(true);keepUnder();if(P.hf){S.spoken=null;hfSpeak()}return}
- if(d.m2set){var ms=d.m2set.split(':');P[ms[0]]=ms[1]==='1'?true:ms[1]==='0'?false:ms[1];keep(render);return}
+ if(d.m2set){var ms=d.m2set.split(':');P[ms[0]]=ms[1]==='toggle'?!P[ms[0]]:ms[1]==='1'?true:ms[1]==='0'?false:ms[1];keep(render);if(ms[0]==='dark'&&document.querySelector('#sheet .profsheet'))openProfile(true);return}
  if(d.withpick){S.with=d.withpick;closeSheet();go('together');return}
  if(d.promote){PROMO[R.id+':'+d.promote]=1;keep(render);toast('Now the default for this recipe. The original is kept as a version.');return}
  if(d.qa){if(QA[d.qa])delete QA[d.qa];else QA[d.qa]=1;keep(render);return}
@@ -552,7 +552,7 @@ document.addEventListener('click',function(e){
  if(d.libtag){S.lib.tag=S.lib.tag===d.libtag?null:d.libtag;keep(render);return}
  if(d.libsave){S.saved[d.libsave]=!S.saved[d.libsave];keep(render);return}
  if(d.libmore){S.lib.more=!S.lib.more;keep(render);return}
- if(d.ptog){P[d.ptog]=!P[d.ptog];document.getElementById('phone').classList.toggle('hc',!!P.hc);openProfile(true);return}
+ if(d.ptog){P[d.ptog]=!P[d.ptog];document.getElementById('phone').classList.toggle('hc',!!P.hc);applyTheme();openProfile(true);return}
  if(d.pset){var ps=d.pset.split(':');P[ps[0]]=ps[1];openProfile(true);keepUnder();return}
  if(d.pserv){P.serv=Math.max(1,Math.min(12,P.serv+(+d.pserv)));openProfile(true);return}
  if(d.pdel!==undefined){P.never.splice(+d.pdel,1);openProfile(true);keepUnder();return}

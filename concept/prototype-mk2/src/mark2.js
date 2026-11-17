@@ -173,4 +173,7 @@ function pencil(fresh){
   pl.insertAdjacentHTML('beforeend','<svg class="pencil" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true"><defs><filter id="'+id+'" x="-5%" y="-40%" width="110%" height="180%"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="'+(seed%97)+'" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="'+(2.2+rows[0].h*.04).toFixed(1)+'" xChannelSelector="R" yChannelSelector="G"/></filter></defs><g fill="none" stroke="#2B2B28" stroke-linecap="round" stroke-linejoin="round" filter="url(#'+id+')">'+out+'</g></svg>');
  });
 }
+
+/* ---- dark mode ---- */
+function applyTheme(){var on=!!P.dark;document.getElementById('phone').classList.toggle('dark',on);document.body.classList.toggle('darkstage',on);var b=document.getElementById('themeBtn');if(b){b.setAttribute('aria-checked',on);b.querySelector('.sw').classList.toggle('on',on)}}
 initMark2();

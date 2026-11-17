@@ -384,3 +384,20 @@ button.badge.solid{background:#111;color:#fff}
 .tlrow:first-child{padding-top:2px}
 .qrow:first-of-type{border-top:1px solid #ECECE8}
 .hfbtn:focus-visible,.upick:focus-visible,.qrow:focus-visible,.ptile:focus-visible{outline:2px solid #111;outline-offset:2px}
+
+/* ================= DARK MODE (Mark 2) =================
+   The interface is flipped as a whole (light becomes dark, hues are kept), then the
+   things that must keep their true colours are flipped back. */
+.themebtn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 14px 0 8px;border-radius:999px;border:none;background:var(--counter);font-size:13px;font-weight:700;cursor:pointer}
+.themebtn .sw{transform:scale(.8)}
+#phone.dark{background:#141413}
+#phone.dark #screen,#phone.dark .sheetwrap,#phone.dark .rail,#phone.dark #toast{filter:invert(.92) hue-rotate(180deg)}
+#phone.dark .ic,#phone.dark .fp,#phone.dark .lock,#phone.dark .libfp,#phone.dark .ticons,#phone.dark .cardthumb{filter:invert(1) hue-rotate(180deg) brightness(.92)}
+#phone.dark .ic .ic,#phone.dark .ticons .ic,#phone.dark .libfp .fp{filter:none}
+#phone.dark .sheetwrap{background:rgba(255,255,255,.5)}
+#phone.dark .sheetwrap.full{background:#fff}
+#phone.dark .card,#phone.dark .sheet,#phone.dark .librow,#phone.dark .pmeal,#phone.dark .cancard{box-shadow:none}
+#phone.dark .sheet{box-shadow:0 0 0 1.5px #D6D6D1}
+#phone.dark .pencil g{stroke:#111}
+#phone.dark .rail{border-right-color:#D6D6D1}
+body.darkstage #phone{border-color:#000}

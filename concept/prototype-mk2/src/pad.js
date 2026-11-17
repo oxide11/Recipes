@@ -186,6 +186,7 @@ function profileSheet(){
    '<p class="muted" style="margin:0;font-size:13px;line-height:1.4">Swaps and recipe picks skip these. Allergies are also flagged on any recipe that contains them.</p>'+
    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+P.never.map(function(n,i){return '<span class="chip out pchip"'+(n[1]==='allergy'?' style="border-width:1.5px"':'')+'>'+(n[1]==='allergy'?SVG.warn('#111'):'')+esc(n[0])+' <span class="muted" style="font-weight:500">'+n[1]+'</span><button data-pdel="'+i+'" aria-label="Remove '+esc(n[0])+'">'+SVG.close+'</button></span>'}).join('')+
    '<button class="chip out" style="border-style:dashed" data-toast="Adding an ingredient to avoid is mocked in this prototype">+ Add</button></div></section>'+
+  '<section class="psec"><span class="kicker">Appearance</span><div style="display:flex;flex-direction:column">'+tog('dark','Dark mode','A dark kitchen: black counters, the same ingredient colours')+'</div></section>'+
   '<section class="psec"><span class="kicker">Measurements</span>'+
    row('Temperature','Safe temperature badges',seg('temp',[['F','°F'],['C','°C']]))+
    row('Units','Default for new recipes',seg('units',[['us','US'],['metric','Metric']]))+
@@ -205,7 +206,7 @@ function profileSheet(){
    link('Nutritional goals','Daily targets for calories and macros','Nutritional goals are on the backlog')+
    '<button class="plink" data-go="questions"><span class="ptxt"><b>Questions for Ashley</b><span>'+openQCount()+' open across her cards</span></span>'+SVG.arrow+'</button>'+
    '<button class="plink" data-act="importcard"><span class="ptxt"><b>Import recipe cards</b><span>Photograph a card to add it</span></span>'+SVG.arrow+'</button>'+'</section></div></div>'+
-  '<p class="muted" style="margin:0;font-size:12px;line-height:1.4">Prototype: temperature units, the never-suggested list, the nutrition goal, hands-free cooking and stronger highlights take effect. The other settings only remember their state.</p>'+
+  '<p class="muted" style="margin:0;font-size:12px;line-height:1.4">Prototype: temperature units, the never-suggested list, the nutrition goal, hands-free cooking, stronger highlights and dark mode take effect. The other settings only remember their state.</p>'+
  '</div>';
 }
 function openProfile(keepPos){
