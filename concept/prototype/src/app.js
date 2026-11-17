@@ -34,6 +34,7 @@ function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;
 /* ================= STATE ================= */
 var S;
 var LOG={};
+var P;function freshPrefs(){P={temp:'F',units:'us',serv:2,awake:true,sound:true,photo:true,never:[['Mushrooms','dislike'],['Tree nuts','allergy']]}}freshPrefs();
 function seedLog(){LOG={
  cajun:[
   {date:'Oct 12',who:'Ashley',mins:29,rating:5,swapList:[],note:'',sample:1},
@@ -115,7 +116,7 @@ function safeFor(st){
 }
 function safeBadge(st,big){
  var s=safeFor(st);if(!s)return '';var it=ing(st.protein);
- return '<button class="safe'+(big?' big':'')+'" data-safe="'+STEPS.indexOf(st)+'" style="background:'+colorOf(it)+'40;border-color:'+edgeOf(it)+'" aria-label="Safe temperature for '+esc(s.name)+': '+s.f+' degrees Fahrenheit, '+s.c+' Celsius. Show details">'+THERMO+'<b>'+s.f+'°F</b><span>'+esc(s.name)+'</span></button>';
+ return '<button class="safe'+(big?' big':'')+'" data-safe="'+STEPS.indexOf(st)+'" style="background:'+colorOf(it)+'40;border-color:'+edgeOf(it)+'" aria-label="Safe temperature for '+esc(s.name)+': '+s.f+' degrees Fahrenheit, '+s.c+' Celsius. Show details">'+THERMO+'<b>'+tempOf(s)+'</b><span>'+esc(s.name)+'</span></button>';
 }
 function openSafe(i){
  var st=STEPS[i],s=safeFor(st);if(!s)return;var it=ing(st.protein),el=document.getElementById('sheet');
@@ -136,10 +137,13 @@ function header(backTo,title,sub,closeIcon){
  return '<div class="row"><button class="iconbtn" data-back="'+backTo+'" aria-label="'+(closeIcon?'Close':'Back')+'">'+(closeIcon?SVG.close:SVG.back)+'</button>'+
   (title?'<div style="display:flex;flex-direction:column;gap:2px;min-width:0"><h1 class="t" style="font-size:26px">'+esc(title)+'</h1>'+(sub?'<p class="muted" style="margin:0;font-size:13px">'+sub+'</p>':'')+'</div>':'')+'</div>';
 }
+function neverChip(n){return '<span class="chip out"'+(n[1]==='allergy'?' style="border-width:1.5px"':'')+'>'+(n[1]==='allergy'?SVG.warn('#111'):'')+esc(n[0])+' <span class="muted" style="font-weight:500">'+n[1]+'</span></span>'}
+function tempOf(s){return P.temp==='C'?s.c+'°C':s.f+'°F'}
+function searchBtn(sz){return S.search?'':'<button class="iconbtn" style="width:'+sz+'px;height:'+sz+'px" aria-label="Search recipes or ingredients" aria-expanded="false" data-act="searchopen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>'}
+function searchField(extra){return S.search?'<label class="row searchf" style="'+(extra||'')+'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search</span><input id="search" type="search" placeholder="Search recipes or ingredients"><button class="iconbtn" style="width:36px;height:36px;background:#fff" aria-label="Close search" data-act="searchclose">'+SVG.close+'</button></label>':''}
 function profileBar(){
  return '<div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--counter)"><span class="kicker" style="color:var(--ink)">Never suggested</span>'+
- '<div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip out">Mushrooms <span class="muted" style="font-weight:500">dislike</span></span>'+
- '<span class="chip out" style="border-width:1.5px">'+SVG.warn('#111')+'Tree nuts <span class="muted" style="font-weight:500">allergy</span></span></div></div>';
+ '<div style="display:flex;gap:8px;flex-wrap:wrap">'+(P.never.length?P.never.map(neverChip).join(''):'<span class="muted" style="font-size:13px">Nothing excluded.</span>')+'</div></div>';
 }
 function fpBar(r,h){var tot=0;r.ING.forEach(function(it){tot+=it.weight});return '<div style="display:flex;height:'+h+'px;width:100%" aria-hidden="true">'+r.ING.map(function(it){return '<span style="flex:'+it.weight+';background:'+(it.profile==='aubergine'?'#4B2E83':it.color)+'"></span>'}).join('')+'</div>'}
 
@@ -158,8 +162,8 @@ function home(){
  var pantry=Object.keys(feat.have).length;
  return '<div class="pad">'+
  '<div class="between"><div><p class="muted" style="margin:0 0 4px;font-size:13px">Monday evening</p><h1 class="t" style="font-size:30px">What\'s cooking?</h1></div>'+
- '<button class="iconbtn" style="background:#111;color:#fff;font-family:var(--disp);font-weight:700;font-size:17px" aria-label="Profile" data-toast="Profile: avoids mushrooms, allergic to tree nuts">M</button></div>'+
- '<label class="row" style="height:48px;padding:0 16px;border-radius:14px;background:var(--counter);gap:10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search</span><input id="search" type="search" placeholder="Search recipes or ingredients" style="flex:1;border:none;background:transparent;font:inherit;font-size:15px;outline:none"></label>'+
+ '<div class="row" style="gap:8px">'+searchBtn(44)+'<button class="iconbtn" style="background:#111;color:#fff;font-family:var(--disp);font-weight:700;font-size:17px" aria-label="Profile" data-act="profile" aria-haspopup="dialog">M</button></div></div>'+
+ searchField()+
  tagBar()+'<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Cook with what you have</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+
   [['#F2C200','Lemons','piccata'],['#9CBF5A','Lemongrass','thai'],['#2E9E4F','Green onion','cajun'],['#6CBF3A','Limes','thai']].map(function(c){return '<button class="chip" data-open="'+c[2]+'"><span class="dot" style="background:'+c[0]+'"></span>'+c[1]+'</button>'}).join('')+'</div></div>'+
  '<button class="rcard" data-open="'+feat.id+'" aria-label="Open '+esc(feat.title)+'">'+fpBar(feat,112)+
@@ -183,7 +187,8 @@ function nutDelta(id,leafId){
  var lf=leafOf(id,leafId);if(!lf||!lf.nut)return '';
  var cur=S.swaps[id]||null,a=dishNut(),b=dishNut(id,leafId),L=['Calories','Protein','Carbs','Fat'],U=['',' g',' g',' g'];
  return '<div class="nutbox"><span class="kicker">'+(leafId===cur?'Per serving, as it is now':'Per serving, with this swap')+'</span><div class="nutgrid">'+L.map(function(l,i){var d=Math.round(b[i]-a[i]);
-  return '<div><span>'+l+'</span><b>'+Math.round(b[i]).toLocaleString('en-US')+U[i]+'</b><i class="'+(d?'chg':'')+'">'+(d?(d<0?'▼ ':'▲ ')+Math.abs(d).toLocaleString('en-US')+U[i]:'no change')+'</i></div>'}).join('')+'</div></div>';
+  var good=i===1?d>0:d<0,cl=d?(good?' better':' worse'):'';
+  return '<div class="nd'+cl+'"><span>'+l+'</span><b>'+Math.round(b[i]).toLocaleString('en-US')+U[i]+'</b><i class="'+(d?'chg':'')+'">'+(d?(d<0?'▼ ':'▲ ')+Math.abs(d).toLocaleString('en-US')+U[i]+'<span class="sr"> '+(good?'better':'worse')+'</span>':'no change')+'</i></div>'}).join('')+'</div><span class="nutkey"><span><i class="kb"></i>Better</span><span><i class="kw"></i>Worse</span><span>Less is better, except protein.</span></span></div>';
 }
 var MACROS=[{name:'Protein',color:'#3A3A38',op:.32},{name:'Carbs',color:'#8A8A85',op:.32},{name:'Fat',color:'#C9C9C4',op:.6}];
 function skGroups(){return S.mode==='calories'?MACROS:GROUPS}
@@ -336,7 +341,7 @@ function swapView(){
   '<p style="margin:0;font-size:14px;line-height:1.45;color:#2B2B28">'+esc(s.note)+'</p>'+
   '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+bars+'</div>'+nutDelta(id,picked)+btn+revert+
  '</section>';
- if(isPad())return '<div class="sheet swapmodal" role="dialog" aria-modal="true" aria-label="Swap '+esc(set.center)+'"><div class="between"><div><h2 class="h2" style="font-size:26px">Swap '+esc(set.center.toLowerCase())+'</h2><p class="muted" style="margin:2px 0 0;font-size:13px">'+sub+'</p></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div><div class="swapgrid">'+map+'<div style="display:flex;flex-direction:column;gap:12px;min-width:0">'+profileBar()+detail+'</div></div></div>';
+ if(isPad())return '<div class="sheet swapmodal" role="dialog" aria-modal="true" aria-label="Swap '+esc(set.center)+'"><div class="row" style="gap:14px"><button class="iconbtn" data-closesheet="1" aria-label="Back to '+esc(R.title)+'">'+SVG.back+'</button><div><h2 class="h2" style="font-size:30px">Swap '+esc(set.center.toLowerCase())+'</h2><p class="muted" style="margin:2px 0 0;font-size:14px">'+sub+'</p></div></div><div class="swapgrid"><div class="mapwrap">'+map+'</div><div class="swapside">'+profileBar()+detail+'</div></div></div>';
  return '<div class="pad">'+header('ingredients','Swap '+set.center.toLowerCase(),sub)+
  '<nav aria-label="Breadcrumb" class="row" style="gap:6px"><button class="chip out" data-act="home" style="height:36px;border-width:1.5px;font-weight:700">'+SVG.cst+esc(R.title)+'</button><span aria-hidden="true" style="color:#8A8A85">›</span><b style="font-size:14px">'+esc(set.center)+'</b></nav>'+map+detail+'</div>';
 }
@@ -477,7 +482,7 @@ function render(anim){
  var ph=document.getElementById('photo');
  if(ph)ph.addEventListener('change',function(){var f=ph.files&&ph.files[0];if(!f)return;if(S.photo)URL.revokeObjectURL(S.photo);S.photo=URL.createObjectURL(f);render()});
  var nt=document.getElementById('note');if(nt)nt.addEventListener('input',function(){S.note=nt.value});
- var se=document.getElementById('search');if(se)se.addEventListener('keydown',function(e){if(e.key==='Enter'){var q=se.value.toLowerCase().trim();var hit=RECIPE_ORDER.filter(function(id){var r=RECIPES[id];return r.title.toLowerCase().indexOf(q)>-1||r.ING.some(function(it){return it.name.toLowerCase().indexOf(q)>-1})})[0];if(q&&hit){openRecipe(hit)}else if(q){toast('No recipe matches "'+q+'" yet')}}});
+ var se=document.getElementById('search');if(se)se.addEventListener('keydown',function(e){if(e.key==='Escape'){e.stopPropagation();S.search=false;render();return}if(e.key==='Enter'){var q=se.value.toLowerCase().trim();var hit=RECIPE_ORDER.filter(function(id){var r=RECIPES[id];return r.title.toLowerCase().indexOf(q)>-1||r.ING.some(function(it){return it.name.toLowerCase().indexOf(q)>-1})})[0];if(q&&hit){openRecipe(hit)}else if(q){toast('No recipe matches "'+q+'" yet')}}});
 }
 function keep(fn){var y=scr.scrollTop;fn();scr.scrollTop=y}
 function openRecipe(id){if(S.recipe!==id||S.screen==='home')loadRecipe(id);go('recipe')}
@@ -499,6 +504,10 @@ document.addEventListener('click',function(e){
  var d=el.dataset;
  if(d.device||d.orient){if(d.device)D.device=d.device;if(d.orient)D.orient=d.orient;closeSheet();S.focus=null;devSeg();fit();keep(render);return}
  if(d.sharefmt){S.share.format=d.sharefmt;openShare(true);return}
+ if(d.ptog){P[d.ptog]=!P[d.ptog];openProfile(true);return}
+ if(d.pset){var ps=d.pset.split(':');P[ps[0]]=ps[1];openProfile(true);keepUnder();return}
+ if(d.pserv){P.serv=Math.max(1,Math.min(12,P.serv+(+d.pserv)));openProfile(true);return}
+ if(d.pdel!==undefined){P.never.splice(+d.pdel,1);openProfile(true);keepUnder();return}
  if(d.sharetog){S.share[d.sharetog]=!S.share[d.sharetog];openShare(true);return}
  if(d.jumpstep){S.dir=+d.jumpstep<S.step?-1:1;S.step=+d.jumpstep;dockSig='';render(true);return}
  if(d.closesheet&&(e.target===el||el.classList.contains('iconbtn'))){closeSheet();return}
@@ -533,6 +542,9 @@ document.addEventListener('click',function(e){
   case 'cleartag':S.tag=null;keep(render);break;
   case 'cooksall':S.cooksAll=!S.cooksAll;keep(render);break;
   case 'share':openShare();break;
+  case 'searchopen':S.search=true;render();var sf=document.getElementById('search');if(sf)sf.focus();break;
+  case 'searchclose':S.search=false;render();var sb=document.querySelector('[data-act="searchopen"]');if(sb)sb.focus();break;
+  case 'profile':openProfile();break;
   case 'sharesend':closeSheet();toast('Sharing is mocked in this prototype');break;
   case 'sharecopy':toast('Copy link is mocked in this prototype');break;
   case 'home':if(isPad()){closeSheet();break}S.focus=null;S.zoom='out';render();scr.scrollTop=0;break;
@@ -547,5 +559,5 @@ document.addEventListener('click',function(e){
  }
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();var t=e.target;if((e.key==='Enter'||e.key===' ')&&t.dataset&&(t.dataset.strike||t.dataset.conv||t.dataset.focus)&&t.tagName!=='BUTTON'){e.preventDefault();t.click()}});
-document.getElementById('restart').addEventListener('click',function(){closeSheet();seedLog();freshGlobal();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
+document.getElementById('restart').addEventListener('click',function(){closeSheet();seedLog();freshPrefs();freshGlobal();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
 speedSeg();recipeSeg();devSeg();fit();render(true);
