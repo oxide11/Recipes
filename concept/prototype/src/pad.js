@@ -84,14 +84,14 @@ function cooksCard(){
  if(!n)return '<section class="card acard"><span class="kicker">Your cooks</span><span style="font-size:13px;line-height:1.45;color:#3A3A38">Not cooked yet. Your ratings, swaps and notes will collect here after each cook.</span></section>';
  var rated=log.filter(function(c){return c.rating}),avg=rated.length?(rated.reduce(function(a,c){return a+c.rating},0)/rated.length).toFixed(1):'–';
  var timed=log.filter(function(c){return c.mins}),am=timed.length?Math.round(timed.reduce(function(a,c){return a+c.mins},0)/timed.length):0;
- var idx=log.map(function(_,i){return i}).reverse();if(!S.cooksAll)idx=idx.slice(0,3);
+ var idx=log.map(function(_,i){return i}).reverse().slice(0,3);
  return '<section class="card acard"><div class="between"><span class="kicker">Your cooks</span><span style="font-size:13px"><b>'+n+'</b> cook'+(n>1?'s':'')+' · <b>★ '+avg+'</b>'+(am?' · '+am+' min avg':'')+'</span></div>'+
   '<div style="display:flex;flex-direction:column">'+idx.map(function(i){var c=log[i],open=S.cookOpen===i,sw=c.swapList||[];
-   return '<div class="cookrow'+(open?' open':'')+'"><button data-cook="'+i+'" aria-expanded="'+open+'"><span class="pnum" style="width:24px;height:24px;font-size:11px">'+(i+1)+'</span><span style="flex:1;min-width:0"><b>'+(c.rating?'★★★★★'.slice(0,c.rating)+'<span style="color:#BDBDB8">'+'★★★★★'.slice(c.rating)+'</span>':'Not rated')+'</b> · '+esc(c.date||'')+' · '+esc(c.who||'You')+'</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>'+
+   open=false;return '<div class="cookrow"><button data-cooksgo="'+i+'" aria-label="Open cook '+(i+1)+' in your cooks"><span class="pnum" style="width:24px;height:24px;font-size:11px">'+(i+1)+'</span><span style="flex:1;min-width:0"><b>'+(c.rating?'★★★★★'.slice(0,c.rating)+'<span style="color:#BDBDB8">'+'★★★★★'.slice(c.rating)+'</span>':'Not rated')+'</b> · '+esc(c.date||'')+' · '+esc(c.who||'You')+'</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>'+
     (open?'<div class="cookbody">'+(c.mins?'<span><b>'+c.mins+' min</b> start to plate</span>':'')+
      (sw.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+sw.map(function(x){return '<span class="badge" style="height:24px;font-size:11px">'+esc(x)+'</span>'}).join('')+'</div>':'<span class="muted">Cooked as written, no swaps</span>')+
      (c.note?'<p class="cardnote" style="margin:0">“'+esc(c.note)+'”</p>':'')+'</div>':'')+'</div>'}).join('')+'</div>'+
-  (n>3?'<button class="linkbtn" data-act="cooksall">'+(S.cooksAll?'Show fewer':'Show all '+n+' cooks')+'</button>':'')+
+  '<button class="secondary" style="height:44px;font-size:14px" data-go="cooks">'+(n>3?'See all '+n+' cooks':'Open your cooks')+'</button>'+
   (log.some(function(c){return c.sample})?'<span class="muted" style="font-size:11px">Earlier entries are sample data for the prototype.</span>':'')+'</section>';
 }
 function ingRowPad(it){
@@ -214,4 +214,30 @@ function openProfile(keepPos){
  var el=document.getElementById('sheet'),old=el.querySelector('.sheet'),y=old?old.scrollTop:0;
  el.innerHTML='<div class="sheetwrap'+(keepPos?' noanim':'')+'" data-closesheet="1">'+profileSheet()+'</div>';
  if(keepPos)el.querySelector('.sheet').scrollTop=y;else{var c=el.querySelector('.iconbtn');if(c)c.focus()}
+}
+
+/* ================= YOUR COOKS (full screen) ================= */
+function starsHtml(r){return r?'★★★★★'.slice(0,r)+'<span style="color:#BDBDB8">'+'★★★★★'.slice(r)+'</span>':'Not rated'}
+function cooksView(){
+ var log=LOG[R.id]||[],n=log.length,pad=isPad();
+ var head='<div class="row" style="gap:12px;align-items:flex-start"><button class="iconbtn" data-back="recipe" aria-label="Back to recipe">'+SVG.back+'</button><div><h1 class="t" style="font-size:'+(pad?36:28)+'px">Your cooks</h1><p class="muted" style="margin:2px 0 0;font-size:'+(pad?14:13)+'px">'+esc(R.title)+'</p></div></div>';
+ if(!n)return '<div class="pad">'+head+'<p class="insight">Not cooked yet. Your ratings, swaps and notes will collect here after each cook.</p><button class="primary" data-act="startcook">Start cooking</button></div>';
+ var rated=log.filter(function(c){return c.rating}),avg=rated.length?(rated.reduce(function(s,c){return s+c.rating},0)/rated.length).toFixed(1):'–';
+ var timed=log.filter(function(c){return c.mins}),am=timed.length?Math.round(timed.reduce(function(s,c){return s+c.mins},0)/timed.length):0;
+ var best=timed.length?Math.min.apply(null,timed.map(function(c){return c.mins})):0,mx=timed.length?Math.max.apply(null,timed.map(function(c){return c.mins})):1;
+ var tally={};log.forEach(function(c){(c.swapList||[]).forEach(function(x){tally[x]=(tally[x]||0)+1})});
+ var tk=Object.keys(tally).sort(function(x,y){return tally[y]-tally[x]});
+ var plain=log.filter(function(c){return !(c.swapList||[]).length}).length;
+ var stats='<div class="stats" style="grid-template-columns:repeat(4,1fr)"><div><b>'+n+'</b><span>cook'+(n>1?'s':'')+'</span></div><div><b>★ '+avg+'</b><span>avg rating</span></div><div><b>'+(am||'–')+(am?' min':'')+'</b><span>avg time</span></div><div><b>'+(best||'–')+(best?' min':'')+'</b><span>fastest</span></div></div>';
+ var chart='<section class="card acard"><div class="between"><span class="kicker">Start to plate</span><span class="muted" style="font-size:12px">The recipe card says '+esc(R.stats[0][0])+' prep + '+esc(R.stats[1][0])+' cook</span></div>'+
+  '<div class="ckchart" role="img" aria-label="Cook time for each cook">'+log.map(function(c,i){return '<button class="ckbar'+(S.cookOpen===i?' on':'')+'" data-cook="'+i+'" aria-label="Cook '+(i+1)+', '+(c.mins?c.mins+' minutes':'not timed')+'"><b>'+(c.mins||'–')+'</b><i style="height:'+(c.mins?Math.max(8,Math.round(c.mins/mx*100)):4)+'%"></i><span>'+esc(c.date||'')+'</span></button>'}).join('')+'</div></section>';
+ var swaps='<section class="card acard"><span class="kicker">Swaps you have made</span>'+(tk.length?'<div style="display:flex;flex-direction:column">'+tk.map(function(k){return '<div class="between" style="min-height:40px;border-bottom:1px solid #ECECE8;gap:12px"><span style="font-size:15px;font-weight:600">'+esc(k)+'</span><span class="badge solid" style="height:24px;font-size:12px">'+tally[k]+' of '+n+'</span></div>'}).join('')+'</div>':'')+
+  '<span class="muted" style="font-size:13px">'+(plain?'Cooked as written '+plain+' time'+(plain>1?'s':'')+'.':'Never cooked exactly as written.')+'</span></section>';
+ var entries='<section style="display:flex;flex-direction:column;gap:12px"><div class="between"><span class="kicker">Every cook, newest first</span></div>'+log.map(function(_,i){return i}).reverse().map(function(i){var c=log[i],sw=c.swapList||[];
+  return '<article class="card ckentry'+(S.cookOpen===i?' on':'')+'" id="ck'+i+'"><div class="between" style="gap:12px"><div class="row" style="gap:12px;min-width:0"><span class="pnum" style="width:32px;height:32px;font-size:14px;flex-shrink:0">'+(i+1)+'</span><div style="min-width:0"><b style="font-size:17px;letter-spacing:1px">'+starsHtml(c.rating)+'</b><div class="muted" style="font-size:13px">'+esc(c.date||'')+' · '+esc(c.who||'You')+'</div></div></div>'+(c.mins?'<span style="text-align:right;white-space:nowrap"><b style="font-family:var(--disp);font-size:20px">'+c.mins+' min</b><div class="muted" style="font-size:12px">'+(am&&c.mins!==am?(Math.abs(c.mins-am)+' min '+(c.mins<am?'faster':'slower')+' than avg'):'right on average')+'</div></span>':'')+'</div>'+
+   (sw.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+sw.map(function(x){return '<span class="badge" style="height:26px;font-size:12px">'+esc(x)+'</span>'}).join('')+'</div>':'<span class="muted" style="font-size:13px">Cooked as written, no swaps</span>')+
+   (c.note?'<p class="cardnote" style="margin:0;font-size:15px;line-height:1.5">“'+esc(c.note)+'”</p>':'')+'</article>'}).join('')+
+  (log.some(function(c){return c.sample})?'<span class="muted" style="font-size:12px">Earlier entries are sample data for the prototype.</span>':'')+'</section>';
+ return '<div class="pad">'+head+stats+'<div class="ckgrid"><div style="display:flex;flex-direction:column;gap:16px;min-width:0">'+chart+swaps+'</div>'+entries+'</div></div>'+
+  '<div class="bottombar"><button class="primary" data-act="startcook">Cook it again</button></div>';
 }

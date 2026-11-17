@@ -469,7 +469,7 @@ function done(){
 }
 
 /* ================= RENDER + EVENTS ================= */
-var VIEWS={home:home,recipe:recipe,ingredients:ingredients,shop:shop,cook:cook,done:done};
+var VIEWS={home:home,recipe:recipe,ingredients:ingredients,shop:shop,cook:cook,done:done,cooks:function(){return cooksView()}};
 var PADVIEWS={home:homePad,recipe:recipePad,ingredients:ingredientsPad};
 function render(anim){
  document.getElementById('phone').classList.toggle('norail',S.screen==='cook');
@@ -519,7 +519,8 @@ document.addEventListener('click',function(e){
   var ls=stepLines(STEPS[S.step]),all=ls.every(function(_,j){return S.struck[S.step+':'+j]});
   var nb=scr.querySelector('[data-act="next"]');if(nb)nb.classList.toggle('glow',all);var h=scr.querySelector('.hint');if(h)h.innerHTML=all?'<b style="color:#111">Step done.</b> On to the next one.':'Tap a line to cross it off. Tap an ingredient to change its units.';return}
  if(d.tag){S.tag=d.tag;go('home',-1);recipeSeg();toast('Showing recipes tagged '+d.tag);return}
- if(d.cook){S.cookOpen=S.cookOpen===+d.cook?null:+d.cook;keep(render);return}
+ if(d.cooksgo){S.cookOpen=+d.cooksgo;go('cooks');var ce=document.getElementById('ck'+S.cookOpen);if(ce&&ce.scrollIntoView)ce.scrollIntoView({block:'nearest'});return}
+ if(d.cook){S.cookOpen=S.cookOpen===+d.cook?null:+d.cook;keep(render);var ce2=document.getElementById('ck'+S.cookOpen);if(ce2&&ce2.scrollIntoView)ce2.scrollIntoView({block:'nearest',behavior:'smooth'});return}
  if(d.safe){openSafe(+d.safe);return}
  if(d.dockopen){S.dockOpen=S.dockOpen===d.dockopen?null:d.dockopen;updateTimerDom();return}
  if(d.ttoggle){var tt=S.timers[d.ttoggle];tt.running=!tt.running;updateTimerDom();return}
