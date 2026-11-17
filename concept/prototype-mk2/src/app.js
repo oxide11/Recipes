@@ -541,7 +541,10 @@ document.addEventListener('click',function(e){
  if(d.withpick){S.with=d.withpick;closeSheet();go('together');return}
  if(d.promote){PROMO[R.id+':'+d.promote]=1;keep(render);toast('Now the default for this recipe. The original is kept as a version.');return}
  if(d.qa){if(QA[d.qa])delete QA[d.qa];else QA[d.qa]=1;keep(render);return}
- if(d.wcart){if(CART[d.wcart])delete CART[d.wcart];else CART[d.wcart]=1;keep(render);return}
+ if(d.wcart){if(CART[d.wcart]){delete CART[d.wcart];delete CARTBY[d.wcart]}else{CART[d.wcart]=1;CARTBY[d.wcart]='M'}keep(render);return}
+ if(d.kpick!==undefined){switchKitchen(+d.kpick);closeSheet();keep(render);toast('Now in '+KITCHENS[KCUR].name);return}
+ if(d.kman!==undefined){openKitchen(+d.kman);return}
+ if(d.kmem){var km=d.kmem.split(':'),K=KITCHENS[+km[0]],ix=K.members.indexOf(km[1]);if(ix>-1)K.members.splice(ix,1);else K.members.push(km[1]);openKitchen(+km[0],true);keepUnder();return}
  if(d.pan){openStock(d.pan);return}
  if(d.stk){stockAct(d.stk);return}
  if(d.spice!==undefined){openSpice(+d.spice);return}
@@ -550,7 +553,7 @@ document.addEventListener('click',function(e){
  if(d.plandel!==undefined){var pd=d.plandel.split(':');PLAN[pd[0]].splice(+pd[1],1);if(!PLAN[pd[0]].length)delete PLAN[pd[0]];keep(render);return}
  if(d.prep!==undefined){S.prepDay=+d.prep;go('prep');return}
  if(d.planadd!==undefined){openPlanPick(+d.planadd);return}
- if(d.planpick){var pp=d.planpick.split(':');(PLAN[pp[0]]=PLAN[pp[0]]||[]).push(pp[1]);closeSheet();keep(render);toast(RECIPES[pp[1]].title+' planned for '+DAYS[+pp[0]][0]);return}
+ if(d.planpick){var pp=d.planpick.split(':');(PLAN[pp[0]]=PLAN[pp[0]]||[]).push(pp[1]);PLANBY[pp[0]+':'+pp[1]]='M';closeSheet();keep(render);toast(RECIPES[pp[1]].title+' planned for '+DAYS[+pp[0]][0]);return}
  if(d.libf){S.lib.f=d.libf;keep(render);return}
  if(d.libs){S.lib.s=d.libs;keep(render);return}
  if(d.libtag){S.lib.tag=S.lib.tag===d.libtag?null:d.libtag;closeSheet();keep(render);return}
@@ -605,6 +608,9 @@ document.addEventListener('click',function(e){
   case 'importcard':openImport();break;
   case 'sendqs':toast('Sent '+openQCount()+' question'+(openQCount()===1?'':'s')+' to Ashley (sharing is mocked)');break;
   case 'libtags':openLibTags();break;
+  case 'kitchens':openKitchens();break;
+  case 'librarymembers':openLibraryMembers();break;
+  case 'newkitchen':KITCHENS.push({name:'New kitchen',members:['M'],st:null});openKitchen(KITCHENS.length-1);break;
   case 'profile':openProfile();break;
   case 'sharesend':closeSheet();toast('Sharing is mocked in this prototype');break;
   case 'sharecopy':toast('Copy link is mocked in this prototype');break;

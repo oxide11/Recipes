@@ -198,9 +198,9 @@ function profileSheet(){
    tog('hf','Hands-free cooking','Reads each step aloud and moves on when its timer ends')+
    tog('hc','Stronger ingredient highlights','Outlined ingredients in step text instead of pale tints')+
    tog('photo','Ask for a plate photo','Prompt at the end of every cook')+'</div></section>'+
-  '<section class="psec"><span class="kicker">Household</span><div class="row" style="gap:14px;flex-wrap:wrap">'+
-   [['A','Ashley'],['N','Nicole']].map(function(h){return '<span class="phh"><span class="pava sm">'+h[0]+'</span>'+h[1]+'</span>'}).join('')+
-   '<button class="chip out" style="border-style:dashed" data-toast="Invites are mocked in this prototype">+ Invite</button></div></section>'+
+  '<section class="psec" style="gap:0"><span class="kicker" style="margin-bottom:6px">Sharing</span>'+
+   '<button class="plink" data-act="librarymembers"><span class="ptxt"><b>Family library</b><span>'+LIBM.length+' people share these recipes</span></span>'+avStack(LIBM,4)+'</button>'+
+   '<button class="plink" data-act="kitchens"><span class="ptxt"><b>Your kitchens</b><span>'+KITCHENS.length+' · plan, shopping and pantry are per kitchen</span></span>'+avStack(KITCHENS[KCUR].members,4)+'</button></section>'+
   '<section class="psec" style="gap:0"><span class="kicker" style="margin-bottom:6px">More</span>'+
    link('Cooking log',cooks+' cooks across '+Object.keys(LOG).filter(function(k){return LOG[k].length}).length+' recipes','The full cooking log is not built yet. Each recipe shows its own under Your cooks.')+
    link('Nutritional goals','Daily targets for calories and macros','Nutritional goals are on the backlog')+
@@ -278,7 +278,7 @@ function libraryView(){
  var paper=L.more?PAPER:PAPER.slice(0,pad?12:6);
  return '<div class="pad">'+
   '<div class="between" style="gap:16px;align-items:flex-end"><div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">'+RECIPE_ORDER.length+' ready to cook · '+PAPER.length+' still on paper</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Recipes</h1></div>'+
-   '<button class="secondary" style="height:44px;padding:0 16px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border-color:#111" data-act="importcard">+ Add</button></div>'+
+   '<div class="row" style="gap:8px"><button class="avbtn" data-act="librarymembers" aria-label="Family library, '+LIBM.length+' people">'+avStack(LIBM,3)+'</button><button class="secondary" style="height:44px;padding:0 16px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border-color:#111" data-act="importcard">+ Add</button></div></div>'+
   '<label class="row searchf" style="animation:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search your recipes</span><input id="libq" type="search" placeholder="Search by name or ingredient" value="'+esc(L.q||'')+'"></label>'+
   '<div class="libctl"><div class="seg" role="group" aria-label="Show" style="grid-template-columns:repeat(4,1fr)">'+F.map(function(f){return '<button data-libf="'+f[0]+'" aria-pressed="'+(L.f===f[0])+'">'+f[1]+' <span style="opacity:.7;font-weight:500">'+cnt[f[0]]+'</span></button>'}).join('')+'</div>'+
    '</div>'+
@@ -324,7 +324,7 @@ function pantryView(){
  var rank=RECIPE_ORDER.slice().sort(function(x,y){var a=coverage(x),b=coverage(y);return (a[1]-a[0])-(b[1]-b[0])||b[0]/b[1]-a[0]/a[1]}).slice(0,4);
  var F=[['have','On hand',on],['out','Missing',cat.length-on],['all','All',cat.length]];
  return '<div class="pad">'+
-  '<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">'+on+' of '+cat.length+' ingredients on hand</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Pantry</h1></div>'+
+  kitchenBar()+'<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">'+on+' of '+cat.length+' ingredients on hand</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Pantry</h1></div>'+
   '<section style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Closest to ready</p><div class="canrow">'+rank.map(function(id){var c=coverage(id),miss=c[1]-c[0],r=RECIPES[id];
    return '<button class="cancard" data-open="'+id+'" aria-label="Open '+esc(r.title)+', '+(miss?miss+' to buy':'everything on hand')+'"><b>'+esc(r.title)+'</b><span class="canbar" aria-hidden="true"><i style="width:'+Math.round(c[0]/c[1]*100)+'%"></i></span><span>'+(miss?miss+' to buy':'Ready to cook')+'</span></button>'}).join('')+'</div></section>'+
   '<div class="panctl"><div class="seg" role="group" aria-label="Show" style="grid-template-columns:repeat(3,1fr)">'+F.map(function(f){return '<button data-panf="'+f[0]+'" aria-pressed="'+(S.pan.f===f[0])+'">'+f[1]+' <span style="opacity:.7;font-weight:500">'+f[2]+'</span></button>'}).join('')+'</div>'+
@@ -366,15 +366,15 @@ var CART={};
 function shopAllView(){
  var pad=isPad(),needs=planNeeds(),n=planIds().length;
  Object.keys(CART).forEach(function(k){if(!needs.some(function(x){return pKey(x.it)===k}))delete CART[k]});
- var inCart=needs.filter(function(x){return CART[pKey(x.it)]}).length;
+ var inCart=needs.filter(function(x){return CART[pKey(x.it)]}).length;liveShop(needs);
  var planned=DAYS.map(function(D0,i){return (PLAN[i]||[]).map(function(id){return '<button class="chip out" data-open="'+id+'" style="height:36px"><span class="muted" style="font-weight:600">'+D0[1]+'</span> '+esc(RECIPES[id].short||RECIPES[id].title)+'</button>'}).join('')}).join('');
  var secs=AISLES.map(function(a){var items=needs.filter(function(x){return x.it.aisle===a});if(!items.length)return '';
   var left=items.filter(function(x){return !CART[pKey(x.it)]}).length;
   return '<section style="display:flex;flex-direction:column;gap:10px"><div class="between" style="border-bottom:1.5px solid #111;padding-bottom:6px"><h2 class="h2">'+a+'</h2><span class="muted" style="font-size:12px;font-weight:600">'+(left?left+' to get':'All in cart')+'</span></div><div class="tiles">'+
    items.map(function(x){var it=x.it,k=pKey(it),g=!!CART[k],cnt=Math.min(4,it.icon[0][1]),size=cnt===1?56:Math.min(36,Math.floor(140/cnt)),ic='';for(var j=0;j<cnt;j++)ic+=icon(it.icon[0][0],size);
-    return '<button class="tile'+(g?' got':'')+'" data-wcart="'+esc(k)+'" aria-pressed="'+g+'" aria-label="'+esc(it.name+', '+it.amt+', for '+x.for.join(' and ')+(g?', in cart':''))+'" style="background:'+(g?'#fff':it.color+'24')+'"><span class="tchk">'+(g?SVG.tick:'')+'</span><span class="ticons">'+ic+'</span><b>'+esc(it.name)+'</b><span style="font-size:12px;color:#3A3A38">'+esc(x.amts.join(' + '))+'</span><span class="ttag">'+esc(x.for.join(', '))+'</span></button>'}).join('')+'</div></section>'}).join('');
+    return '<button class="tile'+(g?' got':'')+'" data-wcart="'+esc(k)+'" aria-pressed="'+g+'" aria-label="'+esc(it.name+', '+it.amt+', for '+x.for.join(' and ')+(g?', in cart':''))+'" style="background:'+(g?'#fff':it.color+'24')+'"><span class="tchk">'+(g?SVG.tick:'')+'</span>'+(g&&CARTBY[k]?'<i class="byav" title="'+PEOPLE[CARTBY[k]]+'">'+CARTBY[k]+'</i>':'')+'<span class="ticons">'+ic+'</span><b>'+esc(it.name)+'</b><span style="font-size:12px;color:#3A3A38">'+esc(x.amts.join(' + '))+'</span><span class="ttag">'+esc(x.for.join(', '))+'</span></button>'}).join('')+'</div></section>'}).join('');
  return '<div class="pad">'+
-  '<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">For this week’s plan · '+n+' recipe'+(n===1?'':'s')+'</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Shopping</h1></div>'+
+  kitchenBar()+'<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">For this week’s plan · '+n+' recipe'+(n===1?'':'s')+'</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Shopping</h1></div>'+
   (planned?'<div style="display:flex;gap:8px;flex-wrap:wrap">'+planned+'</div>':'')+
   (needs.length?'<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:14px">'+inCart+' of '+needs.length+' in your cart</b><div class="prog"><i style="width:'+Math.round(100*inCart/needs.length)+'%"></i></div></div><div class="aisles">'+secs+'</div>'
    :'<p class="insight"><strong>Nothing to buy.</strong> '+(n?'Your pantry covers everything planned this week.':'Nothing is planned yet.')+'</p><button class="secondary" data-go="plan">Open the plan</button>')+

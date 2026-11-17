@@ -510,3 +510,21 @@ body.darkstage #phone{border-color:#000}
 .lsel{stroke-dasharray:1;stroke-dashoffset:1;animation:ldraw .4s ease-out .05s forwards}
 @keyframes ldraw{to{stroke-dashoffset:0}}
 @media (prefers-reduced-motion:reduce){.hub2::before,.leaf.on,.lsel{animation:none}.lsel{stroke-dashoffset:0}.leaf.on{transform:translate(-50%,-50%) scale(1.08)}}
+
+/* ---- sharing ---- */
+.avs{display:inline-flex;flex-shrink:0}
+.av{width:26px;height:26px;border-radius:999px;background:#E4E4E0;color:#111;font-style:normal;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #fff;flex-shrink:0}
+.avs .av+.av{margin-left:-7px}.av.me{background:#111;color:#fff}.av.more{background:#fff;box-shadow:0 0 0 1.5px #BDBDB8;font-size:10px}
+.kbar{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:8px 14px 8px 10px;border-radius:14px;border:1.5px solid #ECECE8;background:#fff;text-align:left;cursor:pointer;margin-bottom:-6px}
+.ipad .kbar{width:auto;max-width:520px;align-self:flex-start}
+.ktxt{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}.ktxt b{font-size:15px}.ktxt small{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.krow{display:flex;align-items:center;gap:8px;padding:6px 10px 6px 6px;border-radius:14px;border:1.5px solid #ECECE8}
+.krow.on{border-color:#111}
+.kpick{flex:1;min-width:0;display:flex;align-items:center;gap:10px;min-height:48px;border:none;background:none;text-align:left;cursor:pointer;padding:0 4px}
+.mrow{display:flex;align-items:center;gap:12px;min-height:52px;border-bottom:1px solid #ECECE8}
+.mrow b{display:block;font-size:15px}.mrow small{font-size:12px;color:var(--muted)}
+.role{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);margin-left:4px}
+.avbtn{height:44px;padding:0 10px;border-radius:999px;border:1.5px solid #ECECE8;background:#fff;display:inline-flex;align-items:center;cursor:pointer}
+.byav{position:absolute;left:10px;top:10px;width:24px;height:24px;border-radius:999px;background:#111;color:#fff;font-style:normal;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tile{position:relative}
+.plink .avs{margin-left:auto}

@@ -692,6 +692,24 @@ body.darkstage #phone{border-color:#000}
 .lsel{stroke-dasharray:1;stroke-dashoffset:1;animation:ldraw .4s ease-out .05s forwards}
 @keyframes ldraw{to{stroke-dashoffset:0}}
 @media (prefers-reduced-motion:reduce){.hub2::before,.leaf.on,.lsel{animation:none}.lsel{stroke-dashoffset:0}.leaf.on{transform:translate(-50%,-50%) scale(1.08)}}
+
+/* ---- sharing ---- */
+.avs{display:inline-flex;flex-shrink:0}
+.av{width:26px;height:26px;border-radius:999px;background:#E4E4E0;color:#111;font-style:normal;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #fff;flex-shrink:0}
+.avs .av+.av{margin-left:-7px}.av.me{background:#111;color:#fff}.av.more{background:#fff;box-shadow:0 0 0 1.5px #BDBDB8;font-size:10px}
+.kbar{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:8px 14px 8px 10px;border-radius:14px;border:1.5px solid #ECECE8;background:#fff;text-align:left;cursor:pointer;margin-bottom:-6px}
+.ipad .kbar{width:auto;max-width:520px;align-self:flex-start}
+.ktxt{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}.ktxt b{font-size:15px}.ktxt small{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.krow{display:flex;align-items:center;gap:8px;padding:6px 10px 6px 6px;border-radius:14px;border:1.5px solid #ECECE8}
+.krow.on{border-color:#111}
+.kpick{flex:1;min-width:0;display:flex;align-items:center;gap:10px;min-height:48px;border:none;background:none;text-align:left;cursor:pointer;padding:0 4px}
+.mrow{display:flex;align-items:center;gap:12px;min-height:52px;border-bottom:1px solid #ECECE8}
+.mrow b{display:block;font-size:15px}.mrow small{font-size:12px;color:var(--muted)}
+.role{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);margin-left:4px}
+.avbtn{height:44px;padding:0 10px;border-radius:999px;border:1.5px solid #ECECE8;background:#fff;display:inline-flex;align-items:center;cursor:pointer}
+.byav{position:absolute;left:10px;top:10px;width:24px;height:24px;border-radius:999px;background:#111;color:#fff;font-style:normal;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tile{position:relative}
+.plink .avs{margin-left:auto}
 </style>
 </head>
 <body>
@@ -2226,7 +2244,10 @@ document.addEventListener('click',function(e){
  if(d.withpick){S.with=d.withpick;closeSheet();go('together');return}
  if(d.promote){PROMO[R.id+':'+d.promote]=1;keep(render);toast('Now the default for this recipe. The original is kept as a version.');return}
  if(d.qa){if(QA[d.qa])delete QA[d.qa];else QA[d.qa]=1;keep(render);return}
- if(d.wcart){if(CART[d.wcart])delete CART[d.wcart];else CART[d.wcart]=1;keep(render);return}
+ if(d.wcart){if(CART[d.wcart]){delete CART[d.wcart];delete CARTBY[d.wcart]}else{CART[d.wcart]=1;CARTBY[d.wcart]='M'}keep(render);return}
+ if(d.kpick!==undefined){switchKitchen(+d.kpick);closeSheet();keep(render);toast('Now in '+KITCHENS[KCUR].name);return}
+ if(d.kman!==undefined){openKitchen(+d.kman);return}
+ if(d.kmem){var km=d.kmem.split(':'),K=KITCHENS[+km[0]],ix=K.members.indexOf(km[1]);if(ix>-1)K.members.splice(ix,1);else K.members.push(km[1]);openKitchen(+km[0],true);keepUnder();return}
  if(d.pan){openStock(d.pan);return}
  if(d.stk){stockAct(d.stk);return}
  if(d.spice!==undefined){openSpice(+d.spice);return}
@@ -2235,7 +2256,7 @@ document.addEventListener('click',function(e){
  if(d.plandel!==undefined){var pd=d.plandel.split(':');PLAN[pd[0]].splice(+pd[1],1);if(!PLAN[pd[0]].length)delete PLAN[pd[0]];keep(render);return}
  if(d.prep!==undefined){S.prepDay=+d.prep;go('prep');return}
  if(d.planadd!==undefined){openPlanPick(+d.planadd);return}
- if(d.planpick){var pp=d.planpick.split(':');(PLAN[pp[0]]=PLAN[pp[0]]||[]).push(pp[1]);closeSheet();keep(render);toast(RECIPES[pp[1]].title+' planned for '+DAYS[+pp[0]][0]);return}
+ if(d.planpick){var pp=d.planpick.split(':');(PLAN[pp[0]]=PLAN[pp[0]]||[]).push(pp[1]);PLANBY[pp[0]+':'+pp[1]]='M';closeSheet();keep(render);toast(RECIPES[pp[1]].title+' planned for '+DAYS[+pp[0]][0]);return}
  if(d.libf){S.lib.f=d.libf;keep(render);return}
  if(d.libs){S.lib.s=d.libs;keep(render);return}
  if(d.libtag){S.lib.tag=S.lib.tag===d.libtag?null:d.libtag;closeSheet();keep(render);return}
@@ -2290,6 +2311,9 @@ document.addEventListener('click',function(e){
   case 'importcard':openImport();break;
   case 'sendqs':toast('Sent '+openQCount()+' question'+(openQCount()===1?'':'s')+' to Ashley (sharing is mocked)');break;
   case 'libtags':openLibTags();break;
+  case 'kitchens':openKitchens();break;
+  case 'librarymembers':openLibraryMembers();break;
+  case 'newkitchen':KITCHENS.push({name:'New kitchen',members:['M'],st:null});openKitchen(KITCHENS.length-1);break;
   case 'profile':openProfile();break;
   case 'sharesend':closeSheet();toast('Sharing is mocked in this prototype');break;
   case 'sharecopy':toast('Copy link is mocked in this prototype');break;
@@ -2508,9 +2532,9 @@ function profileSheet(){
    tog('hf','Hands-free cooking','Reads each step aloud and moves on when its timer ends')+
    tog('hc','Stronger ingredient highlights','Outlined ingredients in step text instead of pale tints')+
    tog('photo','Ask for a plate photo','Prompt at the end of every cook')+'</div></section>'+
-  '<section class="psec"><span class="kicker">Household</span><div class="row" style="gap:14px;flex-wrap:wrap">'+
-   [['A','Ashley'],['N','Nicole']].map(function(h){return '<span class="phh"><span class="pava sm">'+h[0]+'</span>'+h[1]+'</span>'}).join('')+
-   '<button class="chip out" style="border-style:dashed" data-toast="Invites are mocked in this prototype">+ Invite</button></div></section>'+
+  '<section class="psec" style="gap:0"><span class="kicker" style="margin-bottom:6px">Sharing</span>'+
+   '<button class="plink" data-act="librarymembers"><span class="ptxt"><b>Family library</b><span>'+LIBM.length+' people share these recipes</span></span>'+avStack(LIBM,4)+'</button>'+
+   '<button class="plink" data-act="kitchens"><span class="ptxt"><b>Your kitchens</b><span>'+KITCHENS.length+' · plan, shopping and pantry are per kitchen</span></span>'+avStack(KITCHENS[KCUR].members,4)+'</button></section>'+
   '<section class="psec" style="gap:0"><span class="kicker" style="margin-bottom:6px">More</span>'+
    link('Cooking log',cooks+' cooks across '+Object.keys(LOG).filter(function(k){return LOG[k].length}).length+' recipes','The full cooking log is not built yet. Each recipe shows its own under Your cooks.')+
    link('Nutritional goals','Daily targets for calories and macros','Nutritional goals are on the backlog')+
@@ -2588,7 +2612,7 @@ function libraryView(){
  var paper=L.more?PAPER:PAPER.slice(0,pad?12:6);
  return '<div class="pad">'+
   '<div class="between" style="gap:16px;align-items:flex-end"><div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">'+RECIPE_ORDER.length+' ready to cook · '+PAPER.length+' still on paper</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Recipes</h1></div>'+
-   '<button class="secondary" style="height:44px;padding:0 16px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border-color:#111" data-act="importcard">+ Add</button></div>'+
+   '<div class="row" style="gap:8px"><button class="avbtn" data-act="librarymembers" aria-label="Family library, '+LIBM.length+' people">'+avStack(LIBM,3)+'</button><button class="secondary" style="height:44px;padding:0 16px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border-color:#111" data-act="importcard">+ Add</button></div></div>'+
   '<label class="row searchf" style="animation:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search your recipes</span><input id="libq" type="search" placeholder="Search by name or ingredient" value="'+esc(L.q||'')+'"></label>'+
   '<div class="libctl"><div class="seg" role="group" aria-label="Show" style="grid-template-columns:repeat(4,1fr)">'+F.map(function(f){return '<button data-libf="'+f[0]+'" aria-pressed="'+(L.f===f[0])+'">'+f[1]+' <span style="opacity:.7;font-weight:500">'+cnt[f[0]]+'</span></button>'}).join('')+'</div>'+
    '</div>'+
@@ -2634,7 +2658,7 @@ function pantryView(){
  var rank=RECIPE_ORDER.slice().sort(function(x,y){var a=coverage(x),b=coverage(y);return (a[1]-a[0])-(b[1]-b[0])||b[0]/b[1]-a[0]/a[1]}).slice(0,4);
  var F=[['have','On hand',on],['out','Missing',cat.length-on],['all','All',cat.length]];
  return '<div class="pad">'+
-  '<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">'+on+' of '+cat.length+' ingredients on hand</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Pantry</h1></div>'+
+  kitchenBar()+'<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">'+on+' of '+cat.length+' ingredients on hand</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Pantry</h1></div>'+
   '<section style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Closest to ready</p><div class="canrow">'+rank.map(function(id){var c=coverage(id),miss=c[1]-c[0],r=RECIPES[id];
    return '<button class="cancard" data-open="'+id+'" aria-label="Open '+esc(r.title)+', '+(miss?miss+' to buy':'everything on hand')+'"><b>'+esc(r.title)+'</b><span class="canbar" aria-hidden="true"><i style="width:'+Math.round(c[0]/c[1]*100)+'%"></i></span><span>'+(miss?miss+' to buy':'Ready to cook')+'</span></button>'}).join('')+'</div></section>'+
   '<div class="panctl"><div class="seg" role="group" aria-label="Show" style="grid-template-columns:repeat(3,1fr)">'+F.map(function(f){return '<button data-panf="'+f[0]+'" aria-pressed="'+(S.pan.f===f[0])+'">'+f[1]+' <span style="opacity:.7;font-weight:500">'+f[2]+'</span></button>'}).join('')+'</div>'+
@@ -2676,15 +2700,15 @@ var CART={};
 function shopAllView(){
  var pad=isPad(),needs=planNeeds(),n=planIds().length;
  Object.keys(CART).forEach(function(k){if(!needs.some(function(x){return pKey(x.it)===k}))delete CART[k]});
- var inCart=needs.filter(function(x){return CART[pKey(x.it)]}).length;
+ var inCart=needs.filter(function(x){return CART[pKey(x.it)]}).length;liveShop(needs);
  var planned=DAYS.map(function(D0,i){return (PLAN[i]||[]).map(function(id){return '<button class="chip out" data-open="'+id+'" style="height:36px"><span class="muted" style="font-weight:600">'+D0[1]+'</span> '+esc(RECIPES[id].short||RECIPES[id].title)+'</button>'}).join('')}).join('');
  var secs=AISLES.map(function(a){var items=needs.filter(function(x){return x.it.aisle===a});if(!items.length)return '';
   var left=items.filter(function(x){return !CART[pKey(x.it)]}).length;
   return '<section style="display:flex;flex-direction:column;gap:10px"><div class="between" style="border-bottom:1.5px solid #111;padding-bottom:6px"><h2 class="h2">'+a+'</h2><span class="muted" style="font-size:12px;font-weight:600">'+(left?left+' to get':'All in cart')+'</span></div><div class="tiles">'+
    items.map(function(x){var it=x.it,k=pKey(it),g=!!CART[k],cnt=Math.min(4,it.icon[0][1]),size=cnt===1?56:Math.min(36,Math.floor(140/cnt)),ic='';for(var j=0;j<cnt;j++)ic+=icon(it.icon[0][0],size);
-    return '<button class="tile'+(g?' got':'')+'" data-wcart="'+esc(k)+'" aria-pressed="'+g+'" aria-label="'+esc(it.name+', '+it.amt+', for '+x.for.join(' and ')+(g?', in cart':''))+'" style="background:'+(g?'#fff':it.color+'24')+'"><span class="tchk">'+(g?SVG.tick:'')+'</span><span class="ticons">'+ic+'</span><b>'+esc(it.name)+'</b><span style="font-size:12px;color:#3A3A38">'+esc(x.amts.join(' + '))+'</span><span class="ttag">'+esc(x.for.join(', '))+'</span></button>'}).join('')+'</div></section>'}).join('');
+    return '<button class="tile'+(g?' got':'')+'" data-wcart="'+esc(k)+'" aria-pressed="'+g+'" aria-label="'+esc(it.name+', '+it.amt+', for '+x.for.join(' and ')+(g?', in cart':''))+'" style="background:'+(g?'#fff':it.color+'24')+'"><span class="tchk">'+(g?SVG.tick:'')+'</span>'+(g&&CARTBY[k]?'<i class="byav" title="'+PEOPLE[CARTBY[k]]+'">'+CARTBY[k]+'</i>':'')+'<span class="ticons">'+ic+'</span><b>'+esc(it.name)+'</b><span style="font-size:12px;color:#3A3A38">'+esc(x.amts.join(' + '))+'</span><span class="ttag">'+esc(x.for.join(', '))+'</span></button>'}).join('')+'</div></section>'}).join('');
  return '<div class="pad">'+
-  '<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">For this week’s plan · '+n+' recipe'+(n===1?'':'s')+'</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Shopping</h1></div>'+
+  kitchenBar()+'<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">For this week’s plan · '+n+' recipe'+(n===1?'':'s')+'</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Shopping</h1></div>'+
   (planned?'<div style="display:flex;gap:8px;flex-wrap:wrap">'+planned+'</div>':'')+
   (needs.length?'<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:14px">'+inCart+' of '+needs.length+' in your cart</b><div class="prog"><i style="width:'+Math.round(100*inCart/needs.length)+'%"></i></div></div><div class="aisles">'+secs+'</div>'
    :'<p class="insight"><strong>Nothing to buy.</strong> '+(n?'Your pantry covers everything planned this week.':'Nothing is planned yet.')+'</p><button class="secondary" data-go="plan">Open the plan</button>')+
@@ -2708,6 +2732,7 @@ function initMark2(){
  // sample data: the second swap in every map is treated as already in the kitchen
  RECIPE_ORDER.forEach(function(id){var sets=RECIPES[id].SETS;Object.keys(sets).forEach(function(k){var l=sets[k].leaves[1];if(l&&!l.allergen&&!l.dislike)ONHAND[l.id]=1})});
  // sample data: a few things on hand are close to their date
+ kitchenInit();
  SPICE=SPICE0.map(function(s){return {name:s[0],color:s[1],level:s[2],months:s[3],keys:s[4]}});
  STOCK={};var seedExp={milk:2,parmesan:3,egg:4,potato:5};catalog().forEach(function(c){if(PAN[c.key]){var s=stockOf(c.key);s.bought=1+hashStr(c.key)%11;if(seedExp[c.key]){s.exp=seedExp[c.key]}else if(s.exp!==null){s.exp=Math.max(6,s.exp-Math.min(s.bought,s.exp-6))}}});syncExp();
 }
@@ -2892,7 +2917,7 @@ function planView(){
   var date='<div class="pdate'+(today?' today':'')+'"><b>'+D0[1]+'</b><span>'+D0[2]+'</span></div>';
   if(!list.length)return '<div class="pday empty">'+date+'<button class="padd" data-planadd="'+i+'" aria-label="Add a recipe for '+D0[0]+'">+ Add a recipe</button></div>';
   var meals=list.map(function(id,j){var r=RECIPES[id],c=coverage(id),miss=c[1]-c[0],t=myMins(id);
-   return '<div class="pmeal"><button class="pmopen" data-open="'+id+'" aria-label="Open '+esc(r.title)+'"><span class="libfp">'+fpBar(r,60)+'</span><span class="libtxt" style="padding:11px 52px 11px 14px"><b style="font-size:17px">'+esc(r.title)+'</b><span class="muted">'+(t.yours?'':'~')+fmtMin(t.m)+' for you · '+(miss?miss+' to buy':'everything on hand')+'</span></span></button><button class="iconbtn pdel" data-plandel="'+i+':'+j+'" aria-label="Remove '+esc(r.title)+' from '+D0[0]+'">'+SVG.close+'</button></div>'}).join('');
+   return '<div class="pmeal"><button class="pmopen" data-open="'+id+'" aria-label="Open '+esc(r.title)+'"><span class="libfp">'+fpBar(r,60)+'</span><span class="libtxt" style="padding:11px 52px 11px 14px"><b style="font-size:17px">'+esc(r.title)+'</b><span class="muted">'+(t.yours?'':'~')+fmtMin(t.m)+' for you · '+(miss?miss+' to buy':'everything on hand')+(KITCHENS[KCUR].members.length>1?' · added by '+PEOPLE[PLANBY[i+':'+id]||'M']:'')+'</span></span></button><button class="iconbtn pdel" data-plandel="'+i+':'+j+'" aria-label="Remove '+esc(r.title)+' from '+D0[0]+'">'+SVG.close+'</button></div>'}).join('');
   var head='<div class="pdhead"><span class="kicker" style="color:#111">'+(today?'Tonight':D0[0])+(prep?' · prep day':'')+'</span>'+(prep?'<span class="muted" style="font-size:12px">'+list.length+' recipes · '+fmtS(pm.end)+'</span>':'')+'</div>';
   return '<div class="pday'+(prep?' prep':'')+'">'+date+'<div class="pdcol">'+head+meals+
    '<div class="pdfoot">'+(prep?'<button class="primary" style="height:44px;font-size:14px;width:auto;padding:0 18px" data-prep="'+i+'">Open prep session</button>':'')+'<button class="linkbtn" style="font-size:13px" data-planadd="'+i+'" aria-label="Add another recipe for '+D0[0]+'">+ Add another</button></div></div></div>'}).join('');
@@ -2900,7 +2925,7 @@ function planView(){
   (needs.length?'<div style="display:flex;flex-direction:column">'+needs.slice(0,pad?99:6).map(function(x){return '<div class="row" style="gap:10px;min-height:44px;border-bottom:1px solid #ECECE8">'+icon(x.it.icon[0][0],28)+'<span style="flex:1;min-width:0;font-size:15px;font-weight:600;padding-left:8px;border-left:4px solid '+(x.it.edge||x.it.color)+'">'+esc(x.it.name)+'</span><span class="muted" style="font-size:12px;text-align:right">'+esc(x.for.join(', '))+'</span></div>'}).join('')+'</div>'+(!pad&&needs.length>6?'<span class="muted" style="font-size:13px">and '+(needs.length-6)+' more</span>':''):'<span style="font-size:14px">Nothing. The pantry covers the whole week.</span>')+
   (needs.length?'<button class="secondary" style="height:44px;font-size:14px" data-go="shopall">Open the shopping list</button>':'')+'</section>';
  return '<div class="pad">'+
-  '<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">November 16 to 22</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Plan</h1></div>'+
+  kitchenBar()+'<div><p class="muted" style="margin:0 0 4px;font-size:'+(pad?14:13)+'px">November 16 to 22</p><h1 class="t" style="font-size:'+(pad?40:30)+'px">Plan</h1></div>'+
   '<div class="stats" style="grid-template-columns:repeat(4,1fr)"><div><b>'+nights+' of 7</b><span>days planned</span></div><div><b>'+ids.length+'</b><span>recipes</span></div><div><b>'+fmtS(mins)+'</b><span>at your pace</span></div><div><b>'+needs.length+'</b><span>to buy</span></div></div>'+
   '<div class="plangrid"><div class="pdays">'+days+'</div>'+buy+'</div>'+
   '<p class="muted" style="margin:0;font-size:12px;line-height:1.45">Add more than one recipe to a day to make it a prep day. The week is sample data.</p>'+
@@ -3082,6 +3107,53 @@ function stockDeduct(){
 }
 document.addEventListener('change',function(e){var t=e.target;if(t&&t.id==='stkq'){var v=parseQty(t.value),key=t.dataset.key;if(v>0){stockSetVal(key,v)}syncExp();openStock(key,true);keepUnder()}});
 document.addEventListener('keydown',function(e){if(e.target&&e.target.id==='stkq'&&e.key==='Enter'){e.preventDefault();e.target.blur()}});
+
+/* ---- sharing: one family library, separate kitchens (plan, shopping, pantry) ---- */
+var PEOPLE={M:'Moussa',A:'Ashley',N:'Nicole',D:'Dan',Y:'Maya',C:'Chris'},LIBM=['M','A','N','D','Y','C'],KITCHENS=[],KCUR=0,PLANBY={},CARTBY={};
+function kitchenInit(){KITCHENS=[{name:'Moussa & Ashley',members:['M','A'],st:null},{name:'Cottage weekend',members:['M','A','N','D'],st:null}];KCUR=0;PLANBY={'2:thai':'A','5:cookies':'A','5:potpie':'A'};CARTBY={}}
+function avStack(list,max){var show=list.slice(0,max||3),more=list.length-show.length;return '<span class="avs" aria-hidden="true">'+show.map(function(k){return '<i class="av'+(k==='M'?' me':'')+'">'+k+'</i>'}).join('')+(more>0?'<i class="av more">+'+more+'</i>':'')+'</span>'}
+function kitchenBar(){var K=KITCHENS[KCUR],others=K.members.filter(function(x){return x!=='M'});
+ return '<button class="kbar" data-act="kitchens" aria-haspopup="dialog" aria-label="Kitchen: '+esc(K.name)+'. Change kitchen">'+avStack(K.members,4)+'<span class="ktxt"><b>'+esc(K.name)+'</b><small>'+(others.length?'Shared with '+others.map(function(k){return PEOPLE[k]}).join(', ')+' · synced just now':'Only you')+'</small></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>'}
+function switchKitchen(i){
+ if(i===KCUR)return;KITCHENS[KCUR].st={PLAN:PLAN,PAN:PAN,STOCK:STOCK,CART:CART,SPICE:SPICE,PLANBY:PLANBY,CARTBY:CARTBY};
+ KCUR=i;var st=KITCHENS[i].st;
+ if(st){PLAN=st.PLAN;PAN=st.PAN;STOCK=st.STOCK;CART=st.CART;SPICE=st.SPICE;PLANBY=st.PLANBY;CARTBY=st.CARTBY}
+ else{PLAN=KITCHENS[i].name==='Cottage weekend'?{5:['pancakes'],6:['shepherd','cookies']}:{};PLANBY={'5:pancakes':'N','6:cookies':'D'};CART={};CARTBY={};STOCK={};
+  PAN={};if(KITCHENS[i].name==='Cottage weekend')Object.keys(PAN0).forEach(function(k){if(hashStr(k)%2===0)PAN[k]=1});
+  SPICE=SPICE0.slice(0,KITCHENS[i].name==='Cottage weekend'?6:0).map(function(s,j){return {name:s[0],color:s[1],level:[.9,.4,.1,.6,0,.7][j],months:s[3],keys:s[4]}})}
+ syncHave();syncExp();
+}
+function liveShop(needs){
+ var K=KITCHENS[KCUR],others=K.members.filter(function(x){return x!=='M'});if(K.sim||!others.length||needs.length<2)return;K.sim=true;var kc=KCUR;
+ setTimeout(function(){if(S.screen!=='shopall'||KCUR!==kc)return;var nx=planNeeds().filter(function(x){return !CART[pKey(x.it)]})[1];if(!nx)return;var k=pKey(nx.it);CART[k]=1;CARTBY[k]=others[0];keep(render);toast(PEOPLE[others[0]]+' just ticked '+nx.it.name)},3500);
+}
+function openKitchens(){
+ var el=document.getElementById('sheet');
+ el.innerHTML='<div class="sheetwrap" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="Your kitchens"><div class="between"><div><span class="kicker">Plan, shopping and pantry</span><h2 class="h2" style="font-size:20px">Your kitchens</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  '<p class="muted" style="margin:0;font-size:13px;line-height:1.45">A kitchen is the group you plan and shop with. Each has its own meal plan, shopping list and pantry. Recipes are shared by the whole family and are not part of a kitchen.</p>'+
+  '<div style="display:flex;flex-direction:column;gap:8px">'+KITCHENS.map(function(K,i){var on=i===KCUR;return '<div class="krow'+(on?' on':'')+'"><button class="kpick" data-kpick="'+i+'" aria-pressed="'+on+'">'+avStack(K.members,4)+'<span class="ktxt"><b>'+esc(K.name)+'</b><small>'+K.members.map(function(k){return k==='M'?'You':PEOPLE[k]}).join(', ')+'</small></span>'+(on?'<span class="badge solid" style="height:22px;font-size:11px">Current</span>':'')+'</button><button class="chip out" style="height:36px;padding:0 12px" data-kman="'+i+'">Members</button></div>'}).join('')+'</div>'+
+  '<button class="secondary" data-act="newkitchen">+ New kitchen</button>'+
+  '<span class="muted" style="font-size:12px;line-height:1.4">Other family members can have kitchens you are not in. You will not see those, and they will not see yours.</span></div></div>';
+ var b=el.querySelector('.iconbtn');if(b)b.focus();
+}
+function openKitchen(i,keepPos){
+ var K=KITCHENS[i],el=document.getElementById('sheet'),out=LIBM.filter(function(k){return K.members.indexOf(k)<0});
+ el.innerHTML='<div class="sheetwrap'+(keepPos?' noanim':'')+'" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="'+esc(K.name)+' members"><div class="between"><div><span class="kicker">Kitchen</span><h2 class="h2" style="font-size:20px">'+esc(K.name)+'</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  '<div style="display:flex;flex-direction:column;gap:6px"><span class="kicker">In this kitchen</span>'+K.members.map(function(k){return '<div class="mrow"><i class="av'+(k==='M'?' me':'')+'">'+k+'</i><span style="flex:1"><b>'+(k==='M'?'You':PEOPLE[k])+'</b><small>Sees and edits the plan, shopping list and pantry</small></span>'+(k==='M'?'':'<button class="chip out" style="height:34px;padding:0 12px" data-kmem="'+i+':'+k+'" aria-label="Remove '+PEOPLE[k]+'">Remove</button>')+'</div>'}).join('')+'</div>'+
+  (out.length?'<div style="display:flex;flex-direction:column;gap:8px"><span class="kicker">Add from the family</span><div style="display:flex;gap:8px;flex-wrap:wrap">'+out.map(function(k){return '<button class="chip out" style="height:40px;padding:0 12px 0 6px;gap:8px" data-kmem="'+i+':'+k+'"><i class="av">'+k+'</i>'+PEOPLE[k]+'</button>'}).join('')+'</div></div>':'')+
+  '<button class="secondary" data-act="kitchens">All kitchens</button>'+
+  '<span class="muted" style="font-size:12px;line-height:1.4">Only people listed here can see this kitchen. Being in the family library does not give anyone access to it.</span></div></div>';
+ if(!keepPos){var b=el.querySelector('.iconbtn');if(b)b.focus()}
+}
+function openLibraryMembers(){
+ var el=document.getElementById('sheet');
+ el.innerHTML='<div class="sheetwrap" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="Family library"><div class="between"><div><span class="kicker">Recipes</span><h2 class="h2" style="font-size:20px">Family library</h2></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  '<p class="muted" style="margin:0;font-size:13px;line-height:1.45">Everyone here sees and can edit the same recipes, cards and cooking notes. Meal plans, shopping lists and pantries are separate and stay inside each kitchen.</p>'+
+  '<div style="display:flex;flex-direction:column;gap:6px">'+LIBM.map(function(k){var shared=KITCHENS.filter(function(K){return K.members.indexOf(k)>-1&&K.members.indexOf('M')>-1}).map(function(K){return K.name});
+   return '<div class="mrow"><i class="av'+(k==='M'?' me':'')+'">'+k+'</i><span style="flex:1"><b>'+(k==='M'?'You':PEOPLE[k])+(k==='A'?' <em class="role">organiser</em>':'')+'</b><small>'+(k==='M'?'In '+shared.length+' kitchen'+(shared.length===1?'':'s'):shared.length?'Shares '+shared.join(' and ')+' with you':'No kitchen in common with you')+'</small></span></div>'}).join('')+'</div>'+
+  '<button class="secondary" data-toast="Invites are mocked in this prototype. In the app this sends an iCloud share link.">+ Invite someone</button></div></div>';
+ var b=el.querySelector('.iconbtn');if(b)b.focus();
+}
 initMark2();
 
 speedSeg();recipeSeg();devSeg();fit();render(true);

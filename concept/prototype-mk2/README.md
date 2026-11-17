@@ -26,3 +26,7 @@ Build: `python3 build.py` (assembles `index.html` from `src/`). Mark 2 code live
 
 ## Sample or mocked data
 On-hand swaps, expiry dates, receipt prices, sending questions, the camera, promoting a swap (state only) and voice commands are sample data or stand-ins.
+
+## Added after the first review
+- Dark mode switch, calmer library controls, pantry inventory (amounts by weight, volume or count; bought date; use-by), spice rack, plan with prep days and prep sessions, redrawn ingredient graphics, larger swap map.
+- Sharing model: one family library for recipes, and separate kitchens (plan, shopping list, pantry) with their own members. See `../BUILD_BRIEF.md`, section 4. In the prototype the people, kitchens and the "Ashley just ticked" update are simulated.
