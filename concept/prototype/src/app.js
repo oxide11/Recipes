@@ -19,7 +19,7 @@ var SVG={
  tick:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
  arrow:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
  heart:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
- heartOn:'<svg width="20" height="20" viewBox="0 0 24 24" fill="#111" stroke="#111" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
+ heartOn:'<svg width="20" height="20" viewBox="0 0 24 24" fill="#E5392B" stroke="#E5392B" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
  cst:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="4" cy="6" r="1.6"/><circle cx="20" cy="6" r="1.6"/><circle cx="5" cy="19" r="1.6"/><circle cx="19" cy="18" r="1.6"/><path d="M5.3 7l4.5 3.5M18.7 7l-4.5 3.5M6.3 18l3.6-3.6M17.7 17l-3.6-3"/></svg>',
  convert:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/></svg>',
  tabHome:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
@@ -92,6 +92,20 @@ function stepTitle(st){return st.title.replace(/\{(\w+)!\}/g,function(_,k){var i
 function A(key){
  var li=lineInfo(key),c=li.color,txt=li.qty&&li.qty!=='—'&&li.qty!=='to taste'?li.qty+' '+li.noun:li.noun;
  return '<span class="ingt'+(li.check?' q':'')+'" role="button" tabindex="0" data-conv="'+key+'" style="background:'+c+'26;box-shadow:inset 0 -4px 0 '+li.edge+'" aria-label="'+esc(txt+'. Change units')+'">'+esc(txt)+'</span>';
+}
+
+/* ================= SAFE TEMPERATURES ================= */
+var SAFE={poultry:{f:165,c:74,note:'thickest part, juices run clear'},seafood:{f:145,c:63,note:'opaque and firm all the way through'}};
+var THERMO='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13.5V5a2 2 0 0 1 4 0v8.5a4.5 4.5 0 1 1-4 0z"/><path d="M12 9v8"/></svg>';
+function safeFor(st){
+ if(!st.protein)return null;var it=ing(st.protein);if(!it)return null;
+ var sw=S.swaps[it.id],lf=sw?leafOf(it.id,sw):null,key=(lf&&lf.safe)||it.safe;
+ if(!key||key==='none'||!SAFE[key])return null;
+ return {name:shownName(it),f:SAFE[key].f,c:SAFE[key].c,note:SAFE[key].note};
+}
+function safeBadge(st,big){
+ var s=safeFor(st);if(!s)return '';
+ return '<div class="safe'+(big?' big':'')+'" role="note" aria-label="Safe temperature for '+esc(s.name)+': '+s.f+' degrees Fahrenheit, '+s.c+' Celsius">'+THERMO+'<b>'+s.f+'°F / '+s.c+'°C</b><span>'+esc(s.name)+' is safe at this internal temperature: '+esc(s.note)+'</span></div>';
 }
 
 /* ================= SHELL ================= */
@@ -196,7 +210,7 @@ function recipe(){
   body='<ol class="plan">'+STEPS.map(function(st,i){
    var keys=[];stepSrc(st).join(' ').replace(/\{(\w+)\}/g,function(_,k){if(keys.indexOf(k)<0)keys.push(k)});
    return '<li><span class="pnum">'+(i+1)+'</span><div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0"><div class="between" style="gap:8px"><b style="font-family:\'Space Grotesk\';font-size:18px">'+esc(stepTitle(st))+'</b>'+'<span class="muted" style="font-size:12px;white-space:nowrap">'+(st.on?st.on+' min hands-on':'')+(st.secs?' · '+Math.round(st.secs/60)+' min timer':'')+'</span>'+'</div>'+
-   (keys.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+keys.map(function(k){var li=lineInfo(k);return '<button class="chip" data-conv="'+k+'" style="height:30px;font-size:13px;font-weight:600;background:'+li.color+'1F;box-shadow:inset 0 -2px 0 '+li.edge+'">'+esc(li.qty+' '+li.noun)+'</button>'}).join('')+'</div>':'')+
+   safeBadge(st)+(keys.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+keys.map(function(k){var li=lineInfo(k);return '<button class="chip" data-conv="'+k+'" style="height:30px;font-size:13px;font-weight:600;background:'+li.color+'1F;box-shadow:inset 0 -2px 0 '+li.edge+'">'+esc(li.qty+' '+li.noun)+'</button>'}).join('')+'</div>':'')+
    '<p style="margin:0;font-size:15px;line-height:1.5;color:#2B2B28">'+stepLines(st).join(' ').replace(/<[^>]+>/g,function(t){return t.indexOf('ingt')>-1||t==='</span>'?'':t})+'</p></div></li>'}).join('')+'</ol>';
  }
  var tabs=[['overview','Overview'],['ingredients','Ingredients'],['steps','Instructions']];
@@ -328,7 +342,7 @@ function cook(){
  return (isLand()?'<div class="cookwrap">'+stepListPad():'')+'<div class="pad cookpad">'+
  '<div class="row"><button class="iconbtn" data-back="recipe" aria-label="Exit cooking mode">'+SVG.close+'</button><div style="flex:1;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700">Step '+(i+1)+' of '+STEPS.length+' · '+esc(R.title)+'</span><div class="stepbar" style="grid-template-columns:repeat('+STEPS.length+',1fr)" aria-hidden="true">'+bar+'</div></div></div>'+
  '<p class="kicker" style="color:#111">'+esc(stepTitle(st))+'</p>'+
- '<ol class="lines">'+lines+'</ol>'+(st.flag?'<p class="cardnote"><b>Card note:</b> '+esc(st.flag)+'</p>':'')+startCard+
+ '<ol class="lines">'+lines+'</ol>'+safeBadge(st,true)+(st.flag?'<p class="cardnote"><b>Card note:</b> '+esc(st.flag)+'</p>':'')+startCard+
  '<p class="muted hint">'+(allDone?'<b style="color:#111">Step done.</b> On to the next one.':'Tap a line to cross it off. Tap an ingredient to change its units.')+'</p>'+
  '</div>'+(isLand()?'</div>':'')+'<div class="bottombar" style="flex-direction:column"><div id="dock" class="dock"></div><div class="row" style="gap:10px"><button class="secondary" style="flex:1" data-act="prev"'+(i===0?' disabled':'')+'>Previous</button><button class="primary'+(allDone?' glow':'')+'" style="flex:2;height:52px;font-size:15px" data-act="next">'+(i===STEPS.length-1?'Plate it':'Next step')+'</button></div></div>';
 }
@@ -365,7 +379,7 @@ function fitSteps(){
  var bar=scr.querySelector('.bottombar'),hint=scr.querySelector('.hint');
  var start=(ol.getBoundingClientRect().top-scr.getBoundingClientRect().top)/SCALE+scr.scrollTop;
  var avail=scr.clientHeight-start-(bar?bar.offsetHeight:0)-(hint?hint.offsetHeight+28:28);
- var sc=scr.querySelector('.startcard');if(sc)avail-=sc.offsetHeight+18;var cn=scr.querySelector('.cookpad .cardnote');if(cn)avail-=cn.offsetHeight+18;
+ var sc=scr.querySelector('.startcard');if(sc)avail-=sc.offsetHeight+18;var cn=scr.querySelector('.cookpad .cardnote');if(cn)avail-=cn.offsetHeight+18;var sb=scr.querySelector('.cookpad .safe');if(sb)avail-=sb.offsetHeight+18;
  if(avail<120)avail=120;
  var lo=22,hi=isPad()?68:36,best=lo;
  while(lo<=hi){var mid=(lo+hi)>>1;ol.style.setProperty('--fs',mid+'px');if(ol.scrollHeight<=avail){best=mid;lo=mid+1}else hi=mid-1}

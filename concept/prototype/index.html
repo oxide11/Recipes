@@ -259,6 +259,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 .steplist .past b{text-decoration:line-through;color:var(--muted)}.steplist .past .mnum{border-color:#BDBDB8;color:var(--muted)}
 .ipad .dock{flex-direction:row;flex-wrap:wrap}.ipad .dockrow{flex:1;min-width:300px;max-width:520px}
 .sheet>*{flex-shrink:0}
+
+.safe{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:max-content;max-width:100%;padding:6px 12px;border-radius:12px;border:1.5px solid #111;background:#fff;font-size:13px;line-height:1.35}
+.safe b{font-family:'Space Grotesk',sans-serif;font-size:15px;white-space:nowrap}
+.safe span{color:#3A3A38}
+.safe svg{flex-shrink:0}
+.safe.big{padding:10px 14px;background:#111;color:#fff;border-color:#111;font-size:14px}
+.safe.big b{font-size:20px}.safe.big span{color:#E4E4E0}
+.ipad .safe.big{font-size:16px}.ipad .safe.big b{font-size:26px}
 </style>
 </head>
 <body>
@@ -377,10 +385,10 @@ var RECIPES={};
 var CHICKEN_SET={center:'Chicken',branches:['Closest','Seafood','Plant-based'],traits:['Tender','Flavour','Protein'],leaves:[
  L('thighs','Chicken thighs','1 : 1','Juicier and harder to overcook. Add 2 minutes.',[5,4,4]),
  L('turkey','Turkey cutlets','1 : 1','Leaner. Pound thin so they cook evenly.',[3,3,5]),
- L('shrimp2','Shrimp','1 : 1 by weight','Cooks in 2 to 3 minutes. Add near the end.',[4,4,4]),
- L('scallops','Scallops','1 : 1 by weight','Sear hard, 90 seconds a side.',[5,4,3]),
- L('tofu2','Firm tofu','1 : 1','Press for 15 minutes, then cube.',[3,2,3]),
- L('chickpeas3','Chickpeas','1 can per breast','Pan-fry until blistered.',[2,3,3])]};
+ L('shrimp2','Shrimp','1 : 1 by weight','Cooks in 2 to 3 minutes. Add near the end.',[4,4,4],{safe:'seafood'}),
+ L('scallops','Scallops','1 : 1 by weight','Sear hard, 90 seconds a side.',[5,4,3],{safe:'seafood'}),
+ L('tofu2','Firm tofu','1 : 1','Press for 15 minutes, then cube.',[3,2,3],{safe:'none'}),
+ L('chickpeas3','Chickpeas','1 can per breast','Pan-fry until blistered.',[2,3,3],{safe:'none'})]};
 
 RECIPES.cajun={
  id:'cajun',title:'Creamy Cajun Chicken Pasta',kicker:'Dinner · From Ashley’s cards',base:2,
@@ -390,7 +398,7 @@ RECIPES.cajun={
  meta:'25 min · Easy',plate:'Cajun chicken pasta',
  card:{source:'Printed sheet, 2 of 3',credit:'Lorac, Sept 2002. Prep 10 min, total 25 min.',photos:2,questions:[]},
  ING:[
-  {id:'chicken',name:'Chicken',color:'#E9B98C',edge:'#B9875A',g:0,weight:400,volume:450,calories:660,cost:7.00,amt:'2 breasts',eq:'boneless, skinless, cut into thin strips',icon:[['chicken',2]],aisle:'Meat and seafood'},
+  {id:'chicken',name:'Chicken',color:'#E9B98C',edge:'#B9875A',g:0,weight:400,volume:450,calories:660,cost:7.00,amt:'2 breasts',safe:'poultry',eq:'boneless, skinless, cut into thin strips',icon:[['chicken',2]],aisle:'Meat and seafood'},
   {id:'cajun',name:'Cajun seasoning',color:'#F58A1F',g:0,weight:6,volume:10,calories:15,cost:0.30,amt:'2 tsp',eq:'store-bought or your own blend',icon:[['jar',1]],aisle:'Pantry'},
   {id:'butter',name:'Butter',color:'#F7D23A',edge:'#C9A800',g:1,weight:28,volume:30,calories:200,cost:0.40,amt:'2 tbsp',eq:'or margarine',icon:[['butter',1]],aisle:'Dairy and eggs'},
   {id:'greenonion',name:'Green onion',color:'#2E9E4F',g:1,weight:15,volume:20,calories:5,cost:0.30,amt:'1',eq:'thinly sliced',icon:[['greenonion',1]],aisle:'Produce'},
@@ -423,7 +431,7 @@ RECIPES.cajun={
  STEPS:[
   {title:'Season the chicken',secs:0,on:4,lines:['Cut {chicken} into thin strips.','Toss with {cajun} in a bowl.']},
   {title:'Cook the {linguine!}',secs:600,on:1,label:'Pasta',lines:['Boil {linguine} until al dente.','Drain and keep warm.']},
-  {title:'Sauté the chicken',secs:360,on:6,label:'Chicken',lines:['Melt {butter} in a large skillet over medium heat.','Sauté the chicken until tender, about 5 to 7 minutes.']},
+  {title:'Sauté the chicken',protein:'chicken',secs:360,on:6,label:'Chicken',lines:['Melt {butter} in a large skillet over medium heat.','Sauté the chicken until tender, about 5 to 7 minutes.']},
   {title:'Make the sauce',secs:0,on:3,lines:['Reduce the heat.','Add {greenonion}, {cream} and {sundried}.','Add {basil}, {salt}, {garlicpowder} and {pepper}.','Heat through.']},
   {title:'Toss and serve',secs:0,on:2,lines:['Pour over the hot linguine.','Toss with {parm}.']}
  ],
@@ -477,7 +485,7 @@ RECIPES.thai={
   {id:'fish',name:'Fish sauce',color:'#7A4E2D',g:1,weight:54,volume:45,calories:30,cost:0.50,amt:'3 tbsp',eq:'salty and savoury',icon:[['fishsauce',1]],aisle:'Pantry'},
   {id:'sugar',name:'Brown sugar',color:'#A0703C',g:1,weight:13,volume:15,calories:50,cost:0.10,amt:'1 tbsp',eq:'packed',icon:[['sugar',1]],aisle:'Pantry'},
   {id:'coconut',name:'Coconut milk',color:'#F3EEDF',edge:'#A89C7E',g:1,weight:1200,volume:1200,calories:2400,cost:6.00,amt:'3 cans',eq:'13.5 oz cans',icon:[['coconut',3]],aisle:'Canned'},
-  {id:'shrimp',name:'Shrimp',color:'#F28C6B',g:2,weight:450,volume:500,calories:450,cost:9.00,amt:'1 lb',eq:'or chicken, the card allows either',icon:[['shrimp',3]],aisle:'Meat and seafood'},
+  {id:'shrimp',name:'Shrimp',color:'#F28C6B',g:2,weight:450,volume:500,calories:450,cost:9.00,amt:'1 lb',safe:'seafood',eq:'or chicken, the card allows either',icon:[['shrimp',3]],aisle:'Meat and seafood'},
   {id:'lime',name:'Lime juice',color:'#6CBF3A',g:3,weight:30,volume:30,calories:8,cost:0.40,amt:'2 tbsp',eq:'about 1 lime',icon:[['lime',1]],aisle:'Produce'},
   {id:'cilantro',name:'Cilantro',color:'#2E9E4F',g:3,weight:5,volume:15,calories:1,cost:1.00,amt:'¼ cup',eq:'roughly chopped',icon:[['herb',1]],aisle:'Produce'}
  ],
@@ -503,16 +511,16 @@ RECIPES.thai={
  STEPS:[
   {title:'Bloom the aromatics',secs:60,on:2,label:'Aromatics',lines:['Heat {oil} over medium heat.','Add {ginger}, {lemongrass} and {curry}.','Cook, stirring, for 1 minute.']},
   {title:'Simmer the broth',secs:900,on:1,label:'Broth simmer',lines:['Add {broth}, {fish} and {sugar}.','Simmer for 15 minutes.']},
-  {title:'Add coconut and shrimp',secs:0,on:2,flag:'The card does not say how long to cook the shrimp or chicken.',lines:['Add {coconut}.','Add {shrimp}.','Cook until the shrimp turns pink.']},
+  {title:'Add coconut and {shrimp!}',protein:'shrimp',secs:0,on:2,flag:'The card does not say how long to cook the shrimp or chicken.',lines:['Add {coconut}.','Add {shrimp}.','Cook until done.']},
   {title:'Finish',secs:0,on:1,lines:['Stir in {lime}.','Garnish with {cilantro}.']}
  ],
  SETS:{
   shrimp:{center:'Shrimp',branches:['Card says','Seafood','Plant-based'],traits:['Tender','Sweetness','Protein'],leaves:[
-   L('chickencard','Chicken','1 lb','The card offers it. Slice thin and simmer until cooked through.',[4,2,5]),
-   L('thighs2','Chicken thighs','1 lb','Juicier than breast and forgiving.',[5,3,5]),
+   L('chickencard','Chicken','1 lb','The card offers it. Slice thin and simmer until cooked through.',[4,2,5],{safe:'poultry'}),
+   L('thighs2','Chicken thighs','1 lb','Juicier than breast and forgiving.',[5,3,5],{safe:'poultry'}),
    L('scallops2','Scallops','1 lb','Sweet and tender. Add for the last 2 minutes.',[5,5,4]),
    L('whitefish','White fish','1 lb','Cubes of cod or haddock. Poach gently.',[4,3,4]),
-   L('tofu3','Firm tofu','1 block','Cube it and add with the coconut milk.',[3,2,3]),
+   L('tofu3','Firm tofu','1 block','Cube it and add with the coconut milk.',[3,2,3],{safe:'none'}),
    L('mushrooms3','Mushrooms','300 g','Earthy and meaty.',[3,2,1],{dislike:'Mushrooms'})]},
   coconut:{center:'Coconut milk',branches:['Closest','Lighter'],traits:['Richness','Sweetness','Body'],leaves:[
    L('lightcoconut','Light coconut milk','1 : 1','Same flavour, about half the calories.',[3,3,3]),
@@ -555,7 +563,7 @@ RECIPES.piccata={
  meta:'30 min · Medium',plate:'Chicken piccata',
  card:{source:'Handwritten card',credit:'Card shorthand: “2 & 2 … again” for the second batch.',photos:1,questions:['Are the stock ½ cup and the capers ¼ cup?','When do you add the last 2 tbsp butter?']},
  ING:[
-  {id:'chicken',name:'Chicken',color:'#E9B98C',edge:'#B9875A',g:0,weight:400,volume:450,calories:660,cost:7.00,amt:'2 breasts',eq:'butterflied',icon:[['chicken',2]],aisle:'Meat and seafood'},
+  {id:'chicken',name:'Chicken',color:'#E9B98C',edge:'#B9875A',g:0,weight:400,volume:450,calories:660,cost:7.00,amt:'2 breasts',safe:'poultry',eq:'butterflied',icon:[['chicken',2]],aisle:'Meat and seafood'},
   {id:'flour',name:'Flour',color:'#E8DFC9',edge:'#A89C7E',g:0,weight:30,volume:60,calories:110,cost:0.10,amt:'¼ cup',eq:'for dredging',icon:[['flour',1]],aisle:'Pantry'},
   {id:'butter',name:'Butter',color:'#F7D23A',edge:'#C9A800',g:1,weight:85,volume:90,calories:610,cost:1.20,amt:'6 tbsp',eq:'¾ of a US stick',icon:[['butter',3]],aisle:'Dairy and eggs'},
   {id:'oil',name:'Olive oil',color:'#8C9A2B',g:1,weight:70,volume:75,calories:600,cost:1.20,amt:'5 tbsp',eq:'extra-virgin',icon:[['bottle',1]],aisle:'Pantry'},
@@ -586,9 +594,9 @@ RECIPES.piccata={
  },
  STEPS:[
   {title:'Season and dredge',secs:0,on:5,lines:['Season {chicken} with {saltpepper}.','Dredge in {flour}.']},
-  {title:'Fry the first batch',secs:240,on:2,label:'First batch',lines:['Heat {butter1} and {oil1} in a large pan.','Cook half the chicken until golden, then lift it out.']},
-  {title:'Fry the second batch',secs:240,on:2,label:'Second batch',lines:['Add {butter2} and {oil2}.','Cook the rest of the chicken, then lift it out.']},
-  {title:'Make the sauce',secs:300,on:2,label:'Chicken in sauce',lines:['Add {lemon}, {capers} and {stock} to the pan.','Return the chicken for 5 minutes.']},
+  {title:'Fry the first batch',protein:'chicken',secs:240,on:2,label:'First batch',lines:['Heat {butter1} and {oil1} in a large pan.','Cook half the chicken until golden, then lift it out.']},
+  {title:'Fry the second batch',protein:'chicken',secs:240,on:2,label:'Second batch',lines:['Add {butter2} and {oil2}.','Cook the rest of the chicken, then lift it out.']},
+  {title:'Make the sauce',protein:'chicken',secs:300,on:2,label:'Chicken in sauce',lines:['Add {lemon}, {capers} and {stock} to the pan.','Return the chicken for 5 minutes.']},
   {title:'Finish',secs:0,on:2,flag:'The card does not say where the last 2 tbsp butter go.',lines:['Whisk {butter3} into the sauce.','Spoon the sauce over the chicken.','Finish with {parsley}.']}
  ],
  SETS:{
@@ -650,7 +658,7 @@ var SVG={
  tick:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
  arrow:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
  heart:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
- heartOn:'<svg width="20" height="20" viewBox="0 0 24 24" fill="#111" stroke="#111" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
+ heartOn:'<svg width="20" height="20" viewBox="0 0 24 24" fill="#E5392B" stroke="#E5392B" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
  cst:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="4" cy="6" r="1.6"/><circle cx="20" cy="6" r="1.6"/><circle cx="5" cy="19" r="1.6"/><circle cx="19" cy="18" r="1.6"/><path d="M5.3 7l4.5 3.5M18.7 7l-4.5 3.5M6.3 18l3.6-3.6M17.7 17l-3.6-3"/></svg>',
  convert:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/></svg>',
  tabHome:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
@@ -723,6 +731,20 @@ function stepTitle(st){return st.title.replace(/\{(\w+)!\}/g,function(_,k){var i
 function A(key){
  var li=lineInfo(key),c=li.color,txt=li.qty&&li.qty!=='—'&&li.qty!=='to taste'?li.qty+' '+li.noun:li.noun;
  return '<span class="ingt'+(li.check?' q':'')+'" role="button" tabindex="0" data-conv="'+key+'" style="background:'+c+'26;box-shadow:inset 0 -4px 0 '+li.edge+'" aria-label="'+esc(txt+'. Change units')+'">'+esc(txt)+'</span>';
+}
+
+/* ================= SAFE TEMPERATURES ================= */
+var SAFE={poultry:{f:165,c:74,note:'thickest part, juices run clear'},seafood:{f:145,c:63,note:'opaque and firm all the way through'}};
+var THERMO='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13.5V5a2 2 0 0 1 4 0v8.5a4.5 4.5 0 1 1-4 0z"/><path d="M12 9v8"/></svg>';
+function safeFor(st){
+ if(!st.protein)return null;var it=ing(st.protein);if(!it)return null;
+ var sw=S.swaps[it.id],lf=sw?leafOf(it.id,sw):null,key=(lf&&lf.safe)||it.safe;
+ if(!key||key==='none'||!SAFE[key])return null;
+ return {name:shownName(it),f:SAFE[key].f,c:SAFE[key].c,note:SAFE[key].note};
+}
+function safeBadge(st,big){
+ var s=safeFor(st);if(!s)return '';
+ return '<div class="safe'+(big?' big':'')+'" role="note" aria-label="Safe temperature for '+esc(s.name)+': '+s.f+' degrees Fahrenheit, '+s.c+' Celsius">'+THERMO+'<b>'+s.f+'°F / '+s.c+'°C</b><span>'+esc(s.name)+' is safe at this internal temperature: '+esc(s.note)+'</span></div>';
 }
 
 /* ================= SHELL ================= */
@@ -827,7 +849,7 @@ function recipe(){
   body='<ol class="plan">'+STEPS.map(function(st,i){
    var keys=[];stepSrc(st).join(' ').replace(/\{(\w+)\}/g,function(_,k){if(keys.indexOf(k)<0)keys.push(k)});
    return '<li><span class="pnum">'+(i+1)+'</span><div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0"><div class="between" style="gap:8px"><b style="font-family:\'Space Grotesk\';font-size:18px">'+esc(stepTitle(st))+'</b>'+'<span class="muted" style="font-size:12px;white-space:nowrap">'+(st.on?st.on+' min hands-on':'')+(st.secs?' · '+Math.round(st.secs/60)+' min timer':'')+'</span>'+'</div>'+
-   (keys.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+keys.map(function(k){var li=lineInfo(k);return '<button class="chip" data-conv="'+k+'" style="height:30px;font-size:13px;font-weight:600;background:'+li.color+'1F;box-shadow:inset 0 -2px 0 '+li.edge+'">'+esc(li.qty+' '+li.noun)+'</button>'}).join('')+'</div>':'')+
+   safeBadge(st)+(keys.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+keys.map(function(k){var li=lineInfo(k);return '<button class="chip" data-conv="'+k+'" style="height:30px;font-size:13px;font-weight:600;background:'+li.color+'1F;box-shadow:inset 0 -2px 0 '+li.edge+'">'+esc(li.qty+' '+li.noun)+'</button>'}).join('')+'</div>':'')+
    '<p style="margin:0;font-size:15px;line-height:1.5;color:#2B2B28">'+stepLines(st).join(' ').replace(/<[^>]+>/g,function(t){return t.indexOf('ingt')>-1||t==='</span>'?'':t})+'</p></div></li>'}).join('')+'</ol>';
  }
  var tabs=[['overview','Overview'],['ingredients','Ingredients'],['steps','Instructions']];
@@ -959,7 +981,7 @@ function cook(){
  return (isLand()?'<div class="cookwrap">'+stepListPad():'')+'<div class="pad cookpad">'+
  '<div class="row"><button class="iconbtn" data-back="recipe" aria-label="Exit cooking mode">'+SVG.close+'</button><div style="flex:1;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700">Step '+(i+1)+' of '+STEPS.length+' · '+esc(R.title)+'</span><div class="stepbar" style="grid-template-columns:repeat('+STEPS.length+',1fr)" aria-hidden="true">'+bar+'</div></div></div>'+
  '<p class="kicker" style="color:#111">'+esc(stepTitle(st))+'</p>'+
- '<ol class="lines">'+lines+'</ol>'+(st.flag?'<p class="cardnote"><b>Card note:</b> '+esc(st.flag)+'</p>':'')+startCard+
+ '<ol class="lines">'+lines+'</ol>'+safeBadge(st,true)+(st.flag?'<p class="cardnote"><b>Card note:</b> '+esc(st.flag)+'</p>':'')+startCard+
  '<p class="muted hint">'+(allDone?'<b style="color:#111">Step done.</b> On to the next one.':'Tap a line to cross it off. Tap an ingredient to change its units.')+'</p>'+
  '</div>'+(isLand()?'</div>':'')+'<div class="bottombar" style="flex-direction:column"><div id="dock" class="dock"></div><div class="row" style="gap:10px"><button class="secondary" style="flex:1" data-act="prev"'+(i===0?' disabled':'')+'>Previous</button><button class="primary'+(allDone?' glow':'')+'" style="flex:2;height:52px;font-size:15px" data-act="next">'+(i===STEPS.length-1?'Plate it':'Next step')+'</button></div></div>';
 }
@@ -996,7 +1018,7 @@ function fitSteps(){
  var bar=scr.querySelector('.bottombar'),hint=scr.querySelector('.hint');
  var start=(ol.getBoundingClientRect().top-scr.getBoundingClientRect().top)/SCALE+scr.scrollTop;
  var avail=scr.clientHeight-start-(bar?bar.offsetHeight:0)-(hint?hint.offsetHeight+28:28);
- var sc=scr.querySelector('.startcard');if(sc)avail-=sc.offsetHeight+18;var cn=scr.querySelector('.cookpad .cardnote');if(cn)avail-=cn.offsetHeight+18;
+ var sc=scr.querySelector('.startcard');if(sc)avail-=sc.offsetHeight+18;var cn=scr.querySelector('.cookpad .cardnote');if(cn)avail-=cn.offsetHeight+18;var sb=scr.querySelector('.cookpad .safe');if(sb)avail-=sb.offsetHeight+18;
  if(avail<120)avail=120;
  var lo=22,hi=isPad()?68:36,best=lo;
  while(lo<=hi){var mid=(lo+hi)>>1;ol.style.setProperty('--fs',mid+'px');if(ol.scrollHeight<=avail){best=mid;lo=mid+1}else hi=mid-1}
@@ -1212,7 +1234,7 @@ function recipePad(){
  var method=STEPS.map(function(st,i){var t=stepTime(st);
   return '<li><span class="mnum">'+(i+1)+'</span><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><div class="between" style="gap:12px;flex-wrap:wrap"><b style="font-family:\'Space Grotesk\';font-size:20px">'+esc(stepTitle(st))+'</b>'+
    '<span class="row" style="gap:10px"><span class="hbar" style="width:'+((t.on+t.wait)*12)+'px;height:10px" aria-hidden="true"><span style="flex:'+t.on+';background:#111"></span>'+(t.wait?'<span class="hatch" style="flex:'+t.wait+'"></span>':'')+'</span><span style="font-size:12px;color:#3A3A38;white-space:nowrap">'+t.on+' min hands-on'+(t.wait?' · '+t.wait+' wait':'')+'</span>'+(st.secs?'<span class="badge" style="height:24px">'+Math.round(st.secs/60)+' min timer</span>':'')+'</span></div>'+
-   stepLines(st).map(function(l){return '<p class="mline">'+l+'</p>'}).join('')+(st.flag?'<p class="cardnote"><b>Card note:</b> '+esc(st.flag)+'</p>':'')+'</div></li>'}).join('');
+   safeBadge(st)+stepLines(st).map(function(l){return '<p class="mline">'+l+'</p>'}).join('')+(st.flag?'<p class="cardnote"><b>Card note:</b> '+esc(st.flag)+'</p>':'')+'</div></li>'}).join('');
  return '<div class="pad">'+
  '<div style="border-radius:5px;overflow:hidden;flex-shrink:0">'+fpBar(R,10)+'</div>'+
  '<header class="phead"><div class="row" style="gap:16px;align-items:flex-start;flex:1;min-width:420px"><button class="iconbtn" data-back="home" aria-label="Back">'+SVG.back+'</button>'+
@@ -1248,7 +1270,7 @@ function ingredientsPad(){
 }
 function stepListPad(){
  return '<aside class="steplist"><span class="kicker" style="padding:0 10px 6px">'+esc(R.title)+'</span>'+STEPS.map(function(st,i){var t=S.timers[i],run=t&&t.started&&t.left>0;
-  return '<button data-jumpstep="'+i+'" class="'+(i===S.step?'cur':i<S.step?'past':'')+'"'+(i===S.step?' aria-current="step"':'')+'><span class="mnum" style="width:28px;height:28px;font-size:13px">'+(i+1)+'</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>'+esc(stepTitle(st))+'</b><span>'+(st.secs?Math.round(st.secs/60)+' min timer'+(run?' · running':''):'No timer')+'</span></span></button>'}).join('')+'</aside>';
+  return '<button data-jumpstep="'+i+'" class="'+(i===S.step?'cur':i<S.step?'past':'')+'"'+(i===S.step?' aria-current="step"':'')+'><span class="mnum" style="width:28px;height:28px;font-size:13px">'+(i+1)+'</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>'+esc(stepTitle(st))+'</b><span>'+(st.secs?Math.round(st.secs/60)+' min timer'+(run?' · running':''):'No timer')+(safeFor(st)?' · '+safeFor(st).f+'°F':'')+'</span></span></button>'}).join('')+'</aside>';
 }
 
 /* ================= SHARE ================= */

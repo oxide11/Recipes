@@ -77,3 +77,11 @@
 .steplist .past b{text-decoration:line-through;color:var(--muted)}.steplist .past .mnum{border-color:#BDBDB8;color:var(--muted)}
 .ipad .dock{flex-direction:row;flex-wrap:wrap}.ipad .dockrow{flex:1;min-width:300px;max-width:520px}
 .sheet>*{flex-shrink:0}
+
+.safe{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:max-content;max-width:100%;padding:6px 12px;border-radius:12px;border:1.5px solid #111;background:#fff;font-size:13px;line-height:1.35}
+.safe b{font-family:'Space Grotesk',sans-serif;font-size:15px;white-space:nowrap}
+.safe span{color:#3A3A38}
+.safe svg{flex-shrink:0}
+.safe.big{padding:10px 14px;background:#111;color:#fff;border-color:#111;font-size:14px}
+.safe.big b{font-size:20px}.safe.big span{color:#E4E4E0}
+.ipad .safe.big{font-size:16px}.ipad .safe.big b{font-size:26px}

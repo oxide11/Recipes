@@ -99,7 +99,7 @@ function recipePad(){
  var method=STEPS.map(function(st,i){var t=stepTime(st);
   return '<li><span class="mnum">'+(i+1)+'</span><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><div class="between" style="gap:12px;flex-wrap:wrap"><b style="font-family:\'Space Grotesk\';font-size:20px">'+esc(stepTitle(st))+'</b>'+
    '<span class="row" style="gap:10px"><span class="hbar" style="width:'+((t.on+t.wait)*12)+'px;height:10px" aria-hidden="true"><span style="flex:'+t.on+';background:#111"></span>'+(t.wait?'<span class="hatch" style="flex:'+t.wait+'"></span>':'')+'</span><span style="font-size:12px;color:#3A3A38;white-space:nowrap">'+t.on+' min hands-on'+(t.wait?' · '+t.wait+' wait':'')+'</span>'+(st.secs?'<span class="badge" style="height:24px">'+Math.round(st.secs/60)+' min timer</span>':'')+'</span></div>'+
-   stepLines(st).map(function(l){return '<p class="mline">'+l+'</p>'}).join('')+(st.flag?'<p class="cardnote"><b>Card note:</b> '+esc(st.flag)+'</p>':'')+'</div></li>'}).join('');
+   safeBadge(st)+stepLines(st).map(function(l){return '<p class="mline">'+l+'</p>'}).join('')+(st.flag?'<p class="cardnote"><b>Card note:</b> '+esc(st.flag)+'</p>':'')+'</div></li>'}).join('');
  return '<div class="pad">'+
  '<div style="border-radius:5px;overflow:hidden;flex-shrink:0">'+fpBar(R,10)+'</div>'+
  '<header class="phead"><div class="row" style="gap:16px;align-items:flex-start;flex:1;min-width:420px"><button class="iconbtn" data-back="home" aria-label="Back">'+SVG.back+'</button>'+
@@ -135,7 +135,7 @@ function ingredientsPad(){
 }
 function stepListPad(){
  return '<aside class="steplist"><span class="kicker" style="padding:0 10px 6px">'+esc(R.title)+'</span>'+STEPS.map(function(st,i){var t=S.timers[i],run=t&&t.started&&t.left>0;
-  return '<button data-jumpstep="'+i+'" class="'+(i===S.step?'cur':i<S.step?'past':'')+'"'+(i===S.step?' aria-current="step"':'')+'><span class="mnum" style="width:28px;height:28px;font-size:13px">'+(i+1)+'</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>'+esc(stepTitle(st))+'</b><span>'+(st.secs?Math.round(st.secs/60)+' min timer'+(run?' · running':''):'No timer')+'</span></span></button>'}).join('')+'</aside>';
+  return '<button data-jumpstep="'+i+'" class="'+(i===S.step?'cur':i<S.step?'past':'')+'"'+(i===S.step?' aria-current="step"':'')+'><span class="mnum" style="width:28px;height:28px;font-size:13px">'+(i+1)+'</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>'+esc(stepTitle(st))+'</b><span>'+(st.secs?Math.round(st.secs/60)+' min timer'+(run?' · running':''):'No timer')+(safeFor(st)?' · '+safeFor(st).f+'°F':'')+'</span></span></button>'}).join('')+'</aside>';
 }
 
 /* ================= SHARE ================= */

@@ -4,10 +4,10 @@ var RECIPES={};
 var CHICKEN_SET={center:'Chicken',branches:['Closest','Seafood','Plant-based'],traits:['Tender','Flavour','Protein'],leaves:[
  L('thighs','Chicken thighs','1 : 1','Juicier and harder to overcook. Add 2 minutes.',[5,4,4]),
  L('turkey','Turkey cutlets','1 : 1','Leaner. Pound thin so they cook evenly.',[3,3,5]),
- L('shrimp2','Shrimp','1 : 1 by weight','Cooks in 2 to 3 minutes. Add near the end.',[4,4,4]),
- L('scallops','Scallops','1 : 1 by weight','Sear hard, 90 seconds a side.',[5,4,3]),
- L('tofu2','Firm tofu','1 : 1','Press for 15 minutes, then cube.',[3,2,3]),
- L('chickpeas3','Chickpeas','1 can per breast','Pan-fry until blistered.',[2,3,3])]};
+ L('shrimp2','Shrimp','1 : 1 by weight','Cooks in 2 to 3 minutes. Add near the end.',[4,4,4],{safe:'seafood'}),
+ L('scallops','Scallops','1 : 1 by weight','Sear hard, 90 seconds a side.',[5,4,3],{safe:'seafood'}),
+ L('tofu2','Firm tofu','1 : 1','Press for 15 minutes, then cube.',[3,2,3],{safe:'none'}),
+ L('chickpeas3','Chickpeas','1 can per breast','Pan-fry until blistered.',[2,3,3],{safe:'none'})]};
 
 RECIPES.cajun={
  id:'cajun',title:'Creamy Cajun Chicken Pasta',kicker:'Dinner · From Ashley’s cards',base:2,
@@ -17,7 +17,7 @@ RECIPES.cajun={
  meta:'25 min · Easy',plate:'Cajun chicken pasta',
  card:{source:'Printed sheet, 2 of 3',credit:'Lorac, Sept 2002. Prep 10 min, total 25 min.',photos:2,questions:[]},
  ING:[
-  {id:'chicken',name:'Chicken',color:'#E9B98C',edge:'#B9875A',g:0,weight:400,volume:450,calories:660,cost:7.00,amt:'2 breasts',eq:'boneless, skinless, cut into thin strips',icon:[['chicken',2]],aisle:'Meat and seafood'},
+  {id:'chicken',name:'Chicken',color:'#E9B98C',edge:'#B9875A',g:0,weight:400,volume:450,calories:660,cost:7.00,amt:'2 breasts',safe:'poultry',eq:'boneless, skinless, cut into thin strips',icon:[['chicken',2]],aisle:'Meat and seafood'},
   {id:'cajun',name:'Cajun seasoning',color:'#F58A1F',g:0,weight:6,volume:10,calories:15,cost:0.30,amt:'2 tsp',eq:'store-bought or your own blend',icon:[['jar',1]],aisle:'Pantry'},
   {id:'butter',name:'Butter',color:'#F7D23A',edge:'#C9A800',g:1,weight:28,volume:30,calories:200,cost:0.40,amt:'2 tbsp',eq:'or margarine',icon:[['butter',1]],aisle:'Dairy and eggs'},
   {id:'greenonion',name:'Green onion',color:'#2E9E4F',g:1,weight:15,volume:20,calories:5,cost:0.30,amt:'1',eq:'thinly sliced',icon:[['greenonion',1]],aisle:'Produce'},
@@ -50,7 +50,7 @@ RECIPES.cajun={
  STEPS:[
   {title:'Season the chicken',secs:0,on:4,lines:['Cut {chicken} into thin strips.','Toss with {cajun} in a bowl.']},
   {title:'Cook the {linguine!}',secs:600,on:1,label:'Pasta',lines:['Boil {linguine} until al dente.','Drain and keep warm.']},
-  {title:'Sauté the chicken',secs:360,on:6,label:'Chicken',lines:['Melt {butter} in a large skillet over medium heat.','Sauté the chicken until tender, about 5 to 7 minutes.']},
+  {title:'Sauté the chicken',protein:'chicken',secs:360,on:6,label:'Chicken',lines:['Melt {butter} in a large skillet over medium heat.','Sauté the chicken until tender, about 5 to 7 minutes.']},
   {title:'Make the sauce',secs:0,on:3,lines:['Reduce the heat.','Add {greenonion}, {cream} and {sundried}.','Add {basil}, {salt}, {garlicpowder} and {pepper}.','Heat through.']},
   {title:'Toss and serve',secs:0,on:2,lines:['Pour over the hot linguine.','Toss with {parm}.']}
  ],
@@ -104,7 +104,7 @@ RECIPES.thai={
   {id:'fish',name:'Fish sauce',color:'#7A4E2D',g:1,weight:54,volume:45,calories:30,cost:0.50,amt:'3 tbsp',eq:'salty and savoury',icon:[['fishsauce',1]],aisle:'Pantry'},
   {id:'sugar',name:'Brown sugar',color:'#A0703C',g:1,weight:13,volume:15,calories:50,cost:0.10,amt:'1 tbsp',eq:'packed',icon:[['sugar',1]],aisle:'Pantry'},
   {id:'coconut',name:'Coconut milk',color:'#F3EEDF',edge:'#A89C7E',g:1,weight:1200,volume:1200,calories:2400,cost:6.00,amt:'3 cans',eq:'13.5 oz cans',icon:[['coconut',3]],aisle:'Canned'},
-  {id:'shrimp',name:'Shrimp',color:'#F28C6B',g:2,weight:450,volume:500,calories:450,cost:9.00,amt:'1 lb',eq:'or chicken, the card allows either',icon:[['shrimp',3]],aisle:'Meat and seafood'},
+  {id:'shrimp',name:'Shrimp',color:'#F28C6B',g:2,weight:450,volume:500,calories:450,cost:9.00,amt:'1 lb',safe:'seafood',eq:'or chicken, the card allows either',icon:[['shrimp',3]],aisle:'Meat and seafood'},
   {id:'lime',name:'Lime juice',color:'#6CBF3A',g:3,weight:30,volume:30,calories:8,cost:0.40,amt:'2 tbsp',eq:'about 1 lime',icon:[['lime',1]],aisle:'Produce'},
   {id:'cilantro',name:'Cilantro',color:'#2E9E4F',g:3,weight:5,volume:15,calories:1,cost:1.00,amt:'¼ cup',eq:'roughly chopped',icon:[['herb',1]],aisle:'Produce'}
  ],
@@ -130,16 +130,16 @@ RECIPES.thai={
  STEPS:[
   {title:'Bloom the aromatics',secs:60,on:2,label:'Aromatics',lines:['Heat {oil} over medium heat.','Add {ginger}, {lemongrass} and {curry}.','Cook, stirring, for 1 minute.']},
   {title:'Simmer the broth',secs:900,on:1,label:'Broth simmer',lines:['Add {broth}, {fish} and {sugar}.','Simmer for 15 minutes.']},
-  {title:'Add coconut and shrimp',secs:0,on:2,flag:'The card does not say how long to cook the shrimp or chicken.',lines:['Add {coconut}.','Add {shrimp}.','Cook until the shrimp turns pink.']},
+  {title:'Add coconut and {shrimp!}',protein:'shrimp',secs:0,on:2,flag:'The card does not say how long to cook the shrimp or chicken.',lines:['Add {coconut}.','Add {shrimp}.','Cook until done.']},
   {title:'Finish',secs:0,on:1,lines:['Stir in {lime}.','Garnish with {cilantro}.']}
  ],
  SETS:{
   shrimp:{center:'Shrimp',branches:['Card says','Seafood','Plant-based'],traits:['Tender','Sweetness','Protein'],leaves:[
-   L('chickencard','Chicken','1 lb','The card offers it. Slice thin and simmer until cooked through.',[4,2,5]),
-   L('thighs2','Chicken thighs','1 lb','Juicier than breast and forgiving.',[5,3,5]),
+   L('chickencard','Chicken','1 lb','The card offers it. Slice thin and simmer until cooked through.',[4,2,5],{safe:'poultry'}),
+   L('thighs2','Chicken thighs','1 lb','Juicier than breast and forgiving.',[5,3,5],{safe:'poultry'}),
    L('scallops2','Scallops','1 lb','Sweet and tender. Add for the last 2 minutes.',[5,5,4]),
    L('whitefish','White fish','1 lb','Cubes of cod or haddock. Poach gently.',[4,3,4]),
-   L('tofu3','Firm tofu','1 block','Cube it and add with the coconut milk.',[3,2,3]),
+   L('tofu3','Firm tofu','1 block','Cube it and add with the coconut milk.',[3,2,3],{safe:'none'}),
    L('mushrooms3','Mushrooms','300 g','Earthy and meaty.',[3,2,1],{dislike:'Mushrooms'})]},
   coconut:{center:'Coconut milk',branches:['Closest','Lighter'],traits:['Richness','Sweetness','Body'],leaves:[
    L('lightcoconut','Light coconut milk','1 : 1','Same flavour, about half the calories.',[3,3,3]),
@@ -182,7 +182,7 @@ RECIPES.piccata={
  meta:'30 min · Medium',plate:'Chicken piccata',
  card:{source:'Handwritten card',credit:'Card shorthand: “2 & 2 … again” for the second batch.',photos:1,questions:['Are the stock ½ cup and the capers ¼ cup?','When do you add the last 2 tbsp butter?']},
  ING:[
-  {id:'chicken',name:'Chicken',color:'#E9B98C',edge:'#B9875A',g:0,weight:400,volume:450,calories:660,cost:7.00,amt:'2 breasts',eq:'butterflied',icon:[['chicken',2]],aisle:'Meat and seafood'},
+  {id:'chicken',name:'Chicken',color:'#E9B98C',edge:'#B9875A',g:0,weight:400,volume:450,calories:660,cost:7.00,amt:'2 breasts',safe:'poultry',eq:'butterflied',icon:[['chicken',2]],aisle:'Meat and seafood'},
   {id:'flour',name:'Flour',color:'#E8DFC9',edge:'#A89C7E',g:0,weight:30,volume:60,calories:110,cost:0.10,amt:'¼ cup',eq:'for dredging',icon:[['flour',1]],aisle:'Pantry'},
   {id:'butter',name:'Butter',color:'#F7D23A',edge:'#C9A800',g:1,weight:85,volume:90,calories:610,cost:1.20,amt:'6 tbsp',eq:'¾ of a US stick',icon:[['butter',3]],aisle:'Dairy and eggs'},
   {id:'oil',name:'Olive oil',color:'#8C9A2B',g:1,weight:70,volume:75,calories:600,cost:1.20,amt:'5 tbsp',eq:'extra-virgin',icon:[['bottle',1]],aisle:'Pantry'},
@@ -213,9 +213,9 @@ RECIPES.piccata={
  },
  STEPS:[
   {title:'Season and dredge',secs:0,on:5,lines:['Season {chicken} with {saltpepper}.','Dredge in {flour}.']},
-  {title:'Fry the first batch',secs:240,on:2,label:'First batch',lines:['Heat {butter1} and {oil1} in a large pan.','Cook half the chicken until golden, then lift it out.']},
-  {title:'Fry the second batch',secs:240,on:2,label:'Second batch',lines:['Add {butter2} and {oil2}.','Cook the rest of the chicken, then lift it out.']},
-  {title:'Make the sauce',secs:300,on:2,label:'Chicken in sauce',lines:['Add {lemon}, {capers} and {stock} to the pan.','Return the chicken for 5 minutes.']},
+  {title:'Fry the first batch',protein:'chicken',secs:240,on:2,label:'First batch',lines:['Heat {butter1} and {oil1} in a large pan.','Cook half the chicken until golden, then lift it out.']},
+  {title:'Fry the second batch',protein:'chicken',secs:240,on:2,label:'Second batch',lines:['Add {butter2} and {oil2}.','Cook the rest of the chicken, then lift it out.']},
+  {title:'Make the sauce',protein:'chicken',secs:300,on:2,label:'Chicken in sauce',lines:['Add {lemon}, {capers} and {stock} to the pan.','Return the chicken for 5 minutes.']},
   {title:'Finish',secs:0,on:2,flag:'The card does not say where the last 2 tbsp butter go.',lines:['Whisk {butter3} into the sauce.','Spoon the sauce over the chicken.','Finish with {parsley}.']}
  ],
  SETS:{
