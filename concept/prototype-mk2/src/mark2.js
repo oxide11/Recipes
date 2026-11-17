@@ -50,7 +50,7 @@ function hfTimerDone(k){
 }
 function lockPreview(){
  var keys=typeof activeTimers==='function'&&S.timers?activeTimers():[];
- var rows=keys.length?keys.map(function(k){var t=S.timers[k],v=timerView(t);return '<div class="lockrow">'+miniRing(46,v.col,v.f)+'<span><b>'+clock(t.left)+'</b><small>'+esc(STEPS[k].label)+' · step '+(+k+1)+'</small></span></div>'}).join(''):
+ var rows=keys.length?keys.map(function(k){var t=S.timers[k],v=timerView(t);return '<div class="lockrow">'+miniRing(46,v.f>.32&&!v.done?'#FFFFFF':v.col,v.f)+'<span><b>'+clock(t.left)+'</b><small>'+esc(STEPS[k].label)+' · step '+(+k+1)+'</small></span></div>'}).join(''):
   '<div class="lockrow">'+miniRing(46,colorFor(.28),.28)+'<span><b>2:48</b><small>Sample timer · starts when you start one</small></span></div>';
  return '<div class="lock" aria-label="Lock screen preview"><span class="locktime">6:42</span>'+rows+'</div>';
 }

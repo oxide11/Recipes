@@ -3,7 +3,7 @@ var R,ING,GROUPS,LINE,STEPS,SETS;
 var MODES={
  weight:{label:'Weight',cap:'Grams',fmt:function(v){return Math.round(v)+'g'}},
  volume:{label:'Volume',cap:'Millilitres, raw',fmt:function(v){return Math.round(v)+'ml'}},
- cost:{label:'Cost',cap:'Estimated, CAD',fmt:function(v){return '~$'+(v<1?v.toFixed(2):(Math.round(v*2)/2).toFixed(2))}},
+ cost:{label:'Cost',cap:'Estimated, CAD',fmt:function(v){return (typeof P!=='undefined'&&P&&P.receipts?'$':'~$')+(v<1?v.toFixed(2):(Math.round(v*2)/2).toFixed(2))}},
  calories:{label:'Calories',cap:'Estimated kcal by macro',fmt:function(v){return '~'+(v<50?Math.round(v):Math.round(v/10)*10)+' cal'}}
 };
 var POS=[[62,38],[205,46],[290,142],[290,330],[70,432],[200,430]];
@@ -195,7 +195,7 @@ function nutDelta(id,leafId){
  var cur=S.swaps[id]||null,a=dishNut(),b=dishNut(id,leafId),L=['Calories','Protein','Carbs','Fat'],U=['',' g',' g',' g'];
  return '<div class="nutbox"><span class="kicker">'+(leafId===cur?'Per serving, as it is now':'Per serving, with this swap')+'</span><div class="nutgrid">'+L.map(function(l,i){var d=Math.round(b[i]-a[i]);
   var gd=goodDelta(i,d),good=gd===1,cl=gd===1?' better':gd===-1?' worse':'';
-  return '<div class="nd'+cl+'"><span>'+l+'</span><b>'+Math.round(b[i]).toLocaleString('en-US')+U[i]+'</b><i class="'+(d?'chg':'')+'">'+(d?(d<0?'▼ ':'▲ ')+Math.abs(d).toLocaleString('en-US')+U[i]+(gd?'<span class="sr"> '+(good?'better':'worse')+'</span>':''):'no change')+'</i></div>'}).join('')+'</div><span class="nutkey"><span><i class="kb"></i>Better</span><span><i class="kw"></i>Worse</span><span>'+goalKey()+'</span></span></div>';
+  return '<div class="nd'+cl+'"><span>'+l+'</span><b>~'+(i===0?Math.round(b[i]/10)*10:Math.round(b[i])).toLocaleString('en-US')+U[i]+'</b><i class="'+(d?'chg':'')+'">'+(d?(d<0?'▼ ':'▲ ')+Math.abs(d).toLocaleString('en-US')+U[i]+(gd?'<span class="sr"> '+(good?'better':'worse')+'</span>':''):'no change')+'</i></div>'}).join('')+'</div><span class="nutkey"><span><i class="kb"></i>Better</span><span><i class="kw"></i>Worse</span><span>'+goalKey()+'</span></span></div>';
 }
 var MACROS=[{name:'Protein',color:'#3A3A38',op:.32},{name:'Carbs',color:'#8A8A85',op:.32},{name:'Fat',color:'#C9C9C4',op:.6}];
 function skGroups(){return S.mode==='calories'?MACROS:GROUPS}
@@ -237,8 +237,9 @@ function sankey(){
   var b=bp[i],h=hs[i];var m=(b.y0+b.y1)/2,col=colorOf(it);
   var a0=m-h/2;SH[i].forEach(function(sh,g){if(sh<=0)return;var hh=h*sh;paths+='<path d="'+band(BX,a0,a0+hh,MX,cur[g],cur[g]+hh)+'" fill="'+col+'" fill-opacity="'+(/^#F[27]D/.test(col)?.6:.42)+'"/>';a0+=hh;cur[g]+=hh});
   var icons='';iconSpec[i].forEach(function(p){for(var n=0;n<p[1];n++)icons+=icon(p[0],sizes[i])});
+  if(it.pinchIcon){icons='';ING.forEach(function(x,xi){if(icons.split('<svg').length<=4&&LIST.indexOf(x)<0)icons+=icon(x.icon[0][0],26)})}
   var sw=it.pinchIcon?null:S.swaps[it.id];
-  html+='<div class="blk'+(it.pinchIcon?' tap" role="button" tabindex="0" data-act="pinches" aria-label="'+esc(it.name+': '+it.sub+'. Show them')+'"':tapAttr(it))+' style="top:'+b.y0.toFixed(1)+'px;height:'+(b.y1-b.y0).toFixed(1)+'px;width:'+(BX-6)+'px;background:'+col+'1F">'+
+  html+='<div class="blk'+(it.pinchIcon?' tap pinch" role="button" tabindex="0" data-act="pinches" aria-label="'+esc(it.name+': '+it.sub+'. Show them')+'"':tapAttr(it))+' style="top:'+b.y0.toFixed(1)+'px;height:'+(b.y1-b.y0).toFixed(1)+'px;width:'+(BX-6)+'px;background:'+col+'1F">'+
    '<div class="icons">'+icons+'</div><div class="lab"><b>'+esc(shownName(it))+'</b><span>'+M.fmt(vals[i])+'</span></div>'+(it.sub?'<span class="pinchsub">'+esc(it.sub)+'</span>':'')+
    (sw?'<span class="swaptag">for '+esc(it.name.toLowerCase())+'</span>':'')+'</div>'+
    '<div style="position:absolute;left:'+(BX-6)+'px;top:'+b.y0.toFixed(1)+'px;width:6px;height:'+(b.y1-b.y0).toFixed(1)+'px;background:'+edgeOf(it)+'"></div>';
@@ -531,7 +532,7 @@ function closeSheet(){var el=document.getElementById('sheet');if(el)el.innerHTML
 function speedSeg(){document.getElementById('speedSeg').innerHTML=[1,10,30].map(function(n){return '<button data-speed="'+n+'" aria-pressed="'+(S.speed===n)+'">'+n+'x</button>'}).join('')}
 function recipeSeg(){document.getElementById('recipeSeg').innerHTML=RECIPE_ORDER.map(function(id){return '<button data-open="'+id+'" aria-pressed="'+(S.screen!=='home'&&S.recipe===id)+'">'+(RECIPES[id].short||RECIPES[id].title.split(' ')[0])+'</button>'}).join('')}
 document.addEventListener('click',function(e){
- var el=e.target.closest('button,[data-go],[data-closesheet],[data-conv],[data-strike],[data-back],[data-open],[data-focus]');if(!el)return;
+ var el=e.target.closest('button,[data-go],[data-closesheet],[data-conv],[data-strike],[data-back],[data-open],[data-focus],[data-act]');if(!el)return;
  var d=el.dataset;
  if(d.device||d.orient){if(d.device)D.device=d.device;if(d.orient)D.orient=d.orient;closeSheet();S.focus=null;devSeg();fit();keep(render);return}
  if(d.sharefmt){S.share.format=d.sharefmt;openShare(true);return}
@@ -613,6 +614,6 @@ document.addEventListener('click',function(e){
   case 'finish':(LOG[R.id]=LOG[R.id]||[]).push({date:'Today',who:'You',mins:S.started?Math.max(1,Math.round((Date.now()-S.started)/60000)):0,rating:S.rating,swapList:ING.filter(function(it){return S.swaps[it.id]}).map(function(it){return shownName(it)+' for '+it.name.toLowerCase()}),note:S.note});Object.keys(S.timers).forEach(function(k){S.timers[k].running=false});toast('Saved to your cooking log');setTimeout(function(){go('home',-1);recipeSeg()},900);break;
  }
 });
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();var t=e.target;if((e.key==='Enter'||e.key===' ')&&t.dataset&&(t.dataset.strike||t.dataset.conv||t.dataset.focus)&&t.tagName!=='BUTTON'){e.preventDefault();t.click()}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();var t=e.target;if((e.key==='Enter'||e.key===' ')&&t.dataset&&(t.dataset.strike||t.dataset.conv||t.dataset.focus||t.dataset.act)&&t.tagName!=='BUTTON'){e.preventDefault();t.click()}});
 document.getElementById('restart').addEventListener('click',function(){closeSheet();seedLog();freshPrefs();freshGlobal();initPantry();initMark2();loadRecipe('cajun');speedSeg();go('home',-1);recipeSeg()});
 speedSeg();recipeSeg();devSeg();fit();render(true);

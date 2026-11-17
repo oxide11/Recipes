@@ -370,3 +370,17 @@ button.badge.solid{background:#111;color:#fff}
 @keyframes pdraw{to{stroke-dashoffset:0}}
 @media (prefers-reduced-motion:reduce){.pdraw{animation:none;stroke-dashoffset:0}}
 .line.struck .pl,.line.struck .ingt{color:#7A7A75}
+
+/* ---- Mark 2 polish ---- */
+.sk .blk.pinch::after,.sk .blk.pinch .swapic{display:none!important}
+.sk .blk.pinch{gap:2px}
+.sk .blk.pinch .icons{gap:2px}
+.pinchsub{max-width:100%}
+.lock svg circle:first-child{fill:transparent;stroke:rgba(255,255,255,.22)}
+.lock svg{flex-shrink:0}
+.useup .uchip b{font-weight:600}
+.costsrc .seg button{font-size:13px}
+.ohtag{box-shadow:0 0 0 2px #fff}
+.tlrow:first-child{padding-top:2px}
+.qrow:first-of-type{border-top:1px solid #ECECE8}
+.hfbtn:focus-visible,.upick:focus-visible,.qrow:focus-visible,.ptile:focus-visible{outline:2px solid #111;outline-offset:2px}
