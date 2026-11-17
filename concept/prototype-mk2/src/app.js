@@ -544,6 +544,8 @@ document.addEventListener('click',function(e){
  if(d.wcart){if(CART[d.wcart])delete CART[d.wcart];else CART[d.wcart]=1;keep(render);return}
  if(d.pan){openStock(d.pan);return}
  if(d.stk){stockAct(d.stk);return}
+ if(d.spice!==undefined){openSpice(+d.spice);return}
+ if(d.spset){var sp=d.spset.split(':'),sj=SPICE[+sp[0]];if(sp[1]==='today'){sj.months=0;sj.level=1}else sj.level=+sp[1];openSpice(+sp[0],true);keepUnder();return}
  if(d.panf){S.pan.f=d.panf;keep(render);return}
  if(d.plandel!==undefined){var pd=d.plandel.split(':');PLAN[pd[0]].splice(+pd[1],1);if(!PLAN[pd[0]].length)delete PLAN[pd[0]];keep(render);return}
  if(d.prep!==undefined){S.prepDay=+d.prep;go('prep');return}

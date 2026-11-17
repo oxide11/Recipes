@@ -5,6 +5,7 @@ function initMark2(){
  // sample data: the second swap in every map is treated as already in the kitchen
  RECIPE_ORDER.forEach(function(id){var sets=RECIPES[id].SETS;Object.keys(sets).forEach(function(k){var l=sets[k].leaves[1];if(l&&!l.allergen&&!l.dislike)ONHAND[l.id]=1})});
  // sample data: a few things on hand are close to their date
+ SPICE=SPICE0.map(function(s){return {name:s[0],color:s[1],level:s[2],months:s[3],keys:s[4]}});
  STOCK={};var seedExp={milk:2,parmesan:3,egg:4,potato:5};catalog().forEach(function(c){if(PAN[c.key]){var s=stockOf(c.key);s.bought=1+hashStr(c.key)%11;if(seedExp[c.key]){s.exp=seedExp[c.key]}else if(s.exp!==null){s.exp=Math.max(6,s.exp-Math.min(s.bought,s.exp-6))}}});syncExp();
 }
 
@@ -282,5 +283,38 @@ function stockDeduct(){
  ING.forEach(function(it){var k=pKey(it);if(!PAN[k]||(S.haveVia&&S.haveVia[it.id]))return;var base=catItem(k),b=base?pv(base.amt):null,q=pv(it.amt),s=stockOf(k);
   if(b&&q&&b.u===q.u){s.mult=Math.round((s.mult-q.v*f/b.v)*100)/100;if(s.mult<=0.01){delete PAN[k];delete STOCK[k]}}});
  syncHave();syncExp();
+}
+
+/* ---- spice rack ---- */
+var SPICE=[],SPICE0=[
+ ['Salt','#E9E7E0',.8,3,['salt']],['Black pepper','#4A4744',.55,5,['pepper']],['Cajun seasoning','#C8642B',.35,7,['cajun']],
+ ['Garlic powder','#E6D6A8',.6,9,['garlic powder']],['Dried basil','#6E8B4E',.15,14,['basil']],['Red pepper flakes','#B8382C',.7,6,['pepper flakes']],
+ ['Paprika','#C2452D',.9,2,['paprika']],['Dried thyme','#8A9A6A',.45,16,['thyme']],['Dried parsley','#7FA35A',.3,10,['dried parsley']],
+ ['Oregano','#7C8A52',.65,8,['oregano']],['Cumin','#A9793F',.5,11,['cumin']],['Chili powder','#9E3B26',0,13,['chili powder','chilli powder']],
+ ['Cinnamon','#9A5B32',.75,4,['cinnamon']],['Nutmeg','#8B5E3C',.4,20,['nutmeg']],['Bay leaves','#7A8F5C',.85,7,['bay']],['Vanilla','#5E3B22',.25,5,['vanilla']]
+];
+function spiceUses(s){var out=[];RECIPE_ORDER.forEach(function(id){var r=RECIPES[id],hay=(r.ING.map(function(it){return it.name}).join('|')+'|'+Object.keys(r.LINE).map(function(k){var l=r.LINE[k];return (l.name||'')+' '+(l.noun||'')+' '+k}).join('|')).toLowerCase();
+  if(s.keys.some(function(k){return k==='pepper'?/(black pepper|\bpepper\b(?! flakes))/.test(hay.replace(/green pepper|bell pepper|red pepper flakes|pepper flakes/g,'')):hay.indexOf(k)>-1}))out.push(id)});return out}
+function spiceState(s){return s.level<=0?'out':s.level<.22?'low':s.months>=12?'old':''}
+function jar(s,i){var st=spiceState(s),fill=Math.round(Math.max(0,Math.min(1,s.level))*100);
+ return '<button class="jar'+(st?' '+st:'')+'" data-spice="'+i+'" aria-haspopup="dialog" aria-label="'+esc(s.name)+', '+(st==='out'?'empty':fill+' percent full')+(st==='old'?', over a year old':'')+'"><span class="jlid"></span><span class="jbody"><i style="height:'+fill+'%;background:'+s.color+'"></i></span><b>'+esc(s.name)+'</b>'+(st?'<em>'+(st==='out'?'empty':st==='low'?'low':'old')+'</em>':'')+'</button>'}
+function spiceRack(){
+ if(S.pan.f==='out')return '';var q=(S.pan.q||'').toLowerCase().trim(),list=SPICE.map(function(s,i){return [s,i]}).filter(function(x){return !q||x[0].name.toLowerCase().indexOf(q)>-1});
+ if(!list.length)return '';var need=SPICE.filter(function(s){return spiceState(s)==='out'||spiceState(s)==='low'}).length;
+ return '<section class="psecn"><div class="shead"><h2 class="h2" style="font-size:18px">Spice rack</h2><span class="muted" style="font-size:12px;font-weight:600">'+SPICE.length+' jars'+(need?' · '+need+' to restock':'')+'</span></div><div class="rack">'+list.map(function(x){return jar(x[0],x[1])}).join('')+'</div></section>';
+}
+function openSpice(i,keepPos){
+ var s=SPICE[i],el=document.getElementById('sheet'),U=spiceUses(s),st=spiceState(s),L=[[1,'Full'],[.5,'Half'],[.15,'Low'],[0,'Empty']];
+ var cur=s.level<=0?0:s.level<.22?.15:s.level<.7?.5:1,mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],mi=((10-s.months)%12+12)%12,yr=2026-Math.floor((s.months-10+11)/12)-(s.months>10?0:0);
+ if(s.months<=10)yr=2026;else yr=2025-Math.floor((s.months-11)/12);
+ el.innerHTML='<div class="sheetwrap'+(keepPos?' noanim':'')+'" data-closesheet="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="'+esc(s.name)+'">'+
+  '<div class="between"><div class="row" style="gap:14px"><span class="jar big'+(st?' '+st:'')+'" aria-hidden="true"><span class="jlid"></span><span class="jbody"><i style="height:'+Math.round(s.level*100)+'%;background:'+s.color+'"></i></span></span><div><span class="kicker">Spice rack</span><h2 class="h2" style="font-size:22px">'+esc(s.name)+'</h2></div></div><button class="iconbtn" data-closesheet="1" aria-label="Close">'+SVG.close+'</button></div>'+
+  '<div style="display:flex;flex-direction:column;gap:8px"><span class="kicker">How much is left</span><div class="seg" role="group" aria-label="How much is left" style="grid-template-columns:repeat(4,1fr)">'+L.map(function(l){return '<button data-spset="'+i+':'+l[0]+'" aria-pressed="'+(cur===l[0])+'">'+l[1]+'</button>'}).join('')+'</div></div>'+
+  '<div class="prow"><span class="ptxt"><b>Bought</b><span>'+(s.months===0?'This month':mo[mi]+' '+yr+' · '+s.months+' month'+(s.months===1?'':'s')+' ago')+'</span></span><button class="chip out" style="height:36px" data-spset="'+i+':today"'+(s.months===0&&s.level>=1?' disabled':'')+'>New jar today</button></div>'+
+  (s.months>=12?'<p class="cardnote" style="margin:0">Over a year old. Ground spices fade, so you may need a little more than the card says.</p>':'')+
+  '<div style="display:flex;flex-direction:column;gap:6px"><span class="kicker">Used in</span>'+(U.length?U.map(function(id){return '<button class="userow" data-open="'+id+'"><span style="flex:1"><b>'+esc(RECIPES[id].title)+'</b></span>'+SVG.arrow+'</button>'}).join(''):'<span class="muted" style="font-size:14px">None of your nine recipes yet.</span>')+'</div>'+
+  (st==='out'||st==='low'?'<button class="secondary" data-toast="'+esc(s.name)+' added to the shopping list (mocked)">Add to shopping list</button>':'')+
+  '</div></div>';
+ if(!keepPos){var b=el.querySelector('.iconbtn');if(b)b.focus()}
 }
 initMark2();

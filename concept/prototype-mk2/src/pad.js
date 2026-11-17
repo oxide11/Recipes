@@ -311,10 +311,10 @@ function panTile(c){
 }
 function panList(){
  var q=(S.pan.q||'').toLowerCase().trim(),f=S.pan.f,cat=catalog().filter(function(c){if(f==='have'&&!PAN[c.key])return false;if(f==='out'&&PAN[c.key])return false;if(q&&c.key.indexOf(q)<0)return false;return true});
- if(!cat.length)return '<p class="insight">'+(q?'Nothing matches “'+esc(S.pan.q)+'”.':f==='have'?'Nothing on hand yet. Switch to Missing to add what you have.':'Nothing is missing. Every ingredient your recipes use is on hand.')+'</p>';
+ if(!cat.length&&!spiceRack())return '<p class="insight">'+(q?'Nothing matches “'+esc(S.pan.q)+'”.':f==='have'?'Nothing on hand yet. Switch to Missing to add what you have.':'Nothing is missing. Every ingredient your recipes use is on hand.')+'</p>';
  var first=!q&&f!=='out'?cat.filter(function(c){return PAN[c.key]&&EXP[c.key]}).sort(function(x,y){return EXP[x.key]-EXP[y.key]}):[];
  var out=first.length?'<section class="psecn"><div class="shead"><h2 class="h2" style="font-size:18px">Use first</h2><span class="muted" style="font-size:12px;font-weight:600">closest to their date</span></div><div class="ptiles">'+first.map(panTile).join('')+'</div></section>':'';
- return out+AISLES.map(function(a){var items=cat.filter(function(c){return c.it.aisle===a});if(!items.length)return '';
+ return out+spiceRack()+AISLES.map(function(a){var items=cat.filter(function(c){return c.it.aisle===a});if(!items.length)return '';
   items.sort(function(x,y){return (PAN[y.key]?1:0)-(PAN[x.key]?1:0)||x.it.name.localeCompare(y.it.name)});
   var all=catalog().filter(function(c){return c.it.aisle===a}),on=all.filter(function(c){return PAN[c.key]}).length;
   return '<section class="psecn"><div class="shead"><h2 class="h2" style="font-size:18px">'+a+'</h2><span class="muted" style="font-size:12px;font-weight:600">'+on+' of '+all.length+' on hand</span></div><div class="ptiles">'+items.map(panTile).join('')+'</div></section>'}).join('');
