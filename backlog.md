@@ -22,6 +22,31 @@ Items are grouped by category and sorted by severity within each group.
 - [x] **CRITICAL** `RecipeIngestionService.swift:30,615` — URL fetch and image download with no timeout configured. Fixed: 30s/15s timeouts.
 - [x] **MEDIUM** `OpenFoodFactsService.swift:46,83` — No timeout on barcode lookup network requests. Fixed: 15s timeout.
 
+## Correctness
+
+- [ ] **HIGH** `SubstitutionEngine.swift:139` — `findSubstitutions` keys
+  `knownSubstitutions` on the raw lowercased name with no canonicalisation, so
+  `"butter"` matches but `"Unsalted Butter"` silently returns nothing — which is
+  most real recipe text. Route the lookup through
+  `IngredientNormalizer.canonicalize`. Roughly a one-line change; it improves the
+  existing `GuidedShoppingView` substitution flow on its own merits, and it blocks
+  the substitution mindmap below.
+
+## Build & Assets
+
+- [ ] **MEDIUM** `Assets.xcassets` — both `AppIcon.appiconset` (a 1024px PNG) and
+  `AppIcon.icon` (Icon Composer, iOS 26) exist, while
+  `ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon` names only "AppIcon". Which one
+  Xcode 26 actually ships is ambiguous, so one of the two is probably dead art
+  nobody is maintaining. Needs a human decision on which is canonical — leaving it
+  alone risks shipping the wrong icon. `ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES`
+  makes the ambiguity worse, not better.
+- [x] **MEDIUM** `Assets.xcassets` — ~~Xcode export artifacts committed *inside*
+  `AppIcon.appiconset`~~ Fixed 2026-11-17: removed two stray
+  `Recipes 2026-04-04 …` export folders holding `ExportOptions.plist`,
+  `DistributionSummary.plist` and a second 88 KB `Packaging.log` (c73042f caught
+  only the first). Added all three names to `.gitignore` so they stop coming back.
+
 ## Stability — Silent Error Swallowing
 
 - [x] **HIGH** `RemindersSync.swift` — ~~Bare `try?` on EventKit operations; sync failures are invisible.~~ Fixed 2026-08-30: all 8 save/commit sites now route through logged `save(_:commit:operation:)` / `commitPendingWrites(operation:)` helpers. Also fixed a latent bug — a failed save no longer links `remindersIdentifier` to a reminder that was never stored.
@@ -79,8 +104,13 @@ first hour of each isn't spent rediscovering it.
 
 ### Ingredient Sankey — flow of ingredients and quantities through a recipe
 
-- [ ] **IDEA** Sankey/alluvial view of a recipe: ingredients on the left, flowing
-      into the steps that consume them.
+- [x] **SPEC'D** Sankey/alluvial view of a recipe: ingredients on the left, flowing
+      into the steps that consume them. Design resolved 2026-11-17 in
+      `design/feature-design-spec.html` — **ready to build**. Decisions taken there:
+      band height scales within a unit family only, `max(8, 34 * sqrt(q/qFamilyMax))`;
+      count units get a fixed dashed band reading "not to scale"; >8 ingredients
+      collapse to "+N more"; and the no-step-links fallback is mandatory, since
+      ingestion does not guarantee `DirectionIngredientRef` is populated.
 
   **Already there.** The edge list exists — `RecipeDirection.ingredients` is
   `[DirectionIngredientRef]`, and each ref carries `ingredientName` plus an
@@ -116,8 +146,15 @@ first hour of each isn't spent rediscovering it.
 
 ### Substitution mindmap — a node that expands into alternatives
 
-- [ ] **IDEA** Tap an ingredient to expand a radial/mindmap node of substitutes,
-      each showing conversion ratio and trade-off.
+- [x] **SPEC'D** Tap an ingredient to expand a radial/mindmap node of substitutes,
+      each showing conversion ratio and trade-off. Design resolved 2026-11-17 in
+      `design/feature-design-spec.html` — **ready to build** once the prerequisite
+      below lands. Decisions taken there: compact gets a disclosure list and regular
+      gets the radial; selecting a substitute appends to
+      `CookingLogEntry.substitutionsMade` and never mutates the `Recipe`; "Save as
+      variation" is an explicit secondary action mapping onto the existing
+      `IngredientOverride`; `Substitution.ratio` is displayed verbatim, never parsed
+      optimistically.
 
   **Already there.** `SubstitutionEngine.findSubstitutions(for:restrictions:)`
   returns `[Substitution]` carrying exactly what the node needs to display —
@@ -147,4 +184,4 @@ first hour of each isn't spent rediscovering it.
 
 ---
 
-*Last updated: 2026-11-16*
+*Last updated: 2026-11-17*

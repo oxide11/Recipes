@@ -37,3 +37,9 @@ fastlane/test_output
 .env.*
 secrets.json
 credentials.json
+
+# Xcode export/distribution artifacts — these have twice been committed
+# *inside* AppIcon.appiconset, where the asset catalog compiler also sees them.
+ExportOptions.plist
+DistributionSummary.plist
+Packaging.log
