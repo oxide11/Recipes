@@ -71,12 +71,12 @@ function scaleQty(str,f,whole){
  if(f===1)return str;
  var m=/^(\d+(?:\.\d+)?)?([½¼¾⅓⅔])?(\s?)(.*)$/.exec(str);if(!m||(!m[1]&&!m[2]))return str;
  var fv={'½':.5,'¼':.25,'¾':.75,'⅓':1/3,'⅔':2/3}[m[2]]||0,v=(m[1]?parseFloat(m[1]):0)+fv,rest=m[3]+m[4];if(!v)return str;v*=f;
- if(/^ ?(g|ml)\b/.test(rest)||(whole&&!fv&&parseFloat(m[1])>=3))return Math.max(1,Math.round(v))+rest;
+ if(/^ ?(g|ml)\b/.test(rest)||(whole&&!fv&&parseFloat(m[1])>=2))return Math.max(1,Math.round(v))+rest;
  if(/^ ?(oz|lb|kg|L|fl oz)\b/.test(rest))return (Math.round(v*10)/10)+rest;
  var w=Math.floor(v),fr=v-w,best=FR[0];FR.forEach(function(x){if(Math.abs(x[0]-fr)<Math.abs(best[0]-fr))best=x});
  if(best[0]===1){w+=1;best=FR[0]}
  var out=(w?String(w):'')+best[1];if(!out)out='¼';
- if(v>1.01){rest=rest.replace(/^ can\b/,' cans').replace(/^ bunch\b/,' bunches').replace(/^ lemon\b/,' lemons').replace(/^ clove\b/,' cloves')}
+ if(v>1.01){rest=rest.replace(/^ can\b/,' cans').replace(/^ cup\b/,' cups').replace(/^ stalk\b/,' stalks').replace(/^ bunch\b/,' bunches').replace(/^ lemon\b/,' lemons').replace(/^ clove\b/,' cloves')}
  return out+rest;
 }
 function lineInfo(key){
@@ -343,7 +343,7 @@ function swapView(){
 }
 
 /* ================= SHOP ================= */
-var AISLES=['Produce','Dairy and eggs','Canned','Dry goods','Pantry'];
+var AISLES=['Produce','Meat and seafood','Dairy and eggs','Canned','Dry goods','Pantry'];
 function shop(){
  var missing=ING.filter(function(it){return !S.have[it.id]});
  var inCart=missing.filter(function(it){return S.cart[it.id]}).length;
@@ -494,7 +494,7 @@ function openSheet(k){
 }
 function closeSheet(){var el=document.getElementById('sheet');if(el)el.innerHTML='';if(isPad()&&S)S.focus=null}
 function speedSeg(){document.getElementById('speedSeg').innerHTML=[1,10,30].map(function(n){return '<button data-speed="'+n+'" aria-pressed="'+(S.speed===n)+'">'+n+'x</button>'}).join('')}
-function recipeSeg(){document.getElementById('recipeSeg').innerHTML=RECIPE_ORDER.map(function(id){return '<button data-open="'+id+'" aria-pressed="'+(S.screen!=='home'&&S.recipe===id)+'">'+RECIPES[id].title.split(' ')[0]+'</button>'}).join('')}
+function recipeSeg(){document.getElementById('recipeSeg').innerHTML=RECIPE_ORDER.map(function(id){return '<button data-open="'+id+'" aria-pressed="'+(S.screen!=='home'&&S.recipe===id)+'">'+(RECIPES[id].short||RECIPES[id].title.split(' ')[0])+'</button>'}).join('')}
 document.addEventListener('click',function(e){
  var el=e.target.closest('button,[data-go],[data-closesheet],[data-conv],[data-strike],[data-back],[data-open],[data-focus]');if(!el)return;
  var d=el.dataset;

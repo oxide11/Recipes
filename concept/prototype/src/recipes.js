@@ -10,7 +10,7 @@ var CHICKEN_SET={center:'Chicken',branches:['Closest','Seafood','Plant-based'],t
  L('chickpeas3','Chickpeas','1 can per breast','Pan-fry until blistered.',[2,3,3],{safe:'none'})]};
 
 RECIPES.cajun={
- id:'cajun',title:'Creamy Cajun Chicken Pasta',kicker:'Dinner · From Ashley’s cards',base:2,
+ id:'cajun',short:'Cajun',title:'Creamy Cajun Chicken Pasta',kicker:'Dinner · From Ashley’s cards',base:2,
  desc:'Spiced chicken strips in a rich cream sauce with sun-dried tomatoes, tossed through linguine with Parmesan.',
  tags:[['30 min or less',1],['One skillet'],['Weeknight'],['Rich']],
  stats:[['10 min','Prep'],['15 min','Cook'],['1,300','kcal / serving'],['79 g','protein / serving']],
@@ -89,7 +89,7 @@ RECIPES.cajun={
 };
 
 RECIPES.thai={
- id:'thai',title:'Thai Coconut Soup',kicker:'Dinner · From Ashley’s cards',base:6,
+ id:'thai',short:'Thai',title:'Thai Coconut Soup',kicker:'Dinner · From Ashley’s cards',base:6,
  desc:'Ginger, lemongrass and red curry paste bloomed in oil, simmered with broth and coconut milk, finished with lime and cilantro.',
  tags:[['Dairy-free',1],['One pot'],['Weeknight'],['Spicy'],['Serves a crowd']],
  stats:[['10 min','Prep'],['25 min','Cook'],['520','kcal / serving'],['21 g','protein / serving']],
@@ -175,7 +175,7 @@ RECIPES.thai={
 };
 
 RECIPES.piccata={
- id:'piccata',title:'Chicken Piccata',kicker:'Dinner · From Ashley’s cards',base:2,
+ id:'piccata',short:'Piccata',title:'Chicken Piccata',kicker:'Dinner · From Ashley’s cards',base:2,
  desc:'Butterflied chicken dredged and pan-fried, then finished in a bright pan sauce of lemon, capers and stock.',
  tags:[['30 min or less',1],['One skillet'],['Date night'],['Bright']],
  stats:[['10 min','Prep'],['20 min','Cook'],['1,010','kcal / serving'],['65 g','protein / serving']],
