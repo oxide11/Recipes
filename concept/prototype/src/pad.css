@@ -132,3 +132,6 @@
 .cookrow>button svg{transition:transform .2s;flex-shrink:0}
 .cookrow.open>button svg{transform:rotate(180deg)}
 .cookbody{display:flex;flex-direction:column;gap:8px;padding:2px 0 12px 34px;font-size:13px;animation:fade .2s}
+
+button.badge{background:#fff;cursor:pointer;height:30px;padding:0 12px;font-family:inherit}
+button.badge:hover{box-shadow:0 0 0 2px rgba(17,17,17,.15)}

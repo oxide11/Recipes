@@ -143,19 +143,27 @@ function profileBar(){
 }
 function fpBar(r,h){var tot=0;r.ING.forEach(function(it){tot+=it.weight});return '<div style="display:flex;height:'+h+'px;width:100%" aria-hidden="true">'+r.ING.map(function(it){return '<span style="flex:'+it.weight+';background:'+(it.profile==='aubergine'?'#4B2E83':it.color)+'"></span>'}).join('')+'</div>'}
 
+/* ================= TAGS ================= */
+function tagBadges(){return R.tags.map(function(t){return '<button class="badge'+(t[1]?' solid':'')+'" data-tag="'+esc(t[0])+'" aria-label="Show recipes tagged '+esc(t[0])+'">'+t[0]+'</button>'}).join('')}
+function tagList(){return S.tag?RECIPE_ORDER.filter(function(id){return RECIPES[id].tags.some(function(t){return t[0]===S.tag})}):RECIPE_ORDER}
+function tagBar(){
+ if(!S.tag)return '';var n=tagList().length;
+ return '<div class="row" style="gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:14px;background:var(--counter)"><span style="font-size:14px"><b>'+n+'</b> recipe'+(n===1?'':'s')+' tagged</span><span class="badge solid">'+esc(S.tag)+'</span><button class="linkbtn" data-act="cleartag" style="margin-left:auto">Show all</button></div>';
+}
+
 /* ================= HOME ================= */
 function home(){
- var feat=RECIPES[RECIPE_ORDER[0]],others=RECIPE_ORDER.slice(1);
+ var list=tagList(),feat=RECIPES[list[0]],others=list.slice(1);
  function cooked(id){var n=(LOG[id]||[]).length;return n?'<span class="badge solid" style="height:22px;font-size:11px">Cooked '+n+'×</span>':''}
  var pantry=Object.keys(feat.have).length;
  return '<div class="pad">'+
  '<div class="between"><div><p class="muted" style="margin:0 0 4px;font-size:13px">Monday evening</p><h1 class="t" style="font-size:30px">What\'s cooking?</h1></div>'+
  '<button class="iconbtn" style="background:#111;color:#fff;font-family:\'Space Grotesk\';font-weight:700;font-size:17px" aria-label="Profile" data-toast="Profile: avoids mushrooms, allergic to tree nuts">M</button></div>'+
  '<label class="row" style="height:48px;padding:0 16px;border-radius:14px;background:var(--counter);gap:10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search</span><input id="search" type="search" placeholder="Search recipes or ingredients" style="flex:1;border:none;background:transparent;font:inherit;font-size:15px;outline:none"></label>'+
- '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Cook with what you have</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+
+ tagBar()+'<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Cook with what you have</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+
   [['#F2C200','Lemons','piccata'],['#9CBF5A','Lemongrass','thai'],['#2E9E4F','Green onion','cajun'],['#6CBF3A','Limes','thai']].map(function(c){return '<button class="chip" data-open="'+c[2]+'"><span class="dot" style="background:'+c[0]+'"></span>'+c[1]+'</button>'}).join('')+'</div></div>'+
  '<button class="rcard" data-open="'+feat.id+'" aria-label="Open '+esc(feat.title)+'">'+fpBar(feat,112)+
-  '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;width:100%"><div class="between"><span class="kicker" style="color:#111">Tonight\'s pick</span>'+cooked(feat.id)+'</div>'+
+  '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;width:100%"><div class="between"><span class="kicker" style="color:#111">'+(S.tag?'Best match':'Tonight\'s pick')+'</span>'+cooked(feat.id)+'</div>'+
   '<span style="font-family:\'Space Grotesk\';font-size:24px;font-weight:700;line-height:1.15">'+esc(feat.title)+'</span><span class="muted" style="font-size:14px">'+feat.meta+' · '+feat.base+' servings</span>'+
   '<span style="font-size:14px;font-weight:600;margin-top:2px">'+pantry+' of '+feat.ING.length+' ingredients already in your pantry</span></div></button>'+
  '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">From Ashley’s recipe cards</p>'+
@@ -258,7 +266,7 @@ function recipe(){
  return '<div class="pad">'+
  '<div class="between"><button class="iconbtn" data-back="home" aria-label="Back">'+SVG.back+'</button><span class="row" style="gap:8px"><button class="iconbtn" aria-label="Share recipe" data-act="share">'+SVG.share+'</button><button class="iconbtn" aria-label="'+(saved?'Saved':'Save recipe')+'" aria-pressed="'+saved+'" data-act="save">'+(saved?SVG.heartOn:SVG.heart)+'</button></span></div>'+
  '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">'+R.kicker+'</p><h1 class="t" style="font-size:36px">'+R.title+'</h1>'+
- '<div style="display:flex;gap:6px;flex-wrap:wrap">'+R.tags.map(function(t){return '<span class="badge'+(t[1]?' solid':'')+'">'+t[0]+'</span>'}).join('')+'</div>'+
+ '<div style="display:flex;gap:6px;flex-wrap:wrap">'+tagBadges()+'</div>'+
  '<p style="margin:0;font-size:15px;line-height:1.5;color:#2B2B28">'+R.desc+'</p>'+
  '<div class="stats">'+liveStats().map(function(s){return '<div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'}).join('')+'</div>'+
  '<div class="between" style="gap:10px"><div class="stepper" role="group" aria-label="Servings"><button data-serv="-1" aria-label="Fewer servings"'+(S.servings<=1?' disabled':'')+'>−</button><span aria-live="polite"><b>'+S.servings+'</b> serving'+(S.servings>1?'s':'')+'</span><button data-serv="1" aria-label="More servings"'+(S.servings>=12?' disabled':'')+'>+</button></div><span class="muted" style="font-size:13px">'+STEPS.length+' steps</span></div></div>'+
@@ -502,6 +510,7 @@ document.addEventListener('click',function(e){
  if(d.strike){var on=S.struck[d.strike]=!S.struck[d.strike];el.classList.toggle('struck',on);el.setAttribute('aria-pressed',on);
   var ls=stepLines(STEPS[S.step]),all=ls.every(function(_,j){return S.struck[S.step+':'+j]});
   var nb=scr.querySelector('[data-act="next"]');if(nb)nb.classList.toggle('glow',all);var h=scr.querySelector('.hint');if(h)h.innerHTML=all?'<b style="color:#111">Step done.</b> On to the next one.':'Tap a line to cross it off. Tap an ingredient to change its units.';return}
+ if(d.tag){S.tag=d.tag;go('home',-1);recipeSeg();toast('Showing recipes tagged '+d.tag);return}
  if(d.cook){S.cookOpen=S.cookOpen===+d.cook?null:+d.cook;keep(render);return}
  if(d.safe){openSafe(+d.safe);return}
  if(d.dockopen){S.dockOpen=S.dockOpen===d.dockopen?null:d.dockopen;updateTimerDom();return}
@@ -522,6 +531,7 @@ document.addEventListener('click',function(e){
  if(d.rate){S.rating=+d.rate;keep(render);return}
  switch(d.act){
   case 'save':S.saved[R.id]=!S.saved[R.id];keep(render);toast(S.saved[R.id]?'Saved to your recipes':'Removed from saved');break;
+  case 'cleartag':S.tag=null;keep(render);break;
   case 'cooksall':S.cooksAll=!S.cooksAll;keep(render);break;
   case 'share':openShare();break;
   case 'sharesend':closeSheet();toast('Sharing is mocked in this prototype');break;

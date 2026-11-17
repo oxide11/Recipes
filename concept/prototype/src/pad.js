@@ -23,12 +23,12 @@ function homePad(){
  '<div class="between" style="gap:20px;flex-wrap:wrap"><div><p class="muted" style="margin:0 0 4px;font-size:14px">Monday evening</p><h1 class="t" style="font-size:40px">What\'s cooking?</h1></div>'+
  '<div class="row" style="gap:12px;flex:1;justify-content:flex-end;min-width:300px"><label class="row" style="height:48px;padding:0 16px;border-radius:14px;background:var(--counter);gap:10px;flex:1;max-width:380px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#595954" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Search</span><input id="search" type="search" placeholder="Search recipes or ingredients" style="flex:1;border:none;background:transparent;font:inherit;font-size:15px;outline:none;min-width:0"></label>'+
  '<button class="iconbtn" style="width:48px;height:48px;background:#111;color:#fff;font-family:\'Space Grotesk\';font-weight:700;font-size:18px" aria-label="Profile" data-toast="Profile: avoids mushrooms, allergic to tree nuts">M</button></div></div>'+
- '<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Cook with what you have</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+
+ tagBar()+'<div style="display:flex;flex-direction:column;gap:10px"><p class="kicker">Cook with what you have</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+
   [['#F2C200','Lemons','piccata'],['#9CBF5A','Lemongrass','thai'],['#2E9E4F','Green onion','cajun'],['#6CBF3A','Limes','thai'],['#E9B98C','Chicken','cajun']].map(function(c){return '<button class="chip" data-open="'+c[2]+'" style="height:40px;font-size:15px"><span class="dot" style="background:'+c[0]+'"></span>'+c[1]+'</button>'}).join('')+'</div></div>'+
  '<div style="display:flex;flex-direction:column;gap:12px"><p class="kicker">From Ashley’s recipe cards</p><div class="rgrid">'+
-  RECIPE_ORDER.map(function(id,i){var r=RECIPES[id],q=r.card.questions.length;
+  tagList().map(function(id,i){var r=RECIPES[id],q=r.card.questions.length;
    return '<button class="rcard" data-open="'+id+'" aria-label="Open '+esc(r.title)+'">'+fpBar(r,120)+
-   '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;width:100%"><div class="between" style="min-height:22px"><span class="kicker" style="color:#111">'+(i===0?'Tonight\'s pick':r.kicker.split(' · ')[0])+'</span>'+cooked(id)+'</div>'+
+   '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;width:100%"><div class="between" style="min-height:22px"><span class="kicker" style="color:#111">'+(i===0&&!S.tag?'Tonight\'s pick':r.kicker.split(' · ')[0])+'</span>'+cooked(id)+'</div>'+
    '<span style="font-family:\'Space Grotesk\';font-size:24px;font-weight:700;line-height:1.15">'+esc(r.title)+'</span><span class="muted" style="font-size:14px">'+r.meta+' · '+r.base+' servings</span>'+
    '<span style="font-size:14px;line-height:1.45;color:#2B2B28">'+esc(r.desc)+'</span>'+
    '<span style="font-size:13px;font-weight:600;margin-top:2px">'+Object.keys(r.have).length+' of '+r.ING.length+' in your pantry'+(q?' · '+q+' card question'+(q>1?'s':''):'')+'</span></div></button>'}).join('')+
@@ -114,7 +114,7 @@ function recipePad(){
  '<header class="phead"><div class="row" style="gap:16px;align-items:flex-start;flex:1;min-width:420px"><button class="iconbtn" data-back="home" aria-label="Back">'+SVG.back+'</button>'+
   '<div style="display:flex;flex-direction:column;gap:10px;max-width:620px"><p class="kicker">'+R.kicker+'</p><h1 class="t" style="font-size:42px;line-height:1.05">'+esc(R.title)+'</h1>'+
   '<p style="margin:0;font-size:17px;line-height:1.55;color:#2B2B28">'+esc(R.desc)+'</p>'+
-  '<div style="display:flex;gap:6px;flex-wrap:wrap">'+R.tags.map(function(t){return '<span class="badge'+(t[1]?' solid':'')+'">'+t[0]+'</span>'}).join('')+'</div></div></div>'+
+  '<div style="display:flex;gap:6px;flex-wrap:wrap">'+tagBadges()+'</div></div></div>'+
   '<div class="pctl"><div class="row" style="gap:10px"><button class="iconbtn" style="width:52px;height:52px" aria-label="'+(saved?'Saved':'Save recipe')+'" aria-pressed="'+saved+'" data-act="save">'+(saved?SVG.heartOn:SVG.heart)+'</button>'+
    '<button class="secondary" data-act="share" style="display:inline-flex;align-items:center;gap:8px;padding:0 18px;border-color:#111">'+SVG.share+'Share</button>'+
    '<div class="stepper" style="height:52px" role="group" aria-label="Servings"><button data-serv="-1" aria-label="Fewer servings"'+(S.servings<=1?' disabled':'')+'>−</button><span aria-live="polite"><b>'+S.servings+'</b> serving'+(S.servings>1?'s':'')+'</span><button data-serv="1" aria-label="More servings"'+(S.servings>=12?' disabled':'')+'>+</button></div></div>'+
