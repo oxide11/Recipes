@@ -336,6 +336,14 @@ button.badge:hover{box-shadow:0 0 0 2px rgba(17,17,17,.15)}
 .ipad .ingcols .qty{min-width:64px;justify-content:center}
 .ingt.qd::after{content:none}
 .qm{display:inline-flex;align-items:center;justify-content:center;width:.9em;height:.9em;margin-left:3px;border-radius:99px;background:#111;color:#fff;font-family:Inter,sans-serif;font-size:.5em;font-weight:700;font-style:normal;vertical-align:super}
+/* header actions: two equal-width rows, one height */
+.pctl,.port .pctl{flex-direction:column;align-items:stretch;flex-wrap:nowrap}
+.pctl>.row{align-items:stretch}
+.pctl>.row>*{height:52px!important;box-sizing:border-box}
+.pctl>.row .secondary{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.pctl>.row:first-child .stepper{flex:1;justify-content:space-between}
+.pctl>.row:last-child .secondary{flex:1}
+.pctl>.row:last-child .primary{flex:1.4;width:auto}
 </style>
 </head>
 <body>
