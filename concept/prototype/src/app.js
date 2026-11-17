@@ -3,7 +3,7 @@ var R,ING,GROUPS,LINE,STEPS,SETS;
 var MODES={
  weight:{label:'Weight',cap:'Grams',fmt:function(v){return Math.round(v)+'g'}},
  volume:{label:'Volume',cap:'Millilitres, raw',fmt:function(v){return Math.round(v)+'ml'}},
- calories:{label:'Calories',cap:'kcal',fmt:function(v){return Math.round(v)+' cal'}},
+ calories:{label:'Calories',cap:'kcal by macro',fmt:function(v){return Math.round(v)+' cal'}},
  cost:{label:'Cost',cap:'Estimated, CAD',fmt:function(v){return '$'+v.toFixed(2)}}
 };
 var POS=[[62,38],[205,46],[290,142],[290,330],[70,432],[200,430]];
@@ -145,6 +145,13 @@ function home(){
 }
 
 /* ================= SANKEY ================= */
+var MACROS=[{name:'Protein',color:'#3A3A38',op:.32},{name:'Carbs',color:'#8A8A85',op:.32},{name:'Fat',color:'#C9C9C4',op:.6}];
+function skGroups(){return S.mode==='calories'?MACROS:GROUPS}
+function skShares(it){
+ if(S.mode!=='calories'){var z=GROUPS.map(function(){return 0});z[it.g]=1;return z}
+ var m=it.macro||[0,0,0],k=[m[0]*4,m[1]*4,m[2]*9],t=k[0]+k[1]+k[2];if(!t)return [0,1,0];return k.map(function(x){return x/t});
+}
+function skVal(gi,gv,sep){var M=MODES[S.mode];if(S.mode!=='calories')return M.fmt(gv);var g=0;ING.forEach(function(it){g+=(it.macro||[0,0,0])[gi]*F()});return Math.round(g)+' g'+sep+M.fmt(gv)}
 function tapAttr(it){return SETS[it.id]?' tap" role="button" tabindex="0" data-focus="'+it.id+'" aria-label="'+esc('Swap '+shownName(it))+'"':'"'}
 function sankey(){
  var M=MODES[S.mode],mode=S.mode,f=F();
@@ -159,14 +166,14 @@ function sankey(){
  var SPAN=H*.7,hs,bh,bt;
  for(var k=0;k<60;k++){var sc=SPAN/total;hs=vals.map(function(v){return Math.max(1.5,v*sc)});bh=hs.map(function(h,i){return Math.max(minH[i],h)});bt=bh.reduce(function(a,b){return a+b},0)+GAP*(bh.length-1);if(bt<=H-8)break;SPAN-=10}
  var y=(H-bt)/2,bp=bh.map(function(h){var o={y0:y,y1:y+h};y+=h+GAP;return o});
- var gs=GROUPS.map(function(){return 0});ING.forEach(function(it,i){gs[it.g]+=hs[i]});
+ var G=skGroups(),SH=ING.map(skShares),gs=G.map(function(){return 0});ING.forEach(function(it,i){SH[i].forEach(function(sh,g){gs[g]+=hs[i]*sh})});
  var my=(H-(gs.reduce(function(a,b){return a+b},0)+MGAP*(gs.length-1)))/2,mids=gs.map(function(h){var o={y0:my,y1:my+h};my+=h+MGAP;return o});
  var ph=gs.reduce(function(a,b){return a+b},0),py=(H-ph)/2;
  function band(x0,a0,a1,x1,b0,b1){var c=(x0+x1)/2;function q(n){return n.toFixed(1)}return 'M'+x0+','+q(a0)+' C'+c+','+q(a0)+' '+c+','+q(b0)+' '+x1+','+q(b0)+' L'+x1+','+q(b1)+' C'+c+','+q(b1)+' '+c+','+q(a1)+' '+x0+','+q(a1)+' Z'}
  var cur=mids.map(function(m){return m.y0}),paths='',html='';
  ING.forEach(function(it,i){
-  var b=bp[i],h=hs[i],c0=cur[it.g];cur[it.g]+=h;var m=(b.y0+b.y1)/2,col=colorOf(it);
-  paths+='<path d="'+band(BX,m-h/2,m+h/2,MX,c0,c0+h)+'" fill="'+col+'" fill-opacity="'+(/^#F[27]D/.test(col)?.6:.42)+'"/>';
+  var b=bp[i],h=hs[i];var m=(b.y0+b.y1)/2,col=colorOf(it);
+  var a0=m-h/2;SH[i].forEach(function(sh,g){if(sh<=0)return;var hh=h*sh;paths+='<path d="'+band(BX,a0,a0+hh,MX,cur[g],cur[g]+hh)+'" fill="'+col+'" fill-opacity="'+(/^#F[27]D/.test(col)?.6:.42)+'"/>';a0+=hh;cur[g]+=hh});
   var icons='';iconSpec[i].forEach(function(p){for(var n=0;n<p[1];n++)icons+=icon(p[0],sizes[i])});
   var sw=S.swaps[it.id];
   html+='<div class="blk'+tapAttr(it)+' style="top:'+b.y0.toFixed(1)+'px;height:'+(b.y1-b.y0).toFixed(1)+'px;width:'+(BX-6)+'px;background:'+col+'1F">'+
@@ -175,9 +182,9 @@ function sankey(){
    '<div style="position:absolute;left:'+(BX-6)+'px;top:'+b.y0.toFixed(1)+'px;width:6px;height:'+(b.y1-b.y0).toFixed(1)+'px;background:'+edgeOf(it)+'"></div>';
  });
  var pc=py;
- mids.forEach(function(m,gi){var h=m.y1-m.y0;paths+='<path d="'+band(MX+6,m.y0,m.y1,PX,pc,pc+h)+'" fill="'+GROUPS[gi].color+'" fill-opacity="'+GROUPS[gi].op+'"/>';pc+=h;
-  var gv=0;ING.forEach(function(it,i){if(it.g===gi)gv+=vals[i]});
-  html+='<div style="position:absolute;left:'+MX+'px;top:'+m.y0.toFixed(1)+'px;width:6px;height:'+h.toFixed(1)+'px;background:#111"></div><div class="mid" style="left:'+(MX+12)+'px;top:'+((m.y0+m.y1)/2-15).toFixed(1)+'px">'+GROUPS[gi].name+'\n'+M.fmt(gv)+'</div>'});
+ mids.forEach(function(m,gi){var h=m.y1-m.y0;paths+='<path d="'+band(MX+6,m.y0,m.y1,PX,pc,pc+h)+'" fill="'+G[gi].color+'" fill-opacity="'+G[gi].op+'"/>';pc+=h;
+  var gv=0;ING.forEach(function(it,i){gv+=vals[i]*SH[i][gi]});if(h<1)return;
+  html+='<div style="position:absolute;left:'+MX+'px;top:'+m.y0.toFixed(1)+'px;width:6px;height:'+h.toFixed(1)+'px;background:#111"></div><div class="mid" style="left:'+(MX+12)+'px;top:'+((m.y0+m.y1)/2-15).toFixed(1)+'px">'+G[gi].name+'\n'+skVal(gi,gv,'\n')+'</div>'});
  html+='<div style="position:absolute;left:'+PX+'px;top:'+py.toFixed(1)+'px;width:6px;height:'+ph.toFixed(1)+'px;background:#111"></div><div class="mid" style="right:0;top:'+(py-20).toFixed(1)+'px">Plate</div>';
  var aria='Sankey chart by '+M.label.toLowerCase()+': '+ING.map(function(it,i){return shownName(it)+' '+M.fmt(vals[i])+' ('+it.eq+')'}).join(', ')+'. Total '+M.fmt(total);
  return {html:'<div class="sk" role="img" aria-label="'+esc(aria)+'" style="height:'+H+'px"><svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true" style="position:absolute;left:0;top:0">'+paths+'</svg>'+html+'</div>',total:M.fmt(total)};

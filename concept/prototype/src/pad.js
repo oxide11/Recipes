@@ -39,7 +39,7 @@ function homePad(){
 function sankeyWide(W){
  var M=MODES[S.mode],mode=S.mode,f=F();
  var vals=ING.map(function(i){return i[mode]*f}),total=vals.reduce(function(a,b){return a+b},0);
- var GAP=8,MGAP=22,BX=236,PX=W-136,MX=Math.round(BX+(PX-BX)*.5);
+ var GAP=8,MGAP=22,BX=W>900?300:236,PX=W-136,MX=Math.round(BX+(PX-BX)*.5);
  var spec=ING.map(function(it){return it.icon.map(function(p){return[p[0],Math.max(1,Math.round(p[1]*f))]})});
  var counts=spec.map(function(sp){return sp.reduce(function(a,p){return a+p[1]},0)});
  var sizes=counts.map(function(n){return n===1?46:n===2?38:n<=4?28:n<=8?22:18});
@@ -47,22 +47,22 @@ function sankeyWide(W){
  var SPAN=H*.72,hs,bh,bt;
  for(var k=0;k<80;k++){var sc=SPAN/total;hs=vals.map(function(v){return Math.max(2,v*sc)});bh=hs.map(function(h){return Math.max(MINB,h)});bt=bh.reduce(function(a,b){return a+b},0)+GAP*(bh.length-1);if(bt<=H-8)break;SPAN-=10}
  var y=(H-bt)/2,bp=bh.map(function(h){var o={y0:y,y1:y+h};y+=h+GAP;return o});
- var gs=GROUPS.map(function(){return 0});ING.forEach(function(it,i){gs[it.g]+=hs[i]});
+ var G=skGroups(),SH=ING.map(skShares),gs=G.map(function(){return 0});ING.forEach(function(it,i){SH[i].forEach(function(sh,g){gs[g]+=hs[i]*sh})});
  var ph=gs.reduce(function(a,b){return a+b},0),my=(H-(ph+MGAP*(gs.length-1)))/2,mids=gs.map(function(h){var o={y0:my,y1:my+h};my+=h+MGAP;return o}),py=(H-ph)/2;
  function band(x0,a0,a1,x1,b0,b1){var c=(x0+x1)/2;function q(n){return n.toFixed(1)}return 'M'+x0+','+q(a0)+' C'+c+','+q(a0)+' '+c+','+q(b0)+' '+x1+','+q(b0)+' L'+x1+','+q(b1)+' C'+c+','+q(b1)+' '+c+','+q(a1)+' '+x0+','+q(a1)+' Z'}
  var cur=mids.map(function(m){return m.y0}),paths='',html='';
  ING.forEach(function(it,i){
-  var b=bp[i],h=hs[i],c0=cur[it.g];cur[it.g]+=h;var m=(b.y0+b.y1)/2,col=colorOf(it),sw=S.swaps[it.id];
-  paths+='<path d="'+band(BX,m-h/2,m+h/2,MX,c0,c0+h)+'" fill="'+col+'" fill-opacity="'+(/^#(F[237]|E[89])/.test(col)?.6:.42)+'"/>';
+  var b=bp[i],h=hs[i];var m=(b.y0+b.y1)/2,col=colorOf(it),sw=S.swaps[it.id];
+  var a0=m-h/2;SH[i].forEach(function(sh,g){if(sh<=0)return;var hh=h*sh;paths+='<path d="'+band(BX,a0,a0+hh,MX,cur[g],cur[g]+hh)+'" fill="'+col+'" fill-opacity="'+(/^#(F[237]|E[89])/.test(col)?.6:.42)+'"/>';a0+=hh;cur[g]+=hh});
   var icons='',shown=0;spec[i].forEach(function(p){for(var n=0;n<p[1]&&shown<12;n++,shown++)icons+=icon(p[0],sizes[i])});
-  html+='<div class="wblk" style="top:'+b.y0.toFixed(1)+'px;height:'+(b.y1-b.y0).toFixed(1)+'px;width:'+(BX-6)+'px;background:'+col+'24">'+
+  html+='<div class="wblk'+tapAttr(it)+' style="top:'+b.y0.toFixed(1)+'px;height:'+(b.y1-b.y0).toFixed(1)+'px;width:'+(BX-6)+'px;background:'+col+'24">'+
    '<span class="wicons">'+icons+'</span><span style="display:flex;flex-direction:column;gap:1px;min-width:0"><b style="font-size:15px;line-height:18px">'+esc(shownName(it))+'</b><span style="font-size:13px;color:#3A3A38">'+M.fmt(vals[i])+'</span>'+(sw?'<span class="swaptag" style="width:max-content">for '+esc(it.name.toLowerCase())+'</span>':'')+'</span></div>'+
    '<div style="position:absolute;left:'+(BX-6)+'px;top:'+b.y0.toFixed(1)+'px;width:6px;height:'+(b.y1-b.y0).toFixed(1)+'px;background:'+edgeOf(it)+'"></div>';
  });
  var pc=py;
- mids.forEach(function(m,gi){var h=m.y1-m.y0;paths+='<path d="'+band(MX+6,m.y0,m.y1,PX,pc,pc+h)+'" fill="'+GROUPS[gi].color+'" fill-opacity="'+GROUPS[gi].op+'"/>';pc+=h;
-  var gv=0;ING.forEach(function(it,i){if(it.g===gi)gv+=vals[i]});
-  html+='<div style="position:absolute;left:'+MX+'px;top:'+m.y0.toFixed(1)+'px;width:6px;height:'+h.toFixed(1)+'px;background:#111"></div><div style="position:absolute;left:'+(MX+14)+'px;top:'+((m.y0+m.y1)/2-17).toFixed(1)+'px;font-size:14px;line-height:17px;font-weight:700;white-space:nowrap">'+GROUPS[gi].name+'<br><span style="font-weight:500;color:#3A3A38">'+M.fmt(gv)+'</span></div>'});
+ mids.forEach(function(m,gi){var h=m.y1-m.y0;paths+='<path d="'+band(MX+6,m.y0,m.y1,PX,pc,pc+h)+'" fill="'+G[gi].color+'" fill-opacity="'+G[gi].op+'"/>';pc+=h;
+  var gv=0;ING.forEach(function(it,i){gv+=vals[i]*SH[i][gi]});if(h<1)return;
+  html+='<div style="position:absolute;left:'+MX+'px;top:'+m.y0.toFixed(1)+'px;width:6px;height:'+h.toFixed(1)+'px;background:#111"></div><div style="position:absolute;left:'+(MX+14)+'px;top:'+((m.y0+m.y1)/2-17).toFixed(1)+'px;font-size:14px;line-height:17px;font-weight:700;white-space:nowrap">'+G[gi].name+'<br><span style="font-weight:500;color:#3A3A38">'+skVal(gi,gv,' · ')+'</span></div>'});
  html+='<div style="position:absolute;left:'+PX+'px;top:'+py.toFixed(1)+'px;width:6px;height:'+ph.toFixed(1)+'px;background:#111"></div>'+
   '<div class="wplate" style="left:'+(PX+14)+'px;top:'+(H/2-58)+'px"><div>'+(S.photo?'<img src="'+S.photo+'" alt="Your plate">':'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Your plate<br>photo</span>')+'</div></div>'+
   '<div style="position:absolute;left:'+(PX+14)+'px;top:'+(H/2+66)+'px;width:116px;text-align:center;font-size:13px;font-weight:700;line-height:1.3">'+S.servings+' serving'+(S.servings>1?'s':'')+'<br>'+M.fmt(total)+'</div>';
@@ -94,7 +94,7 @@ function ingRowPad(it){
 }
 function recipePad(){
  var M=MODES[S.mode],ins=R.INS[S.mode],saved=!!S.saved[R.id],land=isLand();
- var W=land?padW()-300-22-34:padW()-34;
+ var W=padW()-34;
  var nsw=ING.filter(function(it){return S.swaps[it.id]}).length;
  var method=STEPS.map(function(st,i){var t=stepTime(st);
   return '<li><span class="mnum">'+(i+1)+'</span><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><div class="between" style="gap:12px;flex-wrap:wrap"><b style="font-family:\'Space Grotesk\';font-size:20px">'+esc(stepTitle(st))+'</b>'+
@@ -109,11 +109,11 @@ function recipePad(){
   '<div class="pctl"><div class="row" style="gap:10px"><button class="iconbtn" style="width:52px;height:52px" aria-label="'+(saved?'Saved':'Save recipe')+'" aria-pressed="'+saved+'" data-act="save">'+(saved?SVG.heartOn:SVG.heart)+'</button>'+
    '<button class="secondary" data-act="share" style="display:inline-flex;align-items:center;gap:8px;padding:0 18px;border-color:#111">'+SVG.share+'Share</button>'+
    '<div class="stepper" style="height:52px" role="group" aria-label="Servings"><button data-serv="-1" aria-label="Fewer servings"'+(S.servings<=1?' disabled':'')+'>−</button><span aria-live="polite"><b>'+S.servings+'</b> serving'+(S.servings>1?'s':'')+'</span><button data-serv="1" aria-label="More servings"'+(S.servings>=12?' disabled':'')+'>+</button></div></div>'+
-   '<div class="row" style="gap:10px"><button class="secondary" data-go="ingredients" style="padding:0 18px">Plan this cook'+(nsw?' · '+nsw+' swap'+(nsw>1?'s':''):'')+'</button><button class="primary" data-act="startcook" style="width:auto;height:52px;padding:0 28px;font-size:16px">Start cooking</button></div></div>'+
+   '<div class="row" style="gap:10px"><button class="secondary" data-go="shop" style="padding:0 18px">Shopping list</button><button class="primary" data-act="startcook" style="width:auto;height:52px;padding:0 28px;font-size:16px">Start cooking</button></div></div>'+
  '</header>'+
  '<div class="stats">'+R.stats.map(function(s){return '<div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'}).join('')+'</div>'+
  '<div class="ovgrid"><section class="card" style="padding:18px 16px;display:flex;flex-direction:column;gap:14px;min-width:0">'+
-   '<div class="between" style="gap:12px;flex-wrap:wrap"><div><h2 class="h2" style="font-size:20px">Where it all goes</h2><span class="muted" style="font-size:12px;font-weight:600">'+M.cap+'</span></div>'+
+   '<div class="between" style="gap:12px;flex-wrap:wrap"><div><h2 class="h2" style="font-size:20px">Where it all goes</h2><span class="muted" style="font-size:12px;font-weight:600">'+M.cap+' · tap an ingredient to see its swaps</span></div>'+
    '<div class="seg" role="group" aria-label="Measure by" style="grid-template-columns:repeat(4,1fr);width:360px">'+Object.keys(MODES).map(function(k){return '<button data-mode="'+k+'" aria-pressed="'+(k===S.mode)+'">'+MODES[k].label+'</button>'}).join('')+'</div></div>'+
    sankeyWide(W)+'<p class="insight"><strong>'+ins[0]+'</strong> '+ins[1]+'</p></section>'+
   '<aside class="aside">'+cardSection()+timeCard()+cooksCard()+'</aside></div>'+
