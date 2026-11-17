@@ -2,41 +2,41 @@ id,name,curated,aliases,aisle,group,default_food,default_description,energy_kcal
 butter,Butter,yes,salted butter,Dairy and eggs,Dairy and Egg Products,usda:01001,"Butter, salted",717,0.85,81.11,0.06,0.0,0.06,643,0.959,pat=5.0; stick=113.0,milk,vegetarian,30-60,,180-270,6
 unsalted-butter,Unsalted butter,yes,sweet butter,Dairy and eggs,Dairy and Egg Products,usda:01145,"Butter, without salt",717,0.85,81.11,0.06,0.0,0.06,11,0.959,pat=5.0; stick=113.0,milk,vegetarian,,,,6
 margarine,Margarine,yes,,Dairy and eggs,Fats and Oils,usda:04610,"Margarine, regular, 80% fat, composite, stick, with salt",717,0.16,80.71,0.7,0.0,0.0,751,0.959,pat=5.0; stick=113.0,,vegan,180-180,,360-360,13
-milk,Milk,yes,whole milk|homo milk,Dairy and eggs,Dairy and Egg Products,usda:01211,"Milk, whole, 3.25% milkfat, without added vitamin A and vitamin D",61,3.15,3.27,4.78,0.0,5.05,43,1.031,,milk,vegetarian,7-7,,,2
+milk,Milk,yes,whole milk|homo milk,Dairy and eggs,Dairy and Egg Products,usda:01211,"Milk, whole, 3.25% milkfat, without added vitamin A and vitamin D",61,3.15,3.27,4.78,0.0,5.05,43,1.031,,milk,vegetarian,7-7,,,4
 heavy-cream,Heavy cream,yes,whipping cream|heavy whipping cream|35% cream,Dairy and eggs,Dairy and Egg Products,usda:01053,"Cream, fluid, heavy whipping",340,2.84,36.08,2.74,0.0,2.92,27,1.011,,milk,vegetarian,,,,1
 half-and-half,Half-and-half,yes,half and half|10% cream|cereal cream,Dairy and eggs,Dairy and Egg Products,usda:01049,"Cream, fluid, half and half",123,3.13,10.39,4.73,0.0,4.13,61,1.023,"container, individual=15.0",milk,vegetarian,,,,3
-sour-cream,Sour cream,yes,,Dairy and eggs,Dairy and Egg Products,usda:01056,"Cream, sour, cultured",198,2.44,19.35,4.63,0.0,3.41,31,0.892,,milk,vegetarian,,,,6
-egg,Egg,yes,eggs|large egg|large eggs,Dairy and eggs,Dairy and Egg Products,usda:01123,"Egg, whole, raw, fresh",143,12.56,9.51,0.72,0.0,0.37,142,1.027,large=50.0; extra large=56.0; jumbo=63.0; medium=44.0; small=38.0; large egg=52.6,egg,vegetarian,7-7,,,30
-cheddar,Cheddar,yes,cheddar cheese|sharp cheddar|old cheddar,Dairy and eggs,Dairy and Egg Products,usda:01009,"Cheese, cheddar",404,22.87,33.31,3.09,0.0,0.48,653,0.558,slice=28.0,milk,vegetarian,180-180,,180-180,7
-parmesan,Parmesan,yes,parmesan cheese|parmigiano|parmigiano reggiano|grated parmesan,Dairy and eggs,Dairy and Egg Products,usda:01032,"Cheese, parmesan, grated",420,28.42,27.84,13.91,0.0,0.07,1804,0.38,,milk,vegetarian,180-180,,180-180,6
-feta,Feta,yes,feta cheese,Dairy and eggs,Dairy and Egg Products,usda:01019,"Cheese, feta",264,14.21,21.28,4.09,0.0,4.09,917,0.634,wedge=38.0,milk,vegetarian,,,,2
-mozzarella,Mozzarella,yes,mozzarella cheese,Dairy and eggs,Dairy and Egg Products,usda:01026,"Cheese, mozzarella, whole milk",300,22.17,22.35,2.19,0.0,1.03,627,0.473,slices=28.3,milk,vegetarian,30-30,,90-120,7
-chicken-breast,Chicken breast,yes,chicken|chicken breasts|boneless skinless chicken breast,Meat and seafood,Poultry Products,usda:05062,"Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",120,22.5,2.62,0.0,0.0,0.0,45,,piece=272.0; package=926.0; breast=272.0; food guide serving = 90g=90.0,,contains meat or fish,1-2,,270-270,21
+sour-cream,Sour cream,yes,,Dairy and eggs,Dairy and Egg Products,usda:01056,"Cream, sour, cultured",198,2.44,19.35,4.63,0.0,3.41,31,0.892,,milk,vegetarian,,,,7
+egg,Egg,yes,eggs|large egg|large eggs,Dairy and eggs,Dairy and Egg Products,usda:01123,"Egg, whole, raw, fresh",143,12.56,9.51,0.72,0.0,0.37,142,1.027,large=50.0; extra large=56.0; jumbo=63.0; medium=44.0; small=38.0; large egg=52.6,egg,vegetarian,7-7,,,36
+cheddar,Cheddar,yes,cheddar cheese|sharp cheddar|old cheddar,Dairy and eggs,Dairy and Egg Products,usda:01009,"Cheese, cheddar",404,22.87,33.31,3.09,0.0,0.48,653,0.558,slice=28.0,milk,vegetarian,180-180,,180-180,8
+parmesan,Parmesan,yes,parmesan cheese|parmigiano|parmigiano reggiano|grated parmesan,Dairy and eggs,Dairy and Egg Products,usda:01032,"Cheese, parmesan, grated",420,28.42,27.84,13.91,0.0,0.07,1804,0.38,,milk,vegetarian,180-180,,180-180,8
+feta,Feta,yes,feta cheese,Dairy and eggs,Dairy and Egg Products,usda:01019,"Cheese, feta",264,14.21,21.28,4.09,0.0,4.09,917,0.634,wedge=38.0,milk,vegetarian,,,,3
+mozzarella,Mozzarella,yes,mozzarella cheese,Dairy and eggs,Dairy and Egg Products,usda:01026,"Cheese, mozzarella, whole milk",300,22.17,22.35,2.19,0.0,1.03,627,0.473,slices=28.3,milk,vegetarian,30-30,,90-120,8
+chicken-breast,Chicken breast,yes,chicken|chicken breasts|boneless skinless chicken breast,Meat and seafood,Poultry Products,usda:05062,"Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",120,22.5,2.62,0.0,0.0,0.0,45,,piece=272.0; package=926.0; breast=272.0; food guide serving = 90g=90.0,,contains meat or fish,1-2,,270-270,24
 chicken-thighs,Chicken thighs,yes,chicken thigh|boneless chicken thighs,Meat and seafood,Poultry Products,usda:05096,"Chicken, broilers or fryers, dark meat, thigh, meat only, raw",121,19.66,4.12,0.0,0.0,0.0,95,,thigh without skin=149.0; thigh=149.0; food guide serving = 90g=90.0,,contains meat or fish,,,,32
 cooked-chicken,Cooked chicken,yes,rotisserie chicken|leftover chicken|shredded chicken,Meat and seafood,Poultry Products,usda:05013,"Chicken, broilers or fryers, meat only, roasted",190,28.93,7.41,0.0,0.0,0.0,86,0.588,unit=146.0; /2 bird=243.0; food guide serving = 75g=75.0,,contains meat or fish,3-4,,120-120,1
-lean-ground-beef,Lean ground beef,yes,ground beef|hamburger|minced beef|beef mince,Meat and seafood,Beef Products,usda:23562,"Beef, ground, 90% lean meat / 10% fat, raw",176,20.0,10.0,0.0,0.0,0.0,66,,food guide serving = 90g=90.0,,contains meat or fish,,,,45
-sirloin-roast,Sirloin roast,yes,top sirloin roast|sirloin tip roast|beef sirloin,Meat and seafood,Beef Products,usda:13929,"Beef, top sirloin, steak, separable lean and fat, trimmed to 1/8"" fat, all grades, raw",201,20.3,12.71,0.0,0.0,0.0,52,,steak=608.0; food guide serving = 90g=90.0,,contains meat or fish,,,,19
+lean-ground-beef,Lean ground beef,yes,ground beef|hamburger|minced beef|beef mince,Meat and seafood,Beef Products,usda:23562,"Beef, ground, 90% lean meat / 10% fat, raw",176,20.0,10.0,0.0,0.0,0.0,66,,food guide serving = 90g=90.0,,contains meat or fish,,,,47
+sirloin-roast,Sirloin roast,yes,top sirloin roast|sirloin tip roast|beef sirloin,Meat and seafood,Beef Products,usda:13929,"Beef, top sirloin, steak, separable lean and fat, trimmed to 1/8"" fat, all grades, raw",201,20.3,12.71,0.0,0.0,0.0,52,,steak=608.0; food guide serving = 90g=90.0,,contains meat or fish,,,,20
 chuck-roast,Chuck roast,yes,pot roast|beef chuck,Meat and seafood,Beef Products,usda:13809,"Beef, chuck, arm pot roast, separable lean and fat, trimmed to 1/8"" fat, all grades, raw",244,19.23,17.98,0.0,0.0,0.0,62,,,,contains meat or fish,3-5,,120-360,1
-cooked-ham,Cooked ham,yes,ham|diced ham|leftover ham,Meat and seafood,Sausages and Luncheon Meats,usda:07029,"Ham, sliced, regular (approximately 11% fat)",163,16.6,8.6,3.83,1.3,0.0,1143,,grams 1 serving=1.0; slice=28.0,,contains meat or fish,180-270,,,7
-bacon,Bacon,yes,,Meat and seafood,Pork Products,usda:10123,"Pork, cured, bacon, unprepared",417,12.62,39.69,1.28,0.0,1.0,662,,slice raw=28.0; package=442.0; medium slice=22.7; thick slice=38.0,,contains meat or fish,7-7,,30-30,7
-shrimp,Shrimp,yes,prawns|raw shrimp|large shrimp,Meat and seafood,Finfish and Shellfish Products,usda:15270,"Crustaceans, shrimp, raw (not previously frozen)",85,20.1,0.51,0.0,,,119,,,shellfish,contains meat or fish,1-3,,180-540,7
-salmon,Salmon,yes,salmon fillet|atlantic salmon,Meat and seafood,Finfish and Shellfish Products,usda:15236,"Fish, salmon, Atlantic, farmed, raw",208,20.42,13.42,0.0,0.0,0.0,59,,fillet=396.0; food guide serving = 90g=90.0; /2 fillet=198.0,fish,contains meat or fish,1-2,,60-90,32
-onion,Onion,yes,onions|yellow onion|cooking onion|white onion,Produce,Vegetables and Vegetable Products,usda:11282,"Onions, raw",40,1.1,0.1,9.34,1.7,4.24,4,0.581,"large=150.0; slice, large=38.0; medium=110.0; slice, medium=14.0; small=70.0; slice, thin=9.0",,vegan,60-60,30-30,300-360,16
-red-onion,Red onion,yes,,Produce,Vegetables and Vegetable Products,usda:11282,"Onions, raw",40,1.1,0.1,9.34,1.7,4.24,4,0.581,"large=150.0; slice, large=38.0; medium=110.0; slice, medium=14.0; small=70.0; slice, thin=9.0",,vegan,,,,16
-green-onion,Green onion,yes,green onions|scallion|scallions|spring onion,Produce,Vegetables and Vegetable Products,usda:11291,"Onions, spring or scallions (includes tops and bulb), raw",32,1.83,0.19,7.34,2.6,2.33,16,0.423,large=25.0; medium=15.0; small=5.0,,vegan,,,,16
-garlic,Garlic,yes,garlic clove|garlic cloves|minced garlic,Produce,Vegetables and Vegetable Products,usda:11215,"Garlic, raw",149,6.36,0.5,33.06,2.1,1.0,17,0.575,clove=3.0; cloves=3.0; bulb=24.0,,vegan,,240-360,,1
+cooked-ham,Cooked ham,yes,ham|diced ham|leftover ham,Meat and seafood,Sausages and Luncheon Meats,usda:07029,"Ham, sliced, regular (approximately 11% fat)",163,16.6,8.6,3.83,1.3,0.0,1143,,grams 1 serving=1.0; slice=28.0,,contains meat or fish,180-270,,,9
+bacon,Bacon,yes,,Meat and seafood,Pork Products,usda:10123,"Pork, cured, bacon, unprepared",417,12.62,39.69,1.28,0.0,1.0,662,,slice raw=28.0; package=442.0; medium slice=22.7; thick slice=38.0,,contains meat or fish,7-7,,30-30,8
+shrimp,Shrimp,yes,prawns|raw shrimp|large shrimp,Meat and seafood,Finfish and Shellfish Products,fdc:2684443,"Crustaceans, shrimp, farm raised, raw",76,15.57,0.8,0.48,,,475,,,shellfish,contains meat or fish,1-3,,180-540,8
+salmon,Salmon,yes,salmon fillet|atlantic salmon,Meat and seafood,Finfish and Shellfish Products,usda:15236,"Fish, salmon, Atlantic, farmed, raw",208,20.42,13.42,0.0,0.0,0.0,59,,fillet=396.0; food guide serving = 90g=90.0; /2 fillet=198.0,fish,contains meat or fish,1-2,,60-90,34
+onion,Onion,yes,onions|yellow onion|cooking onion|white onion,Produce,Vegetables and Vegetable Products,usda:11282,"Onions, raw",40,1.1,0.1,9.34,1.7,4.24,4,0.581,"large=150.0; slice, large=38.0; medium=110.0; slice, medium=14.0; small=70.0; slice, thin=9.0",,vegan,60-60,30-30,300-360,19
+red-onion,Red onion,yes,,Produce,Vegetables and Vegetable Products,usda:11282,"Onions, raw",40,1.1,0.1,9.34,1.7,4.24,4,0.581,"large=150.0; slice, large=38.0; medium=110.0; slice, medium=14.0; small=70.0; slice, thin=9.0",,vegan,,,,19
+green-onion,Green onion,yes,green onions|scallion|scallions|spring onion,Produce,Vegetables and Vegetable Products,usda:11291,"Onions, spring or scallions (includes tops and bulb), raw",32,1.83,0.19,7.34,2.6,2.33,16,0.423,large=25.0; medium=15.0; small=5.0,,vegan,,,,19
+garlic,Garlic,yes,garlic clove|garlic cloves|minced garlic,Produce,Vegetables and Vegetable Products,usda:11215,"Garlic, raw",149,6.36,0.5,33.06,2.1,1.0,17,0.575,clove=3.0; cloves=3.0; bulb=24.0,,vegan,,240-360,,2
 ginger,Ginger,yes,fresh ginger|ginger root,Produce,Vegetables and Vegetable Products,usda:11216,"Ginger root, raw",80,1.82,0.75,17.77,2.0,1.7,13,0.398,slices=2.2; slice=2.2,,vegan,14-21,2-5,180-180,2
 potatoes,Potatoes,yes,potato|russet potatoes|yukon gold potatoes|white potatoes,Produce,Vegetables and Vegetable Products,usda:11352,"Potatoes, flesh and skin, raw",77,2.05,0.09,17.49,2.1,0.82,6,0.634,potato large=369.0; potato medium=213.0; potato small=170.0; potato=150.0; large=369.0; medium=213.0,,vegan,3-4,,30-60,1
 sweet-potatoes,Sweet potatoes,yes,sweet potato|yam,Produce,Vegetables and Vegetable Products,usda:11507,"Sweet potato, raw, unprepared",86,1.57,0.05,20.12,3.0,4.18,55,0.562,medium=130.0,,vegan,,14-21,,14
-carrots,Carrots,yes,carrot,Produce,Vegetables and Vegetable Products,usda:11124,"Carrots, raw",41,0.93,0.24,9.58,2.8,4.74,69,0.516,large=72.0; medium=61.0; small=50.0; slice=3.0; strip large=7.0; strip medium=4.0,,vegan,14-21,,300-360,11
-celery,Celery,yes,celery stalk|celery stalks,Produce,Vegetables and Vegetable Products,usda:11143,"Celery, raw",16,0.69,0.17,2.97,1.6,1.34,80,0.507,"nlea serving=110.0; stalk, large=64.0; stalk, medium=40.0; stalk, small=17.0; strip=4.0; large stalk=64.0",,vegan,7-14,,300-360,3
-tomatoes,Tomatoes,yes,tomato|roma tomatoes,Produce,Vegetables and Vegetable Products,usda:11529,"Tomatoes, red, ripe, raw, year round average",18,0.88,0.2,3.89,1.2,2.63,5,0.695,"italian tomato=62.0; cherry=17.0; large whole=182.0; medium whole=123.0; slice, medium=20.0; plum tomato=62.0",,vegan,,,60-60,14
-cherry-tomatoes,Cherry tomatoes,yes,grape tomatoes,Produce,Vegetables and Vegetable Products,usda:11529,"Tomatoes, red, ripe, raw, year round average",18,0.88,0.2,3.89,1.2,2.63,5,0.695,"italian tomato=62.0; cherry=17.0; large whole=182.0; medium whole=123.0; slice, medium=20.0; plum tomato=62.0",,vegan,5-5,10-10,,14
-sun-dried-tomatoes,Sun-dried tomatoes,yes,sundried tomatoes,Pantry,Vegetables and Vegetable Products,usda:11955,"Tomatoes, sun-dried",258,14.11,2.97,55.76,12.3,37.59,107,0.228,piece=2.0,,vegan,,365-365,,14
+carrots,Carrots,yes,carrot,Produce,Vegetables and Vegetable Products,usda:11124,"Carrots, raw",41,0.93,0.24,9.58,2.8,4.74,69,0.516,large=72.0; medium=61.0; small=50.0; slice=3.0; strip large=7.0; strip medium=4.0,,vegan,14-21,,300-360,15
+celery,Celery,yes,celery stalk|celery stalks,Produce,Vegetables and Vegetable Products,usda:11143,"Celery, raw",16,0.69,0.17,2.97,1.6,1.34,80,0.507,"nlea serving=110.0; stalk, large=64.0; stalk, medium=40.0; stalk, small=17.0; strip=4.0; large stalk=64.0",,vegan,7-14,,300-360,4
+tomatoes,Tomatoes,yes,tomato|roma tomatoes,Produce,Vegetables and Vegetable Products,usda:11529,"Tomatoes, red, ripe, raw, year round average",18,0.88,0.2,3.89,1.2,2.63,5,0.695,"italian tomato=62.0; cherry=17.0; large whole=182.0; medium whole=123.0; slice, medium=20.0; plum tomato=62.0",,vegan,,,60-60,18
+cherry-tomatoes,Cherry tomatoes,yes,grape tomatoes,Produce,Vegetables and Vegetable Products,usda:11529,"Tomatoes, red, ripe, raw, year round average",18,0.88,0.2,3.89,1.2,2.63,5,0.695,"italian tomato=62.0; cherry=17.0; large whole=182.0; medium whole=123.0; slice, medium=20.0; plum tomato=62.0",,vegan,5-5,10-10,,18
+sun-dried-tomatoes,Sun-dried tomatoes,yes,sundried tomatoes,Pantry,Vegetables and Vegetable Products,usda:11955,"Tomatoes, sun-dried",258,14.11,2.97,55.76,12.3,37.59,107,0.228,piece=2.0,,vegan,,365-365,,18
 tomato-paste,Tomato paste,yes,,Canned,Vegetables and Vegetable Products,usda:11546,"Tomato products, canned, paste, without salt added",82,4.32,0.47,18.91,4.1,12.18,59,1.162,can=170.0,,vegan,,810-810,60-90,2
 bell-pepper,Bell pepper,yes,red pepper|green pepper|sweet pepper|bell peppers,Produce,Vegetables and Vegetable Products,usda:11821,"Peppers, sweet, red, raw",31,0.99,0.3,6.03,2.1,4.2,4,0.629,large=164.0; medium=119.0; small=74.0; ring=10.0; /2 medium=59.5,,vegan,120-180,,,19
-cucumber,Cucumber,yes,english cucumber,Produce,Vegetables and Vegetable Products,usda:11205,"Cucumber, with peel, raw",15,0.65,0.11,3.63,0.5,1.67,2,0.44,,,vegan,4-6,,,2
-spinach,Spinach,yes,baby spinach,Produce,Vegetables and Vegetable Products,usda:11457,"Spinach, raw",23,2.86,0.39,3.63,2.2,0.42,79,0.127,bunch=340.0; leaf=10.0; package=284.0,,vegan,3-7,,,9
+cucumber,Cucumber,yes,english cucumber,Produce,Vegetables and Vegetable Products,usda:11205,"Cucumber, with peel, raw",15,0.65,0.11,3.63,0.5,1.67,2,0.44,,,vegan,4-6,,,3
+spinach,Spinach,yes,baby spinach,Produce,Vegetables and Vegetable Products,usda:11457,"Spinach, raw",23,2.86,0.39,3.63,2.2,0.42,79,0.127,bunch=340.0; leaf=10.0; package=284.0,,vegan,3-7,,,13
 mushrooms,Mushrooms,yes,white mushrooms|button mushrooms|cremini,Produce,Vegetables and Vegetable Products,usda:11260,"Mushrooms, white, raw",22,3.09,0.34,3.26,1.0,1.98,5,0.296,large=23.0; medium=18.0; slice=6.0; small=10.0,,vegan,3-7,,300-360,5
 lemongrass,Lemongrass,yes,lemon grass,Produce,Vegetables and Vegetable Products,usda:11972,"Lemon grass (citronella), raw",99,1.82,0.49,25.31,,,6,0.283,,,vegan,7-9,,180-180,1
 parsley,Parsley,yes,fresh parsley|flat-leaf parsley,Produce,Vegetables and Vegetable Products,usda:11297,"Parsley, fresh",36,2.97,0.79,6.33,3.3,0.85,56,0.254,sprigs=1.0,,vegan,2-3,,90-120,3
@@ -50,7 +50,7 @@ lime-juice,Lime juice,yes,juice of a lime|fresh lime juice,Produce,Fruits and Fr
 frozen-peas-and-carrots,Frozen peas and carrots,yes,peas and carrots,Frozen,Vegetables and Vegetable Products,usda:11322,"Peas and carrots, frozen, unprepared",53,3.4,0.47,11.15,3.4,,79,0.592,package=284.0,,vegan,,,,5
 capers,Capers,yes,,Pantry,Spices and Herbs,usda:02054,"Capers, canned",23,2.36,0.86,4.89,3.2,0.41,2348,0.582,,,vegan,,,,1
 flour,Flour,yes,all-purpose flour|all purpose flour|plain flour|AP flour,Dry goods,Cereal Grains and Pasta,usda:20081,"Wheat flour, white, all-purpose, enriched, bleached",364,10.33,0.98,76.31,2.7,0.27,2,0.528,serving=20.0,wheat or gluten,vegan,180-180,60-60,,8
-sugar,Sugar,yes,white sugar|granulated sugar,Dry goods,Sweets,usda:19335,"Sugars, granulated",387,0.0,0.0,99.98,0.0,99.8,1,0.845,serving packet=2.8; serving 1 cube=2.3,,vegan,,730-730,,1
+sugar,Sugar,yes,white sugar|granulated sugar,Dry goods,Sweets,usda:19335,"Sugars, granulated",387,0.0,0.0,99.98,0.0,99.8,1,0.845,serving packet=2.8; serving 1 cube=2.3,,vegan,,730-730,,3
 brown-sugar,Brown sugar,yes,light brown sugar|dark brown sugar,Dry goods,Sweets,usda:19334,"Sugars, brown",380,0.12,0.0,98.09,0.0,97.02,28,0.93,,,vegan,,,,1
 baking-soda,Baking soda,yes,bicarbonate of soda|bicarb,Dry goods,Baked Products,usda:18372,"Leavening agents, baking soda",0,0.0,0.0,0.0,0.0,0.0,27360,0.933,,wheat or gluten,vegan,,730-1095,,1
 baking-powder,Baking powder,yes,,Dry goods,Baked Products,usda:18369,"Leavening agents, baking powder, double-acting, sodium aluminum sulfate",53,0.0,0.0,27.7,0.2,0.0,10600,0.933,,wheat or gluten,vegan,,180-540,,3
@@ -59,7 +59,7 @@ chocolate-chips,Chocolate chips,yes,semi-sweet chocolate chips|semisweet chocola
 linguine,Linguine,yes,spaghetti|fettuccine|dry pasta,Dry goods,Cereal Grains and Pasta,usda:20120,"Pasta, dry, enriched",371,13.04,1.51,74.67,3.2,2.67,6,0.385,,wheat or gluten,vegan,,730-730,,21
 angel-hair,Angel hair,yes,angel hair pasta|capellini,Dry goods,Cereal Grains and Pasta,usda:20120,"Pasta, dry, enriched",371,13.04,1.51,74.67,3.2,2.67,6,0.385,,wheat or gluten,vegan,,,,21
 rotini,Rotini,yes,fusilli|penne|macaroni|short pasta,Dry goods,Cereal Grains and Pasta,usda:20120,"Pasta, dry, enriched",371,13.04,1.51,74.67,3.2,2.67,6,0.385,,wheat or gluten,vegan,,,,21
-rice,Rice,yes,white rice|long grain rice,Dry goods,Cereal Grains and Pasta,usda:20044,"Rice, white, long-grain, regular, raw, enriched",365,7.13,0.66,79.95,1.3,0.12,5,0.782,,,vegan,3-4,,30-60,23
+rice,Rice,yes,white rice|long grain rice,Dry goods,Cereal Grains and Pasta,usda:20044,"Rice, white, long-grain, regular, raw, enriched",365,7.13,0.66,79.95,1.3,0.12,5,0.782,,,vegan,3-4,,30-60,24
 pie-crusts,Pie crusts,yes,pie crust|pie shell|pastry shell,Frozen,Baked Products,usda:18334,"Pie crust, standard-type, frozen, ready-to-bake, enriched",457,6.16,26.07,48.62,2.5,3.72,409,,piece=18.0; pie crust=173.0; /8 crust=18.0; crust=144.0; /6 crust=18.0; frozen crust=173.0,wheat or gluten,vegan,,,60-60,15
 olive-oil,Olive oil,yes,extra virgin olive oil|EVOO,Pantry,Fats and Oils,usda:04053,"Oil, olive, salad or cooking",884,0.0,100.0,0.0,0.0,0.0,2,0.913,,,vegan,,,,1
 vegetable-oil,Vegetable oil,yes,canola oil|cooking oil|neutral oil|oil,Pantry,Fats and Oils,usda:04582,"Oil, canola",884,0.0,100.0,0.0,0.0,0.0,0,0.921,,,vegan,,730-730,,1
@@ -76,7 +76,7 @@ chicken-bouillon,Chicken bouillon,yes,bouillon cube|chicken bouillon cube|stock 
 brown-gravy,Brown gravy,yes,gravy|beef gravy,Canned,"Soups, Sauces, and Gravies",usda:06116,"Gravy, beef, canned, ready-to-serve",53,3.75,2.36,4.81,0.4,0.21,560,0.985,can=291.0,,contains meat or fish,3-4,,30-60,18
 coconut-milk,Coconut milk,yes,canned coconut milk,Canned,Nut and Seed Products,usda:12118,"Nuts, coconut milk, canned (liquid expressed from grated meat and water)",197,2.02,21.33,2.81,,,13,0.955,,,contains meat or fish,,730-1825,90-90,4
 red-wine,Red wine,yes,dry red wine,Pantry,Beverages,usda:14096,"Alcoholic beverage, wine, table, red",85,0.07,0.0,2.61,0.0,0.62,4,0.994,serving=147.0,sulphites,vegan,,1095-1825,,36
-salt,Salt,yes,table salt|sea salt|kosher salt|fine salt,Pantry,Spices and Herbs,usda:02047,"Salt, table",0,0.0,0.0,0.0,0.0,0.0,38758,1.221,,,vegan,,,,1
+salt,Salt,yes,table salt|sea salt|kosher salt|fine salt,Pantry,Spices and Herbs,usda:02047,"Salt, table",0,0.0,0.0,0.0,0.0,0.0,38758,1.221,,,vegan,,,,2
 black-pepper,Black pepper,yes,pepper|ground pepper|ground black pepper,Pantry,Spices and Herbs,usda:02030,"Spices, pepper, black",251,10.39,3.26,63.95,25.3,0.64,20,0.527,,,vegan,,730-730,,4
 white-pepper,White pepper,yes,ground white pepper,Pantry,Spices and Herbs,usda:02032,"Spices, pepper, white",296,10.4,2.12,68.61,26.2,,5,0.485,,,vegan,,,,4
 red-pepper-flakes,Red pepper flakes,yes,chili flakes|crushed red pepper|chilli flakes,Pantry,Spices and Herbs,usda:02031,"Spices, pepper, red or cayenne",318,12.01,17.27,56.63,27.2,10.34,30,0.362,,,vegan,,,,4
@@ -88,7 +88,7 @@ honey,Honey,yes,,Pantry,Sweets,usda:19296,Honey,304,0.3,0.0,82.4,0.2,82.12,4,1.4
 water,Water,yes,,Pantry,Beverages,usda:14411,"Beverages, water, tap, drinking",0,0.0,0.0,0.0,0.0,0.0,4,1.0,serving 8 fl oz=237.0,,vegan,,360-360,,7
 red-curry-paste,Red curry paste,yes,thai red curry paste|curry paste,Pantry,,,,,,,,,,,,,,unknown,,,,0
 1-fat-milk,1% fat milk,,,Dairy and eggs,Dairy and Egg Products,usda:01175,"Milk, fluid, 1% fat, without added vitamin A and vitamin D",42,3.37,0.97,4.99,0.0,5.2,44,1.031,,milk,vegetarian,,,,1
-3-25-milkfat-milk,3.25% milkfat milk,,,Dairy and eggs,Dairy and Egg Products,usda:01211,"Milk, whole, 3.25% milkfat, without added vitamin A and vitamin D",61,3.15,3.27,4.78,0.0,5.05,43,1.031,,milk,vegetarian,,,,2
+3-25-milkfat-milk,3.25% milkfat milk,,,Dairy and eggs,Dairy and Egg Products,usda:01211,"Milk, whole, 3.25% milkfat, without added vitamin A and vitamin D",61,3.15,3.27,4.78,0.0,5.05,43,1.031,,milk,vegetarian,,,,4
 60-whole-wheat-bread,60% whole wheat bread,,,Bakery,Baked Products,cnf:7193,"Bread, 60% whole wheat, commercial",240,12.45,1.77,42.84,4.9,1.11,604,,slice=26.0,wheat or gluten,vegan,,,,2
 abalone,Abalone,,,Meat and seafood,Finfish and Shellfish Products,usda:15155,"Mollusks, abalone, mixed species, raw",105,17.1,0.76,6.01,0.0,0.0,301,,food guide serving = 90g=90.0,shellfish,contains meat or fish,,,,2
 abiyuch,Abiyuch,,,Produce,Fruits and Fruit Juices,usda:09427,"Abiyuch, raw",69,1.5,0.1,17.6,5.3,8.55,20,0.964,,,vegan,,,,1
@@ -100,30 +100,33 @@ acorns,Acorns,,,Dry goods,Nut and Seed Products,usda:12058,"Nuts, acorns, raw",3
 adobo-fresco-sauce,Adobo fresco sauce,,,Canned,"Soups, Sauces, and Gravies",cnf:5371,"Sauce, adobo fresco",271,2.0,20.9,18.6,1.3,2.03,17152,1.217,,,vegan,,,,1
 adzuki-beans,Adzuki beans,,,Dry goods,Legumes and Legume Products,usda:16001,"Beans, adzuki, mature seeds, raw",329,19.87,0.53,62.9,12.7,,5,0.833,,,vegan,,,,4
 agar-seaweed,Agar seaweed,,,Produce,Vegetables and Vegetable Products,usda:11442,"Seaweed, agar, raw",26,0.54,0.03,6.75,0.5,0.28,9,0.338,,,vegan,,,,2
+alaska-pollock,Alaska pollock,,,Meat and seafood,Finfish and Shellfish Products,fdc:2768188,"Alaska Pollock, raw",78,17.33,0.99,0.06,0.0,,115,,,fish,contains meat or fish,,,,1
 alcohol,Alcohol,,,Pantry,Beverages,cnf:7182,"Alcohol, energy drink (7% alcohol by volume)",75,0.25,0.0,9.22,0.0,9.27,8,1.041,can=492.4,,vegan,,,,4
 alcoholic-beverages,Alcoholic beverages,,,Pantry,Beverages,usda:14251,"Alcoholic beverages, beer, higher alcohol",58,0.9,0.0,0.27,0.0,0.0,4,1.035,bottle=355.0,,vegan,,,,2
 alfalfa-seeds,Alfalfa seeds,,,Produce,Vegetables and Vegetable Products,usda:11001,"Alfalfa seeds, sprouted, raw",23,3.99,0.69,2.1,1.9,0.2,6,0.139,,,vegan,,,,1
 alfredo-mix-sauce,Alfredo mix sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06960,"Sauce, alfredo mix, dry",535,15.32,36.35,36.52,2.0,5.4,2590,0.507,,,vegan,,,,1
 allspice,Allspice,,,Pantry,Spices and Herbs,usda:02001,"Spices, allspice, ground",263,6.09,8.69,72.12,21.6,,77,0.397,,,vegan,,,,1
-almond-butter,Almond butter,,,Dry goods,Nut and Seed Products,usda:12695,"Nuts, almond butter, plain, with salt added",614,20.96,55.5,18.82,10.3,6.27,227,1.069,,tree nuts,vegetarian,,365-365,,3
+almond-butter,Almond butter,,,Dry goods,Nut and Seed Products,usda:12695,"Nuts, almond butter, plain, with salt added",614,20.96,55.5,18.82,10.3,6.27,227,1.069,,tree nuts,vegetarian,,365-365,,4
 almond-meal,Almond meal,,,Dry goods,Nut and Seed Products,cnf:2607,"Nuts, almond meal, partially defatted",408,39.5,18.3,28.9,,,7,0.27,,tree nuts,vegan,,,,2
-almond-milk,Almond milk,,,Pantry,Beverages,usda:14054,"Beverages, almond milk, chocolate, ready-to-drink",50,0.63,1.25,9.38,0.4,8.75,71,1.032,,tree nuts,vegan,,,,3
+almond-milk,Almond milk,,,Pantry,Beverages,usda:14054,"Beverages, almond milk, chocolate, ready-to-drink",50,0.63,1.25,9.38,0.4,8.75,71,1.032,,tree nuts,vegan,,,,6
 almond-oil,Almond oil,,,Pantry,Fats and Oils,usda:04529,"Oil, almond",884,0.0,100.0,0.0,0.0,0.0,0,0.921,,tree nuts,vegan,730-730,365-365,,1
 almond-paste,Almond paste,,,Dry goods,Nut and Seed Products,usda:12071,"Nuts, almond paste",458,9.0,27.74,47.81,4.8,36.25,9,0.959,,tree nuts,vegan,,,,1
-almonds,Almonds,,,Dry goods,Nut and Seed Products,usda:12061,"Nuts, almonds",579,21.15,49.93,21.55,12.5,4.35,1,0.429,,tree nuts,vegan,480-480,180-180,600-600,12
+almonds,Almonds,,,Dry goods,Nut and Seed Products,usda:12061,"Nuts, almonds",579,21.15,49.93,21.55,12.5,4.35,1,0.429,,tree nuts,vegan,480-480,180-180,600-600,14
 aloe-vera-juice-drink,Aloe vera juice drink,,,Pantry,Beverages,usda:14216,"Beverages, aloe vera juice drink, fortified with Vitamin C",15,0.0,0.0,3.75,0.0,3.75,8,1.015,,,vegan,,,,1
 amaranth-grain,Amaranth grain,,,Dry goods,Cereal Grains and Pasta,usda:20001,"Amaranth grain, uncooked",371,13.56,7.02,65.25,6.7,1.69,4,0.824,serving=20.0,,vegan,,,,2
 amaranth-leaves,Amaranth leaves,,,Produce,Vegetables and Vegetable Products,usda:11003,"Amaranth leaves, raw",23,2.46,0.33,4.02,,,20,0.118,leaf=14.0,,vegan,,,,3
 american-cheddar-cheese,American cheddar cheese,,,Dairy and eggs,Dairy and Egg Products,usda:43278,"Cheese, american cheddar, imitation",239,16.7,14.0,11.6,0.0,7.74,1345,0.947,slice=21.0,milk,vegetarian,,,,1
-american-cheese,American cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01061,"Cheese, American, nonfat or fat free",126,21.05,0.0,10.53,0.0,5.26,1316,,serving=19.0,milk,vegetarian,,,,1
+american-cheese,American cheese,,,Dairy and eggs,Dairy and Egg Products,fdc:747429,"Cheese, American, restaurant",375,17.5,31.1,6.35,,3.76,1600,,slice=16.0,milk,vegetarian,,,,2
 ancho-peppers,Ancho peppers,,,Dry goods,Vegetables and Vegetable Products,usda:11978,"Peppers, ancho, dried",281,11.86,8.2,51.42,21.6,,43,,pepper=17.0; peppers=17.0,,vegan,,,,1
+anchovies,Anchovies,,,Canned,Finfish and Shellfish Products,fdc:2747652,"Anchovies, canned in olive oil, with salt, drained",206,26.94,9.85,2.41,,,5403,,,fish,contains meat or fish,,1825-1825,60-60,1
 anchovy,Anchovy,,,Meat and seafood,Finfish and Shellfish Products,usda:15001,"Fish, anchovy, european, raw",131,20.35,4.84,0.0,0.0,0.0,104,,anchovy=4.0; food guide serving = 90g=90.0,fish,contains meat or fish,,1825-1825,60-60,2
 animal-fat,Animal fat,,,Pantry,Fats and Oils,usda:04609,"Animal fat, bacon grease",897,0.0,99.5,0.0,0.0,0.0,150,0.816,,,contains meat or fish,,,,3
 anise-seed,Anise seed,,,Pantry,Spices and Herbs,usda:02002,"Spices, anise seed",337,17.6,15.9,50.02,14.6,,16,0.441,,,vegan,,,,1
 antelope,Antelope,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17144,"Game meat, antelope, raw",114,22.38,2.03,0.0,0.0,,51,,food guide serving = 90g=90.0,,contains meat or fish,,,,2
-apple-juice,Apple juice,,,Frozen,Fruits and Fruit Juices,usda:09017,"Apple juice, frozen concentrate, unsweetened, undiluted, without added ascorbic acid",166,0.51,0.37,41.0,0.4,38.83,25,1.189,can=211.0,,vegan,6-6,,360-360,7
-apples,Apples,,,Produce,Fruits and Fruit Juices,usda:09003,"Apples, raw, with skin",52,0.26,0.17,13.81,2.4,10.39,1,0.495,large=223.0; medium=182.0; small=149.0; extra small=101.0; nlea serving=242.0; medium fruit=182.0,,vegan,28-42,21-21,240-240,18
-applesauce,Applesauce,,,Canned,Fruits and Fruit Juices,usda:09019,"Applesauce, canned, unsweetened, without added ascorbic acid (includes USDA commodity)",42,0.17,0.1,11.27,1.1,9.39,2,1.031,,,vegan,,360-540,,4
+apple-juice,Apple juice,,,Pantry,Fruits and Fruit Juices,fdc:2003590,"Apple juice, with added vitamin C, from concentrate, shelf stable",47,0.09,0.29,11.36,,10.29,5,,,,vegan,6-6,,360-360,8
+apples,Apples,,,Produce,Fruits and Fruit Juices,usda:09003,"Apples, raw, with skin",52,0.26,0.17,13.81,2.4,10.39,1,0.495,large=223.0; medium=182.0; small=149.0; extra small=101.0; nlea serving=242.0; medium fruit=182.0,,vegan,28-42,21-21,240-240,28
+applesauce,Applesauce,,,Produce,Fruits and Fruit Juices,fdc:2263892,"Applesauce, unsweetened, with added vitamin C",46,0.27,0.16,12.26,,9.66,1,,,,vegan,,360-540,,6
+apricot,Apricot,,,Produce,Fruits and Fruit Juices,fdc:2710815,"Apricot, with skin, raw",43,0.96,0.41,10.24,1.5,6.25,0,,,,vegan,,1-2,240-240,1
 apricot-kernel-oil,Apricot kernel oil,,,Pantry,Fats and Oils,usda:04530,"Oil, apricot kernel",884,0.0,100.0,0.0,0.0,0.0,0,0.921,,,vegan,,,,1
 apricot-nectar,Apricot nectar,,,Canned,Fruits and Fruit Juices,usda:09036,"Apricot nectar, canned, without added ascorbic acid",56,0.37,0.09,14.39,0.6,13.79,3,1.061,,,vegan,,,,2
 apricots,Apricots,,,Produce,Fruits and Fruit Juices,usda:09021,"Apricots, raw",48,1.4,0.39,11.12,2.0,9.24,1,0.676,fruits=35.0,,vegan,2-5,,,16
@@ -134,9 +137,10 @@ arrowroot-flour,Arrowroot flour,,,Dry goods,Cereal Grains and Pasta,usda:20003,A
 artichoke,Artichoke,,,Canned,Vegetables and Vegetable Products,cnf:6618,"Artichoke, canned",50,3.46,0.16,11.13,3.9,0.98,271,0.75,,,vegan,7-14,1-2,,2
 artichokes,Artichokes,,,Produce,Vegetables and Vegetable Products,usda:11007,"Artichokes, (globe or french), raw",47,3.27,0.15,10.51,5.4,0.99,94,,"artichoke, medium=128.0; artichoke, large=162.0; medium=128.0; large=162.0",,vegan,7-14,1-2,,6
 artificial-blueberry-muffin-mix,Artificial blueberry muffin mix,,,Bakery,Baked Products,usda:18566,"Artificial Blueberry Muffin Mix, dry",407,4.7,8.7,77.45,,,760,,muffin=31.0,wheat or gluten,vegan,,,,1
-arugula,Arugula,,,Produce,Vegetables and Vegetable Products,usda:11959,"Arugula, raw",25,2.58,0.66,3.65,1.6,2.05,27,0.085,leaf=2.0,,vegan,3-7,,,1
+arugula,Arugula,,,Produce,Vegetables and Vegetable Products,usda:11959,"Arugula, raw",25,2.58,0.66,3.65,1.6,2.05,27,0.085,leaf=2.0,,vegan,3-7,,,2
 asiago-cheese,Asiago cheese,,,Dairy and eggs,Dairy and Egg Products,cnf:7732,"Cheese, asiago",405,25.48,32.15,3.47,0.0,0.31,904,0.503,,milk,vegetarian,,,,1
-asparagus,Asparagus,,,Produce,Vegetables and Vegetable Products,usda:11011,"Asparagus, raw",20,2.2,0.12,3.88,2.1,1.88,2,0.566,"spear, small=12.0; spear, medium=16.0; spear, large=20.0; spear, extra large=24.0; spear tip=3.5; small spear=12.0",,vegan,3-4,,150-150,9
+asparagus,Asparagus,,,Produce,Vegetables and Vegetable Products,usda:11011,"Asparagus, raw",20,2.2,0.12,3.88,2.1,1.88,2,0.566,"spear, small=12.0; spear, medium=16.0; spear, large=20.0; spear, extra large=24.0; spear tip=3.5; small spear=12.0",,vegan,3-4,,150-150,10
+avocado,Avocado,,,Produce,Fruits and Fruit Juices,fdc:2710824,"Avocado, Hass, peeled, raw",206,1.81,20.31,8.32,,,0,,,,vegan,3-4,,,1
 avocado-oil,Avocado oil,,,Pantry,Fats and Oils,usda:04581,"Oil, avocado",884,0.0,100.0,0.0,0.0,,0,0.921,,,vegan,,730-730,,1
 avocados,Avocados,,,Produce,Fruits and Fruit Juices,usda:09039,"Avocados, raw, Florida",120,2.23,10.06,7.82,5.6,2.42,2,0.972,fruit without skin and seeds=304.0; fruit=304.0; /2 fruit=152.0,,vegan,3-4,,,3
 babassu-oil,Babassu oil,,,Pantry,Fats and Oils,usda:04534,"Oil, babassu",884,0.0,100.0,0.0,0.0,0.0,0,0.921,,,vegan,,,,1
@@ -149,7 +153,8 @@ balsam-pear,Balsam-pear,,,Produce,Vegetables and Vegetable Products,usda:11022,"
 balsamic-vinegar,Balsamic vinegar,,,Pantry,Spices and Herbs,usda:02069,"Vinegar, balsamic",88,0.49,0.0,17.03,,14.95,23,1.078,,,vegan,,1095-1825,,1
 bamboo-shoots,Bamboo shoots,,,Produce,Vegetables and Vegetable Products,usda:11026,"Bamboo shoots, raw",27,2.6,0.3,5.2,2.2,3.0,4,0.64,,,vegan,14-14,,,4
 banana-bread,Banana bread,,,Bakery,Baked Products,usda:18019,"Bread, banana, prepared from recipe, made with margarine",326,4.3,10.5,54.6,1.1,,302,,individual loaf=57.0; slice=60.0; loaf=1036.0; /2 slice=30.0,wheat or gluten,vegan,,,,1
-bananas,Bananas,,,Produce,Fruits and Fruit Juices,usda:09040,"Bananas, raw",89,1.09,0.33,22.84,2.6,12.23,1,0.793,extra small=81.0; small=101.0; medium=118.0; large=136.0; extra large=152.0; nlea serving=126.0,,vegan,3-3,,60-90,2
+banana-or-hungarian-wax-peppers,Banana or hungarian wax peppers,,,Produce,Vegetables and Vegetable Products,fdc:2747660,"Peppers, banana or Hungarian wax, seeded, raw",24,0.72,0.13,4.97,1.8,2.71,0,,,,vegan,,,,1
+bananas,Bananas,,,Produce,Fruits and Fruit Juices,usda:09040,"Bananas, raw",89,1.09,0.33,22.84,2.6,12.23,1,0.793,extra small=81.0; small=101.0; medium=118.0; large=136.0; extra large=152.0; nlea serving=126.0,,vegan,3-3,,60-90,6
 bannock-bread,Bannock bread,,,Bakery,Baked Products,cnf:4082,"Bread, bannock",340,5.58,20.09,33.52,1.2,0.27,598,0.415,piece=42.6,wheat or gluten,vegan,,,,1
 baobab-powder,Baobab powder,,,Dry goods,Fruits and Fruit Juices,cnf:7820,Baobab powder,250,3.69,0.47,79.65,44.5,,10,,,,vegan,,,,1
 barbecue-loaf,Barbecue loaf,,,Meat and seafood,Sausages and Luncheon Meats,usda:07001,"Barbecue loaf, pork, beef",173,15.84,8.9,6.4,0.0,,1334,,slice=23.0,,contains meat or fish,,,,1
@@ -168,43 +173,46 @@ beef-broth-bouillon-and-consomme,Beef broth bouillon and consomme,,,Canned,"Soup
 beef-broth-or-bouillon,Beef broth or bouillon,,,Canned,"Soups, Sauces, and Gravies",usda:06075,"Soup, beef broth or bouillon, powder, dry",213,15.97,8.89,17.4,0.0,16.71,26000,,cube=3.6; packet=6.0,,contains meat or fish,,,,2
 beef-broth-or-bouillon-canned,Beef broth or bouillon canned,,,Canned,"Soups, Sauces, and Gravies",usda:06008,"Soup, beef broth or bouillon canned, ready-to-serve",7,1.14,0.22,0.04,0.0,0.0,372,1.109,can 14.5 oz=435.0; container 32 oz=960.0; can=315.0,,contains meat or fish,,,,1
 beef-composite,Beef composite,,,Meat and seafood,Beef Products,usda:23491,"Beef composite, separable lean only, trimmed to 1/8"" fat, choice, cooked",203,28.73,9.16,0.0,0.0,0.0,53,,,,contains meat or fish,,,,1
-beef-flank,Beef flank,,,Meat and seafood,Beef Products,usda:13068,"Beef, flank, steak, separable lean only, trimmed to 0"" fat, choice, raw",149,21.72,6.29,0.0,0.0,0.0,57,,steak=202.0,,contains meat or fish,,,,18
-beef-loin,Beef loin,,,Meat and seafood,Beef Products,usda:13911,"Beef, loin, top loin, separable lean and fat, trimmed to 1/8"" fat, choice, raw",237,19.32,17.1,0.0,0.0,0.0,54,,steak=301.0,,contains meat or fish,,,,153
+beef-flank,Beef flank,,,Meat and seafood,Beef Products,usda:13068,"Beef, flank, steak, separable lean only, trimmed to 0"" fat, choice, raw",149,21.72,6.29,0.0,0.0,0.0,57,,steak=202.0,,contains meat or fish,,,,19
+beef-loin,Beef loin,,,Meat and seafood,Beef Products,usda:13911,"Beef, loin, top loin, separable lean and fat, trimmed to 1/8"" fat, choice, raw",237,19.32,17.1,0.0,0.0,0.0,54,,steak=301.0,,contains meat or fish,,,,162
 beef-plate,Beef plate,,,Meat and seafood,Beef Products,usda:23165,"Beef, plate steak, boneless, inside skirt, separable lean only, trimmed to 0"" fat, choice, raw",171,20.89,9.76,0.0,0.0,0.0,67,,steak=388.0,,contains meat or fish,,,,28
 beef-rib,Beef rib,,,Meat and seafood,Beef Products,cnf:6079,"Beef, rib, rib roast with bone, lean, raw",162,21.86,7.31,0.0,0.0,0.0,76,,,,contains meat or fish,,,,133
-beef-ribeye,Beef ribeye,,,Meat and seafood,Beef Products,usda:23270,"Beef, ribeye cap steak, boneless, separable lean only, trimmed to 0"" fat, choice, raw",187,19.46,11.4,1.75,0.0,0.0,88,,steak=249.0,,contains meat or fish,,,,15
-beef-round,Beef round,,,Meat and seafood,Beef Products,cnf:6041,"Beef, hip, outside (bottom) round roast, boneless, lean, raw",147,22.52,4.97,0.0,0.0,0.0,71,,food guide serving = 90g=90.0,,contains meat or fish,,,,167
+beef-ribeye,Beef ribeye,,,Meat and seafood,Beef Products,fdc:2646172,"Beef, ribeye, steak, boneless, choice, raw",260,18.74,20.04,0.0,,,43,,,,contains meat or fish,,,,16
+beef-round,Beef round,,,Meat and seafood,Beef Products,cnf:6041,"Beef, hip, outside (bottom) round roast, boneless, lean, raw",147,22.52,4.97,0.0,0.0,0.0,71,,food guide serving = 90g=90.0,,contains meat or fish,,,,172
 beef-rump,Beef rump,,,Meat and seafood,Beef Products,usda:23466,"Beef, New Zealand, imported, rump centre, separable lean only, raw",141,21.74,6.05,0.0,0.0,0.0,49,,,,contains meat or fish,,,,4
 beef-sausage,Beef sausage,,,Meat and seafood,Sausages and Luncheon Meats,usda:07956,"Beef sausage, fresh, cooked",332,18.21,27.98,0.35,0.0,0.0,813,0.583,serving=43.0; link=20.0; patty=29.0; large link=66.0,,contains meat or fish,,,,2
 beef-shank,Beef shank,,,Meat and seafood,Beef Products,usda:13227,"Beef, shank crosscuts, separable lean only, trimmed to 1/4"" fat, choice, raw",128,21.75,3.85,0.0,0.0,,63,,,,contains meat or fish,,,,2
 beef-shoulder,Beef shoulder,,,Meat and seafood,Beef Products,usda:13520,"Beef, shoulder top blade steak, boneless, separable lean only, trimmed to 0"" fat, choice, raw",143,20.35,6.88,0.0,0.0,0.0,82,,steak=1432.0,,contains meat or fish,,,,30
 beef-sweetbread,Beef sweetbread,,,Meat and seafood,Beef Products,usda:23438,"Beef, New Zealand, imported, sweetbread, raw",303,11.51,28.6,0.0,0.0,0.0,64,,,,contains meat or fish,,,,2
 beef-tallow-fat,Beef tallow fat,,,Pantry,Fats and Oils,usda:04001,"Fat, beef tallow",902,0.0,100.0,0.0,0.0,0.0,0,0.866,,,contains meat or fish,,,,1
-beef-tenderloin,Beef tenderloin,,,Meat and seafood,Beef Products,usda:13920,"Beef, tenderloin, steak, separable lean and fat, trimmed to 1/8"" fat, choice, raw",246,19.82,17.88,0.0,0.0,0.0,50,,steak=177.0,,contains meat or fish,,,,22
+beef-tenderloin,Beef tenderloin,,,Meat and seafood,Beef Products,usda:13920,"Beef, tenderloin, steak, separable lean and fat, trimmed to 1/8"" fat, choice, raw",246,19.82,17.88,0.0,0.0,0.0,50,,steak=177.0,,contains meat or fish,,,,23
 beef-tongue,Beef tongue,,,Canned,Beef Products,cnf:2797,"Beef, tongue, whole, canned or pickled",267,19.3,20.3,0.3,0.0,0.0,73,0.566,,,contains meat or fish,,,,1
-beef-top-sirloin,Beef top sirloin,,,Meat and seafood,Beef Products,usda:13934,"Beef, top sirloin, steak, separable lean and fat, trimmed to 1/8"" fat, select, raw",189,20.68,11.13,0.0,0.0,0.0,53,,steak=594.0,,contains meat or fish,,,,19
+beef-top-sirloin,Beef top sirloin,,,Meat and seafood,Beef Products,usda:13934,"Beef, top sirloin, steak, separable lean and fat, trimmed to 1/8"" fat, select, raw",189,20.68,11.13,0.0,0.0,0.0,53,,steak=594.0,,contains meat or fish,,,,20
 beef-variety-meats,Beef variety meats,,,Meat and seafood,Beef Products,usda:13318,"Beef, variety meats and by-products, brain, raw",143,10.86,10.3,1.05,0.0,0.0,126,,food guide serving = 90g=90.0,,contains meat or fish,,,,34
 beefalo,Beefalo,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17152,"Game meat, beefalo, composite of cuts, raw",143,23.3,4.8,0.0,0.0,,78,,food guide serving = 90g=90.0,,contains meat or fish,,,,2
 beer,Beer,,,Pantry,Beverages,usda:14003,"Alcoholic beverage, beer, regular, all",43,0.46,0.0,3.55,0.0,0.0,4,1.004,can=356.0; bottle=342.5,,vegan,,,,3
 beerwurst,Beerwurst,,,Meat and seafood,Sausages and Luncheon Meats,usda:07003,"Beerwurst, beer salami, pork",238,14.24,18.8,2.06,0.0,,1240,0.621,slice=23.0; link=12.5,,contains meat or fish,,,,3
-beet-greens,Beet greens,,,Produce,Vegetables and Vegetable Products,usda:11086,"Beet greens, raw",22,2.2,0.13,4.33,3.7,0.5,226,0.161,leaf=32.0,,vegan,,,,3
-beets,Beets,,,Produce,Vegetables and Vegetable Products,usda:11080,"Beets, raw",43,1.61,0.17,9.56,2.8,6.76,78,0.575,,,vegan,7-14,1-1,180-240,8
+beet-greens,Beet greens,,,Produce,Vegetables and Vegetable Products,usda:11086,"Beet greens, raw",22,2.2,0.13,4.33,3.7,0.5,226,0.161,leaf=32.0,,vegan,,,,4
+beets,Beets,,,Produce,Vegetables and Vegetable Products,usda:11080,"Beets, raw",43,1.61,0.17,9.56,2.8,6.76,78,0.575,,,vegan,7-14,1-1,180-240,9
 beverage,Beverage,,,Dairy and eggs,Dairy and Egg Products,usda:43078,"Beverage, milkshake mix, dry, not chocolate",329,23.5,2.6,52.9,1.6,51.3,780,0.473,envelope=21.0,milk,vegetarian,,,,3
 biscuits,Biscuits,,,Bakery,Baked Products,usda:18012,"Biscuits, plain or buttermilk, refrigerated dough, lower fat",270,6.7,7.83,43.7,2.0,7.18,828,,serving 1 biscuit=58.0,milk|wheat or gluten,vegan,,270-270,,9
-bison,Bison,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17149,"Bison, ground, grass-fed, raw",146,20.23,7.21,0.05,0.0,0.0,70,,patty=85.0,,contains meat or fish,3-5,,180-270,15
-black-beans,Black beans,,,Dry goods,Legumes and Legume Products,usda:16014,"Beans, black, mature seeds, raw",341,21.6,1.42,62.36,15.5,2.12,5,0.82,,,vegan,,540-720,,5
+bison,Bison,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17149,"Bison, ground, grass-fed, raw",146,20.23,7.21,0.05,0.0,0.0,70,,patty=85.0,,contains meat or fish,3-5,,180-270,16
+black-beans,Black beans,,,Dry goods,Legumes and Legume Products,usda:16014,"Beans, black, mature seeds, raw",341,21.6,1.42,62.36,15.5,2.12,5,0.82,,,vegan,,540-720,,6
 black-crowberry,Black crowberry,,,Produce,Fruits and Fruit Juices,cnf:5938,"Black crowberry (curlewberry), Indigenous",35,0.2,0.7,9.5,,,2,,,,vegan,,,,1
+black-rice,Black rice,,,Dry goods,Cereal Grains and Pasta,fdc:2710825,"Rice, black, unenriched, raw",361,7.57,3.44,77.19,4.2,,0,,,,vegan,,,,1
 black-turtle-beans,Black turtle beans,,,Dry goods,Legumes and Legume Products,usda:16016,"Beans, black turtle, mature seeds, raw",339,21.25,0.9,63.25,15.5,2.12,9,0.778,,,vegan,,,,4
 blackberries,Blackberries,,,Produce,Fruits and Fruit Juices,usda:09042,"Blackberries, raw",43,1.39,0.49,9.61,5.3,4.88,1,0.609,,,vegan,3-6,,360-360,3
 blackberry-juice,Blackberry juice,,,Canned,Fruits and Fruit Juices,usda:09043,"Blackberry juice, canned",38,0.3,0.6,7.8,0.1,7.7,1,1.056,,,vegan,,,,1
+blackeye-pea,Blackeye pea,,,Dry goods,Legumes and Legume Products,fdc:2644284,"Blackeye pea, dry",346,21.23,2.42,61.84,,,3,,,,vegan,,,,2
 blood-sausage,Blood sausage,,,Meat and seafood,Sausages and Luncheon Meats,usda:07005,Blood sausage,379,14.6,34.5,1.29,0.0,1.29,680,0.583,slices=25.0; slice=32.9; /6 package=75.0,,contains meat or fish,,,,1
 blue-cheese,Blue cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01004,"Cheese, blue",353,21.4,28.74,2.34,0.0,0.5,1146,0.571,,milk,vegetarian,,,,1
 blue-or-roquefort-cheese-dressing,Blue or roquefort cheese dressing,,,Pantry,Fats and Oils,usda:43020,"Salad dressing, blue or roquefort cheese, low calorie",99,5.1,7.2,2.9,0.0,2.82,939,1.036,,milk,vegetarian,,,,4
-blueberries,Blueberries,,,Produce,Fruits and Fruit Juices,usda:09050,"Blueberries, raw",57,0.74,0.33,14.49,2.4,9.96,1,0.613,,,vegan,7-14,,240-360,8
+blueberries,Blueberries,,,Produce,Fruits and Fruit Juices,usda:09050,"Blueberries, raw",57,0.74,0.33,14.49,2.4,9.96,1,0.613,,,vegan,7-14,,240-360,10
 bluefish,Bluefish,,,Meat and seafood,Finfish and Shellfish Products,usda:15005,"Fish, bluefish, raw",124,20.04,4.24,0.0,0.0,,60,,fillet=150.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,60-90,2
 boar,Boar,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17158,"Game meat, boar, wild, raw",122,21.51,3.33,0.0,0.0,,,,food guide serving = 90g=90.0,,contains meat or fish,,,,2
 bocconcini-cheese,Bocconcini cheese,,,Dairy and eggs,Dairy and Egg Products,cnf:7743,"Cheese, bocconcini",325,18.82,26.52,2.96,0.0,0.14,6,1.03,piece=30.0,milk,vegetarian,,,,2
 bockwurst,Bockwurst,,,Meat and seafood,Sausages and Luncheon Meats,usda:07006,"Bockwurst, pork, veal, raw",301,14.03,25.87,2.95,1.0,1.33,756,,link=91.0,,contains meat or fish,,,,1
+bok-choy-cabbage,Bok choy cabbage,,,Produce,Vegetables and Vegetable Products,fdc:2685572,"Cabbage, bok choy, raw",17,1.02,0.23,3.51,1.3,,14,,,,vegan,,,,1
 bologna,Bologna,,,Meat and seafood,Sausages and Luncheon Meats,usda:07007,"Bologna, beef",299,10.91,26.13,4.29,0.0,2.05,1013,0.583,slice=30.0; serving=28.0,,contains meat or fish,,,,12
 borage,Borage,,,Produce,Vegetables and Vegetable Products,usda:11613,"Borage, raw",21,1.8,0.7,3.06,,,80,0.376,,,vegan,,,,3
 boston-brown-bread,Boston brown bread,,,Bakery,Baked Products,usda:18021,"Bread, boston brown, canned",195,5.2,1.5,43.3,4.7,2.42,631,,slice=45.0,wheat or gluten,vegan,,,,1
@@ -213,7 +221,7 @@ boursin-cheese,Boursin cheese,,,Dairy and eggs,Dairy and Egg Products,cnf:7733,"
 boysenberries,Boysenberries,,,Frozen,Fruits and Fruit Juices,usda:09057,"Boysenberries, frozen, unsweetened",50,1.1,0.26,12.19,5.3,6.89,1,0.558,package=284.0,,vegan,3-6,,360-360,2
 bratwurst,Bratwurst,,,Meat and seafood,Sausages and Luncheon Meats,usda:07922,"Bratwurst, beef and pork, smoked",297,12.2,26.34,2.0,0.0,0.0,848,0.592,serving 2.33 oz=66.0,,contains meat or fish,2-3,,60-90,5
 braunschweiger,Braunschweiger,,,Meat and seafood,Sausages and Luncheon Meats,usda:07014,"Braunschweiger (a liver sausage), pork",327,14.5,28.5,3.1,0.0,0.0,977,0.9,slice=18.0,,contains meat or fish,,,,1
-brazilnuts,Brazilnuts,,,Dry goods,Nut and Seed Products,usda:12078,"Nuts, brazilnuts, dried, unblanched",659,14.32,67.1,11.74,7.5,2.33,3,0.592,kernel=5.0; medium=3.5,tree nuts,vegan,,,,1
+brazilnuts,Brazilnuts,,,Dry goods,Nut and Seed Products,fdc:2515373,"Nuts, brazilnuts, raw",621,15.04,57.43,21.64,6.0,,0,,,tree nuts,vegan,,,,2
 bread-crumbs,Bread crumbs,,,Bakery,Baked Products,usda:18079,"Bread crumbs, dry, grated, plain",395,13.35,5.3,71.98,4.5,6.2,732,0.456,,wheat or gluten,vegan,,,,2
 bread-pudding,Bread pudding,,,Bakery,Baked Products,cnf:6619,"Bread pudding, with raisins, homemade",153,5.23,4.83,23.4,0.9,14.67,230,0.893,,wheat or gluten,vegan,,,,1
 bread-sticks,Bread sticks,,,Bakery,Baked Products,usda:18080,"Bread sticks, plain",412,12.0,9.5,68.4,3.0,1.26,713,0.194,"stick, small=5.0; stick=10.0; sticks=10.0",wheat or gluten,vegan,,,,1
@@ -225,18 +233,18 @@ breakfast-tart,Breakfast tart,,,Bakery,Baked Products,usda:18459,"Breakfast tart
 brick-cheese,Brick cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01005,"Cheese, brick",371,23.24,29.68,2.79,0.0,0.51,560,0.518,slice=28.0,milk,vegetarian,,,,1
 brie-cheese,Brie cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01006,"Cheese, brie",334,20.75,27.68,0.45,0.0,0.45,629,0.812,package=128.0,milk,vegetarian,,,,1
 broadbeans,Broadbeans,,,Produce,Vegetables and Vegetable Products,usda:11088,"Broadbeans, immature seeds, raw",72,5.6,0.6,11.7,4.2,,50,0.461,,,vegan,,,,7
-broccoli,Broccoli,,,Produce,Vegetables and Vegetable Products,usda:11090,"Broccoli, raw",34,2.82,0.37,6.64,2.6,1.7,33,0.378,bunch=608.0; spear=31.0; stalk=151.0; nlea serving=148.0; floweret=11.0,,vegan,3-5,,300-360,14
+broccoli,Broccoli,,,Produce,Vegetables and Vegetable Products,usda:11090,"Broccoli, raw",34,2.82,0.37,6.64,2.6,1.7,33,0.378,bunch=608.0; spear=31.0; stalk=151.0; nlea serving=148.0; floweret=11.0,,vegan,3-5,,300-360,16
 broccoli-raab,Broccoli raab,,,Produce,Vegetables and Vegetable Products,usda:11096,"Broccoli raab, raw",22,3.17,0.49,2.85,2.7,0.38,33,0.199,stalk=19.0; flower and leaf=10.0,,vegan,3-5,,300-360,2
 broth,Broth,,,Canned,"Soups, Sauces, and Gravies",cnf:7374,"Soup, broth, vegetable, ready-to-serve",3,0.07,0.01,0.74,0.1,0.66,252,1.001,,,vegan,3-4,,30-60,4
 brotwurst,Brotwurst,,,Meat and seafood,Sausages and Luncheon Meats,usda:07015,"Brotwurst, pork, beef, link",323,14.3,27.8,2.98,0.0,2.98,1112,0.592,link=70.0,,contains meat or fish,,,,1
 brown-mushrooms,Brown mushrooms,,,Produce,Vegetables and Vegetable Products,usda:11266,"Mushrooms, brown, italian, or crimini, raw",22,2.5,0.1,4.3,0.6,1.72,6,0.296,piece whole=20.0; piece=14.0,,vegan,,,,2
-brown-rice,Brown rice,,,Dry goods,Cereal Grains and Pasta,usda:20036,"Rice, brown, long-grain, raw",367,7.54,3.2,76.25,3.6,0.66,5,0.782,,,vegan,,,,4
-brussels-sprouts,Brussels sprouts,,,Produce,Vegetables and Vegetable Products,usda:11098,"Brussels sprouts, raw",43,3.38,0.3,8.95,3.8,2.2,25,0.372,,,vegan,3-5,,300-360,6
-buckwheat,Buckwheat,,,Dry goods,Cereal Grains and Pasta,usda:20008,Buckwheat,343,13.25,3.4,71.5,10.0,,1,0.719,serving=20.0,,vegan,,60-60,120-120,1
+brown-rice,Brown rice,,,Dry goods,Cereal Grains and Pasta,usda:20036,"Rice, brown, long-grain, raw",367,7.54,3.2,76.25,3.6,0.66,5,0.782,,,vegan,,,,5
+brussels-sprouts,Brussels sprouts,,,Produce,Vegetables and Vegetable Products,usda:11098,"Brussels sprouts, raw",43,3.38,0.3,8.95,3.8,2.2,25,0.372,,,vegan,3-5,,300-360,7
+buckwheat,Buckwheat,,,Dry goods,Cereal Grains and Pasta,usda:20008,Buckwheat,343,13.25,3.4,71.5,10.0,,1,0.719,serving=20.0,,vegan,,60-60,120-120,2
 buckwheat-flour,Buckwheat flour,,,Dry goods,Cereal Grains and Pasta,usda:20011,"Buckwheat flour, whole-groat",335,12.62,3.1,70.59,10.0,2.6,11,0.507,serving=20.0,,vegan,,,,1
 buckwheat-groats,Buckwheat groats,,,Dry goods,Cereal Grains and Pasta,usda:20009,"Buckwheat groats, roasted, dry",346,11.73,2.71,74.95,10.3,,11,0.693,,,vegan,,,,2
 buffalo,Buffalo,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17160,"Game meat, buffalo, water, raw",99,20.39,1.37,0.0,0.0,,53,,food guide serving = 90g=90.0,,contains meat or fish,,,,2
-bulgur,Bulgur,,,Dry goods,Cereal Grains and Pasta,usda:20012,"Bulgur, dry",342,12.29,1.33,75.87,12.5,0.41,17,0.592,,wheat or gluten,vegan,,180-360,,2
+bulgur,Bulgur,,,Dry goods,Cereal Grains and Pasta,usda:20012,"Bulgur, dry",342,12.29,1.33,75.87,12.5,0.41,17,0.592,,wheat or gluten,vegan,,180-360,,3
 burbot,Burbot,,,Meat and seafood,Finfish and Shellfish Products,usda:15006,"Fish, burbot, raw",90,19.31,0.81,0.0,0.0,,97,,fillet=116.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,10
 burdock-root,Burdock root,,,Produce,Vegetables and Vegetable Products,usda:11104,"Burdock root, raw",72,1.53,0.15,17.34,3.3,2.9,5,0.499,root=156.0,,vegan,,,,3
 butter-oil,Butter oil,,,Dairy and eggs,Dairy and Egg Products,usda:01003,"Butter oil, anhydrous",876,0.28,99.48,0.0,0.0,0.0,2,0.866,,milk,vegetarian,,,,1
@@ -245,6 +253,7 @@ butter-tart,Butter tart,,,Bakery,Baked Products,cnf:6621,"Butter tart, with rais
 butterbur,Butterbur,,,Produce,Vegetables and Vegetable Products,usda:11106,"Butterbur, (fuki), raw",14,0.39,0.04,3.61,,,7,0.397,,,vegan,,,,4
 butterfish,Butterfish,,,Meat and seafood,Finfish and Shellfish Products,usda:15007,"Fish, butterfish, raw",146,17.28,8.02,0.0,0.0,,89,,fillet=32.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
 butterhead-lettuce,Butterhead lettuce,,,Produce,Vegetables and Vegetable Products,usda:11250,"Lettuce, butterhead (includes boston and bibb types), raw",13,1.35,0.22,2.23,1.1,0.94,5,0.232,"head=163.0; leaf, large=15.0; leaf, medium=7.5; leaf=5.0; small leaf=5.0; medium leaf=7.5",,vegan,,,,1
+buttermilk,Buttermilk,,,Dairy and eggs,Dairy and Egg Products,fdc:2259792,"Buttermilk, low fat",43,3.46,1.08,4.81,,,92,,,milk,vegetarian,7-14,,90-90,1
 buttermilk-as-main-ingredient-dressing,Buttermilk as main ingredient dressing,,,Pantry,Fats and Oils,cnf:5518,"Salad dressing, buttermilk as main ingredient",364,3.2,36.9,7.6,0.0,4.77,865,0.993,,milk,vegan,,,,1
 buttermilk-dressing,Buttermilk dressing,,,Pantry,Fats and Oils,usda:43215,"Salad dressing, buttermilk, lite",202,1.25,12.42,21.33,1.1,3.77,1120,1.036,serving=30.0,milk,vegan,,,,1
 buttermilk-milk,Buttermilk milk,,,Dairy and eggs,Dairy and Egg Products,cnf:7710,"Milk, fluid, buttermilk, 1.5%",46,3.58,1.52,4.4,0.0,4.02,103,1.03,,milk,vegetarian,,,,5
@@ -259,8 +268,9 @@ canadian-bacon,Canadian bacon,,,Meat and seafood,Pork Products,usda:10130,"Canad
 candied-foods,Candied foods,,,Pantry,Sweets,cnf:4398,"Candied foods, citron",314,0.2,0.3,80.2,2.6,,290,0.896,,,vegan,,,,8
 candied-fruit,Candied fruit,,,Produce,Fruits and Fruit Juices,usda:09426,Candied fruit,322,0.34,0.07,82.74,1.6,80.68,98,0.789,,,vegan,,,,1
 canned-paste,Canned paste,,,Canned,Vegetables and Vegetable Products,cnf:6579,"Tomato products, canned paste",82,4.32,0.47,18.91,4.1,12.18,790,1.162,,,vegan,,,,1
+cannellini-beans,Cannellini beans,,,Dry goods,Legumes and Legume Products,fdc:2644281,"Beans, cannellini, dry",337,21.56,2.2,59.8,,,0,,,,vegan,,,,2
 canola-and-soybean-oil,Canola and soybean oil,,,Pantry,Fats and Oils,cnf:5510,"Vegetable oil, canola and soybean",884,0.0,100.0,0.0,0.0,0.0,0,0.921,,soy,vegan,,,,1
-cantaloupe-melon,Cantaloupe melon,,,Produce,Fruits and Fruit Juices,usda:09181,"Melons, cantaloupe, raw",34,0.84,0.19,8.16,0.9,7.86,16,0.676,"melon, large=814.0; wedge, large=102.0; melon, medium=552.0; wedge, medium=69.0; melon, small=441.0; wedge, small=55.0",,vegan,,,,1
+cantaloupe-melon,Cantaloupe melon,,,Produce,Fruits and Fruit Juices,usda:09181,"Melons, cantaloupe, raw",34,0.84,0.19,8.16,0.9,7.86,16,0.676,"melon, large=814.0; wedge, large=102.0; melon, medium=552.0; wedge, medium=69.0; melon, small=441.0; wedge, small=55.0",,vegan,,,,3
 carambola,Carambola,,,Produce,Fruits and Fruit Juices,usda:09060,"Carambola, (starfruit), raw",31,1.04,0.33,6.73,2.8,3.98,2,0.507,large=124.0; medium=91.0; small=70.0; large fruit=124.0; medium fruit=91.0; small fruit=70.0,,vegan,,,,1
 caraway-cheese,Caraway cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01008,"Cheese, caraway",376,25.18,29.2,3.06,0.0,,690,0.518,,milk,vegetarian,,,,1
 caraway-seed,Caraway seed,,,Pantry,Spices and Herbs,usda:02005,"Spices, caraway seed",333,19.77,14.59,49.9,38.0,0.64,17,0.441,,,vegan,,,,1
@@ -276,10 +286,10 @@ carp,Carp,,,Meat and seafood,Finfish and Shellfish Products,usda:15008,"Fish, ca
 carrot-juice,Carrot juice,,,Canned,Vegetables and Vegetable Products,usda:11655,"Carrot juice, canned",40,0.95,0.15,9.28,0.8,3.91,66,0.997,,,vegan,6-6,,360-360,1
 casaba-melon,Casaba melon,,,Produce,Fruits and Fruit Juices,usda:09183,"Melons, casaba, raw",28,1.11,0.1,6.58,0.9,5.69,9,0.719,fruit=1640.0; /10 fruit=164.0,,vegan,,,,1
 cashew-butter,Cashew butter,,,Dry goods,Nut and Seed Products,usda:12588,"Nuts, cashew butter, plain, with salt added",609,12.12,53.03,30.3,3.0,9.09,295,1.081,,tree nuts,vegetarian,,90-90,,2
-cashew-nuts,Cashew nuts,,,Dry goods,Nut and Seed Products,usda:12087,"Nuts, cashew nuts, raw",553,18.22,43.85,30.19,3.3,5.91,12,0.549,,tree nuts,vegan,,,,5
+cashew-nuts,Cashew nuts,,,Dry goods,Nut and Seed Products,usda:12087,"Nuts, cashew nuts, raw",553,18.22,43.85,30.19,3.3,5.91,12,0.549,,tree nuts,vegan,,,,6
 cassava,Cassava,,,Produce,Vegetables and Vegetable Products,usda:11134,"Cassava, raw",160,1.36,0.28,38.06,1.8,1.7,14,0.871,root=408.0,,vegan,3-3,7-7,30-60,2
-catfish,Catfish,,,Meat and seafood,Finfish and Shellfish Products,usda:15010,"Fish, catfish, channel, wild, raw",95,16.38,2.82,0.0,0.0,,43,,fillet=159.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,60-90,5
-cauliflower,Cauliflower,,,Produce,Vegetables and Vegetable Products,usda:11135,"Cauliflower, raw",25,1.92,0.28,4.97,2.0,1.91,30,0.452,floweret=13.0; head large=840.0; head medium=588.0; head small=265.0; large head=840.0; medium head=575.0,,vegan,3-5,,300-360,9
+catfish,Catfish,,,Meat and seafood,Finfish and Shellfish Products,usda:15010,"Fish, catfish, channel, wild, raw",95,16.38,2.82,0.0,0.0,,43,,fillet=159.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,60-90,6
+cauliflower,Cauliflower,,,Produce,Vegetables and Vegetable Products,usda:11135,"Cauliflower, raw",25,1.92,0.28,4.97,2.0,1.91,30,0.452,floweret=13.0; head large=840.0; head medium=588.0; head small=265.0; large head=840.0; medium head=575.0,,vegan,3-5,,300-360,10
 caviar,Caviar,,,Meat and seafood,Finfish and Shellfish Products,usda:15012,"Fish, caviar, black and red, granular",264,24.6,17.9,4.0,0.0,0.0,1500,1.082,,fish,contains meat or fish,7-28,,,1
 celeriac,Celeriac,,,Produce,Vegetables and Vegetable Products,usda:11141,"Celeriac, raw",42,1.5,0.3,9.2,1.8,1.6,100,0.659,,,vegan,7-7,,,3
 celery-flakes,Celery flakes,,,Dry goods,Vegetables and Vegetable Products,usda:44055,"Celery flakes, dried",319,11.3,2.1,63.7,27.8,35.9,1435,,,,vegan,,,,1
@@ -303,18 +313,18 @@ cheesecake-commercially-prepared,Cheesecake commercially prepared,,,Bakery,Baked
 cheesecake-prepared-from-mix,Cheesecake prepared from mix,,,Bakery,Baked Products,usda:18148,"Cheesecake prepared from mix, no-bake type",274,5.5,12.7,35.5,1.9,,380,,piece=99.0; /8 cake=148.5; /6 cake=132.0,wheat or gluten,vegan,,,,1
 cheesefurter,Cheesefurter,,,Meat and seafood,Sausages and Luncheon Meats,usda:07016,"Cheesefurter, cheese smokie, pork, beef",328,14.1,29.0,1.51,0.0,1.51,1082,0.638,links=42.9,milk,contains meat or fish,,,,1
 cherimoya,Cherimoya,,,Produce,Fruits and Fruit Juices,usda:09062,"Cherimoya, raw",75,1.57,0.68,17.71,3.0,12.87,7,0.676,fruit without skin and seeds=235.0; /4 fruit=58.8; fruit=235.0,,vegan,4-4,,300-360,1
-cherries,Cherries,,,Produce,Fruits and Fruit Juices,usda:09070,"Cherries, sweet, raw",63,1.06,0.2,16.01,2.1,12.82,0,0.617,cherry=8.2; nlea serving=140.0; fruits=8.2,,vegan,7-7,,360-360,16
+cherries,Cherries,,,Produce,Fruits and Fruit Juices,usda:09070,"Cherries, sweet, raw",63,1.06,0.2,16.01,2.1,12.82,0,0.617,cherry=8.2; nlea serving=140.0; fruits=8.2,,vegan,7-7,,360-360,17
 cherry-juice,Cherry juice,,,Pantry,Fruits and Fruit Juices,cnf:7821,"Cherry juice, tart",59,0.31,0.54,13.7,,12.21,4,1.138,,,vegan,,,,1
 chervil,Chervil,,,Pantry,Spices and Herbs,usda:02008,"Spices, chervil, dried",237,23.2,3.9,49.1,11.3,,83,0.125,,,vegan,,,,1
 cheshire-cheese,Cheshire cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01010,"Cheese, cheshire",387,23.37,30.6,4.78,0.0,,700,0.518,,milk,vegetarian,,,,1
 chestnuts,Chestnuts,,,Dry goods,Nut and Seed Products,usda:12097,"Nuts, chestnuts, european, raw, unpeeled",213,2.42,2.26,45.54,8.1,,3,0.613,kernels=4.7,,vegan,,,,14
 chewing-gum,Chewing gum,,,Pantry,Sweets,usda:19163,Chewing gum,360,0.0,0.3,96.7,2.4,66.08,1,,stick=3.0,,vegan,,,,2
-chia-seeds,Chia seeds,,,Dry goods,Nut and Seed Products,usda:12006,"Seeds, chia seeds, dried",486,16.54,30.74,42.12,34.4,,16,0.72,,,vegan,,540-540,,1
+chia-seeds,Chia seeds,,,Dry goods,Nut and Seed Products,usda:12006,"Seeds, chia seeds, dried",486,16.54,30.74,42.12,34.4,,16,0.72,,,vegan,,540-540,,2
 chicken-breast-tenders,Chicken breast tenders,,,Meat and seafood,Poultry Products,usda:05327,"Chicken breast tenders, breaded, uncooked",263,14.73,15.75,15.01,1.1,0.37,536,,piece=15.0; pieces=15.5,,contains meat or fish,,,,2
 chicken-broth-cubes,Chicken broth cubes,,,Canned,"Soups, Sauces, and Gravies",usda:06081,"Soup, chicken broth cubes, dry",198,14.6,4.7,23.5,0.0,0.0,24000,,cube=4.8,,contains meat or fish,,,,2
 chicken-broth-or-bouillon,Chicken broth or bouillon,,,Canned,"Soups, Sauces, and Gravies",usda:06080,"Soup, chicken broth or bouillon, dry",267,16.66,13.88,18.01,0.0,17.36,23875,0.407,cube=4.0; packet=6.0,,contains meat or fish,,,,2
 chicken-dark-meat,Chicken dark meat,,,Meat and seafood,Poultry Products,usda:05131,"Chicken, stewing, dark meat, meat only, raw",157,19.7,8.12,0.0,0.0,0.0,101,,unit=105.0; /2 bird=154.0,,contains meat or fish,,,,32
-chicken-drumstick,Chicken drumstick,,,Meat and seafood,Poultry Products,usda:05066,"Chicken, broilers or fryers, drumstick, meat and skin, raw",161,18.08,9.2,0.11,0.0,0.0,106,,drumstick with skin=133.0; drumstick=130.0; food guide serving = 90g=90.0,,contains meat or fish,,,,12
+chicken-drumstick,Chicken drumstick,,,Meat and seafood,Poultry Products,usda:05066,"Chicken, broilers or fryers, drumstick, meat and skin, raw",161,18.08,9.2,0.11,0.0,0.0,106,,drumstick with skin=133.0; drumstick=130.0; food guide serving = 90g=90.0,,contains meat or fish,,,,14
 chicken-fat,Chicken fat,,,Pantry,Fats and Oils,usda:04542,"Fat, chicken",900,0.0,99.8,0.0,0.0,0.0,0,0.866,,,contains meat or fish,,,,1
 chicken-feet,Chicken feet,,,Meat and seafood,Poultry Products,usda:05335,"Chicken, feet, boiled",215,19.4,14.6,0.2,0.0,0.0,67,,food guide serving = 75g=75.0,,contains meat or fish,,,,1
 chicken-giblets,Chicken giblets,,,Meat and seafood,Poultry Products,usda:05137,"Chicken, capons, giblets, raw",130,18.28,5.18,1.42,0.0,,77,,unit=18.0; food guide serving = 90g=90.0,,contains meat or fish,,,,20
@@ -324,9 +334,9 @@ chicken-light-meat,Chicken light meat,,,Meat and seafood,Poultry Products,usda:0
 chicken-liver,Chicken liver,,,Meat and seafood,Poultry Products,usda:05027,"Chicken, liver, all classes, raw",119,16.92,4.83,0.73,0.0,0.0,71,,food guide serving = 90g=90.0,,contains meat or fish,,,,3
 chicken-patty,Chicken patty,,,Meat and seafood,Poultry Products,usda:05323,"Chicken patty, frozen, uncooked",292,14.33,20.04,13.61,1.2,0.0,518,,patty=60.0,,contains meat or fish,,,,2
 chicken-spread,Chicken spread,,,Meat and seafood,Sausages and Luncheon Meats,usda:07018,Chicken spread,158,18.01,17.56,4.05,0.3,0.47,722,0.878,serving=56.0,,contains meat or fish,,,,1
-chicken-wing,Chicken wing,,,Meat and seafood,Poultry Products,usda:05105,"Chicken, broilers or fryers, wing, meat only, raw",126,21.97,3.54,0.0,0.0,0.0,81,,"wing, bone and skin removed=17.0; wing=29.0; food guide serving = 90g=90.0",,contains meat or fish,,,,16
+chicken-wing,Chicken wing,,,Meat and seafood,Poultry Products,usda:05105,"Chicken, broilers or fryers, wing, meat only, raw",126,21.97,3.54,0.0,0.0,0.0,81,,"wing, bone and skin removed=17.0; wing=29.0; food guide serving = 90g=90.0",,contains meat or fish,,,,17
 chickpea-flour,Chickpea flour,,,Dry goods,Legumes and Legume Products,usda:16157,Chickpea flour (besan),387,22.39,6.69,57.82,10.8,10.85,64,0.389,serving=20.0,,vegan,,,,1
-chickpeas,Chickpeas,,,Dry goods,Legumes and Legume Products,usda:16056,"Chickpeas (garbanzo beans, bengal gram), mature seeds, raw",378,20.47,6.04,62.95,12.2,10.7,24,0.845,,,vegan,,,,7
+chickpeas,Chickpeas,,,Dry goods,Legumes and Legume Products,usda:16056,"Chickpeas (garbanzo beans, bengal gram), mature seeds, raw",378,20.47,6.04,62.95,12.2,10.7,24,0.845,,,vegan,,,,9
 chicory,Chicory,,,Produce,Vegetables and Vegetable Products,usda:11151,"Chicory, witloof, raw",17,0.9,0.1,4.0,3.1,,2,0.38,head=53.0,,vegan,,,,1
 chicory-greens,Chicory greens,,,Produce,Vegetables and Vegetable Products,usda:11152,"Chicory greens, raw",23,1.7,0.3,4.7,4.0,0.7,45,0.123,,,vegan,,,,1
 chicory-roots,Chicory roots,,,Produce,Vegetables and Vegetable Products,usda:11154,"Chicory roots, raw",72,1.4,0.2,17.51,1.5,8.73,50,0.38,root=60.0,,vegan,,,,1
@@ -375,9 +385,9 @@ cocoa-butter-oil,Cocoa butter oil,,,Pantry,Fats and Oils,usda:04501,"Oil, cocoa 
 cocoa-mix,Cocoa mix,,,Pantry,Beverages,usda:14192,"Beverages, Cocoa mix, powder",398,6.67,4.0,83.73,3.7,65.55,504,0.966,serving=28.0,,vegan,,,,5
 coconut-cream,Coconut cream,,,Dry goods,Nut and Seed Products,usda:12115,"Nuts, coconut cream, raw (liquid expressed from grated meat)",330,3.63,34.68,6.65,2.2,,4,1.014,,,contains meat or fish,,730-1825,90-90,2
 coconut-meat,Coconut meat,,,Dry goods,Nut and Seed Products,usda:12104,"Nuts, coconut meat, raw",354,3.33,33.49,15.23,9.0,6.23,20,0.338,medium=397.0; piece=45.0,,contains meat or fish,,,,7
-coconut-oil,Coconut oil,,,Pantry,Fats and Oils,usda:04047,"Oil, coconut",892,0.0,99.06,0.0,0.0,0.0,0,0.921,,,vegan,,1095-1095,,1
+coconut-oil,Coconut oil,,,Pantry,Fats and Oils,usda:04047,"Oil, coconut",892,0.0,99.06,0.0,0.0,0.0,0,0.921,,,vegan,,1095-1095,,2
 coconut-water,Coconut water,,,Dry goods,Nut and Seed Products,usda:12119,"Nuts, coconut water (liquid from coconuts)",19,0.72,0.2,3.71,1.1,2.61,105,1.014,,,vegan,,360-360,,2
-cod,Cod,,,Meat and seafood,Finfish and Shellfish Products,usda:15015,"Fish, cod, Atlantic, raw",82,17.81,0.67,0.0,0.0,0.0,54,,fillet=231.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,180-240,11
+cod,Cod,,,Meat and seafood,Finfish and Shellfish Products,usda:15015,"Fish, cod, Atlantic, raw",82,17.81,0.67,0.0,0.0,0.0,54,,fillet=231.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,180-240,13
 coffee,Coffee,,,Pantry,Beverages,usda:14223,"Beverages, coffee, instant, chicory",3,0.09,0.0,0.75,0.0,0.0,7,1.011,serving 6 fl oz=179.0,,vegan,21-21,,,24
 coffee-and-cocoa,Coffee and cocoa,,,Pantry,Beverages,usda:14204,"Beverages, coffee and cocoa, instant, decaffeinated, with whitener and low calorie sweetener",440,9.0,13.21,71.4,4.8,34.98,500,1.298,serving=7.0,,vegan,,,,1
 coffee-and-cocoa-powder,Coffee and cocoa  powder,,,Pantry,Beverages,cnf:7281,"Coffee and cocoa (mocha) powder, with whitener and low calorie sweetener",506,9.0,31.3,47.0,4.8,34.98,500,1.28,,,vegan,,,,1
@@ -387,18 +397,18 @@ coffeecake,Coffeecake,,,Bakery,Baked Products,usda:18106,"Coffeecake, fruit",311
 colby-cheese,Colby cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01011,"Cheese, colby",394,23.76,32.11,2.57,0.0,0.52,604,0.518,slice=28.0,milk,vegetarian,,,,1
 coleslaw,Coleslaw,,,Produce,Vegetables and Vegetable Products,cnf:2062,"Coleslaw (cabbage salad), with dressing, homemade",78,1.29,2.61,12.41,1.5,,23,0.507,,,vegan,3-5,,,1
 coleslaw-dressing,Coleslaw dressing,,,Pantry,Fats and Oils,usda:43016,"Salad dressing, coleslaw",390,0.9,33.4,23.8,0.1,20.11,710,1.057,,,vegan,,,,2
-collards,Collards,,,Produce,Vegetables and Vegetable Products,usda:11161,"Collards, raw",32,3.02,0.61,5.42,4.0,0.46,17,0.152,,,vegan,,,,6
+collards,Collards,,,Produce,Vegetables and Vegetable Products,usda:11161,"Collards, raw",32,3.02,0.61,5.42,4.0,0.46,17,0.152,,,vegan,,,,7
 common-cabbage,Common cabbage,,,Produce,Vegetables and Vegetable Products,usda:11750,"Cabbage, common (danish, domestic, and pointed types), stored, raw",24,1.21,0.18,5.37,2.3,,18,0.296,head=908.0,,vegan,,,,3
 conch,Conch,,,Meat and seafood,Finfish and Shellfish Products,usda:15250,"Mollusks, conch, baked or broiled",130,26.3,1.2,1.7,0.0,0.0,153,0.537,food guide serving = 75g=75.0,shellfish,contains meat or fish,,,,1
 condensed-milk,Condensed milk,,,Dairy and eggs,Dairy and Egg Products,usda:01095,"Milk, canned, condensed, sweetened",321,7.91,8.7,54.4,0.0,54.4,127,1.293,,milk,vegetarian,,,,1
 cookie,Cookie,,,Bakery,Baked Products,cnf:7850,"Cookie, Ovaltine, commercial",474,6.15,18.01,71.9,2.0,20.33,146,,cookie=8.1,wheat or gluten,vegan,,60-90,240-360,44
-cookies,Cookies,,,Bakery,Baked Products,usda:18157,"Cookies, chocolate wafers",433,6.6,14.2,72.7,3.4,37.43,580,0.473,cookie=6.0; medium cookies=6.0,wheat or gluten,vegan,,60-90,240-360,79
+cookies,Cookies,,,Bakery,Baked Products,usda:18157,"Cookies, chocolate wafers",433,6.6,14.2,72.7,3.4,37.43,580,0.473,cookie=6.0; medium cookies=6.0,wheat or gluten,vegan,,60-90,240-360,80
 coriander-leaf,Coriander leaf,,,Pantry,Spices and Herbs,usda:02012,"Spices, coriander leaf, dried",279,21.93,4.78,52.1,10.4,7.27,211,0.122,,,vegan,,,,1
 coriander-seed,Coriander seed,,,Pantry,Spices and Herbs,usda:02013,"Spices, coriander seed",298,12.37,17.77,54.99,41.9,,35,0.352,,,vegan,,,,1
-corn,Corn,,,Produce,Vegetables and Vegetable Products,usda:11900,"Corn, sweet, white, raw",86,3.22,1.18,19.02,2.7,3.22,15,0.651,"ear, small=73.0; ear, medium=90.0; ear, large=143.0; ear, small, 14 - 16.5cm=73.0; ear, medium, 17 - 19cm=90.0; ear, large, 20 - 23cm=143.0",,vegan,,180-360,,34
+corn,Corn,,,Produce,Vegetables and Vegetable Products,usda:11900,"Corn, sweet, white, raw",86,3.22,1.18,19.02,2.7,3.22,15,0.651,"ear, small=73.0; ear, medium=90.0; ear, large=143.0; ear, small, 14 - 16.5cm=73.0; ear, medium, 17 - 19cm=90.0; ear, large, 20 - 23cm=143.0",,vegan,,180-360,,35
 corn-and-canola-oil,Corn and canola oil,,,Pantry,Fats and Oils,usda:42289,"Oil, corn and canola",884,0.0,100.0,0.0,0.0,0.0,0,0.947,,,vegan,,,,1
 corn-bran,Corn bran,,,Dry goods,Cereal Grains and Pasta,usda:20015,"Corn bran, crude",224,8.36,0.92,85.64,79.0,0.0,7,0.321,serving=20.0,,vegan,,,,1
-corn-flour,Corn flour,,,Dry goods,Cereal Grains and Pasta,usda:20016,"Corn flour, whole-grain, yellow",361,6.93,3.86,76.85,7.3,0.64,5,0.495,serving=20.0,,vegan,,,,7
+corn-flour,Corn flour,,,Dry goods,Cereal Grains and Pasta,usda:20016,"Corn flour, whole-grain, yellow",361,6.93,3.86,76.85,7.3,0.64,5,0.495,serving=20.0,,vegan,,,,8
 corn-fritter,Corn fritter,,,Bakery,Baked Products,cnf:6,Corn fritter,374,8.55,21.24,38.62,2.0,2.85,441,0.452,,,vegan,,,,1
 corn-grain,Corn grain,,,Dry goods,Cereal Grains and Pasta,usda:20014,"Corn grain, yellow",365,9.42,4.74,74.26,7.3,0.64,35,0.702,serving=20.0,,vegan,,,,2
 corn-grits,Corn grits,,,Dry goods,Breakfast Cereals,usda:08090,"Cereals, corn grits, white, regular and quick, enriched, dry",370,7.65,1.75,79.09,4.6,0.57,1,0.659,,,vegan,,,,7
@@ -411,8 +421,9 @@ corned-beef-loaf,Corned beef loaf,,,Meat and seafood,Sausages and Luncheon Meats
 cornmeal,Cornmeal,,,Dry goods,Cereal Grains and Pasta,usda:20020,"Cornmeal, whole-grain, yellow",362,8.12,3.59,76.89,7.3,0.64,35,0.516,serving=20.0,,vegan,,180-360,,12
 cornsalad,Cornsalad,,,Produce,Vegetables and Vegetable Products,usda:11190,"Cornsalad, raw",21,2.0,0.4,3.6,,,4,0.237,,,vegan,,,,1
 cornstarch,Cornstarch,,,Dry goods,Cereal Grains and Pasta,usda:20027,Cornstarch,381,0.26,0.05,91.27,0.9,0.0,9,0.541,serving=20.0,,vegan,,540-720,,1
-cos-or-romaine-lettuce,Cos or romaine lettuce,,,Produce,Vegetables and Vegetable Products,usda:11251,"Lettuce, cos or romaine, raw",17,1.23,0.3,3.29,2.1,1.19,8,0.199,leaf inner=6.0; leaf outer=28.0; head=626.0; nlea serving=85.0; leaf=10.0,,vegan,,,,1
-cottage-cheese,Cottage cheese,,,Dairy and eggs,Dairy and Egg Products,usda:43273,"Cheese, cottage, with vegetables",95,10.9,4.2,3.0,0.1,0.37,403,0.955,,milk,vegetarian,14-14,,,9
+cos-or-romaine-lettuce,Cos or romaine lettuce,,,Produce,Vegetables and Vegetable Products,usda:11251,"Lettuce, cos or romaine, raw",17,1.23,0.3,3.29,2.1,1.19,8,0.199,leaf inner=6.0; leaf outer=28.0; head=626.0; nlea serving=85.0; leaf=10.0,,vegan,,,,3
+cotija-cheese,Cotija cheese,,,Dairy and eggs,Dairy and Egg Products,fdc:2647443,"Cheese, cotija, solid",352,23.84,27.24,2.72,,,1625,,,milk,vegetarian,,,,1
+cottage-cheese,Cottage cheese,,,Dairy and eggs,Dairy and Egg Products,usda:43273,"Cheese, cottage, with vegetables",95,10.9,4.2,3.0,0.1,0.37,403,0.955,,milk,vegetarian,14-14,,,11
 cottage-pudding-cake-with-caramel-sauce,Cottage pudding cake with caramel sauce,,,Bakery,Baked Products,cnf:7730,"Cottage pudding cake with caramel sauce (poor man's, chômeur)",271,2.67,7.16,50.26,0.3,40.24,94,0.494,,wheat or gluten,vegan,,,,1
 cottonseed-flour,Cottonseed flour,,,Dry goods,Nut and Seed Products,usda:12007,"Seeds, cottonseed flour, partially defatted (glandless)",359,40.96,6.2,40.54,3.0,,35,0.397,,,vegan,,,,2
 cottonseed-kernels,Cottonseed kernels,,,Dry goods,Nut and Seed Products,usda:12160,"Seeds, cottonseed kernels, roasted (glandless)",506,32.59,36.29,21.9,5.5,,25,0.63,,,vegan,,,,1
@@ -420,7 +431,7 @@ cottonseed-meal,Cottonseed meal,,,Dry goods,Nut and Seed Products,usda:12011,"Se
 cottonseed-oil,Cottonseed oil,,,Pantry,Fats and Oils,usda:04502,"Oil, cottonseed, salad or cooking",884,0.0,100.0,0.0,0.0,0.0,0,0.921,,,vegan,,,,1
 couscous,Couscous,,,Dry goods,Cereal Grains and Pasta,usda:20028,"Couscous, dry",376,12.76,0.64,77.43,5.0,,10,0.731,,wheat or gluten,vegan,,,,2
 cowpeas,Cowpeas,,,Produce,Vegetables and Vegetable Products,usda:11201,"Cowpeas, leafy tips, raw",29,4.1,0.25,4.82,,,7,0.152,leaf=3.0,,vegan,,,,20
-crab,Crab,,,Meat and seafood,Finfish and Shellfish Products,usda:15136,"Crustaceans, crab, alaska king, raw",84,18.29,0.6,0.0,0.0,,836,0.499,leg=172.0; food guide serving = 90g=90.0,shellfish,contains meat or fish,1-3,,60-120,14
+crab,Crab,,,Meat and seafood,Finfish and Shellfish Products,usda:15136,"Crustaceans, crab, alaska king, raw",84,18.29,0.6,0.0,0.0,,836,0.499,leg=172.0; food guide serving = 90g=90.0,shellfish,contains meat or fish,1-3,,60-120,15
 crabapples,Crabapples,,,Produce,Fruits and Fruit Juices,usda:09077,"Crabapples, raw",76,0.4,0.3,19.95,,,1,0.465,fruit=35.0,,vegan,,,,1
 cracked-wheat-bread,Cracked-wheat bread,,,Bakery,Baked Products,usda:18025,"Bread, cracked-wheat",260,8.7,3.9,49.5,5.5,,538,,"slice, large or thick=30.0; slice, regular=25.0; slice=12.2; slice, thin=20.0; slice thin, crust not eaten=9.4",wheat or gluten,vegan,,,,1
 cracker,Cracker,,,Bakery,Baked Products,cnf:7874,"Cracker, assorted mix",452,8.96,14.7,71.05,4.0,7.51,489,,cracker=6.0,wheat or gluten,vegan,,240-240,90-120,40
@@ -428,7 +439,7 @@ cracker-meal,Cracker meal,,,Bakery,Baked Products,usda:18236,Cracker meal,383,9.
 crackers,Crackers,,,Bakery,Baked Products,usda:18235,"Crackers, whole-wheat",427,10.58,14.13,69.55,10.3,1.19,704,0.397,serving=28.0; cracker=4.7; square=4.0; squares=4.0; crackers=4.0,wheat or gluten,vegan,,240-240,90-120,46
 cranberries,Cranberries,,,Produce,Fruits and Fruit Juices,usda:09078,"Cranberries, raw",46,0.46,0.13,11.97,3.6,4.27,2,0.444,,,vegan,60-60,,360-360,2
 cranberry-beans,Cranberry beans,,,Dry goods,Legumes and Legume Products,usda:16019,"Beans, cranberry (roman), mature seeds, raw",335,23.03,1.23,60.05,24.7,,6,0.824,,,vegan,,,,4
-cranberry-juice,Cranberry juice,,,Pantry,Fruits and Fruit Juices,usda:43382,"Cranberry juice, unsweetened",46,0.39,0.13,12.2,0.1,12.1,2,1.069,,,vegan,,,,1
+cranberry-juice,Cranberry juice,,,Pantry,Fruits and Fruit Juices,usda:43382,"Cranberry juice, unsweetened",46,0.39,0.13,12.2,0.1,12.1,2,1.069,,,vegan,,,,2
 cranberry-juice-blend,Cranberry juice blend,,,Canned,Fruits and Fruit Juices,usda:09522,"Cranberry juice blend, 100% juice, bottled, with added vitamin C and calcium",45,0.27,0.12,10.91,0.1,9.8,6,1.008,,,vegan,,,,1
 cranberry-juice-cocktail,Cranberry juice cocktail,,,Pantry,Beverages,usda:14284,"Beverages, Cranberry juice cocktail",52,0.0,0.34,12.25,,11.41,2,1.145,,,vegan,,,,5
 cranberry-sauce,Cranberry sauce,,,Canned,Fruits and Fruit Juices,usda:09081,"Cranberry sauce, canned, sweetened",159,0.9,0.15,40.4,1.1,31.75,5,1.171,slice=57.0,,vegan,,730-730,,1
@@ -437,7 +448,7 @@ cranberry-apricot-juice-drink,Cranberry-apricot juice drink,,,Pantry,Beverages,u
 cranberry-grape-juice-drink,Cranberry-grape juice drink,,,Pantry,Beverages,usda:14241,"Beverages, cranberry-grape juice drink, bottled",56,0.2,0.1,14.0,0.1,,3,1.036,,,vegan,,,,1
 cranberry-orange-relish,Cranberry-orange relish,,,Canned,Fruits and Fruit Juices,usda:09082,"Cranberry-orange relish, canned",178,0.3,0.1,46.2,0.0,,32,1.162,,,vegan,,,,1
 crayfish,Crayfish,,,Meat and seafood,Finfish and Shellfish Products,usda:15145,"Crustaceans, crayfish, mixed species, wild, raw",77,15.97,0.95,0.0,0.0,0.0,58,0.592,food guide serving = 90g=90.0,shellfish,contains meat or fish,1-3,,180-540,4
-cream-cheese,Cream cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01017,"Cheese, cream",350,6.15,34.44,5.52,0.0,3.76,314,0.98,"package, small=85.0",milk,vegetarian,14-14,,,3
+cream-cheese,Cream cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01017,"Cheese, cream",350,6.15,34.44,5.52,0.0,3.76,314,0.98,"package, small=85.0",milk,vegetarian,14-14,,,4
 cream-cheese-product,Cream cheese product,,,Dairy and eggs,Dairy and Egg Products,cnf:7752,"Cheese, cream cheese product, flavoured, sweet",252,5.45,18.57,17.03,0.0,14.22,445,1.08,,milk,vegetarian,,,,3
 cream-of-tartar,Cream of tartar,,,Bakery,Baked Products,usda:18373,"Leavening agents, cream of tartar",258,0.0,0.0,61.5,0.2,0.0,52,0.609,,wheat or gluten,vegan,,,,1
 cream-puff,Cream puff,,,Bakery,Baked Products,usda:18969,"Cream puff, eclair, custard or cream filled, iced",334,4.41,18.52,37.43,0.9,22.05,265,,snack cake=46.0,milk|wheat or gluten,vegetarian,,,,1
@@ -452,7 +463,7 @@ croissants,Croissants,,,Bakery,Baked Products,usda:18240,"Croissants, apple",254
 croutons,Croutons,,,Bakery,Baked Products,usda:18243,"Croutons, seasoned",465,10.8,18.3,63.5,5.0,4.41,1089,0.169,"package, fast food=10.0; cubes=0.2",wheat or gluten,vegan,150-180,150-180,330-360,2
 crumpets,Crumpets,,,Bakery,Baked Products,cnf:7910,"Crumpets, plain",214,6.3,0.75,45.63,2.0,3.67,327,,muffin=48.0,wheat or gluten,vegan,,,,1
 crepe,Crêpe,,,Bakery,Baked Products,cnf:7731,"Crêpe, plain, homemade",224,9.01,11.58,20.44,0.6,4.34,281,0.57,large=102.0; small=37.0,wheat or gluten,vegan,,,,1
-cucumber-pickles,Cucumber pickles,,,Produce,Vegetables and Vegetable Products,usda:11937,"Pickles, cucumber, dill or kosher dill",12,0.5,0.3,2.41,1.0,1.07,809,0.655,"spear, small=35.0; slice=7.0; large=135.0; medium=65.0; small=37.0",,vegan,,,,6
+cucumber-pickles,Cucumber pickles,,,Produce,Vegetables and Vegetable Products,usda:11937,"Pickles, cucumber, dill or kosher dill",12,0.5,0.3,2.41,1.0,1.07,809,0.655,"spear, small=35.0; slice=7.0; large=135.0; medium=65.0; small=37.0",,vegan,,,,7
 cumin-seed,Cumin seed,,,Pantry,Spices and Herbs,usda:02014,"Spices, cumin seed",375,17.81,22.27,44.24,10.5,2.25,168,0.417,,,vegan,,,,1
 cupu-assu-oil,Cupu assu oil,,,Pantry,Fats and Oils,usda:04541,"Oil, cupu assu",884,0.0,100.0,0.0,0.0,0.0,0,0.92,,,vegan,,,,1
 curds-cheese,Curds cheese,,,Dairy and eggs,Dairy and Egg Products,cnf:7745,"Cheese, curds",375,22.59,30.56,2.51,0.0,0.45,701,0.65,,milk,vegetarian,,,,1
@@ -485,7 +496,7 @@ drum,Drum,,,Meat and seafood,Finfish and Shellfish Products,usda:15024,"Fish, dr
 drumstick-leaves,Drumstick leaves,,,Produce,Vegetables and Vegetable Products,usda:11222,"Drumstick leaves, raw",64,9.4,1.4,8.28,2.0,,9,0.089,,,vegan,,,,3
 drumstick-pods,Drumstick pods,,,Produce,Vegetables and Vegetable Products,usda:11620,"Drumstick pods, raw",37,2.1,0.2,8.53,3.2,,42,0.423,pod=11.0,,vegan,,,,3
 dry-milk,Dry milk,,,Dairy and eggs,Dairy and Egg Products,usda:01212,"Milk, dry, whole, without added vitamin D",496,26.32,26.71,38.42,0.0,38.42,371,0.541,,milk,vegetarian,,,,7
-dry-white-cheese,Dry white cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01227,"Cheese, dry white, queso seco",325,24.51,24.35,2.04,,0.55,1808,0.41,,milk,vegetarian,,,,1
+dry-white-cheese,Dry white cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01227,"Cheese, dry white, queso seco",325,24.51,24.35,2.04,,0.55,1808,0.41,,milk,vegetarian,,,,3
 duck,Duck,,,Meat and seafood,Poultry Products,usda:05144,"Duck, wild, meat and skin, raw",211,17.42,15.2,0.0,0.0,,56,,unit=239.0; /2 bird=270.0,,contains meat or fish,30-30,,,6
 duck-breast,Duck breast,,,Meat and seafood,Poultry Products,usda:05145,"Duck, wild, breast, meat only, raw",123,19.85,4.25,0.0,0.0,,57,,unit=73.0; breast=166.0; food guide serving = 90g=90.0,,contains meat or fish,,,,3
 duck-fat,Duck fat,,,Pantry,Fats and Oils,usda:04574,"Fat, duck",882,0.0,99.8,0.0,0.0,0.0,0,0.866,,,contains meat or fish,30-30,,,1
@@ -509,7 +520,8 @@ egg-noodles,Egg noodles,,,Dry goods,Cereal Grains and Pasta,usda:20109,"Noodles,
 egg-substitute,Egg substitute,,,Dairy and eggs,Dairy and Egg Products,usda:01144,"Egg substitute, powder",444,55.5,13.0,21.8,0.0,21.8,800,,,,vegetarian,3-4,,360-360,2
 eggnog,Eggnog,,,Dairy and eggs,Dairy and Egg Products,usda:01057,Eggnog,88,4.55,4.19,8.05,0.0,8.05,54,1.074,,egg,vegetarian,3-5,,180-180,1
 eggnog-flavor-mix,Eggnog-flavor mix,,,Pantry,Beverages,usda:14245,"Beverages, Eggnog-flavor mix, powder, prepared with whole milk",95,2.93,3.02,14.2,0.0,12.66,55,1.15,,egg|milk,vegetarian,,,,1
-eggplant,Eggplant,,,Produce,Vegetables and Vegetable Products,usda:11209,"Eggplant, raw",25,0.98,0.18,5.88,3.0,3.53,2,0.347,,,vegan,4-7,1-1,180-240,4
+eggplant,Eggplant,,,Produce,Vegetables and Vegetable Products,usda:11209,"Eggplant, raw",25,0.98,0.18,5.88,3.0,3.53,2,0.347,,,vegan,4-7,1-1,180-240,5
+einkorn,Einkorn,,,Dry goods,Cereal Grains and Pasta,fdc:2710827,"Einkorn, grain, dry, raw",346,15.12,3.81,68.65,8.9,,0,,,,vegan,,,,1
 elderberries,Elderberries,,,Produce,Fruits and Fruit Juices,usda:09088,"Elderberries, raw",73,0.66,0.5,18.4,7.0,,6,0.613,,,vegan,,,,1
 elk,Elk,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17166,"Game meat, elk, raw",111,22.95,1.45,0.0,0.0,,58,,food guide serving = 90g=90.0,,contains meat or fish,,,,7
 emu,Emu,,,Meat and seafood,Poultry Products,usda:05621,"Emu, ground, raw",134,22.77,4.03,0.0,0.0,0.0,56,,patty=117.0; food guide serving = 90g=90.0,,contains meat or fish,,,,12
@@ -527,15 +539,16 @@ eulachon,Eulachon,,,Meat and seafood,Finfish and Shellfish Products,cnf:3241,"Fi
 evaporated-milk,Evaporated milk,,,Dairy and eggs,Dairy and Egg Products,usda:01291,"Milk, evaporated, 2% fat, with added vitamin A and vitamin D",107,6.67,2.0,15.74,0.0,6.67,100,1.065,can=369.0,milk,vegetarian,,,,5
 falafel,Falafel,,,Dry goods,Legumes and Legume Products,usda:16138,"Falafel, home-prepared",333,13.31,17.8,31.84,,,294,,patty=17.0,,vegan,,,,1
 farina,Farina,,,Dry goods,Breakfast Cereals,usda:08172,"Cereals, farina, unenriched, dry",369,10.6,0.5,78.0,1.9,,3,0.741,,,vegan,,,,3
+farro,Farro,,,Dry goods,Cereal Grains and Pasta,fdc:2710828,"Farro, pearled, dry, raw",344,12.64,3.1,72.13,7.3,,1,,,wheat or gluten,vegan,,180-180,360-360,1
 fat-free-ice-cream,Fat free ice cream,,,Dairy and eggs,Dairy and Egg Products,usda:01243,"Fat free ice cream, no sugar added, flavors other than chocolate",129,4.41,0.0,27.94,7.4,8.82,110,0.575,,milk,vegetarian,,,,1
 fava-beans,Fava beans,,,Produce,Vegetables and Vegetable Products,usda:11973,"Beans, fava, in pod, raw",88,7.92,0.73,17.63,7.5,9.21,25,0.533,pod=6.1,,vegan,,,,1
 feijoa,Feijoa,,,Produce,Fruits and Fruit Juices,usda:09334,"Feijoa, raw",61,0.71,0.42,15.21,6.4,8.2,3,0.947,fruit without peel=42.0; fruit=50.0; fruits=50.0,,vegan,7-7,3-5,180-240,1
-fennel,Fennel,,,Produce,Vegetables and Vegetable Products,usda:11957,"Fennel, bulb, raw",31,1.24,0.2,7.3,3.1,3.93,52,0.368,bulb=234.0,,vegan,,,,1
+fennel,Fennel,,,Produce,Vegetables and Vegetable Products,usda:11957,"Fennel, bulb, raw",31,1.24,0.2,7.3,3.1,3.93,52,0.368,bulb=234.0,,vegan,,,,2
 fennel-seed,Fennel seed,,,Pantry,Spices and Herbs,usda:02018,"Spices, fennel seed",345,15.8,14.87,52.29,39.8,,88,0.4,,,vegan,,,,1
 fenugreek-seed,Fenugreek seed,,,Pantry,Spices and Herbs,usda:02019,"Spices, fenugreek seed",323,23.0,6.41,58.35,24.6,,67,0.751,,,vegan,,,,1
 fiddlehead-ferns,Fiddlehead ferns,,,Produce,Vegetables and Vegetable Products,usda:11995,"Fiddlehead ferns, raw",34,4.55,0.4,5.54,,,1,0.484,,,vegan,,,,2
 fiddlehead-greens,Fiddlehead greens,,,Produce,Vegetables and Vegetable Products,cnf:6617,"Fiddlehead greens (ferns), frozen, boiled, drained",34,4.31,0.35,5.74,1.9,,0,,,,vegan,,,,1
-figs,Figs,,,Produce,Fruits and Fruit Juices,usda:09089,"Figs, raw",74,0.75,0.3,19.18,2.9,16.26,1,,large=64.0; medium=50.0; small=40.0; large fruit=64.0; small fruit=40.0; medium fruit=50.0,,vegan,,,,7
+figs,Figs,,,Produce,Fruits and Fruit Juices,usda:09089,"Figs, raw",74,0.75,0.3,19.18,2.9,16.26,1,,large=64.0; medium=50.0; small=40.0; large fruit=64.0; small fruit=40.0; medium fruit=50.0,,vegan,,,,9
 filled-milk,Filled milk,,,Dairy and eggs,Dairy and Egg Products,usda:01060,"Milk, filled, fluid, with lauric acid oil",63,3.33,3.4,4.74,0.0,4.74,57,1.031,,milk,vegetarian,,,,2
 fireweed,Fireweed,,,Produce,Vegetables and Vegetable Products,usda:11985,"Fireweed, leaves, raw",103,4.71,2.75,19.22,10.6,,34,0.097,,,vegan,,,,1
 fish-broth,Fish broth,,,Canned,"Soups, Sauces, and Gravies",usda:06963,Fish broth,16,2.0,0.6,0.4,0.0,0.09,318,1.031,,,contains meat or fish,,,,1
@@ -547,13 +560,14 @@ flat-noodles,Flat noodles,,,Dry goods,Cereal Grains and Pasta,usda:20118,"Noodle
 flatfish,Flatfish,,,Meat and seafood,Finfish and Shellfish Products,usda:15028,"Fish, flatfish (flounder and sole species), raw",70,12.41,1.93,0.0,0.0,0.0,296,,fillet=163.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
 flavors-not-chocolate-yogurt,Flavors not chocolate yogurt,,,Dairy and eggs,Dairy and Egg Products,usda:01235,"Yogurt, frozen, flavors not chocolate, nonfat milk, with low-calorie sweetener",104,4.4,0.8,19.7,2.0,12.61,81,0.575,,milk,vegetarian,,,,1
 flavors-other-than-chocolate-yogurt,Flavors other than chocolate yogurt,,,Dairy and eggs,Dairy and Egg Products,usda:01298,"Yogurt, frozen, flavors other than chocolate, lowfat",139,8.0,2.5,21.0,0.0,21.0,45,0.845,,milk,vegetarian,,,,1
-flaxseed,Flaxseed,,,Dry goods,Nut and Seed Products,usda:12220,"Seeds, flaxseed",534,18.29,42.16,28.88,27.3,1.55,30,0.71,,,vegan,,730-730,,1
+flaxseed,Flaxseed,,,Dry goods,Nut and Seed Products,usda:12220,"Seeds, flaxseed",534,18.29,42.16,28.88,27.3,1.55,30,0.71,,,vegan,,730-730,,2
 flaxseed-oil,Flaxseed oil,,,Pantry,Fats and Oils,usda:42231,"Oil, flaxseed, cold pressed",884,0.11,99.98,0.0,0.0,0.0,0,0.921,,,vegan,,,,2
 focaccia,Focaccia,,,Bakery,Baked Products,usda:18973,"Focaccia, Italian flatbread, plain",249,8.77,7.89,35.82,1.8,1.75,561,,piece=57.0,wheat or gluten,vegan,,,,1
+fonio,Fonio,,,Dry goods,Cereal Grains and Pasta,fdc:2710829,"Fonio, grain, dry, raw",377,7.17,1.69,81.31,2.2,,3,,,,vegan,,,,1
 fontina-cheese,Fontina cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01020,"Cheese, fontina",389,25.6,31.14,1.55,0.0,1.55,800,0.507,slice=28.0; package=227.0,milk,vegetarian,,,,1
 for-baking,For baking,,,Pantry,Sweets,usda:19907,"Sweeteners, for baking, contains sugar and sucralose",398,0.0,0.0,99.53,,47.05,2,0.917,,,vegan,,,,2
 formulated,Formulated,,,Dry goods,Nut and Seed Products,usda:12140,"Nuts, formulated, wheat-based, unflavored, with salt added",622,13.82,57.7,23.68,5.2,,505,,,tree nuts|wheat or gluten,vegan,,,,2
-frankfurter,Frankfurter,,,Meat and seafood,Sausages and Luncheon Meats,usda:07950,"Frankfurter, meat",290,10.26,25.76,4.17,0.0,,1090,0.638,serving=52.0; jumbo=75.0,,contains meat or fish,,,,15
+frankfurter,Frankfurter,,,Meat and seafood,Sausages and Luncheon Meats,usda:07950,"Frankfurter, meat",290,10.26,25.76,4.17,0.0,,1090,0.638,serving=52.0; jumbo=75.0,,contains meat or fish,,,,16
 french-beans,French beans,,,Dry goods,Legumes and Legume Products,usda:16022,"Beans, french, mature seeds, raw",343,18.81,2.02,64.11,25.2,,18,0.778,,,vegan,,,,3
 french-dressing,French dressing,,,Pantry,Fats and Oils,usda:04133,"Salad dressing, french, home recipe",631,0.1,70.2,3.4,0.0,,658,0.93,,,vegan,,,,8
 french-or-vienna-bread,French or vienna bread,,,Bakery,Baked Products,usda:28318,"Bread, french or vienna, whole wheat",239,8.33,1.04,49.1,4.2,0.0,375,,slice 1 serving=48.0; slice=48.0,wheat or gluten,vegan,,,,3
@@ -595,24 +609,25 @@ gourd,Gourd,,,Produce,Vegetables and Vegetable Products,usda:11220,"Gourd, dishc
 grains,Grains,,,Dry goods,Cereal Grains and Pasta,cnf:4530,"Grains, wheat flour, white, high gluten",319,13.9,1.6,67.61,2.9,,0,0.528,serving=20.0,wheat or gluten,vegan,,120-120,240-240,11
 granola-bar,Granola bar,,,Bakery,Baked Products,cnf:6596,"Granola bar, crunchy, plain",480,9.01,21.51,64.39,6.2,26.41,351,,bars=23.0; bar=23.0,wheat or gluten,vegan,,180-360,,12
 grape-drink,Grape drink,,,Pantry,Beverages,usda:14277,"Beverages, grape drink, canned",61,0.0,0.0,15.72,0.0,13.06,16,1.057,,,vegan,,,,1
-grape-juice,Grape juice,,,Frozen,Fruits and Fruit Juices,cnf:1720,"Grape juice, frozen concentrate, sugar and vitamin C added, diluted",51,0.19,0.09,12.75,0.1,12.65,2,1.057,,,vegan,,,,5
+grape-juice,Grape juice,,,Pantry,Fruits and Fruit Juices,fdc:2003593,"Grape juice, white, with added vitamin C, from concentrate, shelf stable",65,0.09,0.27,15.84,,14.45,7,,,,vegan,,,,7
 grape-juice-drink,Grape juice drink,,,Pantry,Beverages,usda:14282,"Beverages, grape juice drink, canned",57,0.0,0.0,14.55,0.1,14.11,9,1.059,serving=227.0,,vegan,,,,1
 grape-leaves,Grape leaves,,,Produce,Vegetables and Vegetable Products,usda:11974,"Grape leaves, raw",93,5.6,2.12,17.31,11.0,6.3,9,0.059,leaf=3.0,,vegan,,,,2
 grapefruit,Grapefruit,,,Produce,Fruits and Fruit Juices,usda:09118,"Grapefruit, raw, white, Florida",32,0.63,0.1,8.19,,,0,0.972,fruit=236.0; /2 fruit=118.0,,vegan,10-21,10-10,,10
-grapefruit-juice,Grapefruit juice,,,Pantry,Fruits and Fruit Juices,usda:09404,"Grapefruit juice, pink, raw",39,0.5,0.1,9.2,,,1,1.044,fruit yields=196.0,,vegan,,,,7
-grapes,Grapes,,,Produce,Fruits and Fruit Juices,usda:09131,"Grapes, american type (slip skin), raw",67,0.63,0.35,17.15,0.9,16.25,2,0.389,fruits=2.4,,vegan,7-7,1-1,30-30,5
+grapefruit-juice,Grapefruit juice,,,Pantry,Fruits and Fruit Juices,usda:09404,"Grapefruit juice, pink, raw",39,0.5,0.1,9.2,,,1,1.044,fruit yields=196.0,,vegan,,,,9
+grapes,Grapes,,,Produce,Fruits and Fruit Juices,usda:09131,"Grapes, american type (slip skin), raw",67,0.63,0.35,17.15,0.9,16.25,2,0.389,fruits=2.4,,vegan,7-7,1-1,30-30,9
 grapeseed-oil,Grapeseed oil,,,Pantry,Fats and Oils,usda:04517,"Oil, grapeseed",884,0.0,100.0,0.0,0.0,0.0,0,0.921,,,vegan,,365-365,,1
 grayling,Grayling,,,Meat and seafood,Finfish and Shellfish Products,cnf:5843,"Fish, grayling, Indigenous, raw",97,20.0,1.9,0.0,0.0,0.0,81,,food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
-great-northern-beans,Great northern beans,,,Dry goods,Legumes and Legume Products,usda:16024,"Beans, great northern, mature seeds, raw",339,21.86,1.14,62.37,20.2,2.26,14,0.773,,,vegan,,,,5
-greek-yogurt,Greek yogurt,,,Dairy and eggs,Dairy and Egg Products,usda:01293,"Yogurt, Greek, plain, whole milk",97,9.0,5.0,3.98,0.0,4.0,35,,,milk,vegetarian,,,,8
+great-northern-beans,Great northern beans,,,Dry goods,Legumes and Legume Products,usda:16024,"Beans, great northern, mature seeds, raw",339,21.86,1.14,62.37,20.2,2.26,14,0.773,,,vegan,,,,6
+greek-yogurt,Greek yogurt,,,Dairy and eggs,Dairy and Egg Products,usda:01293,"Yogurt, Greek, plain, whole milk",97,9.0,5.0,3.98,0.0,4.0,35,,,milk,vegetarian,,,,11
+green-cabbage,Green cabbage,,,Produce,Vegetables and Vegetable Products,fdc:2346407,"Cabbage, green, raw",28,0.96,0.23,6.38,,,16,,,,vegan,,,,1
 green-goddess-dressing,Green goddess dressing,,,Pantry,Fats and Oils,usda:43017,"Salad dressing, green goddess, regular",427,1.9,43.33,7.36,0.1,6.67,867,1.036,,,vegan,,,,1
 green-leaf-lettuce,Green leaf lettuce,,,Produce,Vegetables and Vegetable Products,usda:11253,"Lettuce, green leaf, raw",15,1.36,0.15,2.87,1.3,0.78,28,0.152,head=360.0; leaf inner=4.8; leaf outer=24.0; leaf=10.0,,vegan,,,,1
-green-peas,Green peas,,,Produce,Vegetables and Vegetable Products,usda:11304,"Peas, green, raw",81,5.42,0.4,14.45,5.7,5.67,5,0.613,,,vegan,,,,13
+green-peas,Green peas,,,Produce,Vegetables and Vegetable Products,usda:11304,"Peas, green, raw",81,5.42,0.4,14.45,5.7,5.67,5,0.613,,,vegan,,,,14
 grenadine-syrup,Grenadine syrup,,,Pantry,Sweets,usda:42040,"Syrups, grenadine",268,0.0,0.0,66.91,0.0,46.55,27,1.351,,,vegan,,,,1
-ground-chicken,Ground chicken,,,Meat and seafood,Poultry Products,usda:05332,"Chicken, ground, raw",143,17.44,8.1,0.04,0.0,0.0,60,,food guide serving = 90g=90.0,,contains meat or fish,,,,2
-ground-lamb,Ground lamb,,,Meat and seafood,"Lamb, Veal, and Game Products",cnf:3639,"Lamb, Canadian, ground, raw",204,17.06,14.12,0.0,0.0,0.0,68,,food guide serving = 90g=90.0,,contains meat or fish,,,,7
-ground-pork,Ground pork,,,Meat and seafood,Pork Products,usda:10972,"Pork, ground, 84% lean / 16% fat, raw",218,17.99,16.0,0.44,0.0,0.0,68,,food guide serving = 90g=90.0,,contains meat or fish,,,,10
-ground-turkey,Ground turkey,,,Meat and seafood,Poultry Products,usda:05305,"Ground turkey, raw",148,19.66,7.66,0.0,0.0,0.0,58,,"patty, 4 oz=114.0; patty=114.0; food guide serving = 90g=90.0",,contains meat or fish,1-2,,90-120,11
+ground-chicken,Ground chicken,,,Meat and seafood,Poultry Products,usda:05332,"Chicken, ground, raw",143,17.44,8.1,0.04,0.0,0.0,60,,food guide serving = 90g=90.0,,contains meat or fish,,,,3
+ground-lamb,Ground lamb,,,Meat and seafood,"Lamb, Veal, and Game Products",cnf:3639,"Lamb, Canadian, ground, raw",204,17.06,14.12,0.0,0.0,0.0,68,,food guide serving = 90g=90.0,,contains meat or fish,,,,8
+ground-pork,Ground pork,,,Meat and seafood,Pork Products,usda:10972,"Pork, ground, 84% lean / 16% fat, raw",218,17.99,16.0,0.44,0.0,0.0,68,,food guide serving = 90g=90.0,,contains meat or fish,,,,11
+ground-turkey,Ground turkey,,,Meat and seafood,Poultry Products,usda:05305,"Ground turkey, raw",148,19.66,7.66,0.0,0.0,0.0,58,,"patty, 4 oz=114.0; patty=114.0; food guide serving = 90g=90.0",,contains meat or fish,1-2,,90-120,14
 ground-veal,Ground veal,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17142,"Veal, ground, raw",197,18.58,13.06,0.0,0.0,0.0,103,,food guide serving = 90g=90.0,,contains meat or fish,,,,3
 groundcherries,Groundcherries,,,Produce,Fruits and Fruit Juices,usda:09138,"Groundcherries, (cape-gooseberries or poha), raw",53,1.9,0.7,11.2,,,,0.592,cherry=4.8; fruits=4.8,,vegan,,,,1
 grouper,Grouper,,,Meat and seafood,Finfish and Shellfish Products,usda:15031,"Fish, grouper, mixed species, raw",92,19.38,1.02,0.0,0.0,,53,,fillet=259.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
@@ -623,9 +638,9 @@ guava-sauce,Guava sauce,,,Pantry,Fruits and Fruit Juices,usda:09143,"Guava sauce
 guavas,Guavas,,,Produce,Fruits and Fruit Juices,usda:09139,"Guavas, common, raw",68,2.55,0.95,14.32,5.4,8.92,2,0.697,"fruit, without refuse=55.0; fruit=55.0",,vegan,2-4,,,2
 guinea-hen,Guinea hen,,,Meat and seafood,Poultry Products,usda:05152,"Guinea hen, meat only, raw",110,20.64,2.47,0.0,0.0,,69,,unit=275.0; /2 bird=264.0; food guide serving = 90g=90.0,,contains meat or fish,,,,2
 gums,Gums,,,Pantry,Sweets,usda:42281,"Gums, seed gums (includes locust bean, guar)",332,4.6,0.5,77.3,77.3,0.0,125,,,,vegan,,,,1
-haddock,Haddock,,,Meat and seafood,Finfish and Shellfish Products,usda:15033,"Fish, haddock, raw",74,16.32,0.45,0.0,0.0,0.0,213,,fillet=193.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,180-240,3
+haddock,Haddock,,,Meat and seafood,Finfish and Shellfish Products,usda:15033,"Fish, haddock, raw",74,16.32,0.45,0.0,0.0,0.0,213,,fillet=193.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,180-240,4
 half-and-half-cream,Half and half cream,,,Dairy and eggs,Dairy and Egg Products,usda:01049,"Cream, fluid, half and half",123,3.13,10.39,4.73,0.0,4.13,61,1.023,"container, individual=15.0",milk,vegetarian,,,,3
-halibut,Halibut,,,Meat and seafood,Finfish and Shellfish Products,usda:15038,"Fish, halibut, Greenland, raw",186,14.37,13.84,0.0,0.0,0.0,80,,fillet=408.0; /2 fillet=204.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,180-240,4
+halibut,Halibut,,,Meat and seafood,Finfish and Shellfish Products,usda:15038,"Fish, halibut, Greenland, raw",186,14.37,13.84,0.0,0.0,0.0,80,,fillet=408.0; /2 fillet=204.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,180-240,5
 ham-and-cheese-loaf-or-roll,Ham and cheese loaf or roll,,,Meat and seafood,Sausages and Luncheon Meats,usda:07032,Ham and cheese loaf or roll,241,13.6,18.7,4.0,0.0,0.0,1000,,slice=28.0; slices=28.5,milk,contains meat or fish,,,,1
 ham-and-cheese-spread,Ham and cheese spread,,,Meat and seafood,Sausages and Luncheon Meats,usda:07033,Ham and cheese spread,245,16.18,18.53,2.28,0.0,,1197,1.014,,milk,contains meat or fish,,,,1
 ham-salad-spread,Ham salad spread,,,Meat and seafood,Sausages and Luncheon Meats,usda:07031,Ham salad spread,216,8.68,15.53,10.64,0.0,0.0,1075,1.07,,,contains meat or fish,,,,1
@@ -633,7 +648,7 @@ haskap-berry,Haskap berry,,,Produce,Fruits and Fruit Juices,cnf:7786,"Haskap ber
 havarti-cheese,Havarti cheese,,,Dairy and eggs,Dairy and Egg Products,cnf:7757,"Cheese, havarti",396,22.05,33.25,2.58,0.0,0.11,713,,slice presliced=21.3,milk,vegetarian,,,,2
 haw,Haw,,,Produce,Fruits and Fruit Juices,cnf:1751,"Haw, scarlet, meat and skin, raw",87,2.0,0.7,20.8,,,,,,,contains meat or fish,,,,1
 hazelnut-oil,Hazelnut oil,,,Pantry,Fats and Oils,usda:04532,"Oil, hazelnut",884,0.0,100.0,0.0,0.0,0.0,0,0.921,,tree nuts,vegan,,,,1
-hazelnuts-or-filberts,Hazelnuts or filberts,,,Dry goods,Nut and Seed Products,usda:12120,"Nuts, hazelnuts or filberts",628,14.95,60.75,16.7,9.7,4.34,0,0.486,nuts=1.4,tree nuts,vegan,,,,3
+hazelnuts-or-filberts,Hazelnuts or filberts,,,Dry goods,Nut and Seed Products,usda:12120,"Nuts, hazelnuts or filberts",628,14.95,60.75,16.7,9.7,4.34,0,0.486,nuts=1.4,tree nuts,vegan,,,,4
 headcheese,Headcheese,,,Meat and seafood,Sausages and Luncheon Meats,usda:07034,"Headcheese, pork",157,13.83,10.9,0.0,0.0,0.0,941,0.592,slice=28.0,,contains meat or fish,,,,1
 hearts-of-palm,Hearts of palm,,,Produce,Vegetables and Vegetable Products,usda:43392,"Hearts of palm, raw",115,2.7,0.2,25.61,1.5,17.16,14,,,,vegan,,,,2
 hemp-seed,Hemp seed,,,Dry goods,Nut and Seed Products,usda:12012,"Seeds, hemp seed, hulled",553,31.56,48.75,8.67,4.0,1.5,5,0.676,,,vegan,,,,1
@@ -646,7 +661,7 @@ homemade-sauce,Homemade sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06165,"
 hominy,Hominy,,,Dry goods,Cereal Grains and Pasta,usda:20330,"Hominy, canned, yellow",72,1.48,0.88,14.26,2.5,,345,0.676,serving=101.4,,vegan,,,,2
 honey-mustard-dressing,Honey mustard dressing,,,Pantry,Fats and Oils,usda:04703,"Salad dressing, honey mustard, regular",464,0.87,40.83,23.33,0.4,15.84,512,1.014,,mustard,vegetarian,,,,2
 honey-roll-sausage,Honey roll sausage,,,Meat and seafood,Sausages and Luncheon Meats,usda:07088,"Honey roll sausage, beef",182,18.58,10.5,2.18,0.0,,1322,,slice=23.0,,contains meat or fish,,,,1
-honeydew-melon,Honeydew melon,,,Produce,Fruits and Fruit Juices,usda:09184,"Melons, honeydew, raw",36,0.54,0.14,9.09,0.8,8.12,18,0.733,wedge=125.0; nlea serving=134.0,,vegan,,,,1
+honeydew-melon,Honeydew melon,,,Produce,Fruits and Fruit Juices,usda:09184,"Melons, honeydew, raw",36,0.54,0.14,9.09,0.8,8.12,18,0.733,wedge=125.0; nlea serving=134.0,,vegan,,,,2
 horchata,Horchata,,,Pantry,Beverages,usda:14638,"Beverages, Horchata, as served in restaurant",54,0.48,0.71,11.52,0.0,9.36,14,0.964,,,vegan,,,,2
 horned-melon,Horned melon,,,Produce,Fruits and Fruit Juices,usda:09451,Horned melon (Kiwano),44,1.78,1.26,7.56,,,2,0.985,fruit=209.0,,vegan,,,,1
 horse,Horse,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17170,"Game meat, horse, raw",133,21.39,4.6,0.0,0.0,,53,,food guide serving = 90g=90.0,,contains meat or fish,,,,2
@@ -659,7 +674,7 @@ hot-chocolate,Hot chocolate,,,Pantry,Beverages,cnf:5295,"Hot chocolate, rich, mi
 hot-chocolate-with-marshmallows,Hot chocolate with marshmallows,,,Pantry,Beverages,cnf:5296,"Hot chocolate with marshmallows, mix, powder, prepared with water",52,0.63,0.48,11.36,0.2,9.8,45,1.16,,,vegan,,,,1
 hot-pickled-peppers,Hot pickled peppers,,,Canned,Vegetables and Vegetable Products,usda:31034,"Peppers, hot pickled, canned",22,0.8,0.4,4.56,2.6,1.6,1430,0.575,,,vegan,,,,1
 human-milk,Human milk,,,Dairy and eggs,Dairy and Egg Products,usda:01107,"Milk, human, mature, fluid",70,1.03,4.38,6.89,0.0,6.89,17,1.04,,milk,vegetarian,,,,1
-hummus,Hummus,,,Dairy and eggs,Legumes and Legume Products,usda:16158,"Hummus, commercial",166,7.9,9.6,14.29,6.0,,379,1.04,,,vegan,90-90,,,2
+hummus,Hummus,,,Dairy and eggs,Legumes and Legume Products,usda:16158,"Hummus, commercial",166,7.9,9.6,14.29,6.0,,379,1.04,,,vegan,90-90,,,3
 hungarian-peppers,Hungarian peppers,,,Produce,Vegetables and Vegetable Products,usda:11981,"Peppers, hungarian, raw",29,0.8,0.41,6.7,1.0,3.53,1,,pepper=27.0; peppers=27.0,,vegan,,,,1
 hush-puppies,Hush puppies,,,Bakery,Baked Products,usda:18270,"Hush puppies, prepared from recipe",337,7.7,13.5,46.0,2.8,2.03,668,0.642,,wheat or gluten,vegan,,,,1
 hyacinth-beans,Hyacinth beans,,,Dry goods,Legumes and Legume Products,usda:16067,"Hyacinth beans, mature seeds, raw",344,23.9,1.69,60.74,25.6,,21,0.888,,,vegan,,,,3
@@ -670,7 +685,7 @@ ice-cream-cones,Ice cream cones,,,Bakery,Baked Products,usda:18271,"Ice cream co
 ice-cream-cookie-sandwich,Ice cream cookie sandwich,,,Dairy and eggs,Dairy and Egg Products,usda:01239,Ice cream cookie sandwich,240,3.7,7.4,39.6,1.2,21.3,162,,serving=82.0,milk|wheat or gluten,vegetarian,,,,1
 ice-cream-sandwich,Ice cream sandwich,,,Dairy and eggs,Dairy and Egg Products,usda:01238,Ice cream sandwich,237,4.29,8.57,37.14,0.0,18.57,129,,serving=70.0,milk,vegetarian,,,,3
 ice-cream-sundae-cone,Ice cream sundae cone,,,Dairy and eggs,Dairy and Egg Products,usda:01301,Ice cream sundae cone,254,3.0,14.0,28.89,1.0,21.26,115,,,milk,vegetarian,,,,1
-iceberg-lettuce,Iceberg lettuce,,,Produce,Vegetables and Vegetable Products,usda:11252,"Lettuce, iceberg (includes crisphead types), raw",14,0.9,0.14,2.97,1.2,1.97,10,0.273,"head, large=755.0; head, medium=539.0; head, small=324.0; leaf, large=15.0; leaf, medium=8.0; leaf, small=5.0",,vegan,,,,1
+iceberg-lettuce,Iceberg lettuce,,,Produce,Vegetables and Vegetable Products,usda:11252,"Lettuce, iceberg (includes crisphead types), raw",14,0.9,0.14,2.97,1.2,1.97,10,0.273,"head, large=755.0; head, medium=539.0; head, small=324.0; leaf, large=15.0; leaf, medium=8.0; leaf, small=5.0",,vegan,,,,2
 icing,Icing,,,Pantry,Sweets,cnf:4377,"Icing (frosting), sour cream flavour, ready to eat",412,0.1,17.2,67.6,0.1,63.54,204,1.348,,milk,vegetarian,,300-360,,2
 imitation-cheese,Imitation cheese,,,Dairy and eggs,Dairy and Egg Products,usda:42117,"Imitation cheese, american or cheddar, low cholesterol",390,25.0,32.0,1.0,0.0,1.0,670,0.478,,milk,vegetarian,,,,1
 imitation-milk,Imitation milk,,,Dairy and eggs,Dairy and Egg Products,usda:43543,"Milk, imitation, non-soy",46,1.6,2.0,5.3,0.0,5.3,55,1.031,,milk|soy,vegetarian,,,,1
@@ -685,7 +700,7 @@ italian-bread,Italian bread,,,Bakery,Baked Products,usda:18033,"Bread, italian",
 italian-dressing,Italian dressing,,,Pantry,Fats and Oils,usda:04636,"Salad dressing, italian dressing, fat-free",47,0.97,0.87,8.75,0.6,8.85,1129,0.976,,,vegan,,,,6
 italian-style-blend-cheese,Italian style blend cheese,,,Dairy and eggs,Dairy and Egg Products,cnf:7767,"Cheese, Italian style blend, shredded",334,26.57,24.7,1.0,0.0,0.48,686,1.04,,milk,vegetarian,,,,2
 jackfruit,Jackfruit,,,Produce,Fruits and Fruit Juices,usda:09144,"Jackfruit, raw",95,1.72,0.64,23.25,1.5,19.08,2,0.668,,,vegan,,,,2
-jalapeno-peppers,Jalapeno peppers,,,Produce,Vegetables and Vegetable Products,usda:11979,"Peppers, jalapeno, raw",29,0.91,0.37,6.5,2.8,4.12,3,0.38,pepper=14.0; medium=14.0,,vegan,,,,2
+jalapeno-peppers,Jalapeno peppers,,,Produce,Vegetables and Vegetable Products,usda:11979,"Peppers, jalapeno, raw",29,0.91,0.37,6.5,2.8,4.12,3,0.38,pepper=14.0; medium=14.0,,vegan,,,,3
 jams,Jams,,,Pantry,Sweets,usda:43344,"Jams, preserves, marmalade, reduced sugar",151,0.0,0.1,37.6,1.5,29.41,0,1.223,,,vegan,,180-540,,2
 jams-and-preserves,Jams and preserves,,,Pantry,Sweets,usda:19297,Jams and preserves,278,0.37,0.07,68.86,1.1,48.5,32,1.351,packet=14.0,,vegan,,,,3
 japanese-noodles,Japanese noodles,,,Dry goods,Cereal Grains and Pasta,usda:20114,"Noodles, japanese, soba, dry",336,14.38,0.71,74.62,,,792,,,wheat or gluten,vegan,,,,4
@@ -698,15 +713,16 @@ jew-s-ear,Jew's ear,,,Produce,Vegetables and Vegetable Products,usda:11228,"Jew'
 juice,Juice,,,Pantry,Fruits and Fruit Juices,cnf:5472,"Juice, Orange-strawberry-banana",50,0.42,0.16,12.34,0.2,9.58,4,0.989,,,vegan,5-7,,30-30,3
 jujube,Jujube,,,Produce,Fruits and Fruit Juices,usda:09146,"Jujube, raw",79,1.2,0.2,20.23,,,3,,medium=14.0,,vegan,,,,2
 jute,Jute,,,Produce,Vegetables and Vegetable Products,usda:11231,"Jute, potherb, raw",34,4.65,0.25,5.8,,,8,0.118,,,vegan,,,,3
-kale,Kale,,,Produce,Vegetables and Vegetable Products,usda:11233,"Kale, raw",49,4.28,0.93,8.75,3.6,2.26,38,0.068,,,vegan,3-5,,240-360,9
+kale,Kale,,,Produce,Vegetables and Vegetable Products,usda:11233,"Kale, raw",49,4.28,0.93,8.75,3.6,2.26,38,0.068,,,vegan,3-5,,240-360,11
 kanpyo,Kanpyo,,,Dry goods,Vegetables and Vegetable Products,usda:11237,"Kanpyo, (dried gourd strips)",258,8.58,0.56,65.03,9.8,,15,0.228,strip=6.3; piece=6.3,,vegan,,,,1
 keikitos,Keikitos,,,Bakery,Baked Products,usda:18956,"Keikitos (muffins), Latino bakery item",467,6.81,25.24,53.16,1.2,25.81,515,,piece=42.0,wheat or gluten,vegan,,,,1
 kelp-seaweed,Kelp seaweed,,,Produce,Vegetables and Vegetable Products,usda:11445,"Seaweed, kelp, raw",43,1.68,0.56,9.57,1.3,0.6,233,0.338,,,vegan,,,,1
-kidney-beans,Kidney beans,,,Dry goods,Legumes and Legume Products,usda:16032,"Beans, kidney, red, mature seeds, raw",337,22.53,1.06,61.29,15.2,2.1,12,0.778,,,vegan,,,,20
+khorasan,Khorasan,,,Dry goods,Cereal Grains and Pasta,fdc:2710830,"Khorasan, grain, dry, raw",348,14.76,2.8,71.79,10.5,,4,,,,vegan,,,,1
+kidney-beans,Kidney beans,,,Dry goods,Legumes and Legume Products,usda:16032,"Beans, kidney, red, mature seeds, raw",337,22.53,1.06,61.29,15.2,2.1,12,0.778,,,vegan,,,,22
 kielbasa,Kielbasa,,,Meat and seafood,Sausages and Luncheon Meats,usda:07934,"Kielbasa, Polish, turkey and beef, smoked",226,13.1,17.6,3.9,0.0,0.0,1200,0.638,serving 2 oz=56.0,,contains meat or fish,7-7,,30-60,4
 kimchi-cabbage,Kimchi cabbage,,,Produce,Vegetables and Vegetable Products,usda:11118,"Cabbage, kimchi",15,1.1,0.5,2.4,1.6,1.06,498,0.634,,,vegan,,,,1
 kiwi-strawberry-juice-drink,Kiwi strawberry juice drink,,,Pantry,Beverages,usda:14161,"Beverages, Kiwi Strawberry Juice Drink",47,0.0,0.0,12.26,0.0,11.63,11,1.0,,,vegan,,,,1
-kiwifruit,Kiwifruit,,,Produce,Fruits and Fruit Juices,usda:09148,"Kiwifruit, green, raw",61,1.14,0.52,14.66,3.0,8.99,3,0.761,fruit=69.0; nlea serving=148.0; medium fruit=69.0,,vegan,,,,1
+kiwifruit,Kiwifruit,,,Produce,Fruits and Fruit Juices,usda:09148,"Kiwifruit, green, raw",61,1.14,0.52,14.66,3.0,8.99,3,0.761,fruit=69.0; nlea serving=148.0; medium fruit=69.0,,vegan,,,,3
 knackwurst,Knackwurst,,,Meat and seafood,Sausages and Luncheon Meats,usda:07038,"Knackwurst, knockwurst, pork, beef",307,11.1,27.7,3.2,0.0,0.0,930,,link=72.0,,contains meat or fish,,,,1
 kohlrabi,Kohlrabi,,,Produce,Vegetables and Vegetable Products,usda:11241,"Kohlrabi, raw",27,1.7,0.1,6.2,3.6,2.6,20,0.571,slice=16.0,,vegan,7-7,,240-360,3
 kumquats,Kumquats,,,Produce,Fruits and Fruit Juices,usda:09149,"Kumquats, raw",71,1.88,0.86,15.9,6.5,9.36,10,,fruit without refuse=19.0; fruit=19.0; fruits=19.0,,vegan,21-21,,,1
@@ -727,6 +743,7 @@ lamb-variety-meats,Lamb variety meats,,,Meat and seafood,"Lamb, Veal, and Game P
 lambsquarters,Lambsquarters,,,Produce,Vegetables and Vegetable Products,usda:11244,"Lambsquarters, raw",43,4.2,0.8,7.3,4.0,,43,0.127,,,vegan,,,,3
 lard,Lard,,,Pantry,Fats and Oils,usda:04002,Lard,902,0.0,100.0,0.0,0.0,0.0,0,0.814,,,contains meat or fish,,,,1
 laver-seaweed,Laver seaweed,,,Produce,Vegetables and Vegetable Products,usda:11446,"Seaweed, laver, raw",35,5.81,0.28,5.11,0.3,0.49,48,0.338,sheets=2.6,,vegan,,,,1
+leaf-lettuce,Leaf lettuce,,,Produce,Vegetables and Vegetable Products,fdc:2346390,"Lettuce, leaf, red, raw",15,0.88,0.11,3.26,,,25,,,,vegan,,,,2
 lebanon-bologna,Lebanon bologna,,,Meat and seafood,Sausages and Luncheon Meats,usda:07039,"Lebanon bologna, beef",172,19.03,10.44,0.44,0.0,0.0,1374,,serving 2 slices=57.0,,contains meat or fish,,,,1
 leeks,Leeks,,,Produce,Vegetables and Vegetable Products,usda:11246,"Leeks, (bulb and lower leaf-portion), raw",61,1.5,0.3,14.15,1.8,3.9,20,0.376,slice=6.0,,vegan,7-14,,300-360,4
 lemon-juice-from-concentrate,Lemon juice from concentrate,,,Canned,Fruits and Fruit Juices,usda:09153,"Lemon juice from concentrate, canned or bottled",17,0.45,0.07,5.62,0.7,1.53,24,1.031,,,vegan,,,,1
@@ -735,7 +752,7 @@ lemonade-fruit-juice-drink-light,Lemonade fruit juice drink light,,,Pantry,Bever
 lemonade-with-artificial-sweetener,Lemonade with artificial sweetener,,,Pantry,Beverages,cnf:2963,"Lemonade with artificial sweetener, powder, water added",3,0.0,0.0,0.68,0.0,0.0,4,1.01,,,vegan,,,,2
 lemonade-flavor-drink,Lemonade-flavor drink,,,Pantry,Beverages,usda:14296,"Beverages, lemonade-flavor drink, powder",380,0.0,1.01,97.9,0.0,97.15,130,0.985,serving=18.0,,vegan,,,,2
 lemons,Lemons,,,Produce,Fruits and Fruit Juices,usda:09150,"Lemons, raw, without peel",29,1.1,0.3,9.32,2.8,2.5,2,0.896,fruit=58.0; wedge or slice=7.0; nlea serving=58.0; medium fruit=58.0; large fruit=84.0; medium=7.0,,vegan,10-21,10-10,,1
-lentils,Lentils,,,Dry goods,Legumes and Legume Products,usda:16069,"Lentils, raw",352,24.63,1.06,63.35,10.7,2.03,6,0.812,,,vegan,,365-365,,9
+lentils,Lentils,,,Dry goods,Legumes and Legume Products,usda:16069,"Lentils, raw",352,24.63,1.06,63.35,10.7,2.03,6,0.812,,,vegan,,365-365,,10
 light-cream,Light cream,,,Dairy and eggs,Dairy and Egg Products,usda:01050,"Cream, fluid, light (coffee cream or table cream)",191,2.96,19.1,2.82,0.0,3.67,72,1.014,"container, individual=11.1",milk,vegetarian,,,,1
 light-ice-cream,Light ice cream,,,Dairy and eggs,Dairy and Egg Products,usda:01302,"Light ice cream, Creamsicle",165,1.54,3.08,32.75,0.0,18.46,46,,bar=66.0,milk,vegetarian,,,,1
 light-whipping-cream,Light whipping cream,,,Dairy and eggs,Dairy and Egg Products,usda:01052,"Cream, fluid, light whipping",292,2.17,30.91,2.96,0.0,2.96,34,1.014,,milk,vegetarian,,,,1
@@ -751,7 +768,7 @@ litchis,Litchis,,,Produce,Fruits and Fruit Juices,usda:09164,"Litchis, raw",66,0
 liver-cheese,Liver cheese,,,Meat and seafood,Sausages and Luncheon Meats,usda:07040,"Liver cheese, pork",304,15.2,25.6,2.1,0.0,,1225,,slice=38.0,milk,contains meat or fish,,,,1
 liver-sausage,Liver sausage,,,Meat and seafood,Sausages and Luncheon Meats,usda:07041,"Liver sausage, liverwurst, pork",326,14.1,28.5,2.2,0.0,,860,0.901,slice=18.0,,contains meat or fish,,,,1
 liverwurst-spread,Liverwurst spread,,,Meat and seafood,Sausages and Luncheon Meats,usda:07911,Liverwurst spread,305,12.38,25.45,5.89,2.5,1.65,700,0.93,,,contains meat or fish,,,,1
-lobster,Lobster,,,Meat and seafood,Finfish and Shellfish Products,usda:15147,"Crustaceans, lobster, northern, raw",77,16.52,0.75,0.0,0.0,0.0,423,,lobster=150.0; food guide serving = 90g=90.0,shellfish,contains meat or fish,1-1,,,2
+lobster,Lobster,,,Meat and seafood,Finfish and Shellfish Products,usda:15147,"Crustaceans, lobster, northern, raw",77,16.52,0.75,0.0,0.0,0.0,423,,lobster=150.0; food guide serving = 90g=90.0,shellfish,contains meat or fish,1-1,,,3
 loganberries,Loganberries,,,Frozen,Fruits and Fruit Juices,usda:09167,"Loganberries, frozen",55,1.52,0.31,13.02,5.3,7.7,1,0.621,,,vegan,,,,1
 longans,Longans,,,Produce,Fruits and Fruit Juices,usda:09172,"Longans, raw",60,1.31,0.1,15.14,1.1,,0,,fruit without refuse=3.2; fruit=3.2; fruits=3.2,,vegan,,,,2
 loquats,Loquats,,,Produce,Fruits and Fruit Juices,usda:09174,"Loquats, raw",47,0.43,0.2,12.14,1.7,,1,0.63,large=20.0; medium=16.0; small=13.6; large fruit=20.0; medium fruit=16.0; small fruit=13.6,,vegan,,,,1
@@ -760,18 +777,19 @@ lotus-seeds,Lotus seeds,,,Dry goods,Nut and Seed Products,usda:12205,"Seeds, lot
 low-fat-cheese,Low fat cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01168,"Cheese, low fat, cheddar or colby",173,24.35,7.0,1.91,0.0,0.52,873,0.518,slice=28.0,milk,vegetarian,,,,1
 low-sodium-milk,Low sodium milk,,,Dairy and eggs,Dairy and Egg Products,usda:01089,"Milk, low sodium, fluid",61,3.1,3.46,4.46,0.0,4.46,3,1.031,,milk,vegetarian,,,,1
 low-sodium-cheese,Low-sodium cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01169,"Cheese, low-sodium, cheddar or colby",398,24.35,32.62,1.91,0.0,0.49,21,0.518,slice=28.0,milk,vegetarian,,,,1
-lowfat-milk,Lowfat milk,,,Dairy and eggs,Dairy and Egg Products,usda:01082,"Milk, lowfat, fluid, 1% milkfat, with added vitamin A and vitamin D",42,3.37,0.97,4.99,0.0,5.2,44,1.031,,milk,vegetarian,,,,3
+lowfat-milk,Lowfat milk,,,Dairy and eggs,Dairy and Egg Products,usda:01082,"Milk, lowfat, fluid, 1% milkfat, with added vitamin A and vitamin D",42,3.37,0.97,4.99,0.0,5.2,44,1.031,,milk,vegetarian,,,,5
 luncheon-meat,Luncheon meat,,,Canned,Sausages and Luncheon Meats,usda:07045,"Luncheon meat, pork, canned",334,12.5,30.3,2.1,0.0,0.0,1289,,slice=21.0,,contains meat or fish,3-5,,30-60,1
 luncheon-sausage,Luncheon sausage,,,Meat and seafood,Sausages and Luncheon Meats,usda:07090,"Luncheon sausage, pork and beef",260,15.38,20.9,1.58,0.0,,1182,,slice=23.0,,contains meat or fish,,,,1
 luncheon-slices,Luncheon slices,,,Dry goods,Legumes and Legume Products,usda:43131,"Luncheon slices, meatless",189,17.78,11.11,4.44,1.1,2.22,711,,"slice, thin=14.0; thin slice=14.0; slices=14.0; serving=150.0",,vegan,,,,1
 lupins,Lupins,,,Dry goods,Legumes and Legume Products,usda:16076,"Lupins, mature seeds, raw",371,36.17,9.74,40.37,18.9,,15,0.761,,,vegan,,,,3
 luxury-loaf,Luxury loaf,,,Meat and seafood,Sausages and Luncheon Meats,usda:07060,"Luxury loaf, pork",141,18.4,4.8,4.9,0.0,,1225,,slice=28.0; slices=28.5,,contains meat or fish,,,,1
 macadamia,Macadamia,,,Dry goods,Nut and Seed Products,cnf:2576,"Nuts, macadamia (bushnuts, queensland), oil roasted",718,7.26,76.52,12.9,9.3,,7,0.566,,tree nuts,vegan,360-360,14-28,720-720,2
-macadamia-nuts,Macadamia nuts,,,Dry goods,Nut and Seed Products,usda:12131,"Nuts, macadamia nuts, raw",718,7.91,75.77,13.82,8.6,4.57,5,0.566,,tree nuts,vegan,,,,3
+macadamia-nuts,Macadamia nuts,,,Dry goods,Nut and Seed Products,usda:12131,"Nuts, macadamia nuts, raw",718,7.91,75.77,13.82,8.6,4.57,5,0.566,,tree nuts,vegan,,,,4
 macaroni-and-cheese-loaf,Macaroni and cheese loaf,,,Meat and seafood,Sausages and Luncheon Meats,usda:07940,"Macaroni and cheese loaf, chicken, pork and beef",228,11.76,14.96,11.63,0.0,0.0,3,,slice=38.0; food guide serving = 75g=75.0,milk|wheat or gluten,contains meat or fish,,,,1
 mace,Mace,,,Pantry,Spices and Herbs,usda:02022,"Spices, mace, ground",475,6.71,32.38,50.5,20.2,,80,0.353,,,vegan,,,,1
 mackerel,Mackerel,,,Meat and seafood,Finfish and Shellfish Products,usda:15049,"Fish, mackerel, king, raw",105,20.28,2.0,0.0,0.0,,158,,fillet=396.0; /2 fillet=198.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,60-90,10
 made-with-milk-bread,Made with milk bread,,,Bakery,Baked Products,cnf:7291,"Bread, made with milk, commercial",263,10.01,3.01,48.26,3.4,4.23,578,,slice=27.0,milk|wheat or gluten,vegetarian,,,,2
+mahi-mahi,Mahi mahi,,,Frozen,Finfish and Shellfish Products,fdc:2747658,"Mahi mahi, frozen, wild caught",84,19.79,0.38,0.29,,,52,,,fish,contains meat or fish,,,,1
 mahimahi,Mahimahi,,,Meat and seafood,Finfish and Shellfish Products,usda:15023,"Fish, mahimahi, raw",85,18.5,0.7,0.0,0.0,,88,,fillet=204.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
 maitake-mushrooms,Maitake mushrooms,,,Produce,Vegetables and Vegetable Products,usda:11993,"Mushrooms, maitake, raw",31,1.94,0.19,6.97,2.7,2.07,1,0.292,piece whole=1.1; piece=1.1,,vegan,,,,1
 malabar-spinach,Malabar spinach,,,Produce,Vegetables and Vegetable Products,usda:11986,"Malabar spinach, cooked",23,2.98,0.78,2.71,2.1,,55,0.186,bunch=17.0,,vegan,,,,1
@@ -782,7 +800,8 @@ malt-syrup,Malt syrup,,,Pantry,Sweets,usda:19352,"Syrups, malt",318,6.2,0.0,71.3
 malted-drink-mix,Malted drink mix,,,Pantry,Beverages,usda:14317,"Beverages, malted drink mix, chocolate, powder",411,5.1,4.76,86.94,4.8,66.67,190,0.714,serving=21.0,wheat or gluten,vegan,,,,6
 malted-milk,Malted milk,,,Pantry,Beverages,cnf:2896,"Malted milk, natural flavour, fortified powder",383,8.8,2.8,81.2,0.6,,406,0.714,,milk|wheat or gluten,vegetarian,,,,2
 mammy-apple,Mammy-apple,,,Produce,Fruits and Fruit Juices,usda:09175,"Mammy-apple, (mamey), raw",51,0.5,0.5,12.5,3.0,,15,,fruit without refuse=846.0; fruit=846.0; /8 fruit=105.8,,vegan,,,,1
-mango,Mango,,,Dry goods,Fruits and Fruit Juices,usda:09178,"Mango, dried, sweetened",319,2.45,1.18,78.58,2.4,66.27,162,0.427,,,vegan,7-7,3-5,180-240,1
+mandarin,Mandarin,,,Produce,Fruits and Fruit Juices,fdc:2710832,"Mandarin, seedless, peeled, raw",56,1.04,0.46,13.42,1.3,9.12,0,,,,vegan,,,,1
+mango,Mango,,,Produce,Fruits and Fruit Juices,fdc:2710834,"Mango, Ataulfo, peeled, raw",71,0.69,0.68,17.4,1.3,11.1,0,,,,vegan,7-7,3-5,180-240,3
 mango-nectar,Mango nectar,,,Canned,Fruits and Fruit Juices,usda:09436,"Mango nectar, canned",51,0.11,0.06,13.12,0.3,12.45,5,1.061,,,vegan,,,,1
 mangos,Mangos,,,Produce,Fruits and Fruit Juices,usda:09176,"Mangos, raw",60,0.82,0.38,14.98,1.6,13.66,1,0.697,fruit without refuse=336.0; fruit=207.0; /2 fruit=103.5,,vegan,7-7,3-5,180-240,1
 mangosteen,Mangosteen,,,Canned,Fruits and Fruit Juices,usda:09177,"Mangosteen, canned, syrup pack",73,0.41,0.58,17.91,1.8,,7,0.913,,,vegan,,,,1
@@ -817,7 +836,7 @@ milk-shakes,Milk shakes,,,Dairy and eggs,Dairy and Egg Products,usda:01111,"Milk
 milk-substitutes,Milk substitutes,,,Dairy and eggs,Dairy and Egg Products,usda:01076,"Milk substitutes, fluid, with lauric acid oil",61,1.75,3.41,6.16,0.0,,78,1.031,,,vegetarian,,,,1
 milkfish,Milkfish,,,Meat and seafood,Finfish and Shellfish Products,usda:15053,"Fish, milkfish, raw",148,20.53,6.73,0.0,0.0,,72,,food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
 milkshake,Milkshake,,,Pantry,Beverages,cnf:2905,"Milkshake (fast food), chocolate",127,3.4,3.7,20.5,1.9,18.6,97,0.795,,,vegan,,,,1
-millet,Millet,,,Dry goods,Cereal Grains and Pasta,usda:20031,"Millet, raw",378,11.02,4.22,72.85,8.5,,5,0.845,,,vegan,,60-60,120-120,2
+millet,Millet,,,Dry goods,Cereal Grains and Pasta,usda:20031,"Millet, raw",378,11.02,4.22,72.85,8.5,,5,0.845,,,vegan,,60-60,120-120,3
 millet-flour,Millet flour,,,Dry goods,Cereal Grains and Pasta,usda:20647,Millet flour,382,10.75,4.25,75.12,3.5,1.66,4,0.503,serving=20.0,,vegan,,,,1
 miso,Miso,,,Dairy and eggs,Legumes and Legume Products,usda:16112,Miso,198,12.79,6.01,25.37,5.4,6.2,3728,1.162,,soy,vegan,365-365,,,1
 mixed-nuts,Mixed nuts,,,Dry goods,Nut and Seed Products,usda:12637,"Nuts, mixed nuts, oil roasted, with peanuts, with salt added",607,20.04,53.95,21.05,7.0,4.15,273,0.566,"nuts, assorted=1.4",peanuts|tree nuts,vegan,,,,8
@@ -825,6 +844,7 @@ mixed-vegetable-and-fruit-juice-drink,Mixed vegetable and fruit juice drink,,,Pa
 molasses,Molasses,,,Pantry,Sweets,usda:19304,Molasses,290,0.0,0.1,74.73,0.0,74.72,37,1.424,serving 1 tbsp=20.0,,vegan,,365-730,,1
 monkfish,Monkfish,,,Meat and seafood,Finfish and Shellfish Products,usda:15054,"Fish, monkfish, raw",76,14.48,1.52,0.0,0.0,,18,,food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
 monterey-cheese,Monterey cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01025,"Cheese, monterey",373,24.48,30.28,0.68,0.0,0.5,600,0.518,slice=28.0; package=170.0,milk,vegetarian,,,,2
+monterey-jack-cheese,Monterey jack cheese,,,Dairy and eggs,Dairy and Egg Products,fdc:2647438,"Cheese, monterey jack, solid",391,22.62,32.63,1.9,,,662,,,milk,vegetarian,,,,1
 moose,Moose,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17172,"Game meat, moose, raw",102,22.24,0.74,0.0,0.0,,65,,,,contains meat or fish,,,,2
 morel-mushrooms,Morel mushrooms,,,Produce,Vegetables and Vegetable Products,usda:11240,"Mushrooms, morel, raw",31,3.12,0.57,5.1,2.8,0.6,21,0.279,piece=12.9,,vegan,,,,1
 mortadella,Mortadella,,,Meat and seafood,Sausages and Luncheon Meats,usda:07050,"Mortadella, beef, pork",311,16.37,25.39,3.05,0.0,0.0,1246,,slice=15.0,,contains meat or fish,,,,1
@@ -845,7 +865,7 @@ mungo-beans,Mungo beans,,,Dry goods,Legumes and Legume Products,usda:16083,"Mung
 mushroom-with-beef-stock,Mushroom with beef stock,,,Canned,"Soups, Sauces, and Gravies",usda:06044,"Soup, mushroom with beef stock, canned, condensed",68,2.51,3.21,7.41,0.1,2.28,773,1.065,can=305.0,,contains meat or fish,,,,2
 muskrat,Muskrat,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17174,"Game meat, muskrat, raw",162,20.76,8.1,0.0,0.0,,82,,,,contains meat or fish,,,,2
 mussel,Mussel,,,Meat and seafood,Finfish and Shellfish Products,usda:15164,"Mollusks, mussel, blue, raw",86,11.9,2.24,3.69,0.0,0.0,286,0.634,large=20.0; medium=16.0; small=10.0; food guide serving = 90g=90.0,shellfish,contains meat or fish,3-10,,90-120,2
-mustard,Mustard,,,Pantry,Spices and Herbs,usda:02046,"Mustard, prepared, yellow",60,3.74,3.34,5.83,4.0,0.92,1104,1.052,packet=5.0,mustard,vegan,,365-730,,1
+mustard,Mustard,,,Pantry,Spices and Herbs,usda:02046,"Mustard, prepared, yellow",60,3.74,3.34,5.83,4.0,0.92,1104,1.052,packet=5.0,mustard,vegan,,365-730,,2
 mustard-cabbage,Mustard cabbage,,,Produce,Vegetables and Vegetable Products,usda:43144,"Cabbage, mustard, salted",28,1.1,0.1,5.63,3.1,1.4,717,0.541,,mustard,vegan,,,,1
 mustard-greens,Mustard greens,,,Produce,Vegetables and Vegetable Products,usda:11270,"Mustard greens, raw",27,2.86,0.42,4.67,3.2,1.32,20,0.237,,,vegan,,,,6
 mustard-oil,Mustard oil,,,Pantry,Fats and Oils,usda:04583,"Oil, mustard",884,0.0,100.0,0.0,0.0,,0,0.921,,mustard,vegan,,,,1
@@ -859,13 +879,13 @@ nance,Nance,,,Frozen,Fruits and Fruit Juices,usda:09449,"Nance, frozen, unsweete
 napa-cabbage,Napa cabbage,,,Produce,Vegetables and Vegetable Products,cnf:6304,"Cabbage, napa, raw",14,1.2,0.1,3.0,0.6,1.42,15,0.309,,,vegan,,,,2
 naranjilla-pulp,Naranjilla  pulp,,,Frozen,Fruits and Fruit Juices,usda:09450,"Naranjilla (lulo) pulp, frozen, unsweetened",25,0.44,0.22,5.9,1.1,3.74,4,0.507,,,vegan,,,,1
 natto,Natto,,,Dry goods,Legumes and Legume Products,usda:16113,Natto,211,19.4,11.0,12.68,5.4,4.89,7,0.74,,soy,vegan,,,,1
-navy-beans,Navy beans,,,Dry goods,Legumes and Legume Products,usda:16037,"Beans, navy, mature seeds, raw",337,22.33,1.5,60.75,15.3,3.88,5,0.879,,,vegan,,,,7
-nectarines,Nectarines,,,Produce,Fruits and Fruit Juices,usda:09191,"Nectarines, raw",44,1.06,0.32,10.55,1.7,7.89,0,0.604,small=129.0; medium=142.0; large=156.0; nlea serving=140.0; fruit=136.0,,vegan,3-5,,60-60,1
+navy-beans,Navy beans,,,Dry goods,Legumes and Legume Products,usda:16037,"Beans, navy, mature seeds, raw",337,22.33,1.5,60.75,15.3,3.88,5,0.879,,,vegan,,,,8
+nectarines,Nectarines,,,Produce,Fruits and Fruit Juices,usda:09191,"Nectarines, raw",44,1.06,0.32,10.55,1.7,7.89,0,0.604,small=129.0; medium=142.0; large=156.0; nlea serving=140.0; fruit=136.0,,vegan,3-5,,60-60,2
 netted-willow,Netted willow,,,Produce,Vegetables and Vegetable Products,cnf:5936,"Netted willow, Indigenous, leaves, raw",118,3.8,2.0,25.9,,,15,,,,vegan,,,,1
 neufchatel-cheese,Neufchatel cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01031,"Cheese, neufchatel",253,9.15,22.78,3.59,0.0,3.19,334,1.014,package=85.0,milk,vegetarian,,,,1
 new-england-brand-sausage,New england brand sausage,,,Meat and seafood,Sausages and Luncheon Meats,usda:07091,"New england brand sausage, pork, beef",161,17.27,7.58,4.83,0.0,,1220,,slice=23.0,,contains meat or fish,,,,1
 new-zealand-spinach,New zealand spinach,,,Produce,Vegetables and Vegetable Products,usda:11276,"New Zealand spinach, raw",14,1.5,0.2,2.5,1.5,0.29,130,0.237,,,vegan,,,,3
-nonfat-milk,Nonfat milk,,,Dairy and eggs,Dairy and Egg Products,usda:42290,"Milk, fluid, nonfat, calcium fortified (fat free or skim)",35,3.4,0.18,4.85,0.0,4.85,52,1.044,,milk,vegetarian,,,,5
+nonfat-milk,Nonfat milk,,,Dairy and eggs,Dairy and Egg Products,usda:42290,"Milk, fluid, nonfat, calcium fortified (fat free or skim)",35,3.4,0.18,4.85,0.0,4.85,52,1.044,,milk,vegetarian,,,,7
 nopales,Nopales,,,Produce,Vegetables and Vegetable Products,usda:11963,"Nopales, raw",16,1.32,0.09,3.33,2.2,1.15,21,0.364,,,vegan,,,,2
 nutmeg,Nutmeg,,,Pantry,Spices and Herbs,usda:02025,"Spices, nutmeg, ground",525,5.84,36.31,49.29,20.8,2.99,16,0.461,,,vegan,,1095-1460,,1
 nutmeg-butter-oil,Nutmeg butter oil,,,Pantry,Fats and Oils,usda:04572,"Oil, nutmeg butter",884,0.0,100.0,0.0,0.0,0.0,0,0.92,,milk,vegetarian,,,,1
@@ -875,9 +895,11 @@ oat-bran,Oat bran,,,Dry goods,Cereal Grains and Pasta,usda:20033,"Oat bran, raw"
 oat-bran-bread,Oat bran bread,,,Bakery,Baked Products,usda:18037,"Bread, oat bran",236,10.4,4.4,39.8,4.5,7.7,353,,slice=30.0,wheat or gluten,vegan,,,,2
 oat-bread,Oat bread,,,Bakery,Baked Products,cnf:7312,"Bread, oat (includes oatmeal and oat bran), commercial, toasted",292,12.34,3.83,51.65,7.7,5.42,411,,slice=40.0,wheat or gluten,vegan,,,,1
 oat-flour,Oat flour,,,Dry goods,Cereal Grains and Pasta,usda:20132,"Oat flour, partially debranned",404,14.66,9.12,65.7,6.5,0.8,19,0.44,serving=20.0,,vegan,,,,1
+oat-milk,Oat milk,,,Pantry,Beverages,fdc:2257046,"Oat milk, unsweetened, plain, refrigerated",48,0.8,2.75,5.1,0.0,2.32,42,,,,vegan,,,,1
 oat-oil,Oat oil,,,Pantry,Fats and Oils,usda:04588,"Oil, oat",884,0.0,100.0,0.0,0.0,0.0,0,0.921,,,vegan,,,,1
 oatmeal-bread,Oatmeal bread,,,Bakery,Baked Products,usda:18039,"Bread, oatmeal",269,8.4,4.4,48.5,4.0,8.14,447,,slice=27.0,wheat or gluten,vegan,,,,2
-oats,Oats,,,Dry goods,Cereal Grains and Pasta,usda:20038,Oats,389,16.89,6.9,66.27,10.6,,2,0.659,serving=20.0,,vegan,,360-360,,11
+oats,Oats,,,Dry goods,Cereal Grains and Pasta,usda:20038,Oats,389,16.89,6.9,66.27,10.6,,2,0.659,serving=20.0,,vegan,,360-360,,13
+oaxaca-cheese,Oaxaca cheese,,,Dairy and eggs,Dairy and Egg Products,fdc:2647441,"Cheese, oaxaca, solid",298,22.14,22.1,2.4,,,734,,,milk,vegetarian,,,,1
 ocean-perch,Ocean perch,,,Meat and seafood,Finfish and Shellfish Products,usda:15057,"Fish, ocean perch, Atlantic, raw",79,15.31,1.54,0.0,0.0,0.0,287,,fillet=64.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,120-240,2
 octopus,Octopus,,,Meat and seafood,Finfish and Shellfish Products,usda:15166,"Mollusks, octopus, common, raw",82,14.91,1.04,2.2,0.0,0.0,230,,food guide serving = 90g=90.0,shellfish,contains meat or fish,,,,2
 oheloberries,Oheloberries,,,Produce,Fruits and Fruit Juices,usda:09192,"Oheloberries, raw",28,0.38,0.22,6.84,,,1,0.592,fruit=1.1; fruits=1.1,,vegan,,,,1
@@ -885,20 +907,20 @@ oka-cheese,Oka cheese,,,Dairy and eggs,Dairy and Egg Products,cnf:7763,"Cheese, 
 okara,Okara,,,Dry goods,Legumes and Legume Products,usda:16130,Okara,76,3.52,1.73,12.23,,,9,0.516,serving=150.0,,vegan,,,,1
 okra,Okra,,,Produce,Vegetables and Vegetable Products,usda:11278,"Okra, raw",33,1.93,0.19,7.45,3.2,1.48,7,0.423,pods=11.9; pod=11.9,,vegan,2-3,1-1,300-360,6
 olive-loaf,Olive loaf,,,Meat and seafood,Sausages and Luncheon Meats,usda:07051,"Olive loaf, pork",235,11.8,16.5,9.2,0.0,0.0,964,,slice=28.0; slices=28.5,,contains meat or fish,,,,1
-olives,Olives,,,Canned,Fruits and Fruit Juices,usda:09193,"Olives, ripe, canned (small-extra large)",115,0.84,10.68,6.26,3.2,0.0,735,0.567,large=4.4; small=3.2,,vegan,14-14,,,3
+olives,Olives,,,Produce,Fruits and Fruit Juices,fdc:332791,"Olives, green, Manzanilla, stuffed with pimiento",130,1.15,12.9,4.96,4.0,0.0,1620,,olive=3.2,,vegan,14-14,,,4
 onion-powder,Onion powder,,,Pantry,Spices and Herbs,usda:02026,"Spices, onion powder",341,10.41,1.04,79.12,15.2,6.63,73,0.477,,,vegan,,1095-1460,,1
-onion-rings,Onion rings,,,Produce,Vegetables and Vegetable Products,usda:11296,"Onion rings, breaded, par fried, frozen, prepared, heated in oven",276,4.14,14.3,33.79,2.2,5.1,370,0.203,"rings, large=7.1; rings, medium=6.0; rings, small=4.8; large rings=7.1; small rings=4.8; medium rings=6.0",,vegan,,,,2
+onion-rings,Onion rings,,,Produce,Vegetables and Vegetable Products,usda:11296,"Onion rings, breaded, par fried, frozen, prepared, heated in oven",276,4.14,14.3,33.79,2.2,5.1,370,0.203,"rings, large=7.1; rings, medium=6.0; rings, small=4.8; large rings=7.1; small rings=4.8; medium rings=6.0",,vegan,,,,3
 opossum,Opossum,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17176,"Game meat, opossum, cooked, roasted",221,30.2,10.2,0.0,0.0,0.0,58,,"piece, cooked=399.0",,contains meat or fish,,,,1
 orange-and-apricot-juice-drink,Orange and apricot juice drink,,,Pantry,Beverages,usda:14327,"Beverages, orange and apricot juice drink, canned",51,0.3,0.1,12.7,0.1,12.06,2,1.057,,,vegan,,,,1
 orange-breakfast-drink,Orange breakfast drink,,,Pantry,Beverages,usda:14436,"Beverages, orange breakfast drink, ready-to-drink, with added nutrients",53,0.0,0.0,13.2,0.1,8.02,54,1.069,,,vegan,,,,1
 orange-drink,Orange drink,,,Pantry,Beverages,usda:14426,"Beverages, Orange drink, breakfast type, with juice and pulp, frozen concentrate",153,0.4,0.0,39.0,0.1,38.05,26,1.227,can=436.0,,vegan,,,,3
-orange-juice,Orange juice,,,Pantry,Fruits and Fruit Juices,usda:09206,"Orange juice, raw",45,0.7,0.2,10.4,0.2,8.4,1,1.048,fruit yields=86.0,,vegan,,,240-360,11
+orange-juice,Orange juice,,,Pantry,Fruits and Fruit Juices,usda:09206,"Orange juice, raw",45,0.7,0.2,10.4,0.2,8.4,1,1.048,fruit yields=86.0,,vegan,,,240-360,13
 orange-juice-drink,Orange juice drink,,,Pantry,Beverages,usda:42270,"Beverages, Orange juice drink",54,0.2,0.0,13.41,0.2,9.36,2,1.052,,,vegan,,,,1
 orange-peel,Orange peel,,,Produce,Fruits and Fruit Juices,usda:09216,"Orange peel, raw",97,1.5,0.2,25.0,10.6,,3,0.406,,,vegan,,,,1
 orange-pineapple-juice-blend,Orange pineapple juice blend,,,Pantry,Fruits and Fruit Juices,usda:09452,Orange Pineapple Juice Blend,51,0.41,0.08,12.2,0.2,10.57,4,1.04,,,vegan,,,,1
 orange-flavor-drink,Orange-flavor drink,,,Pantry,Beverages,usda:14407,"Beverages, orange-flavor drink, breakfast type, powder",386,0.0,0.0,98.94,0.4,92.31,17,0.878,serving 2 tbsp=26.0,,vegan,,,,5
 orange-grapefruit-juice,Orange-grapefruit juice,,,Canned,Fruits and Fruit Juices,usda:09217,"Orange-grapefruit juice, canned or bottled, unsweetened",43,0.6,0.1,10.28,0.1,10.18,3,1.044,,,vegan,,,,1
-oranges,Oranges,,,Produce,Fruits and Fruit Juices,usda:09202,"Oranges, raw, navels",49,0.91,0.15,12.54,2.2,8.5,1,0.697,fruit=140.0; nlea serving=154.0,,vegan,10-21,10-10,,5
+oranges,Oranges,,,Produce,Fruits and Fruit Juices,usda:09202,"Oranges, raw, navels",49,0.91,0.15,12.54,2.2,8.5,1,0.697,fruit=140.0; nlea serving=154.0,,vegan,10-21,10-10,,7
 oregano,Oregano,,,Pantry,Spices and Herbs,usda:02027,"Spices, oregano, dried",265,9.0,4.28,68.92,42.5,4.09,25,0.305,,,vegan,14-21,7-14,,1
 ostrich,Ostrich,,,Meat and seafood,Poultry Products,usda:05643,"Ostrich, fan, raw",117,21.81,2.65,0.0,0.0,0.0,75,,serving=85.0; food guide serving = 90g=90.0,,contains meat or fish,,,,18
 oven-roasted-chicken-breast-roll,Oven-roasted chicken breast roll,,,Meat and seafood,Sausages and Luncheon Meats,usda:07935,Oven-roasted chicken breast roll,134,14.59,7.65,1.79,0.0,0.43,883,0.571,serving 2 oz=56.0; slice=18.5,,contains meat or fish,,,,1
@@ -918,30 +940,32 @@ papayas,Papayas,,,Produce,Fruits and Fruit Juices,usda:09226,"Papayas, raw",43,0
 paratha-bread,Paratha bread,,,Bakery,Baked Products,usda:28286,"Bread, paratha, whole wheat, commercially prepared, frozen",326,6.36,13.2,45.35,9.6,4.15,452,,piece=79.0,wheat or gluten,vegan,,,,1
 parmesan-cheese-topping,Parmesan cheese topping,,,Dairy and eggs,Dairy and Egg Products,usda:01185,"Parmesan cheese topping, fat free",370,40.0,5.0,40.0,0.0,1.5,1150,0.338,,milk,vegetarian,,,,1
 parmesan-fondue-cheese,Parmesan fondue cheese,,,Dairy and eggs,Dairy and Egg Products,cnf:7765,"Cheese, parmesan fondue, breaded square, ready-to-serve",268,5.17,15.73,27.77,0.0,4.17,304,,square=56.0,milk,vegetarian,,,,1
-parsnips,Parsnips,,,Produce,Vegetables and Vegetable Products,usda:11298,"Parsnips, raw",75,1.2,0.3,17.99,4.9,4.8,10,0.562,,,vegan,14-21,,300-360,3
+parsnips,Parsnips,,,Produce,Vegetables and Vegetable Products,usda:11298,"Parsnips, raw",75,1.2,0.3,17.99,4.9,4.8,10,0.562,,,vegan,14-21,,300-360,4
 pasilla-peppers,Pasilla peppers,,,Dry goods,Vegetables and Vegetable Products,usda:11982,"Peppers, pasilla, dried",345,12.35,15.85,51.13,26.8,,89,,pepper=7.0; peppers=7.0,,vegan,,,,1
 passion-fruit,Passion-fruit,,,Produce,Fruits and Fruit Juices,usda:09231,"Passion-fruit, (granadilla), purple, raw",97,2.2,0.7,23.38,10.4,11.2,28,0.997,fruit without refuse=18.0; fruit=18.0; fruits=18.0,,vegan,,,,1
 passion-fruit-juice,Passion-fruit juice,,,Pantry,Fruits and Fruit Juices,usda:09232,"Passion-fruit juice, purple, raw",51,0.39,0.05,13.6,0.2,13.4,6,1.044,,,vegan,,,,2
 pasta,Pasta,,,Dry goods,Cereal Grains and Pasta,usda:20093,"Pasta, fresh-refrigerated, plain, as purchased",288,11.31,2.3,54.73,,,26,,,wheat or gluten,vegan,3-5,,30-60,21
-pasta-sauce,Pasta sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06931,"Sauce, pasta, spaghetti/marinara, ready-to-serve",50,1.39,1.61,7.43,1.8,4.91,437,1.057,serving 1/2 cup=132.0,wheat or gluten,vegan,,,,2
-pasteurized-process-cheese,Pasteurized process cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01044,"Cheese, pasteurized process, swiss",334,24.73,25.01,2.1,0.0,1.23,1370,0.535,slice=21.0; regular slice=21.0,milk,vegetarian,,,,8
+pasta-sauce,Pasta sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06931,"Sauce, pasta, spaghetti/marinara, ready-to-serve",50,1.39,1.61,7.43,1.8,4.91,437,1.057,serving 1/2 cup=132.0,wheat or gluten,vegan,,,,3
+pasteurized-process-cheese,Pasteurized process cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01044,"Cheese, pasteurized process, swiss",334,24.73,25.01,2.1,0.0,1.23,1370,0.535,slice=21.0; regular slice=21.0,milk,vegetarian,,,,9
+pasteurized-process-cheese-food-or-product,Pasteurized process cheese food or product,,,Dairy and eggs,Dairy and Egg Products,fdc:2647439,"Cheese, pasteurized process cheese food or product, American, singles",308,15.57,23.86,8.19,,,1420,,,milk,vegetarian,,,,1
 pastrami,Pastrami,,,Meat and seafood,Sausages and Luncheon Meats,usda:07052,"Pastrami, turkey",139,16.3,6.21,3.34,0.1,3.34,1123,0.583,slices=28.5; package=227.0,,contains meat or fish,40-40,,,2
 pastry,Pastry,,,Bakery,Baked Products,usda:18959,"Pastry, Pastelitos de Guava (guava pastries)",379,5.48,18.5,47.76,2.2,17.0,231,,piece=86.0,wheat or gluten,vegan,,5-10,,1
 pate,Pate,,,Meat and seafood,Sausages and Luncheon Meats,usda:07942,"Pate, truffle flavor",327,11.2,28.5,6.3,,,807,,serving 2 oz=56.0,,contains meat or fish,1-2,,30-60,4
 pate-de-foie-gras,Pate de foie gras,,,Canned,Poultry Products,usda:05282,"Pate de foie gras, canned (goose liver pate), smoked",462,11.4,43.84,4.67,0.0,,697,0.879,,,contains meat or fish,,,,1
 peach-nectar,Peach nectar,,,Canned,Fruits and Fruit Juices,usda:09251,"Peach nectar, canned, without added ascorbic acid",54,0.27,0.02,13.92,0.6,13.32,7,1.052,,,vegan,,,,2
-peaches,Peaches,,,Produce,Fruits and Fruit Juices,usda:09236,"Peaches, yellow, raw",39,0.91,0.25,9.54,1.5,8.39,0,0.651,small=130.0; medium=150.0; large=175.0; extra large=224.0; nlea serving=147.0,,vegan,3-5,,60-60,15
-peanut-butter,Peanut butter,,,Pantry,Legumes and Legume Products,cnf:6289,"Peanut butter, natural",585,23.68,49.66,21.51,8.0,4.18,6,1.049,,peanuts,vegan,,180-720,,9
+peaches,Peaches,,,Produce,Fruits and Fruit Juices,usda:09236,"Peaches, yellow, raw",39,0.91,0.25,9.54,1.5,8.39,0,0.651,small=130.0; medium=150.0; large=175.0; extra large=224.0; nlea serving=147.0,,vegan,3-5,,60-60,16
+peanut-butter,Peanut butter,,,Pantry,Legumes and Legume Products,cnf:6289,"Peanut butter, natural",585,23.68,49.66,21.51,8.0,4.18,6,1.049,,peanuts,vegan,,180-720,,11
 peanut-butter-with-omega-3,Peanut butter with omega-3,,,Pantry,Legumes and Legume Products,usda:16399,"Peanut butter with omega-3, creamy",608,24.47,54.17,17.0,6.1,3.11,356,1.082,,peanuts,vegan,,,,1
 peanut-flour,Peanut flour,,,Dry goods,Legumes and Legume Products,usda:16099,"Peanut flour, defatted",327,52.2,0.55,34.7,15.8,8.22,180,0.254,serving=20.0,peanuts,vegan,,,,2
 peanut-oil,Peanut oil,,,Pantry,Fats and Oils,usda:04042,"Oil, peanut, salad or cooking",884,0.0,100.0,0.0,0.0,0.0,0,0.913,,peanuts,vegan,,,,1
 peanut-sauce,Peanut sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06618,"Sauce, peanut, made from coconut, water, sugar, peanuts",179,2.02,6.34,28.46,1.1,18.8,319,1.15,,peanuts,vegan,,,,2
 peanut-spread,Peanut spread,,,Dry goods,Legumes and Legume Products,usda:16149,"Peanut spread, reduced sugar",650,24.8,54.89,14.23,7.8,6.35,292,1.081,,peanuts,vegan,,,,1
-peanuts,Peanuts,,,Dry goods,Legumes and Legume Products,usda:16091,"Peanuts, spanish, raw",570,26.15,49.6,15.83,9.5,,22,0.617,,peanuts,vegan,360-360,120-120,720-720,15
+peanuts,Peanuts,,,Dry goods,Legumes and Legume Products,usda:16091,"Peanuts, spanish, raw",570,26.15,49.6,15.83,9.5,,22,0.617,,peanuts,vegan,360-360,120-120,720-720,16
+pear,Pear,,,Produce,Fruits and Fruit Juices,fdc:2710836,"Pear, Anjou, green, with skin, raw",57,0.31,0.37,14.77,2.6,7.8,0,,,,vegan,3-5,,60-60,1
 pear-nectar,Pear nectar,,,Canned,Fruits and Fruit Juices,usda:09262,"Pear nectar, canned, without added ascorbic acid",60,0.11,0.01,15.76,0.6,15.16,4,1.057,,,vegan,,,,2
-pears,Pears,,,Produce,Fruits and Fruit Juices,usda:09252,"Pears, raw",57,0.36,0.14,15.23,3.1,9.75,1,0.636,small=148.0; medium=178.0; large=230.0; nlea serving=166.0,,vegan,3-5,,60-60,16
+pears,Pears,,,Produce,Fruits and Fruit Juices,usda:09252,"Pears, raw",57,0.36,0.14,15.23,3.1,9.75,1,0.636,small=148.0; medium=178.0; large=230.0; nlea serving=166.0,,vegan,3-5,,60-60,18
 peas-and-onions,Peas and onions,,,Frozen,Vegetables and Vegetable Products,usda:11326,"Peas and onions, frozen, unprepared",70,3.98,0.32,13.51,3.5,,61,0.583,package=284.0,,vegan,,,,4
-pecans,Pecans,,,Dry goods,Nut and Seed Products,usda:12142,"Nuts, pecans",691,9.17,71.97,13.86,9.6,3.97,0,0.44,,tree nuts,vegan,360-360,14-28,720-720,5
+pecans,Pecans,,,Dry goods,Nut and Seed Products,usda:12142,"Nuts, pecans",691,9.17,71.97,13.86,9.6,3.97,0,0.44,,tree nuts,vegan,360-360,14-28,720-720,6
 pectin,Pectin,,,Pantry,Sweets,usda:42063,"Pectin, liquid",11,0.0,0.0,2.1,2.1,0.0,0,,,,vegan,,,,2
 pepeao,Pepeao,,,Dry goods,Vegetables and Vegetable Products,usda:11230,"Pepeao, dried",298,4.82,0.44,81.03,,,70,0.101,,,vegan,,,,1
 peppercorn-dressing,Peppercorn dressing,,,Pantry,Fats and Oils,usda:42137,"Salad dressing, peppercorn dressing, commercial, regular",564,1.2,61.4,3.5,0.0,2.45,1103,0.905,,,vegan,,,,1
@@ -964,29 +988,31 @@ pike,Pike,,,Meat and seafood,Finfish and Shellfish Products,usda:15064,"Fish, pi
 pilinuts,Pilinuts,,,Dry goods,Nut and Seed Products,usda:12145,"Nuts, pilinuts, dried",719,10.8,79.55,3.98,,,3,0.507,kernels=1.9,tree nuts,vegan,,,,1
 pimento,Pimento,,,Canned,Vegetables and Vegetable Products,usda:11943,"Pimento, canned",23,1.1,0.3,5.1,1.9,2.71,14,0.812,"slice=1.0; pimiento, whole=66.0",,vegan,,,,1
 pina-colada,Pina colada,,,Pantry,Beverages,usda:14015,"Alcoholic beverage, pina colada, canned",237,0.6,7.6,27.6,0.1,,71,1.102,can=222.0,,vegan,,,,2
-pine-nuts,Pine nuts,,,Dry goods,Nut and Seed Products,usda:12147,"Nuts, pine nuts, dried",673,13.69,68.37,13.08,3.7,3.59,2,0.571,nuts=0.2,tree nuts,vegan,90-90,14-21,270-270,2
-pineapple,Pineapple,,,Produce,Fruits and Fruit Juices,usda:09266,"Pineapple, raw, all varieties",50,0.54,0.12,13.12,1.4,9.85,1,0.697,"fruit=905.0; slice=166.0; slice, thin=56.0; thin slice=56.0",,vegan,5-7,,300-360,10
+pine-nuts,Pine nuts,,,Dry goods,Nut and Seed Products,fdc:2346392,"Nuts, pine nuts, raw",643,15.7,61.27,18.59,3.9,,0,,,tree nuts,vegan,90-90,14-21,270-270,3
+pineapple,Pineapple,,,Produce,Fruits and Fruit Juices,usda:09266,"Pineapple, raw, all varieties",50,0.54,0.12,13.12,1.4,9.85,1,0.697,"fruit=905.0; slice=166.0; slice, thin=56.0; thin slice=56.0",,vegan,5-7,,300-360,11
 pineapple-and-grapefruit-juice-drink,Pineapple and grapefruit juice drink,,,Pantry,Beverages,usda:14334,"Beverages, pineapple and grapefruit juice drink, canned",47,0.2,0.1,11.6,0.1,11.52,14,1.057,,,vegan,,,,1
 pineapple-and-orange-juice-drink,Pineapple and orange juice drink,,,Pantry,Beverages,usda:14341,"Beverages, pineapple and orange juice drink, canned",50,1.3,0.0,11.8,0.1,11.59,3,1.057,,,vegan,,,,1
 pineapple-juice,Pineapple juice,,,Frozen,Fruits and Fruit Juices,usda:09274,"Pineapple juice, frozen concentrate, unsweetened, undiluted",179,1.3,0.1,44.3,0.7,43.6,3,1.217,can=216.0,,vegan,,,,4
 pink-beans,Pink beans,,,Dry goods,Legumes and Legume Products,usda:16040,"Beans, pink, mature seeds, raw",343,20.96,1.13,64.19,12.7,2.14,8,0.888,,,vegan,,,,3
-pinto-beans,Pinto beans,,,Dry goods,Legumes and Legume Products,usda:16042,"Beans, pinto, mature seeds, raw",347,21.42,1.23,62.55,15.5,2.11,12,0.816,,,vegan,,,,13
-pistachio-nuts,Pistachio nuts,,,Dry goods,Nut and Seed Products,usda:12151,"Nuts, pistachio nuts, raw",560,20.16,45.32,27.17,10.6,7.66,1,0.52,kernel=0.7; kernels=0.6,tree nuts,vegan,,,,3
+pinto-beans,Pinto beans,,,Dry goods,Legumes and Legume Products,usda:16042,"Beans, pinto, mature seeds, raw",347,21.42,1.23,62.55,15.5,2.11,12,0.816,,,vegan,,,,14
+pistachio-nuts,Pistachio nuts,,,Dry goods,Nut and Seed Products,usda:12151,"Nuts, pistachio nuts, raw",560,20.16,45.32,27.17,10.6,7.66,1,0.52,kernel=0.7; kernels=0.6,tree nuts,vegan,,,,4
 pita-bread,Pita bread,,,Bakery,Baked Products,usda:18042,"Bread, pita, whole-wheat",262,9.8,1.71,55.89,6.1,2.87,527,,"pita, large=64.0; pita, small=28.0",wheat or gluten,vegan,,,,7
 pitahaya,Pitahaya,,,Produce,Fruits and Fruit Juices,cnf:7579,"Pitahaya (pitaya, dragon fruit, strawberry pear), raw",49,0.5,0.1,11.6,3.0,,,,medium=343.0; /2 medium=188.0,,vegan,,,,1
 pitanga,Pitanga,,,Produce,Fruits and Fruit Juices,usda:09276,"Pitanga, (surinam-cherry), raw",33,0.8,0.4,7.49,,,3,0.731,fruit without refuse=7.0; fruit=7.0,,vegan,,,,1
 pizza-blend-cheese,Pizza blend cheese,,,Dairy and eggs,Dairy and Egg Products,cnf:7769,"Cheese, pizza blend, shredded",331,24.56,23.49,5.07,0.0,0.77,656,1.05,,milk,vegetarian,,,,1
 pizza-sauce,Pizza sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06152,"Sauce, pizza, canned, ready-to-serve",54,2.18,1.15,8.66,2.0,3.78,348,1.065,,,vegan,,,,1
-plain-yogurt,Plain yogurt,,,Dairy and eggs,Dairy and Egg Products,usda:01116,"Yogurt, plain, whole milk, 8 grams protein per 8 ounce",61,3.47,3.25,4.66,0.0,4.66,46,1.036,container=170.0,milk,vegetarian,,,,3
+plain-yogurt,Plain yogurt,,,Dairy and eggs,Dairy and Egg Products,usda:01116,"Yogurt, plain, whole milk, 8 grams protein per 8 ounce",61,3.47,3.25,4.66,0.0,4.66,46,1.036,container=170.0,milk,vegetarian,,,,5
 plant-based-beverage,Plant-based beverage,,,Pantry,Beverages,cnf:7809,"Plant-based beverage, rice beverage, chocolate, fortified, shelf-stable",65,0.48,0.83,13.79,0.4,8.06,40,1.046,,,vegan,,,,27
 plantain,Plantain,,,Produce,Fruits and Fruit Juices,cnf:7824,"Plantain, green, raw",152,1.25,0.07,36.66,2.2,2.29,2,,fruit=267.0,,vegan,3-5,,300-360,2
-plantains,Plantains,,,Produce,Fruits and Fruit Juices,usda:09277,"Plantains, raw",122,1.3,0.37,31.89,2.3,15.0,4,0.626,medium=179.0; medium fruit=179.0,,vegan,3-5,,300-360,4
+plantains,Plantains,,,Produce,Fruits and Fruit Juices,usda:09277,"Plantains, raw",122,1.3,0.37,31.89,2.3,15.0,4,0.626,medium=179.0; medium fruit=179.0,,vegan,3-5,,300-360,7
+plum,Plum,,,Produce,Fruits and Fruit Juices,fdc:2710837,"Plum, black, with skin, raw",53,0.58,0.28,13.46,1.3,7.96,0,,,,vegan,3-5,,60-60,1
 plum-sauce,Plum sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06151,"Sauce, plum, ready-to-serve",184,0.89,1.04,42.81,0.7,,538,1.289,,,vegan,,,,1
 plums,Plums,,,Produce,Fruits and Fruit Juices,usda:09279,"Plums, raw",46,0.7,0.28,11.42,1.4,9.92,0,0.697,fruit=66.0; nlea serving=151.0,,vegan,3-5,,60-60,10
+poblano-peppers,Poblano peppers,,,Produce,Vegetables and Vegetable Products,fdc:2747662,"Peppers, poblano, seeded, raw",28,1.43,0.19,5.14,2.1,2.68,0,,,,vegan,,,,1
 poi,Poi,,,Produce,Vegetables and Vegetable Products,usda:11349,Poi,112,0.38,0.14,27.23,0.4,0.39,12,1.014,,,vegan,,,,1
 pokeberry-shoots,Pokeberry shoots,,,Produce,Vegetables and Vegetable Products,usda:11350,"Pokeberry shoots, (poke), raw",23,2.6,0.4,3.7,1.7,,23,0.676,,,vegan,,,,3
 polish-sausage,Polish sausage,,,Meat and seafood,Sausages and Luncheon Meats,usda:07059,"Polish sausage, pork",326,14.1,28.72,1.63,0.0,,876,,,,contains meat or fish,,,,1
-pollock,Pollock,,,Meat and seafood,Finfish and Shellfish Products,usda:15065,"Fish, pollock, Atlantic, raw",92,19.44,0.98,0.0,0.0,0.0,86,,fillet=386.0; /2 fillet=193.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,120-240,6
+pollock,Pollock,,,Meat and seafood,Finfish and Shellfish Products,fdc:333476,"Fish, pollock, raw",56,12.3,0.41,0.0,,,333,,fillet=177.0,fish,contains meat or fish,1-2,,120-240,7
 pomegranate-juice,Pomegranate juice,,,Canned,Fruits and Fruit Juices,usda:09442,"Pomegranate juice, bottled",54,0.15,0.29,13.13,0.1,12.65,9,1.052,,,vegan,,,,1
 pomegranates,Pomegranates,,,Produce,Fruits and Fruit Juices,usda:09286,"Pomegranates, raw",83,1.67,1.17,18.7,4.0,13.67,3,0.735,fruit=282.0; /2 fruit=141.0,,vegan,30-90,2-5,300-360,1
 pompano,Pompano,,,Meat and seafood,Finfish and Shellfish Products,usda:15068,"Fish, pompano, florida, raw",164,18.48,9.47,0.0,0.0,0.0,65,,fillet=112.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
@@ -998,12 +1024,13 @@ pork,Pork,,,Meat and seafood,Pork Products,usda:10004,"Pork, fresh, backfat, raw
 pork-and-beef-sausage,Pork and beef sausage,,,Meat and seafood,Sausages and Luncheon Meats,usda:07065,"Pork and beef sausage, fresh, cooked",396,13.8,36.25,2.7,0.0,0.0,929,,"link , cooked=13.0; patty, cooked=27.0",,contains meat or fish,,,,1
 pork-and-turkey-sausage,Pork and turkey sausage,,,Meat and seafood,Sausages and Luncheon Meats,usda:07957,"Pork and turkey sausage, pre-cooked",342,12.05,30.64,3.63,0.0,0.0,876,0.562,serving=57.0; link=31.0; food guide serving = 75g=75.0,,contains meat or fish,,,,1
 pork-backribs,Pork backribs,,,Meat and seafood,Pork Products,usda:10192,"Pork, fresh, backribs, separable lean and fat, raw",224,19.07,16.33,0.0,0.0,0.0,87,,,,contains meat or fish,,,,2
-pork-bacon,Pork bacon,,,Meat and seafood,Pork Products,usda:10123,"Pork, cured, bacon, unprepared",417,12.62,39.69,1.28,0.0,1.0,662,,slice raw=28.0; package=442.0; medium slice=22.7; thick slice=38.0,,contains meat or fish,,,,7
-pork-belly,Pork belly,,,Meat and seafood,Pork Products,usda:10005,"Pork, fresh, belly, raw",518,9.34,53.01,0.0,0.0,0.0,32,,,,contains meat or fish,,,,1
+pork-bacon,Pork bacon,,,Meat and seafood,Pork Products,usda:10123,"Pork, cured, bacon, unprepared",417,12.62,39.69,1.28,0.0,1.0,662,,slice raw=28.0; package=442.0; medium slice=22.7; thick slice=38.0,,contains meat or fish,,,,8
+pork-belly,Pork belly,,,Meat and seafood,Pork Products,usda:10005,"Pork, fresh, belly, raw",518,9.34,53.01,0.0,0.0,0.0,32,,,,contains meat or fish,,,,2
+pork-chop,Pork chop,,,Meat and seafood,Pork Products,fdc:2727575,"Pork, chop, center cut, raw",145,22.81,5.47,-0.56,,,39,,,,contains meat or fish,,,,1
 pork-feet,Pork feet,,,Meat and seafood,Pork Products,usda:10132,"Pork, cured, feet, pickled",140,11.63,10.02,0.01,0.0,0.0,946,0.33,food guide serving = 75g=75.0,,contains meat or fish,,,,1
 pork-ham,Pork ham,,,Meat and seafood,Pork Products,usda:10149,"Pork, cured, ham, steak, boneless, extra lean, unheated",122,19.56,4.25,0.0,0.0,,1269,0.566,slice=57.0; food guide serving = 75g=75.0,,contains meat or fish,,,,93
 pork-leg,Pork leg,,,Meat and seafood,Pork Products,usda:10010,"Pork, fresh, leg (ham), whole, separable lean only, raw",136,20.48,5.41,0.0,0.0,0.0,55,,food guide serving = 90g=90.0,,contains meat or fish,,,,20
-pork-loin,Pork loin,,,Meat and seafood,Pork Products,usda:10024,"Pork, fresh, loin, whole, separable lean only, raw",143,21.43,5.66,0.0,0.0,0.0,52,,"chop, excluding refuse=106.0; chop=106.0; food guide serving = 90g=90.0",,contains meat or fish,,,,116
+pork-loin,Pork loin,,,Meat and seafood,Pork Products,usda:10024,"Pork, fresh, loin, whole, separable lean only, raw",143,21.43,5.66,0.0,0.0,0.0,52,,"chop, excluding refuse=106.0; chop=106.0; food guide serving = 90g=90.0",,contains meat or fish,,,,118
 pork-sausage,Pork sausage,,,Meat and seafood,Sausages and Luncheon Meats,usda:07063,"Pork sausage, link/patty, unprepared",288,15.39,24.8,0.93,0.0,0.93,739,,link=25.0,,contains meat or fish,,,,7
 pork-sausage-rice-links,Pork sausage rice links,,,Meat and seafood,Sausages and Luncheon Meats,usda:42190,"Pork sausage rice links, brown and serve, cooked",407,13.7,37.63,2.36,0.0,0.0,689,,links 1 nlea serving=22.5,,contains meat or fish,,,,1
 pork-shoulder,Pork shoulder,,,Meat and seafood,Pork Products,usda:10077,"Pork, fresh, shoulder, arm picnic, separable lean only, raw",120,20.26,3.77,0.0,0.0,0.0,90,,roast=2745.0,,contains meat or fish,,,,30
@@ -1033,7 +1060,7 @@ protein-bread,Protein bread,,,Bakery,Baked Products,usda:18043,"Bread, protein (
 protein-powder-soy-based,Protein powder soy based,,,Pantry,Beverages,usda:14067,"Beverages, Protein powder soy based",388,55.56,5.56,28.89,6.7,22.22,733,,,soy,vegan,,,,1
 protein-powder-whey-based,Protein powder whey based,,,Pantry,Beverages,usda:14066,"Beverages, Protein powder whey based",352,78.13,1.56,6.25,3.1,0.0,156,0.406,,milk,vegetarian,,,,1
 protein-supplement,Protein supplement,,,Dairy and eggs,Dairy and Egg Products,usda:01223,"Protein supplement, milk based, Muscle Milk, powder",411,45.71,17.14,18.5,7.1,5.71,329,0.744,,milk,vegetarian,,,,2
-provolone-cheese,Provolone cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01035,"Cheese, provolone",351,25.58,26.62,2.14,0.0,0.56,876,0.558,slice=28.0; package=170.0; slice presliced=22.4,milk,vegetarian,,,,2
+provolone-cheese,Provolone cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01035,"Cheese, provolone",351,25.58,26.62,2.14,0.0,0.56,876,0.558,slice=28.0; package=170.0; slice presliced=22.4,milk,vegetarian,,,,3
 prune-juice,Prune juice,,,Canned,Fruits and Fruit Juices,usda:09294,"Prune juice, canned",71,0.61,0.03,17.45,1.0,16.45,4,1.082,,,vegan,,,,1
 prune-puree,Prune puree,,,Pantry,Fruits and Fruit Juices,usda:09423,Prune puree,257,2.1,0.2,65.1,3.3,39.0,23,1.007,,,vegan,,,,1
 prunes,Prunes,,,Dry goods,Fruits and Fruit Juices,usda:09289,"Prunes, dehydrated (low-moisture), uncooked",339,3.7,0.73,89.07,,,5,0.558,,,vegan,,,,3
@@ -1049,27 +1076,29 @@ pumpkin-flowers,Pumpkin flowers,,,Produce,Vegetables and Vegetable Products,usda
 pumpkin-leaves,Pumpkin leaves,,,Produce,Vegetables and Vegetable Products,usda:11418,"Pumpkin leaves, raw",19,3.15,0.4,2.33,,,11,0.165,,,vegan,,,,3
 pumpkin-pie-mix,Pumpkin pie mix,,,Canned,Vegetables and Vegetable Products,usda:11426,"Pumpkin pie mix, canned",104,1.09,0.13,26.39,8.3,,208,1.141,,,vegan,,,,1
 pumpkin-pie-spice,Pumpkin pie spice,,,Pantry,Spices and Herbs,usda:02035,"Spices, pumpkin pie spice",342,5.76,12.6,69.28,14.8,7.76,52,0.363,,,vegan,,,,1
+pumpkin-seeds,Pumpkin seeds,,,Dry goods,Nut and Seed Products,fdc:2515380,"Seeds, pumpkin seeds (pepitas), raw",515,29.91,40.03,18.68,5.1,,0,,,,vegan,180-180,180-180,,1
 purslane,Purslane,,,Produce,Vegetables and Vegetable Products,usda:11427,"Purslane, raw",20,2.03,0.36,3.39,,,45,0.182,,,vegan,,,,3
 quail,Quail,,,Meat and seafood,Poultry Products,usda:05158,"Quail, meat only, raw",134,21.76,4.53,0.0,0.0,,51,,unit=342.0; bird=92.0; food guide serving = 90g=90.0,,contains meat or fish,1-2,,180-180,4
-queso-fresco-cheese,Queso fresco cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01228,"Cheese, fresh, queso fresco",299,18.09,23.82,2.98,0.0,2.32,751,0.516,,milk,vegetarian,,,,1
+queso-fresco-cheese,Queso fresco cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01228,"Cheese, fresh, queso fresco",299,18.09,23.82,2.98,0.0,2.32,751,0.516,,milk,vegetarian,,,,2
 quinces,Quinces,,,Produce,Fruits and Fruit Juices,usda:09296,"Quinces, raw",57,0.4,0.1,15.3,1.9,,4,,fruit without refuse=92.0; fruit=92.0,,vegan,,,,1
 quinoa,Quinoa,,,Dry goods,Cereal Grains and Pasta,usda:20035,"Quinoa, uncooked",368,14.12,6.07,64.16,7.0,,5,0.719,serving=20.0,,vegan,,730-1095,,2
 rabbit,Rabbit,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17177,"Game meat, rabbit, domesticated, composite of cuts, raw",136,20.05,5.55,0.0,0.0,,41,,food guide serving = 90g=90.0,,contains meat or fish,2-2,,270-270,5
 raccoon,Raccoon,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17182,"Game meat, raccoon, cooked, roasted",255,29.2,14.5,0.0,0.0,0.0,79,,"piece, cooked=399.0",,contains meat or fish,,,,1
-radicchio,Radicchio,,,Produce,Vegetables and Vegetable Products,usda:11952,"Radicchio, raw",23,1.43,0.25,4.48,0.9,0.6,22,0.169,leaf=8.0; medium leaf=8.0,,vegan,14-21,,,1
+radicchio,Radicchio,,,Produce,Vegetables and Vegetable Products,usda:11952,"Radicchio, raw",23,1.43,0.25,4.48,0.9,0.6,22,0.169,leaf=8.0; medium leaf=8.0,,vegan,14-21,,,2
 radish-seeds,Radish seeds,,,Produce,Vegetables and Vegetable Products,usda:11676,"Radish seeds, sprouted, raw",43,3.81,2.53,3.6,,,6,0.311,,,vegan,,,,1
-radishes,Radishes,,,Produce,Vegetables and Vegetable Products,usda:11429,"Radishes, raw",16,0.68,0.1,3.4,1.6,1.86,39,0.49,large=9.0; medium=4.5; slice=1.0; small=2.0,,vegan,10-14,,,7
+radishes,Radishes,,,Produce,Vegetables and Vegetable Products,usda:11429,"Radishes, raw",16,0.68,0.1,3.4,1.6,1.86,39,0.49,large=9.0; medium=4.5; slice=1.0; small=2.0,,vegan,10-14,,,8
 raisin-bread,Raisin bread,,,Bakery,Baked Products,usda:18047,"Bread, raisin, enriched",274,7.9,4.4,52.3,4.3,5.68,347,,"slice, large=32.0; slice=26.0; slice, thin=23.0; slice = food guide portion=35.0",wheat or gluten,vegan,,,,3
 raisins,Raisins,,,Produce,Fruits and Fruit Juices,usda:09298,"Raisins, seedless",299,3.07,0.46,79.18,3.7,59.19,11,0.613,small box=43.0,,vegan,,180-180,,3
 rambutan,Rambutan,,,Canned,Fruits and Fruit Juices,usda:09301,"Rambutan, canned, syrup pack",82,0.65,0.21,20.87,0.9,,11,0.904,fruit=9.0; fruits=9.0,,vegan,,,,1
 ranch-dressing,Ranch dressing,,,Pantry,Fats and Oils,usda:04639,"Salad dressing, ranch dressing, regular",430,1.32,44.54,5.9,0.0,4.69,901,0.98,serving=30.0,,vegan,,,,3
-raspberries,Raspberries,,,Produce,Fruits and Fruit Juices,usda:09302,"Raspberries, raw",52,1.2,0.65,11.94,6.5,4.42,1,0.52,fruits=1.9,,vegan,2-3,,240-360,6
+raspberries,Raspberries,,,Produce,Fruits and Fruit Juices,usda:09302,"Raspberries, raw",52,1.2,0.65,11.94,6.5,4.42,1,0.52,fruits=1.9,,vegan,2-3,,240-360,8
 raspberry-juice-concentrate,Raspberry juice concentrate,,,Pantry,Fruits and Fruit Juices,cnf:7826,Raspberry juice concentrate,221,3.04,1.34,53.19,1.1,38.21,10,,,,vegan,,,,1
 ready-to-serve-sauce,Ready-to-serve sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06168,"Sauce, ready-to-serve, pepper or hot",11,0.51,0.37,1.75,0.3,1.26,2643,0.959,,,vegan,,,,1
-red-cabbage,Red cabbage,,,Produce,Vegetables and Vegetable Products,usda:11112,"Cabbage, red, raw",31,1.43,0.16,7.37,2.1,3.83,27,0.336,"head, large=1134.0; leaf=23.0; head, medium=839.0; head, small=567.0; small=567.0; medium=839.0",,vegan,,,,3
+red-cabbage,Red cabbage,,,Produce,Vegetables and Vegetable Products,usda:11112,"Cabbage, red, raw",31,1.43,0.16,7.37,2.1,3.83,27,0.336,"head, large=1134.0; leaf=23.0; head, medium=839.0; head, small=567.0; small=567.0; medium=839.0",,vegan,,,,4
 red-leaf-lettuce,Red leaf lettuce,,,Produce,Vegetables and Vegetable Products,usda:11257,"Lettuce, red leaf, raw",16,1.33,0.22,2.26,0.9,0.48,25,0.118,leaf inner=2.6; leaf outer=17.0; head=309.0; nlea serving=85.0; outer leaf=17.0; inner leaf=2.6,,vegan,,,,1
+red-rice,Red rice,,,Dry goods,Cereal Grains and Pasta,fdc:2710838,"Rice, red, unenriched, dry, raw",360,8.56,3.44,76.15,4.2,,0,,,,vegan,,,,1
 reddi-wip-fat-free-whipped-topping,Reddi wip fat free whipped topping,,,Dairy and eggs,Dairy and Egg Products,usda:01200,Reddi Wip Fat Free Whipped Topping,149,3.0,5.0,25.0,0.4,16.0,72,0.271,,milk,vegetarian,,,,1
-reduced-fat-milk,Reduced fat milk,,,Dairy and eggs,Dairy and Egg Products,usda:01079,"Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",50,3.3,1.98,4.8,0.0,5.06,47,1.031,,milk,vegetarian,,,,5
+reduced-fat-milk,Reduced fat milk,,,Dairy and eggs,Dairy and Egg Products,usda:01079,"Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",50,3.3,1.98,4.8,0.0,5.06,47,1.031,,milk,vegetarian,,,,7
 reduced-calorie-bread,Reduced-calorie bread,,,Bakery,Baked Products,usda:18053,"Bread, reduced-calorie, rye",203,9.1,2.9,40.5,12.0,2.29,513,,"slice=23.0; slice, thick=32.0; slice, thin=20.0",wheat or gluten,vegan,,,,6
 refried-beans,Refried beans,,,Canned,Legumes and Legume Products,usda:16172,"Refried beans, canned, fat-free",79,5.34,0.45,13.5,4.7,0.61,438,0.976,can=445.0,,vegan,,1095-1095,,4
 rennin,Rennin,,,Pantry,Sweets,usda:19214,"Rennin, vanilla, dry mix, prepared with 2% milk",77,3.06,1.77,12.34,0.0,,46,1.124,,milk,vegetarian,,,,4
@@ -1081,13 +1110,14 @@ rice-bran-oil,Rice bran oil,,,Pantry,Fats and Oils,usda:04037,"Oil, rice bran",8
 rice-flour,Rice flour,,,Dry goods,Cereal Grains and Pasta,usda:20090,"Rice flour, brown",363,7.23,2.78,76.48,4.6,0.66,8,0.668,serving=20.0,,vegan,,,,2
 rice-milk,Rice milk,,,Pantry,Beverages,usda:14639,"Beverages, rice milk, unsweetened",47,0.28,0.97,9.17,0.3,5.28,39,1.043,,,vegan,,,,1
 rice-noodles,Rice noodles,,,Dry goods,Cereal Grains and Pasta,usda:20133,"Rice noodles, dry",364,5.95,0.56,80.18,1.6,0.12,182,,,,vegan,,,,2
-ricotta-cheese,Ricotta cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01036,"Cheese, ricotta, whole milk",174,11.26,12.98,3.04,0.0,0.27,84,1.047,,milk,vegetarian,,,,2
+ricotta-cheese,Ricotta cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01036,"Cheese, ricotta, whole milk",174,11.26,12.98,3.04,0.0,0.27,84,1.047,,milk,vegetarian,,,,4
 roast-beef,Roast beef,,,Meat and seafood,Sausages and Luncheon Meats,usda:07043,"Roast beef, deli style, prepackaged, sliced",115,18.62,3.69,0.64,0.0,0.29,853,0.592,slice oval=9.3; slice rectangle=13.8; slice=19.9,,contains meat or fish,,,,1
 roast-beef-spread,Roast beef spread,,,Meat and seafood,Sausages and Luncheon Meats,usda:07912,Roast beef spread,223,15.27,16.28,3.73,0.2,0.71,724,,serving .25 cup=57.0,,contains meat or fish,,,,1
 rockfish,Rockfish,,,Meat and seafood,Finfish and Shellfish Products,usda:15070,"Fish, rockfish, Pacific, mixed species, raw",90,18.36,1.34,0.0,0.0,0.0,74,,fillet=191.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,120-240,2
 roe,Roe,,,Meat and seafood,Finfish and Shellfish Products,usda:15072,"Fish, roe, mixed species, raw",143,22.32,6.42,1.5,0.0,0.0,91,0.946,"can , solids and liquid=227.0; food guide serving = 90g=90.0",fish,contains meat or fish,,,,2
 roll-bread,Roll bread,,,Bakery,Baked Products,usda:28288,"Bread, roll, Mexican, bollilo",318,10.65,5.8,55.77,2.2,3.55,506,,piece=98.0,wheat or gluten,vegan,,,,1
 rolls,Rolls,,,Bakery,Baked Products,usda:18349,"Rolls, french",277,8.6,4.3,50.2,3.2,0.31,574,,roll=38.0; /2 roll=22.5,wheat or gluten,vegan,,14-18,90-150,21
+romaine-lettuce,Romaine lettuce,,,Produce,Vegetables and Vegetable Products,fdc:2346389,"Lettuce, romaine, green, raw",17,0.98,0.07,4.06,,,23,,,,vegan,,,,1
 romano-cheese,Romano cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01038,"Cheese, romano",387,31.8,26.94,3.63,0.0,0.73,1433,0.423,package=28.4,milk,vegetarian,,,,1
 roquefort-cheese,Roquefort cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01039,"Cheese, roquefort",369,21.54,30.64,2.0,0.0,,1809,0.571,package=85.0,milk,vegetarian,,,,1
 rose-apples,Rose-apples,,,Produce,Fruits and Fruit Juices,usda:09312,"Rose-apples, raw",25,0.6,0.3,5.7,,,0,,,,vegan,,,,1
@@ -1109,7 +1139,7 @@ safflower-seed-meal,Safflower seed meal,,,Dry goods,Nut and Seed Products,usda:1
 saffron,Saffron,,,Pantry,Spices and Herbs,usda:02037,"Spices, saffron",310,11.43,5.85,65.37,3.9,,148,0.142,,,vegan,,,,1
 sage,Sage,,,Pantry,Spices and Herbs,usda:02038,"Spices, sage, ground",315,10.63,12.75,60.73,40.3,1.71,11,0.139,,,vegan,,,,1
 salami,Salami,,,Meat and seafood,Sausages and Luncheon Meats,usda:07926,"Salami, Italian, pork",425,21.7,37.0,1.2,0.0,1.2,1890,0.621,,,contains meat or fish,14-14,,30-60,8
-salsa-sauce,Salsa sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06164,"Sauce, salsa, ready-to-serve",29,1.52,0.17,6.64,1.9,4.01,711,1.095,,,vegan,,,,2
+salsa-sauce,Salsa sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06164,"Sauce, salsa, ready-to-serve",29,1.52,0.17,6.64,1.9,4.01,711,1.095,,,vegan,,,,4
 salsify,Salsify,,,Produce,Vegetables and Vegetable Products,usda:11437,"Salsify, (vegetable oyster), raw",82,3.3,0.2,18.6,3.3,,20,0.562,,,contains meat or fish,,,,3
 salvadoran-sweet-cheese-bread,Salvadoran sweet cheese bread,,,Bakery,Baked Products,usda:18953,"Bread, salvadoran sweet cheese (quesadilla salvadorena)",374,7.12,17.12,47.84,0.7,24.9,510,,serving=55.0; cake square=399.0,milk|wheat or gluten,vegetarian,,,,1
 sandwich-spread,Sandwich spread,,,Dry goods,Legumes and Legume Products,usda:43135,"Sandwich spread, meatless",149,8.0,9.0,9.0,3.3,1.9,630,1.014,serving=150.0,,vegan,,,,3
@@ -1120,22 +1150,23 @@ sardine,Sardine,,,Canned,Finfish and Shellfish Products,usda:15088,"Fish, sardin
 sauce,Sauce,,,Canned,Vegetables and Vegetable Products,usda:11549,"Tomato products, canned, sauce",24,1.2,0.3,5.31,1.5,3.56,474,1.036,,,vegan,120-180,,,1
 sauerkraut,Sauerkraut,,,Canned,Vegetables and Vegetable Products,usda:11439,"Sauerkraut, canned, solids and liquids",19,0.91,0.14,4.28,2.9,1.78,661,0.6,,,vegan,,360-540,,1
 sauger,Sauger,,,Meat and seafood,Finfish and Shellfish Products,cnf:3235,"Fish, sauger (yellow walleye), raw",83,17.1,1.1,0.0,0.0,0.0,88,,food guide serving = 90g=90.0,fish,contains meat or fish,,,,1
-sausage,Sausage,,,Meat and seafood,Sausages and Luncheon Meats,cnf:7317,"Sausage, chorizo, raw",250,17.88,18.64,1.38,0.0,0.61,554,0.592,food guide serving = 90g=90.0,,contains meat or fish,1-2,,30-60,36
+sausage,Sausage,,,Meat and seafood,Sausages and Luncheon Meats,cnf:7317,"Sausage, chorizo, raw",250,17.88,18.64,1.38,0.0,0.61,554,0.592,food guide serving = 90g=90.0,,contains meat or fish,1-2,,30-60,44
 savory,Savory,,,Pantry,Spices and Herbs,usda:02039,"Spices, savory, ground",272,6.73,5.91,68.73,45.7,,24,0.292,,,vegan,,,,1
 savoy-cabbage,Savoy cabbage,,,Produce,Vegetables and Vegetable Products,usda:11114,"Cabbage, savoy, raw",27,2.0,0.1,6.1,3.1,2.27,28,0.296,,,vegan,,,,3
 scallop,Scallop,,,Meat and seafood,Finfish and Shellfish Products,usda:15172,"Mollusks, scallop, mixed species, raw",69,12.06,0.49,3.18,0.0,0.0,392,,unit 2 large or 5 small=30.0; small=6.0; large=15.0; food guide serving = 90g=90.0,shellfish,contains meat or fish,1-3,,180-540,4
+scallops,Scallops,,,Frozen,Finfish and Shellfish Products,fdc:2747667,"Scallops, sea, frozen, wild caught",66,13.51,0.49,1.97,,,313,,,fish,contains meat or fish,1-3,,180-540,2
 scotch-broth,Scotch broth,,,Canned,"Soups, Sauces, and Gravies",cnf:954,"Soup, scotch broth, canned, condensed",66,4.05,2.14,7.73,1.0,,716,1.04,can=295.4,,vegan,,,,2
 scrapple,Scrapple,,,Meat and seafood,Sausages and Luncheon Meats,usda:07951,"Scrapple, pork",213,8.06,13.87,14.06,0.3,0.2,482,,,,contains meat or fish,,,,1
 sculpin,Sculpin,,,Meat and seafood,Finfish and Shellfish Products,cnf:5919,"Fish, sculpin, Indigenous, raw",92,18.0,1.5,0.0,0.0,0.0,83,,food guide serving = 90g=90.0,fish,contains meat or fish,,,,1
 scup,Scup,,,Meat and seafood,Finfish and Shellfish Products,usda:15090,"Fish, scup, raw",105,18.88,2.73,0.0,0.0,0.0,42,0.702,fillet=64.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
-sea-bass,Sea bass,,,Meat and seafood,Finfish and Shellfish Products,usda:15091,"Fish, sea bass, mixed species, raw",97,18.43,2.0,0.0,0.0,0.0,68,,fillet=129.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
+sea-bass,Sea bass,,,Meat and seafood,Finfish and Shellfish Products,usda:15091,"Fish, sea bass, mixed species, raw",97,18.43,2.0,0.0,0.0,0.0,68,,fillet=129.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,3
 sea-cucumber,Sea cucumber,,,Meat and seafood,Finfish and Shellfish Products,cnf:5940,"Sea cucumber, Indigenous",68,13.0,0.4,3.1,,,,,food guide serving = 90g=90.0,fish,contains meat or fish,,,,1
 seal,Seal,,,Meat and seafood,"Lamb, Veal, and Game Products",cnf:3645,"Game meat, seal, harp, raw",113,23.8,1.3,0.0,0.0,0.0,47,,food guide serving = 90g=90.0,,contains meat or fish,14-14,,,1
 seasoning-mix,Seasoning mix,,,Pantry,Spices and Herbs,usda:02075,"Seasoning mix, dry, taco, original",322,4.5,0.0,58.0,13.3,10.83,7203,0.578,,,vegan,,,,3
 seatrout,Seatrout,,,Meat and seafood,Finfish and Shellfish Products,usda:15093,"Fish, seatrout, mixed species, raw",104,16.74,3.61,0.0,0.0,,58,,fillet=238.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
 semolina,Semolina,,,Dry goods,Cereal Grains and Pasta,usda:20466,"Semolina, unenriched",360,12.68,1.05,72.83,3.9,,1,0.706,serving=20.0,wheat or gluten,vegan,,,,2
-serrano-peppers,Serrano peppers,,,Produce,Vegetables and Vegetable Products,usda:11977,"Peppers, serrano, raw",32,1.74,0.44,6.7,3.7,3.83,10,0.444,pepper=6.1,,vegan,,,,1
-sesame-butter,Sesame butter,,,Dry goods,Nut and Seed Products,usda:12169,"Seeds, sesame butter, paste",586,18.08,50.87,24.05,5.5,,12,1.081,,sesame,vegetarian,,,,5
+serrano-peppers,Serrano peppers,,,Produce,Vegetables and Vegetable Products,usda:11977,"Peppers, serrano, raw",32,1.74,0.44,6.7,3.7,3.83,10,0.444,pepper=6.1,,vegan,,,,2
+sesame-butter,Sesame butter,,,Dry goods,Nut and Seed Products,usda:12169,"Seeds, sesame butter, paste",586,18.08,50.87,24.05,5.5,,12,1.081,,sesame,vegetarian,,,,6
 sesame-flour,Sesame flour,,,Dry goods,Nut and Seed Products,usda:12033,"Seeds, sesame flour, low-fat",333,50.14,1.75,35.51,,,39,,serving=20.0,sesame,vegan,,,,3
 sesame-meal,Sesame meal,,,Dry goods,Nut and Seed Products,usda:12034,"Seeds, sesame meal, partially defatted",567,16.96,48.0,26.04,,,39,,serving=20.0,sesame,vegan,,,,1
 sesame-seed-dressing,Sesame seed dressing,,,Pantry,Fats and Oils,usda:04016,"Salad dressing, sesame seed dressing, regular",443,3.1,45.2,8.6,1.0,8.32,1000,1.035,,sesame,vegan,,,,1
@@ -1152,7 +1183,7 @@ sheep-milk,Sheep milk,,,Dairy and eggs,Dairy and Egg Products,usda:01109,"Milk, 
 sheepshead,Sheepshead,,,Meat and seafood,Finfish and Shellfish Products,usda:15097,"Fish, sheepshead, raw",108,20.21,2.41,0.0,0.0,,71,,fillet=238.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
 shellie-beans,Shellie beans,,,Canned,Vegetables and Vegetable Products,usda:11050,"Beans, shellie, canned, solids and liquids",30,1.76,0.19,6.19,3.4,0.63,334,1.036,,,vegan,,,,1
 sherbet,Sherbet,,,Pantry,Sweets,usda:19097,"Sherbet, orange",144,1.1,2.0,30.4,1.3,24.32,46,0.626,bar=66.0,,vegan,,,270-270,1
-shiitake-mushrooms,Shiitake mushrooms,,,Produce,Vegetables and Vegetable Products,usda:11238,"Mushrooms, shiitake, raw",34,2.24,0.49,6.79,2.5,2.38,9,,piece whole=19.0; piece=19.0; pieces=19.0,,vegan,,,,5
+shiitake-mushrooms,Shiitake mushrooms,,,Produce,Vegetables and Vegetable Products,usda:11238,"Mushrooms, shiitake, raw",34,2.24,0.49,6.79,2.5,2.38,9,,piece whole=19.0; piece=19.0; pieces=19.0,,vegan,,,,7
 shortening,Shortening,,,Pantry,Fats and Oils,usda:04615,"Shortening, vegetable, household, composite",884,0.0,99.97,0.0,0.0,0.0,4,0.866,,,vegan,,365-730,,10
 shortening-bread,Shortening bread,,,Pantry,Fats and Oils,usda:04546,"Shortening bread, soybean (hydrogenated) and cottonseed",884,0.0,100.0,0.0,0.0,0.0,0,0.866,,soy|wheat or gluten,vegan,,,,1
 shortening-cake-mix,Shortening cake mix,,,Pantry,Fats and Oils,usda:04548,"Shortening cake mix, soybean (hydrogenated) and cottonseed (hydrogenated)",884,0.0,100.0,0.0,0.0,0.0,0,0.866,,soy|wheat or gluten,vegan,,,,1
@@ -1165,16 +1196,20 @@ small-white-beans,Small white beans,,,Dry goods,Legumes and Legume Products,usda
 smelt,Smelt,,,Meat and seafood,Finfish and Shellfish Products,usda:15099,"Fish, smelt, rainbow, raw",97,17.63,2.42,0.0,0.0,0.0,60,,food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
 smoked-link-sausage,Smoked link sausage,,,Meat and seafood,Sausages and Luncheon Meats,usda:07074,"Smoked link sausage, pork",309,11.98,28.23,0.94,0.0,0.94,827,0.583,"link=68.0; link, little=16.0",,contains meat or fish,,,,2
 snail,Snail,,,Meat and seafood,Finfish and Shellfish Products,usda:90560,"Mollusks, snail, raw",90,16.1,1.4,2.0,0.0,0.0,70,,food guide serving = 90g=90.0,shellfish,contains meat or fish,,,,1
-snap-beans,Snap beans,,,Produce,Vegetables and Vegetable Products,usda:11052,"Beans, snap, green, raw",31,1.83,0.22,6.97,2.7,3.26,6,0.465,,,vegan,,,,23
-snapper,Snapper,,,Meat and seafood,Finfish and Shellfish Products,usda:15101,"Fish, snapper, mixed species, raw",100,20.51,1.34,0.0,0.0,0.0,64,,fillet=218.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
+snap-beans,Snap beans,,,Produce,Vegetables and Vegetable Products,usda:11052,"Beans, snap, green, raw",31,1.83,0.22,6.97,2.7,3.26,6,0.465,,,vegan,,,,25
+snapper,Snapper,,,Meat and seafood,Finfish and Shellfish Products,usda:15101,"Fish, snapper, mixed species, raw",100,20.51,1.34,0.0,0.0,0.0,64,,fillet=218.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,3
+snow-crab,Snow crab,,,Frozen,Finfish and Shellfish Products,fdc:2747670,"Snow crab, legs only, frozen",69,15.54,0.29,1.11,,,728,,,shellfish,contains meat or fish,,,,1
 sofrito-sauce,Sofrito sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06142,"Sauce, sofrito, prepared from recipe",237,12.8,18.2,5.46,1.7,,1145,0.871,,,vegan,,,,1
-sorghum-flour,Sorghum flour,,,Dry goods,Cereal Grains and Pasta,usda:20648,"Sorghum flour, whole-grain",359,8.43,3.34,76.64,6.6,1.94,3,0.511,serving=20.0,,vegan,,,,2
-sorghum-grain,Sorghum grain,,,Dry goods,Cereal Grains and Pasta,usda:20067,Sorghum grain,329,10.62,3.46,72.09,6.7,2.53,2,0.812,serving=20.0,,vegan,,,,1
+sorghum,Sorghum,,,Dry goods,Cereal Grains and Pasta,fdc:2710842,"Sorghum, whole grain, white, dry, raw",341,10.08,4.22,73.57,8.3,,0,,,,vegan,,120-120,240-240,1
+sorghum-bran,Sorghum bran,,,Dry goods,Cereal Grains and Pasta,fdc:2710839,"Sorghum bran, white, unenriched, dry, raw",365,11.17,9.26,68.7,35.0,,3,,,,vegan,,,,1
+sorghum-flour,Sorghum flour,,,Dry goods,Cereal Grains and Pasta,usda:20648,"Sorghum flour, whole-grain",359,8.43,3.34,76.64,6.6,1.94,3,0.511,serving=20.0,,vegan,,,,3
+sorghum-grain,Sorghum grain,,,Dry goods,Cereal Grains and Pasta,usda:20067,Sorghum grain,329,10.62,3.46,72.09,6.7,2.53,2,0.812,serving=20.0,,vegan,,,,2
 sorghum-syrup,Sorghum syrup,,,Pantry,Sweets,usda:19355,"Syrups, sorghum",290,0.0,0.0,74.9,0.0,74.9,8,1.395,,,vegan,,,,1
 sour-dressing,Sour dressing,,,Dairy and eggs,Dairy and Egg Products,usda:01058,"Sour dressing, non-butterfat, cultured, filled cream-type",178,3.25,16.57,4.68,0.0,4.68,48,0.902,,milk,vegetarian,,,,1
 soursop,Soursop,,,Produce,Fruits and Fruit Juices,usda:09315,"Soursop, raw",66,1.0,0.3,16.84,3.3,13.54,14,0.951,fruit=625.0,,vegan,,,,1
 soy-flour,Soy flour,,,Dry goods,Legumes and Legume Products,usda:16118,"Soy flour, low-fat",372,49.81,8.9,30.63,16.0,9.33,9,0.372,serving=20.0,soy,vegan,180-180,60-60,,4
 soy-meal,Soy meal,,,Dry goods,Legumes and Legume Products,usda:16119,"Soy meal, defatted, raw",337,49.2,2.39,35.89,,,3,0.516,serving=20.0,soy,vegan,,,,1
+soy-milk,Soy milk,,,Dry goods,Legumes and Legume Products,fdc:1750337,"Soy milk, unsweetened, plain, shelf stable",38,3.55,2.12,1.29,0.0,0.56,34,,,soy,vegan,,,,3
 soy-protein-concentrate,Soy protein concentrate,,,Dry goods,Legumes and Legume Products,usda:16420,"Soy protein concentrate, produced by acid wash",328,63.63,0.46,25.41,5.5,20.0,900,0.527,,soy,vegan,,,,2
 soy-protein-isolate,Soy protein isolate,,,Dry goods,Legumes and Legume Products,usda:16122,Soy protein isolate,335,88.32,3.39,0.0,0.0,0.0,1005,0.527,,soy,vegan,,,,2
 soy-sauce-made-from-hydrolyzed-vegetable-protein,Soy sauce made from hydrolyzed vegetable protein,,,Pantry,Legumes and Legume Products,usda:16125,Soy sauce made from hydrolyzed vegetable protein,60,7.0,0.51,7.84,0.5,1.3,6820,1.098,,soy,vegan,,,,1
@@ -1205,12 +1240,12 @@ sprouted-wheat-bread,Sprouted wheat bread,,,Bakery,Baked Products,cnf:7282,"Brea
 sprouted-wheat-with-added-calcium-and-vitamin-d-bread,Sprouted wheat with added calcium and vitamin d bread,,,Bakery,Baked Products,cnf:7288,"Bread, sprouted wheat with added calcium and vitamin D, commercial",250,12.98,3.3,41.19,11.8,1.58,332,,slice=31.0,wheat or gluten,vegan,,,,2
 spruce-grouse,Spruce grouse,,,Meat and seafood,Poultry Products,cnf:5934,"Spruce grouse, Indigenous, meat, raw",109,24.0,1.0,0.0,0.0,0.0,53,,food guide serving = 90g=90.0,,contains meat or fish,,,,2
 squab,Squab,,,Meat and seafood,Poultry Products,usda:05161,"Squab, (pigeon), meat only, raw",142,17.5,7.5,0.0,0.0,,51,,unit=251.0; bird=168.0; food guide serving = 90g=90.0,,contains meat or fish,,,,3
-squid,Squid,,,Meat and seafood,Finfish and Shellfish Products,usda:15175,"Mollusks, squid, mixed species, raw",92,15.58,1.38,3.08,0.0,0.0,44,,food guide serving = 90g=90.0,shellfish,contains meat or fish,1-3,,180-540,3
+squid,Squid,,,Meat and seafood,Finfish and Shellfish Products,usda:15175,"Mollusks, squid, mixed species, raw",92,15.58,1.38,3.08,0.0,0.0,44,,food guide serving = 90g=90.0,shellfish,contains meat or fish,1-3,,180-540,4
 squirrel,Squirrel,,,Meat and seafood,"Lamb, Veal, and Game Products",usda:17183,"Game meat, squirrel, raw",120,21.23,3.21,0.0,0.0,,103,,food guide serving = 90g=90.0,,contains meat or fish,,,,2
 steak-sauce,Steak sauce,,,Canned,"Soups, Sauces, and Gravies",usda:27048,"Sauce, steak, tomato based",95,1.25,0.23,22.04,1.5,9.82,1647,1.15,,,vegan,,,,1
 stock,Stock,,,Canned,"Soups, Sauces, and Gravies",cnf:7365,"Soup (sauce), stock, cream, ready-to-serve",62,0.73,4.71,4.2,0.2,0.93,302,1.026,,milk,vegetarian,,,,4
 straw-mushrooms,Straw mushrooms,,,Canned,Vegetables and Vegetable Products,usda:11989,"Mushrooms, straw, canned, drained solids",32,3.83,0.68,4.64,2.5,,384,0.769,piece=5.5,,vegan,,,,1
-strawberries,Strawberries,,,Produce,Fruits and Fruit Juices,usda:09316,"Strawberries, raw",32,0.67,0.3,7.68,2.0,4.89,1,0.672,extra large=27.0; large=18.0; medium=12.0; small=7.0; nlea serving=147.0,,vegan,2-3,,240-360,5
+strawberries,Strawberries,,,Produce,Fruits and Fruit Juices,usda:09316,"Strawberries, raw",32,0.67,0.3,7.68,2.0,4.89,1,0.672,extra large=27.0; large=18.0; medium=12.0; small=7.0; nlea serving=147.0,,vegan,2-3,,240-360,9
 strawberry-flavor-beverage-mix,Strawberry-flavor beverage mix,,,Pantry,Beverages,usda:14350,"Strawberry-flavor beverage mix, powder",389,0.1,0.2,99.1,0.0,95.45,38,1.122,serving=22.0,,vegan,,,,2
 strings-cheese,Strings cheese,,,Dairy and eggs,Dairy and Egg Products,cnf:7746,"Cheese, strings, cheddar",330,25.14,24.19,2.58,0.0,0.77,611,,stick=21.0,milk,vegetarian,150-150,,,4
 stroganoff-sauce,Stroganoff sauce,,,Canned,"Soups, Sauces, and Gravies",cnf:994,"Sauce, Stroganoff, dehydrated",351,12.1,9.53,57.66,1.1,,4050,,package=46.0,,vegan,,,,1
@@ -1221,12 +1256,13 @@ sucker,Sucker,,,Meat and seafood,Finfish and Shellfish Products,usda:15107,"Fish
 sugar-free-syrup,Sugar free syrup,,,Pantry,Sweets,usda:43026,"Syrups, sugar free",52,0.8,0.0,12.13,0.7,0.01,210,1.014,,,vegan,,,,1
 sugar-substitute,Sugar substitute,,,Pantry,Sweets,usda:19909,"Sweeteners, sugar substitute, granulated, brown",347,2.06,0.0,84.77,0.6,4.03,572,0.099,,,vegan,,730-730,,1
 sugar-apples,Sugar-apples,,,Produce,Fruits and Fruit Juices,usda:09321,"Sugar-apples, (sweetsop), raw",94,2.06,0.29,23.64,4.4,,9,1.057,fruit=155.0,,vegan,,,,1
-summer-squash,Summer squash,,,Produce,Vegetables and Vegetable Products,usda:11641,"Squash, summer, all varieties, raw",16,1.21,0.18,3.35,1.1,2.2,2,0.478,large=323.0; medium=196.0; slice=9.9; small=118.0,,vegan,,,,20
+summer-squash,Summer squash,,,Produce,Vegetables and Vegetable Products,usda:11641,"Squash, summer, all varieties, raw",16,1.21,0.18,3.35,1.1,2.2,2,0.478,large=323.0; medium=196.0; slice=9.9; small=118.0,,vegan,,,,22
 sunfish,Sunfish,,,Meat and seafood,Finfish and Shellfish Products,usda:15108,"Fish, sunfish, pumpkin seed, raw",89,19.4,0.7,0.0,0.0,,80,,fillet=48.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
 sunflower-oil,Sunflower oil,,,Pantry,Fats and Oils,usda:04506,"Oil, sunflower, linoleic, (approx. 65%)",884,0.0,100.0,0.0,0.0,0.0,0,0.92,,,vegan,,365-365,,4
+sunflower-seed,Sunflower seed,,,Dry goods,Nut and Seed Products,fdc:2515381,"Seeds, sunflower seed, kernel, raw",571,18.87,48.44,24.5,7.2,,0,,,,vegan,,360-360,,1
 sunflower-seed-butter,Sunflower seed butter,,,Dry goods,Nut and Seed Products,usda:12540,"Seeds, sunflower seed butter, with salt added",617,17.28,55.2,23.32,5.7,10.54,331,1.081,,,vegetarian,,,,2
 sunflower-seed-flour,Sunflower seed flour,,,Dry goods,Nut and Seed Products,usda:12041,"Seeds, sunflower seed flour, partially defatted",326,48.06,1.61,35.83,5.2,,3,0.271,serving=20.0,,vegan,,,,1
-sunflower-seed-kernels,Sunflower seed kernels,,,Dry goods,Nut and Seed Products,usda:12036,"Seeds, sunflower seed kernels, dried",584,20.78,51.46,20.0,8.6,2.62,9,0.194,,,vegan,,,,7
+sunflower-seed-kernels,Sunflower seed kernels,,,Dry goods,Nut and Seed Products,usda:12036,"Seeds, sunflower seed kernels, dried",584,20.78,51.46,20.0,8.6,2.62,9,0.194,,,vegan,,,,8
 sunflower-seed-kernels-from-shell,Sunflower seed kernels from shell,,,Dry goods,Nut and Seed Products,usda:12536,"Seeds, sunflower seed kernels from shell, dry roasted, with salt added",546,19.33,49.8,15.31,9.0,2.73,6008,0.541,package yields=27.0,,vegan,,,,1
 surimi,Surimi,,,Meat and seafood,Finfish and Shellfish Products,usda:15109,"Fish, surimi",99,15.18,0.9,6.85,0.0,0.0,143,,food guide serving = 75g=75.0,fish,contains meat or fish,,,270-270,1
 swamp-cabbage,Swamp cabbage,,,Produce,Vegetables and Vegetable Products,usda:11503,"Swamp cabbage, (skunk cabbage), raw",19,2.6,0.2,3.14,2.1,,113,0.237,,,vegan,,,,3
@@ -1237,9 +1273,9 @@ sweet-potato-puffs,Sweet potato puffs,,,Frozen,Vegetables and Vegetable Products
 sweet-rolls,Sweet rolls,,,Bakery,Baked Products,usda:18355,"Sweet rolls, cheese",360,7.1,18.3,43.7,1.2,,357,,roll=66.0; /2 roll=33.0,milk|wheat or gluten,vegetarian,,,,4
 sweetener,Sweetener,,,Pantry,Sweets,usda:19912,"Sweetener, syrup, agave",310,0.09,0.45,76.37,0.2,68.03,4,0.93,,,vegan,,,,2
 sweets,Sweets,,,Pantry,Sweets,cnf:4300,"Sweets, molasses, blackstrap",235,0.0,0.0,60.8,0.0,42.8,55,1.386,,,vegan,,365-730,,9
-swiss-cheese,Swiss cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01040,"Cheese, swiss",393,26.96,30.99,1.44,0.0,0.0,187,0.558,slice=28.0; slice presliced=22.0,milk,vegetarian,,,,5
+swiss-cheese,Swiss cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01040,"Cheese, swiss",393,26.96,30.99,1.44,0.0,0.0,187,0.558,slice=28.0; slice presliced=22.0,milk,vegetarian,,,,7
 swisswurst,Swisswurst,,,Meat and seafood,Sausages and Luncheon Meats,usda:07920,"Swisswurst, pork and beef, with swiss cheese, smoked",307,12.69,27.37,1.6,0.0,0.0,827,,serving 2.7 oz=77.0,milk,contains meat or fish,,,,1
-swordfish,Swordfish,,,Meat and seafood,Finfish and Shellfish Products,usda:15110,"Fish, swordfish, raw",144,19.66,6.65,0.0,0.0,0.0,81,,piece=136.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
+swordfish,Swordfish,,,Meat and seafood,Finfish and Shellfish Products,usda:15110,"Fish, swordfish, raw",144,19.66,6.65,0.0,0.0,0.0,81,,piece=136.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,3
 syrup,Syrup,,,Pantry,Sweets,usda:90480,"Syrup, Cane",269,0.0,0.0,73.14,0.0,73.2,58,,serving=21.0,,vegan,,730-730,,3
 table-blends-syrup,Table blends syrup,,,Pantry,Sweets,usda:19113,"Syrups, table blends, pancake, with butter",291,0.0,0.09,72.43,0.0,72.25,287,1.234,serving 1/4 cup=73.0,milk|wheat or gluten,vegetarian,,,,7
 tabletop,Tabletop,,,Pantry,Sweets,usda:44018,"Sweeteners, tabletop, fructose, liquid",279,0.0,0.0,76.1,0.1,76.0,2,1.284,serving=0.1,,vegan,,,,3
@@ -1264,7 +1300,7 @@ teriyaki-sauce,Teriyaki sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06112,"
 tex-mex-blend-cheese,Tex mex blend cheese,,,Dairy and eggs,Dairy and Egg Products,cnf:7770,"Cheese, Tex Mex blend, light, shredded",280,27.4,17.59,2.19,0.0,0.31,692,1.05,,milk,vegetarian,,,,1
 thousand-island-dressing,Thousand island dressing,,,Pantry,Fats and Oils,usda:04017,"Salad dressing, thousand island, commercial, regular",379,1.09,35.06,14.64,0.8,15.18,962,1.057,serving=30.0,,vegan,,,,3
 thuringer,Thuringer,,,Meat and seafood,Sausages and Luncheon Meats,usda:07078,"Thuringer, cervelat, summer sausage, beef, pork",362,17.45,30.43,3.33,0.0,0.85,1300,0.592,slice=23.0,,contains meat or fish,,,,1
-tilapia,Tilapia,,,Meat and seafood,Finfish and Shellfish Products,usda:15261,"Fish, tilapia, raw",96,20.08,1.7,0.0,0.0,0.0,52,,fillet=116.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
+tilapia,Tilapia,,,Meat and seafood,Finfish and Shellfish Products,usda:15261,"Fish, tilapia, raw",96,20.08,1.7,0.0,0.0,0.0,52,,fillet=116.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,3
 tilefish,Tilefish,,,Meat and seafood,Finfish and Shellfish Products,usda:15112,"Fish, tilefish, raw",96,17.5,2.31,0.0,0.0,,53,,fillet=386.0; /2 fillet=193.0; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
 tilsit-cheese,Tilsit cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01041,"Cheese, tilsit",340,24.41,25.98,1.88,0.0,,753,0.518,package=170.0,milk,vegetarian,,,,1
 toaster-pastries,Toaster pastries,,,Bakery,Baked Products,usda:18938,"Toaster Pastries, fruit, frosted (include apples, blueberry, cherry, strawberry)",385,4.01,9.02,71.83,1.8,31.0,311,,piece=53.0,wheat or gluten,vegan,,180-360,,4
@@ -1273,7 +1309,7 @@ tofu-yogurt,Tofu yogurt,,,Dairy and eggs,Legumes and Legume Products,usda:43476,
 tomatillos,Tomatillos,,,Produce,Vegetables and Vegetable Products,usda:11954,"Tomatillos, raw",32,0.96,1.02,5.84,1.9,3.93,1,0.558,medium=34.0,,vegan,,,,1
 tomato-and-vegetable-juice,Tomato and vegetable juice,,,Pantry,Vegetables and Vegetable Products,usda:43365,"Tomato and vegetable juice, low sodium",22,0.6,0.1,4.59,0.8,3.28,58,1.023,,,vegan,,,,1
 tomato-chili-sauce,Tomato chili sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06972,"Sauce, tomato chili sauce, bottled, with salt",92,2.5,0.3,19.79,2.4,13.33,1338,1.154,packet=6.0,,vegan,,,,1
-tomato-juice,Tomato juice,,,Canned,Vegetables and Vegetable Products,usda:11540,"Tomato juice, canned, with salt added",17,0.85,0.29,3.53,0.4,2.58,253,1.027,,,vegan,,,,2
+tomato-juice,Tomato juice,,,Pantry,Vegetables and Vegetable Products,fdc:2003596,"Tomato juice, with added ingredients, from concentrate, shelf stable",20,0.86,0.29,4.32,,2.57,236,,,,vegan,,,,3
 tomato-powder,Tomato powder,,,Dry goods,Vegetables and Vegetable Products,usda:11548,Tomato powder,302,12.91,0.44,74.68,16.5,43.9,134,0.423,,,vegan,,,,1
 tomato-sauce,Tomato sauce,,,Canned,Vegetables and Vegetable Products,usda:43217,"Tomato sauce, canned, no salt added",24,1.2,0.3,5.31,1.5,3.56,11,1.031,,,vegan,,270-360,,1
 tomatoseed-oil,Tomatoseed oil,,,Pantry,Fats and Oils,usda:04515,"Oil, tomatoseed",884,0.0,100.0,0.0,0.0,0.0,0,0.92,,,vegan,,,,1
@@ -1285,7 +1321,7 @@ tree-fern,Tree fern,,,Produce,Vegetables and Vegetable Products,usda:11928,"Tree
 triticale,Triticale,,,Dry goods,Cereal Grains and Pasta,usda:20069,Triticale,336,13.05,2.09,72.13,,,5,0.812,serving=20.0,wheat or gluten,vegan,,,,1
 triticale-flour,Triticale flour,,,Dry goods,Cereal Grains and Pasta,usda:20070,"Triticale flour, whole-grain",338,13.18,1.81,73.14,14.6,,2,0.549,serving=20.0,wheat or gluten,vegan,,,,1
 trout,Trout,,,Meat and seafood,Finfish and Shellfish Products,usda:15114,"Fish, trout, mixed species, raw",148,20.77,6.61,0.0,0.0,0.0,52,,fillet=79.0; food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,120-240,7
-tuna,Tuna,,,Meat and seafood,Finfish and Shellfish Products,usda:15117,"Fish, tuna, fresh, bluefin, raw",144,23.33,4.9,0.0,0.0,0.0,39,,food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,60-90,14
+tuna,Tuna,,,Meat and seafood,Finfish and Shellfish Products,usda:15117,"Fish, tuna, fresh, bluefin, raw",144,23.33,4.9,0.0,0.0,0.0,39,,food guide serving = 90g=90.0,fish,contains meat or fish,1-2,,60-90,16
 tuna-salad,Tuna salad,,,Meat and seafood,Finfish and Shellfish Products,usda:15128,"Fish, tuna salad",187,16.04,9.26,9.41,0.0,,402,0.866,,fish,contains meat or fish,3-4,,,1
 turbot,Turbot,,,Meat and seafood,Finfish and Shellfish Products,usda:15129,"Fish, turbot, european, raw",95,16.05,2.95,0.0,0.0,,150,,fillet=408.0; /2 fillet=197.9; food guide serving = 90g=90.0,fish,contains meat or fish,,,,2
 turkey,Turkey,,,Meat and seafood,Poultry Products,usda:05167,"Turkey, whole, meat only, raw",112,22.64,1.93,0.14,0.0,0.07,118,,bird=5002.0; /2 bird=1860.4; food guide serving = 90g=90.0,,contains meat or fish,1-2,,360-360,30
@@ -1311,7 +1347,7 @@ turkey-wing,Turkey wing,,,Meat and seafood,Poultry Products,usda:05712,"Turkey, 
 turmeric,Turmeric,,,Pantry,Spices and Herbs,usda:02043,"Spices, turmeric, ground",312,9.68,3.25,67.14,22.7,3.21,27,0.534,,,vegan,,,,1
 turnip-greens,Turnip greens,,,Produce,Vegetables and Vegetable Products,usda:11568,"Turnip greens, raw",32,1.5,0.3,7.13,3.2,0.81,40,0.232,,,vegan,,,,8
 turnip-greens-and-turnips,Turnip greens and turnips,,,Frozen,Vegetables and Vegetable Products,usda:11576,"Turnip greens and turnips, frozen, unprepared",21,2.46,0.19,3.39,2.4,,18,0.693,package=287.9,,vegan,,,,3
-turnips,Turnips,,,Produce,Vegetables and Vegetable Products,usda:11564,"Turnips, raw",28,0.9,0.1,6.43,1.8,3.8,67,0.549,large=183.0; medium=122.0; slice=15.0; small=61.0,,vegan,14-14,,240-300,6
+turnips,Turnips,,,Produce,Vegetables and Vegetable Products,usda:11564,"Turnips, raw",28,0.9,0.1,6.43,1.8,3.8,67,0.549,large=183.0; medium=122.0; slice=15.0; small=61.0,,vegan,14-14,,240-300,7
 turnover,Turnover,,,Bakery,Baked Products,cnf:7293,"Turnover, fruit (apple, berry, cherry, peach)",334,4.21,17.27,41.35,,15.96,303,0.799,,wheat or gluten,vegan,,,,1
 turtle,Turtle,,,Meat and seafood,Finfish and Shellfish Products,usda:93600,"Turtle, green, raw",89,19.8,0.5,0.0,0.0,0.0,68,,,fish,contains meat or fish,,,,1
 ucuhuba-butter-oil,Ucuhuba butter oil,,,Pantry,Fats and Oils,usda:04573,"Oil, ucuhuba butter",884,0.0,100.0,0.0,0.0,0.0,0,0.92,,milk,vegetarian,,,,1
@@ -1347,12 +1383,12 @@ waffle,Waffle,,,Bakery,Baked Products,usda:18935,"Waffle, plain, frozen, ready-t
 waffles,Waffles,,,Bakery,Baked Products,usda:18365,"Waffles, plain, frozen, ready-to-heat",285,6.47,9.7,42.98,2.2,4.91,638,,"waffle, square=35.0; waffle=35.0",wheat or gluten,vegan,,,90-90,7
 wakame-seaweed,Wakame seaweed,,,Produce,Vegetables and Vegetable Products,usda:11669,"Seaweed, wakame, raw",45,3.03,0.64,9.14,0.5,0.65,872,0.338,,,vegan,,,,1
 walnut-oil,Walnut oil,,,Pantry,Fats and Oils,usda:04528,"Oil, walnut",884,0.0,100.0,0.0,0.0,0.0,0,0.921,,tree nuts,vegan,,,,1
-walnuts,Walnuts,,,Dry goods,Nut and Seed Products,usda:12155,"Nuts, walnuts, english",654,15.23,65.21,13.71,6.7,2.61,2,0.423,,tree nuts,vegan,270-360,14-28,720-720,4
+walnuts,Walnuts,,,Dry goods,Nut and Seed Products,usda:12155,"Nuts, walnuts, english",654,15.23,65.21,13.71,6.7,2.61,2,0.423,,tree nuts,vegan,270-360,14-28,720-720,5
 wasabi,Wasabi,,,Produce,Vegetables and Vegetable Products,usda:11990,"Wasabi, root, raw",109,4.8,0.63,23.54,7.8,,17,0.549,root=169.0,,vegan,,,,2
 water-with-added-vitamins-and-minerals,Water with added vitamins and minerals,,,Pantry,Beverages,usda:14605,"Beverages, Water with added vitamins and minerals, bottles, sweetened, assorted fruit flavors",22,0.0,0.0,5.49,0.0,5.49,0,1.002,serving=237.0,,vegan,,,,1
 waterchestnuts,Waterchestnuts,,,Produce,Vegetables and Vegetable Products,usda:11588,"Waterchestnuts, chinese, (matai), raw",97,1.4,0.1,23.94,3.0,4.8,14,0.524,,,vegan,,,,2
 watercress,Watercress,,,Produce,Vegetables and Vegetable Products,usda:11591,"Watercress, raw",11,2.3,0.1,1.29,0.5,0.2,41,0.144,sprig=2.5; sprigs=2.5,,vegan,,,,1
-watermelon,Watermelon,,,Produce,Fruits and Fruit Juices,usda:09326,"Watermelon, raw",30,0.61,0.15,7.55,0.4,6.2,1,0.647,wedge=286.0; nlea serving=280.0; small=1825.0; medium=2793.0; large=3754.0,,vegan,3-4,1-2,360-360,1
+watermelon,Watermelon,,,Produce,Fruits and Fruit Juices,usda:09326,"Watermelon, raw",30,0.61,0.15,7.55,0.4,6.2,1,0.647,wedge=286.0; nlea serving=280.0; small=1825.0; medium=2793.0; large=3754.0,,vegan,3-4,1-2,360-360,2
 watermelon-seed-kernels,Watermelon seed kernels,,,Dry goods,Nut and Seed Products,usda:12174,"Seeds, watermelon seed kernels, dried",557,28.33,47.37,15.31,,,99,0.456,,,vegan,,,,1
 waxgourd,Waxgourd,,,Produce,Vegetables and Vegetable Products,usda:11593,"Waxgourd, (chinese preserving melon), raw",13,0.4,0.2,3.0,2.9,,111,0.558,,,vegan,,,,3
 whale,Whale,,,Meat and seafood,"Lamb, Veal, and Game Products",cnf:3648,"Game meat, whale, raw",110,26.5,0.5,0.0,0.0,0.0,78,,,,contains meat or fish,,,,1
@@ -1373,7 +1409,8 @@ whipped-topping,Whipped topping,,,Dairy and eggs,Dairy and Egg Products,usda:421
 whiskey-sour,Whiskey sour,,,Pantry,Beverages,usda:14027,"Alcoholic beverage, whiskey sour, canned",119,0.0,0.0,13.4,0.1,,44,1.041,can=209.0,,vegan,,,,4
 whiskey-sour-mix,Whiskey sour mix,,,Pantry,Beverages,usda:14028,"Beverages, Whiskey sour mix, bottled",87,0.1,0.1,21.4,0.0,21.4,102,1.092,,,vegan,,,,3
 white-beans,White beans,,,Dry goods,Legumes and Legume Products,usda:16049,"Beans, white, mature seeds, raw",333,23.36,0.85,60.27,15.2,2.11,16,0.854,,,vegan,,,,5
-white-bread,White bread,,,Bakery,Baked Products,cnf:7194,"Bread, white, commercial, with added fibre",259,9.05,2.64,48.83,5.9,4.64,471,,slice=37.0,wheat or gluten,vegan,,,,8
+white-bread,White bread,,,Bakery,Baked Products,cnf:7194,"Bread, white, commercial, with added fibre",259,9.05,2.64,48.83,5.9,4.64,471,,slice=37.0,wheat or gluten,vegan,,,,9
+white-button-mushrooms,White button mushrooms,,,Produce,Vegetables and Vegetable Products,fdc:1750347,"Mushrooms, white button",25,2.89,0.37,4.08,,,6,,,,vegan,,,,2
 white-cheese,White cheese,,,Dairy and eggs,Dairy and Egg Products,usda:01229,"Cheese, white, queso blanco",310,20.38,24.31,2.53,,1.76,704,0.499,,milk,vegetarian,,,,1
 white-sauce,White sauce,,,Canned,"Soups, Sauces, and Gravies",usda:06264,"Sauce, white, thin, prepared-from-recipe, with butter",72,3.95,2.56,8.29,0.1,5.29,184,,,milk,vegetarian,,,,1
 white-wheat-bread,White wheat bread,,,Bakery,Baked Products,usda:18967,"Bread, white wheat",238,10.66,2.15,43.91,9.2,5.0,478,,slice=28.0,wheat or gluten,vegan,,,,1
@@ -1385,15 +1422,15 @@ whole-grain-with-seeds-and-bran-bread,Whole grain with seeds and bran bread,,,Ba
 whole-grain-with-seeds-bread,Whole grain with seeds bread,,,Bakery,Baked Products,cnf:7197,"Bread, whole grain (whole wheat) with seeds (flax, sunflower), commercial",273,11.9,4.5,45.26,8.2,5.25,418,,slice=43.0,wheat or gluten,vegan,,,,2
 whole-wheat-hot-natural-cereal,Whole wheat hot natural cereal,,,Dry goods,Breakfast Cereals,usda:08144,"Cereals, whole wheat hot natural cereal, dry",342,11.2,2.0,75.2,9.5,0.42,2,0.395,,wheat or gluten,vegan,,,,3
 whole-grain-wheat-flour,Whole-grain wheat flour,,,Dry goods,Cereal Grains and Pasta,usda:20080,"Wheat flour, whole-grain",340,13.21,2.5,71.97,10.7,0.41,2,0.507,serving=20.0,wheat or gluten,vegan,,,,2
-whole-wheat-bread,Whole-wheat bread,,,Bakery,Baked Products,usda:18077,"Bread, whole-wheat, prepared from recipe",278,8.4,5.4,51.4,6.0,3.84,346,,"slice, regular=46.0; slice, thin=33.0; slice=46.0; thin slice=33.0; slice = food guide portion=35.0",wheat or gluten,vegan,,3-5,90-90,4
+whole-wheat-bread,Whole-wheat bread,,,Bakery,Baked Products,usda:18077,"Bread, whole-wheat, prepared from recipe",278,8.4,5.4,51.4,6.0,3.84,346,,"slice, regular=46.0; slice, thin=33.0; slice=46.0; thin slice=33.0; slice = food guide portion=35.0",wheat or gluten,vegan,,3-5,90-90,5
 wiener,Wiener,,,Meat and seafood,Sausages and Luncheon Meats,cnf:7144,"Wiener (frankfurter), Bavarian",257,15.02,19.51,4.44,0.0,0.92,1109,0.638,,,contains meat or fish,,,,2
-wild-rice,Wild rice,,,Dry goods,Cereal Grains and Pasta,usda:20088,"Wild rice, raw",357,14.73,1.08,74.9,6.2,2.5,7,0.676,,,vegan,,,,2
+wild-rice,Wild rice,,,Dry goods,Cereal Grains and Pasta,usda:20088,"Wild rice, raw",357,14.73,1.08,74.9,6.2,2.5,7,0.676,,,vegan,,,,3
 wine,Wine,,,Pantry,Beverages,usda:14084,"Alcoholic beverage, wine, table, all",83,0.07,0.0,2.72,0.0,0.79,5,0.994,serving=148.0,sulphites,vegan,120-180,,,36
 winged-bean,Winged bean,,,Produce,Vegetables and Vegetable Products,usda:11896,"Winged bean, immature seeds, cooked, boiled, drained, with salt",37,5.31,0.66,3.21,,,240,0.262,,,vegan,,,,1
 winged-bean-leaves,Winged bean leaves,,,Produce,Vegetables and Vegetable Products,usda:11597,"Winged bean leaves, raw",74,5.85,1.1,14.1,,,9,0.254,,,vegan,,,,1
 winged-bean-tuber,Winged bean tuber,,,Produce,Vegetables and Vegetable Products,usda:11599,"Winged bean tuber, raw",148,11.6,0.9,28.1,,,35,,,,vegan,,,,1
 winged-beans,Winged beans,,,Produce,Vegetables and Vegetable Products,usda:11595,"Winged beans, immature seeds, raw",49,6.95,0.87,4.31,,,4,0.186,pod=16.0,,vegan,,,,5
-winter-squash,Winter squash,,,Produce,Vegetables and Vegetable Products,usda:11482,"Squash, winter, acorn, raw",40,0.8,0.1,10.42,1.5,,3,0.592,,,vegan,,,,22
+winter-squash,Winter squash,,,Produce,Vegetables and Vegetable Products,usda:11482,"Squash, winter, acorn, raw",40,0.8,0.1,10.42,1.5,,3,0.592,,,vegan,,,,24
 with-herbs-and-cheese,With herbs and cheese,,,Canned,Vegetables and Vegetable Products,usda:11555,"Tomato products, canned, sauce, with herbs and cheese",59,2.13,1.93,10.24,2.2,,543,1.036,"can, 15 oz=425.0",milk,vegetarian,,,,1
 with-mushrooms,With mushrooms,,,Canned,Vegetables and Vegetable Products,usda:11551,"Tomato products, canned, sauce, with mushrooms",35,1.45,0.13,8.43,1.5,5.77,452,1.036,,,vegan,,,,1
 with-onions,With onions,,,Canned,Vegetables and Vegetable Products,usda:11557,"Tomato products, canned, sauce, with onions, green peppers, and celery",41,0.94,0.74,8.77,1.4,7.36,368,1.057,"can, 15 oz=411.0",,vegan,,,,2

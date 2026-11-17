@@ -4,6 +4,7 @@
 Inputs (see README for where they come from):
   raw/official_sr28/*.txt      USDA National Nutrient Database for Standard Reference, official sr28asc.zip
                                (falls back to raw/USDA-SR28, a GitHub mirror of the same files)
+  raw/official_ff/**/food.csv  USDA Foundation Foods, FoodData Central CSV download (optional)
   raw/official_cnf2026/*.csv   Canadian Nutrient File 2026 (Health Canada), official download
                                (falls back to raw/cnfx, the 2015 edition, for French names only)
   raw/food-shelflife-db/...    USDA FSIS FoodKeeper shelf-life table
@@ -359,6 +360,49 @@ if os.path.isdir(CNF):
             except ValueError: continue
             cnf_nut[target[r['Food_Code']]][f_] = int(v) if d_ == 0 else v
 
+# ---------------------------------------------------------------- USDA Foundation Foods (FoodData Central CSV layout)
+ff_foods, ff_nut, ff_ndb = [], defaultdict(dict), {}
+def ff_dir():
+    base = os.path.join(RAW, 'official_ff')
+    if not os.path.isdir(base): return None
+    for root, dirs, files in os.walk(base):
+        if 'food.csv' in files and 'food_nutrient.csv' in files: return root
+    return None
+FF = ff_dir()
+if FF:
+    def ff_rows(name):
+        with open(os.path.join(FF, name), encoding='utf-8', newline='') as f:
+            for row in csv.DictReader(f): yield row
+    cat = {r['id']: r['code'] for r in ff_rows('food_category.csv')}
+    ffood = {r['fdc_id']: r for r in ff_rows('food.csv') if r['data_type'] == 'foundation_food'}
+    nbr = {r['id']: r['nutrient_nbr'] for r in ff_rows('nutrient.csv')}
+    # same field, several possible nutrient numbers; first listed wins
+    ALT = {'208': ['208', '958', '957'], '269': ['269', '269.3'], '291': ['291', '293'], '435': ['435', '417']}
+    order = {}
+    for sr_no, (f_, _, d_) in NUTR.items():
+        for rank, n_ in enumerate(ALT.get(sr_no, [sr_no])): order[n_] = (f_, d_, rank)
+    best_rank = defaultdict(dict)
+    for r in ff_rows('food_nutrient.csv'):
+        if r['fdc_id'] not in ffood: continue
+        o = order.get(nbr.get(r['nutrient_id'], ''))
+        if not o or r['amount'] == '': continue
+        f_, d_, rank = o; key = 'fdc:' + r['fdc_id']
+        if f_ in best_rank[key] and best_rank[key][f_] <= rank: continue
+        v = round(float(r['amount']), d_); ff_nut[key][f_] = int(v) if d_ == 0 else v; best_rank[key][f_] = rank
+    mu = {r['id']: r['name'] for r in ff_rows('measure_unit.csv')}
+    UN = {'tablespoon': 'tbsp', 'teaspoon': 'tsp'}
+    for r in ff_rows('food_portion.csv'):
+        if r['fdc_id'] not in ffood: continue
+        try: amount, grams = float(r['amount'] or 1), float(r['gram_weight'])
+        except ValueError: continue
+        unit = mu.get(r['measure_unit_id'], ''); unit = '' if unit in ('undetermined', '') else UN.get(unit, unit)
+        extra = ', '.join(x for x in (r['portion_description'].strip(), r['modifier'].strip()) if x)
+        desc = (unit + (', ' + extra if extra else '')) if unit else (extra or 'item')
+        weights['fdc:' + r['fdc_id']].append((amount, desc, grams, 'usda'))
+    for r in ff_rows('foundation_food.csv'):
+        if r['fdc_id'] in ffood and r['NDB_number'].strip(): ff_ndb['fdc:' + r['fdc_id']] = r['NDB_number'].strip().zfill(5)
+    ff_foods = [(('fdc:' + i), r['description'].strip(), cat.get(r['food_category_id'], ''), r['publication_date']) for i, r in ffood.items()]
+
 # ---------------------------------------------------------------- foods table
 foods = OrderedDict()
 def add_food(key, grp, long_desc, manuf, sci, refuse, refuse_note, n, source):
@@ -402,6 +446,15 @@ for r in cnf_only:
     alt = [a.strip() for a in re.split(r'[,;]', r['Alternate_Description_EN']) if a.strip()]
     if alt: rec['alt_names'] = alt
     if r['USDA_NDB_Code'].strip(): rec['usda_ndb_not_in_sr28'] = r['USDA_NDB_Code'].strip()
+for key, desc, grp, pub in ff_foods:
+    if 'energy_kcal' not in ff_nut.get(key, {}): continue
+    rec = add_food(key, grp, desc, '', '', None, '', ff_nut[key], 'usda-foundation')
+    rec['published'] = pub
+    ndb = ff_ndb.get(key)
+    if ndb in foods:
+        rec['same_food_in_sr28'] = 'usda:' + ndb
+        foods[ndb]['newer_lab_data'] = key
+        if foods[ndb].get('description_fr'): rec['description_fr'] = foods[ndb]['description_fr']
 
 # ---------------------------------------------------------------- ingredient concepts (automatic)
 GENERIC_TEMPLATES = {
@@ -476,7 +529,7 @@ def find_food(expr):
     """expr: 'usda:01001' or words that must all appear / '!word' must not. Picks the best-scoring match."""
     if expr.startswith('usda:'):
         return expr[5:] if expr[5:] in foods else None
-    if expr.startswith('cnf:'):
+    if expr.startswith('cnf:') or expr.startswith('fdc:'):
         return expr if expr in foods else None
     must = [w.lower() for w in expr.split() if not w.startswith('!')]
     mustnot = [w[1:].lower() for w in expr.split() if w.startswith('!')]
@@ -484,7 +537,7 @@ def find_food(expr):
     for ndb, rec in foods.items():
         low = rec['description'].lower()
         if all(re.search(r'\b' + re.escape(w), low) for w in must) and not any(re.search(r'\b' + re.escape(w), low) for w in mustnot):
-            sc = variant_score(rec) - (0 if rec['kind'] == 'ingredient' else 40)
+            sc = variant_score(rec) - (0 if rec['kind'] == 'ingredient' else 40) - (15 if rec['source'] == 'usda-foundation' else 0)
             if best is None or sc > best[0]: best = (sc, ndb)
     return best[1] if best else None
 
@@ -568,7 +621,8 @@ kinds = defaultdict(int)
 for r in foods.values(): kinds[r['kind']] += 1
 ing_foods = [r for r in foods.values() if r['kind'] == 'ingredient']
 stats = OrderedDict(
-    foods_total=len(foods), foods_from_usda=sum(1 for r in foods.values() if r['source'] == 'usda'), foods_from_cnf=sum(1 for r in foods.values() if r['source'] == 'cnf'),
+    foods_total=len(foods), foods_from_usda=sum(1 for r in foods.values() if r['source'] == 'usda'), foods_from_usda_foundation=sum(1 for r in foods.values() if r['source'] == 'usda-foundation'),
+    sr28_foods_with_newer_lab_data=sum(1 for r in foods.values() if r.get('newer_lab_data')), foods_from_cnf=sum(1 for r in foods.values() if r['source'] == 'cnf'),
     foods_by_kind=dict(kinds), measures_from_cnf=sum(1 for r in foods.values() for p in r['measures'] if p.get('source') == 'cnf'),
     foods_with_cooking_yield=sum(1 for r in foods.values() if r.get('yields')),
     foods_with_density=sum(1 for r in foods.values() if r.get('density_g_per_ml')),

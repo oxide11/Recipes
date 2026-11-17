@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "count": 1417,
+ "count": 1454,
  "ingredients": [
   {
    "id": "butter",
@@ -382,9 +382,19 @@
      "food": "usda:01077",
      "description": "Milk, whole, 3.25% milkfat, with added vitamin D",
      "state": null
+    },
+    {
+     "food": "fdc:322892",
+     "description": "Milk, whole, 3.25% milkfat, with added vitamin D",
+     "state": null
+    },
+    {
+     "food": "fdc:746782",
+     "description": "Milk, whole, 3.25% milkfat, with added vitamin D",
+     "state": null
     }
    ],
-   "variant_count": 2
+   "variant_count": 4
   },
   {
    "id": "heavy-cream",
@@ -565,6 +575,11 @@
      "state": "pickled"
     },
     {
+     "food": "fdc:2346387",
+     "description": "Cream, sour, full fat",
+     "state": "pickled"
+    },
+    {
      "food": "usda:01179",
      "description": "Sour cream, light",
      "state": "pickled"
@@ -590,7 +605,7 @@
      "state": "pickled"
     }
    ],
-   "variant_count": 6
+   "variant_count": 7
   },
   {
    "id": "egg",
@@ -730,6 +745,21 @@
      "state": "dried"
     },
     {
+     "food": "fdc:329716",
+     "description": "Egg, yolk, dried",
+     "state": "dried"
+    },
+    {
+     "food": "fdc:323793",
+     "description": "Egg, white, dried",
+     "state": "dried"
+    },
+    {
+     "food": "fdc:329490",
+     "description": "Egg, whole, dried",
+     "state": "dried"
+    },
+    {
      "food": "usda:01173",
      "description": "Egg, white, dried",
      "state": "dried"
@@ -805,6 +835,21 @@
      "state": "cooked"
     },
     {
+     "food": "fdc:329596",
+     "description": "Egg, yolk, raw, frozen, pasteurized",
+     "state": "frozen"
+    },
+    {
+     "food": "fdc:323604",
+     "description": "Egg, whole, raw, frozen, pasteurized",
+     "state": "frozen"
+    },
+    {
+     "food": "fdc:323697",
+     "description": "Egg, white, raw, frozen, pasteurized",
+     "state": "frozen"
+    },
+    {
      "food": "usda:01128",
      "description": "Egg, whole, cooked, fried",
      "state": "cooked"
@@ -820,7 +865,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 30
+   "variant_count": 36
   },
   {
    "id": "cheddar",
@@ -897,6 +942,11 @@
      "state": null
     },
     {
+     "food": "fdc:328637",
+     "description": "Cheese, cheddar",
+     "state": null
+    },
+    {
      "food": "cnf:7734",
      "description": "Cheese, cheddar, extra old",
      "state": null
@@ -927,7 +977,7 @@
      "state": null
     }
    ],
-   "variant_count": 7
+   "variant_count": 8
   },
   {
    "id": "parmesan",
@@ -1007,6 +1057,11 @@
      "state": null
     },
     {
+     "food": "fdc:325036",
+     "description": "Cheese, parmesan, grated",
+     "state": null
+    },
+    {
      "food": "usda:01146",
      "description": "Cheese, parmesan, shredded",
      "state": null
@@ -1014,6 +1069,11 @@
     {
      "food": "cnf:7764",
      "description": "Cheese, parmesan, refrigerated",
+     "state": null
+    },
+    {
+     "food": "fdc:2259795",
+     "description": "Cheese, parmesan, grated, refrigerated",
      "state": null
     },
     {
@@ -1027,7 +1087,7 @@
      "state": "dried"
     }
    ],
-   "variant_count": 6
+   "variant_count": 8
   },
   {
    "id": "feta",
@@ -1085,12 +1145,17 @@
      "state": null
     },
     {
+     "food": "fdc:2259796",
+     "description": "Cheese, feta, whole milk, crumbled",
+     "state": null
+    },
+    {
      "food": "cnf:7754",
      "description": "Cheese, feta, light",
      "state": null
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "mozzarella",
@@ -1171,6 +1236,11 @@
      "state": null
     },
     {
+     "food": "fdc:329370",
+     "description": "Cheese, mozzarella, low moisture, part-skim",
+     "state": null
+    },
+    {
      "food": "usda:01027",
      "description": "Cheese, mozzarella, whole milk, low moisture",
      "state": null
@@ -1191,7 +1261,7 @@
      "state": null
     }
    ],
-   "variant_count": 7
+   "variant_count": 8
   },
   {
    "id": "chicken-breast",
@@ -1271,6 +1341,16 @@
     {
      "food": "usda:05062",
      "description": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2646170",
+     "description": "Chicken, breast, boneless, skinless, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2727569",
+     "description": "Chicken, breast, meat and skin, raw",
      "state": "raw"
     },
     {
@@ -1354,6 +1434,11 @@
      "state": "cooked"
     },
     {
+     "food": "fdc:331960",
+     "description": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, cooked, braised",
+     "state": "cooked"
+    },
+    {
      "food": "usda:05748",
      "description": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, with added solution, cooked, braised",
      "state": "cooked"
@@ -1364,7 +1449,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 21
+   "variant_count": 24
   },
   {
    "id": "chicken-thighs",
@@ -1753,6 +1838,16 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2514743",
+     "description": "Beef, ground, 90% lean meat / 10% fat, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2514744",
+     "description": "Beef, ground, 80% lean meat / 20% fat, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:23293",
      "description": "Beef, Australian, imported, grass-fed, ground, 85% lean / 15% fat, raw",
      "state": "raw"
@@ -1891,19 +1986,9 @@
      "food": "usda:23563",
      "description": "Beef, ground, 90% lean meat / 10% fat, patty, cooked, broiled",
      "state": "cooked"
-    },
-    {
-     "food": "usda:23474",
-     "description": "Beef, ground, 93% lean meat /7% fat, patty, cooked, pan-broiled",
-     "state": "cooked"
-    },
-    {
-     "food": "usda:23479",
-     "description": "Beef, ground, 97% lean meat /3% fat, patty, cooked, pan-broiled",
-     "state": "cooked"
     }
    ],
-   "variant_count": 45
+   "variant_count": 47
   },
   {
    "id": "sirloin-roast",
@@ -1966,6 +2051,11 @@
     {
      "food": "usda:13929",
      "description": "Beef, top sirloin, steak, separable lean and fat, trimmed to 1/8\" fat, all grades, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2727574",
+     "description": "Beef, top sirloin steak, raw",
      "state": "raw"
     },
     {
@@ -2049,7 +2139,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 19
+   "variant_count": 20
   },
   {
    "id": "chuck-roast",
@@ -2178,6 +2268,11 @@
      "state": null
     },
     {
+     "food": "fdc:746952",
+     "description": "Ham, sliced, restaurant",
+     "state": null
+    },
+    {
      "food": "usda:07029",
      "description": "Ham, sliced, regular (approximately 11% fat)",
      "state": null
@@ -2185,6 +2280,11 @@
     {
      "food": "usda:07028",
      "description": "Ham, sliced, packaged (96% fat free, water added)",
+     "state": null
+    },
+    {
+     "food": "fdc:332397",
+     "description": "Ham, sliced, pre-packaged, deli meat (96%fat free, water added)",
      "state": null
     },
     {
@@ -2208,7 +2308,7 @@
      "state": "cured"
     }
    ],
-   "variant_count": 7
+   "variant_count": 9
   },
   {
    "id": "bacon",
@@ -2300,6 +2400,11 @@
      "state": "cooked"
     },
     {
+     "food": "fdc:749420",
+     "description": "Pork, cured, bacon, cooked, restaurant",
+     "state": "cooked"
+    },
+    {
      "food": "usda:10862",
      "description": "Pork, cured, bacon, pre-sliced, cooked, pan-fried",
      "state": "cooked"
@@ -2310,7 +2415,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 7
+   "variant_count": 8
   },
   {
    "id": "shrimp",
@@ -2323,25 +2428,22 @@
    "curated": true,
    "aisle": "Meat and seafood",
    "group": "Finfish and Shellfish Products",
-   "default_food": "usda:15270",
-   "default_description": "Crustaceans, shrimp, raw (not previously frozen)",
+   "default_food": "fdc:2684443",
+   "default_description": "Crustaceans, shrimp, farm raised, raw",
    "per_100g": {
-    "energy_kcal": 85,
-    "protein_g": 20.1,
-    "fat_g": 0.51,
-    "carbs_g": 0.0,
-    "sat_fat_g": 0.1,
-    "mono_fat_g": 0.09,
-    "poly_fat_g": 0.15,
-    "trans_fat_g": 0.0,
-    "cholesterol_mg": 161,
-    "sodium_mg": 119,
-    "potassium_mg": 264,
-    "calcium_mg": 64,
+    "energy_kcal": 76,
+    "protein_g": 15.57,
+    "fat_g": 0.8,
+    "carbs_g": 0.48,
+    "cholesterol_mg": 136,
+    "sodium_mg": 475,
+    "potassium_mg": 146,
+    "calcium_mg": 65,
     "iron_mg": 0.52,
-    "magnesium_mg": 35,
-    "zinc_mg": 1.34,
-    "water_g": 78.5
+    "magnesium_mg": 23,
+    "zinc_mg": 0.94,
+    "vitamin_b12_mcg": 1.0,
+    "water_g": 81.3
    },
    "allergens": [
     "shellfish"
@@ -2361,6 +2463,11 @@
     "source_name": "Shrimp, crayfish"
    },
    "variants": [
+    {
+     "food": "fdc:2684443",
+     "description": "Crustaceans, shrimp, farm raised, raw",
+     "state": "raw"
+    },
     {
      "food": "usda:15153",
      "description": "Crustaceans, shrimp, mixed species, imitation, made from surimi",
@@ -2397,7 +2504,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 7
+   "variant_count": 8
   },
   {
    "id": "salmon",
@@ -2506,6 +2613,16 @@
     {
      "food": "cnf:5928",
      "description": "Fish, salmon, Indigenous, eggs, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2684440",
+     "description": "Fish, salmon, sockeye, wild caught, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2684441",
+     "description": "Fish, salmon, Atlantic, farm raised, raw",
      "state": "raw"
     },
     {
@@ -2624,7 +2741,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 32
+   "variant_count": 34
   },
   {
    "id": "onion",
@@ -2729,6 +2846,21 @@
      "state": "raw"
     },
     {
+     "food": "fdc:790577",
+     "description": "Onions, red, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:790646",
+     "description": "Onions, yellow, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1104962",
+     "description": "Onions, white, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11284",
      "description": "Onions, dehydrated flakes",
      "state": "dried"
@@ -2784,7 +2916,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 16
+   "variant_count": 19
   },
   {
    "id": "red-onion",
@@ -2868,6 +3000,21 @@
      "state": "raw"
     },
     {
+     "food": "fdc:790577",
+     "description": "Onions, red, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:790646",
+     "description": "Onions, yellow, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1104962",
+     "description": "Onions, white, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11284",
      "description": "Onions, dehydrated flakes",
      "state": "dried"
@@ -2923,7 +3070,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 16
+   "variant_count": 19
   },
   {
    "id": "green-onion",
@@ -3005,6 +3152,21 @@
      "state": "raw"
     },
     {
+     "food": "fdc:790577",
+     "description": "Onions, red, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:790646",
+     "description": "Onions, yellow, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1104962",
+     "description": "Onions, white, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11284",
      "description": "Onions, dehydrated flakes",
      "state": "dried"
@@ -3060,7 +3222,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 16
+   "variant_count": 19
   },
   {
    "id": "garlic",
@@ -3129,9 +3291,14 @@
      "food": "usda:11215",
      "description": "Garlic, raw",
      "state": "raw"
+    },
+    {
+     "food": "fdc:1104647",
+     "description": "Garlic, raw",
+     "state": "raw"
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "ginger",
@@ -3506,6 +3673,16 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2258587",
+     "description": "Carrots, baby, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2258586",
+     "description": "Carrots, mature, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11130",
      "description": "Carrots, frozen, unprepared",
      "state": "frozen"
@@ -3531,9 +3708,19 @@
      "state": "canned"
     },
     {
+     "food": "fdc:746764",
+     "description": "Carrots, frozen, unprepared",
+     "state": "frozen"
+    },
+    {
      "food": "usda:11757",
      "description": "Carrots, cooked, boiled, drained, with salt",
      "state": "cooked"
+    },
+    {
+     "food": "fdc:326458",
+     "description": "Carrots, frozen, unprepared (Includes foods for USDA's Food Distribution Program)",
+     "state": "frozen"
     },
     {
      "food": "usda:11760",
@@ -3551,7 +3738,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 11
+   "variant_count": 15
   },
   {
    "id": "celery",
@@ -3629,6 +3816,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2346405",
+     "description": "Celery, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11764",
      "description": "Celery, cooked, boiled, drained, with salt",
      "state": "cooked"
@@ -3639,7 +3831,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 3
+   "variant_count": 4
   },
   {
    "id": "tomatoes",
@@ -3733,6 +3925,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:321360",
+     "description": "Tomatoes, grape, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11955",
      "description": "Tomatoes, sun-dried",
      "state": "dried"
@@ -3763,6 +3960,16 @@
      "state": "canned"
     },
     {
+     "food": "fdc:333281",
+     "description": "Tomatoes, canned, red, ripe, diced",
+     "state": "canned"
+    },
+    {
+     "food": "fdc:2685581",
+     "description": "Tomatoes, crushed, canned",
+     "state": "canned"
+    },
+    {
      "food": "usda:11530",
      "description": "Tomatoes, red, ripe, cooked",
      "state": "cooked"
@@ -3771,6 +3978,11 @@
      "food": "usda:11884",
      "description": "Tomatoes, red, ripe, cooked, with salt",
      "state": "cooked"
+    },
+    {
+     "food": "fdc:2685578",
+     "description": "Tomatoes, whole, canned, solids and liquids, with salt added",
+     "state": "canned"
     },
     {
      "food": "usda:11533",
@@ -3783,7 +3995,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 14
+   "variant_count": 18
   },
   {
    "id": "cherry-tomatoes",
@@ -3879,6 +4091,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:321360",
+     "description": "Tomatoes, grape, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11955",
      "description": "Tomatoes, sun-dried",
      "state": "dried"
@@ -3909,6 +4126,16 @@
      "state": "canned"
     },
     {
+     "food": "fdc:333281",
+     "description": "Tomatoes, canned, red, ripe, diced",
+     "state": "canned"
+    },
+    {
+     "food": "fdc:2685581",
+     "description": "Tomatoes, crushed, canned",
+     "state": "canned"
+    },
+    {
      "food": "usda:11530",
      "description": "Tomatoes, red, ripe, cooked",
      "state": "cooked"
@@ -3917,6 +4144,11 @@
      "food": "usda:11884",
      "description": "Tomatoes, red, ripe, cooked, with salt",
      "state": "cooked"
+    },
+    {
+     "food": "fdc:2685578",
+     "description": "Tomatoes, whole, canned, solids and liquids, with salt added",
+     "state": "canned"
     },
     {
      "food": "usda:11533",
@@ -3929,7 +4161,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 14
+   "variant_count": 18
   },
   {
    "id": "sun-dried-tomatoes",
@@ -4014,6 +4246,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:321360",
+     "description": "Tomatoes, grape, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11955",
      "description": "Tomatoes, sun-dried",
      "state": "dried"
@@ -4044,6 +4281,16 @@
      "state": "canned"
     },
     {
+     "food": "fdc:333281",
+     "description": "Tomatoes, canned, red, ripe, diced",
+     "state": "canned"
+    },
+    {
+     "food": "fdc:2685581",
+     "description": "Tomatoes, crushed, canned",
+     "state": "canned"
+    },
+    {
      "food": "usda:11530",
      "description": "Tomatoes, red, ripe, cooked",
      "state": "cooked"
@@ -4052,6 +4299,11 @@
      "food": "usda:11884",
      "description": "Tomatoes, red, ripe, cooked, with salt",
      "state": "cooked"
+    },
+    {
+     "food": "fdc:2685578",
+     "description": "Tomatoes, whole, canned, solids and liquids, with salt added",
+     "state": "canned"
     },
     {
      "food": "usda:11533",
@@ -4064,7 +4316,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 14
+   "variant_count": 18
   },
   {
    "id": "tomato-paste",
@@ -4371,9 +4623,14 @@
      "food": "usda:11205",
      "description": "Cucumber, with peel, raw",
      "state": "raw"
+    },
+    {
+     "food": "fdc:2346406",
+     "description": "Cucumber, with peel, raw",
+     "state": "raw"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "spinach",
@@ -4442,6 +4699,26 @@
      "state": "raw"
     },
     {
+     "food": "fdc:1750352",
+     "description": "Spinach, baby",
+     "state": null
+    },
+    {
+     "food": "fdc:1999632",
+     "description": "Spinach, baby",
+     "state": null
+    },
+    {
+     "food": "fdc:1750353",
+     "description": "Spinach, mature",
+     "state": null
+    },
+    {
+     "food": "fdc:1999633",
+     "description": "Spinach, mature",
+     "state": null
+    },
+    {
      "food": "usda:11463",
      "description": "Spinach, frozen, chopped or leaf, unprepared",
      "state": "frozen"
@@ -4482,7 +4759,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 9
+   "variant_count": 13
   },
   {
    "id": "mushrooms",
@@ -5488,9 +5765,19 @@
      "food": "usda:19335",
      "description": "Sugars, granulated",
      "state": null
+    },
+    {
+     "food": "fdc:334247",
+     "description": "Sugars, granulated",
+     "state": null
+    },
+    {
+     "food": "fdc:746784",
+     "description": "Sugars, granulated",
+     "state": null
     }
    ],
-   "variant_count": 1
+   "variant_count": 3
   },
   {
    "id": "brown-sugar",
@@ -6409,6 +6696,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2512381",
+     "description": "Rice, white, long grain, unenriched, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:20046",
      "description": "Rice, white, long-grain, parboiled, enriched, dry",
      "state": "dried"
@@ -6489,7 +6781,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 23
+   "variant_count": 24
   },
   {
    "id": "pie-crusts",
@@ -7961,9 +8253,14 @@
      "food": "usda:02047",
      "description": "Salt, table",
      "state": null
+    },
+    {
+     "food": "fdc:746775",
+     "description": "Salt, table, iodized",
+     "state": null
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "black-pepper",
@@ -8713,9 +9010,19 @@
      "food": "usda:01077",
      "description": "Milk, whole, 3.25% milkfat, with added vitamin D",
      "state": null
+    },
+    {
+     "food": "fdc:322892",
+     "description": "Milk, whole, 3.25% milkfat, with added vitamin D",
+     "state": null
+    },
+    {
+     "food": "fdc:746782",
+     "description": "Milk, whole, 3.25% milkfat, with added vitamin D",
+     "state": null
     }
    ],
-   "variant_count": 2
+   "variant_count": 4
   },
   {
    "id": "60-whole-wheat-bread",
@@ -9294,6 +9601,51 @@
    "variant_count": 2
   },
   {
+   "id": "alaska-pollock",
+   "name": "Alaska pollock",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Meat and seafood",
+   "group": "Finfish and Shellfish Products",
+   "default_food": "fdc:2768188",
+   "default_description": "Alaska Pollock, raw",
+   "per_100g": {
+    "energy_kcal": 78,
+    "protein_g": 17.33,
+    "fat_g": 0.99,
+    "carbs_g": 0.06,
+    "fibre_g": 0.0,
+    "sat_fat_g": 0.24,
+    "mono_fat_g": 0.15,
+    "poly_fat_g": 0.46,
+    "trans_fat_g": 0.01,
+    "cholesterol_mg": 60,
+    "sodium_mg": 115,
+    "potassium_mg": 353,
+    "calcium_mg": 40,
+    "iron_mg": 0.24,
+    "magnesium_mg": 23,
+    "zinc_mg": 0.43,
+    "vitamin_a_mcg": 3,
+    "vitamin_d_mcg": 0.0,
+    "vitamin_b12_mcg": 1.76,
+    "folate_mcg": 10,
+    "water_g": 80.4
+   },
+   "allergens": [
+    "fish"
+   ],
+   "diet": "contains meat or fish",
+   "variants": [
+    {
+     "food": "fdc:2768188",
+     "description": "Alaska Pollock, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 1
+  },
+  {
    "id": "alcohol",
    "name": "Alcohol",
    "aliases": [],
@@ -9639,12 +9991,17 @@
      "state": null
     },
     {
+     "food": "fdc:2262074",
+     "description": "Almond butter, creamy",
+     "state": null
+    },
+    {
      "food": "usda:12195",
      "description": "Nuts, almond butter, plain, without salt added",
      "state": null
     }
    ],
-   "variant_count": 3
+   "variant_count": 4
   },
   {
    "id": "almond-meal",
@@ -9758,12 +10115,27 @@
      "state": null
     },
     {
+     "food": "fdc:1750338",
+     "description": "Almond milk, unsweetened, plain, shelf stable",
+     "state": null
+    },
+    {
+     "food": "fdc:1999631",
+     "description": "Almond milk, unsweetened, plain, shelf stable",
+     "state": null
+    },
+    {
+     "food": "fdc:2257045",
+     "description": "Almond milk, unsweetened, plain, refrigerated",
+     "state": null
+    },
+    {
      "food": "usda:14016",
      "description": "Beverages, almond milk, sweetened, vanilla flavor, ready-to-drink",
      "state": null
     }
    ],
-   "variant_count": 3
+   "variant_count": 6
   },
   {
    "id": "almond-oil",
@@ -9952,6 +10324,11 @@
      "state": null
     },
     {
+     "food": "fdc:2346393",
+     "description": "Nuts, almonds, whole, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:12062",
      "description": "Nuts, almonds, blanched",
      "state": "cooked"
@@ -9987,6 +10364,11 @@
      "state": "cooked"
     },
     {
+     "food": "fdc:323294",
+     "description": "Nuts, almonds, dry roasted, with salt added",
+     "state": "cooked"
+    },
+    {
      "food": "cnf:2626",
      "description": "Nuts, almonds, oil roasted, blanched, salt added",
      "state": "cooked"
@@ -10007,7 +10389,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 12
+   "variant_count": 14
   },
   {
    "id": "aloe-vera-juice-drink",
@@ -10242,39 +10624,28 @@
    "curated": false,
    "aisle": "Dairy and eggs",
    "group": "Dairy and Egg Products",
-   "default_food": "usda:01061",
-   "default_description": "Cheese, American, nonfat or fat free",
+   "default_food": "fdc:747429",
+   "default_description": "Cheese, American, restaurant",
    "per_100g": {
-    "energy_kcal": 126,
-    "protein_g": 21.05,
-    "fat_g": 0.0,
-    "carbs_g": 10.53,
-    "fibre_g": 0.0,
-    "sugars_g": 5.26,
-    "sat_fat_g": 0.0,
-    "mono_fat_g": 0.0,
-    "poly_fat_g": 0.0,
-    "trans_fat_g": 0.0,
-    "cholesterol_mg": 26,
-    "sodium_mg": 1316,
-    "potassium_mg": 393,
-    "calcium_mg": 789,
-    "iron_mg": 0.0,
-    "magnesium_mg": 115,
-    "zinc_mg": 4.11,
-    "vitamin_a_mcg": 56,
-    "vitamin_c_mg": 0.0,
-    "vitamin_d_mcg": 0.1,
-    "vitamin_e_mg": 0.27,
-    "vitamin_k_mcg": 0.2,
-    "vitamin_b12_mcg": 1.85,
-    "folate_mcg": 9,
-    "water_g": 65.5,
-    "alcohol_g": 0.0,
-    "caffeine_mg": 0
+    "energy_kcal": 375,
+    "protein_g": 17.5,
+    "fat_g": 31.1,
+    "carbs_g": 6.35,
+    "sugars_g": 3.76,
+    "sat_fat_g": 17.7,
+    "mono_fat_g": 6.62,
+    "poly_fat_g": 1.23,
+    "trans_fat_g": 1.01,
+    "sodium_mg": 1600,
+    "potassium_mg": 173,
+    "calcium_mg": 508,
+    "iron_mg": 0.24,
+    "magnesium_mg": 25,
+    "zinc_mg": 2.45,
+    "water_g": 39.5
    },
    "unit_weights_g": {
-    "serving": 19.0
+    "slice": 16.0
    },
    "allergens": [
     "milk"
@@ -10282,12 +10653,17 @@
    "diet": "vegetarian",
    "variants": [
     {
+     "food": "fdc:747429",
+     "description": "Cheese, American, restaurant",
+     "state": null
+    },
+    {
      "food": "usda:01061",
      "description": "Cheese, American, nonfat or fat free",
      "state": null
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "ancho-peppers",
@@ -10335,6 +10711,58 @@
      "food": "usda:11978",
      "description": "Peppers, ancho, dried",
      "state": "dried"
+    }
+   ],
+   "variant_count": 1
+  },
+  {
+   "id": "anchovies",
+   "name": "Anchovies",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Canned",
+   "group": "Finfish and Shellfish Products",
+   "default_food": "fdc:2747652",
+   "default_description": "Anchovies, canned in olive oil, with salt, drained",
+   "per_100g": {
+    "energy_kcal": 206,
+    "protein_g": 26.94,
+    "fat_g": 9.85,
+    "carbs_g": 2.41,
+    "sodium_mg": 5403,
+    "potassium_mg": 298,
+    "calcium_mg": 240,
+    "iron_mg": 2.69,
+    "magnesium_mg": 228,
+    "zinc_mg": 2.54,
+    "vitamin_b12_mcg": 12.65,
+    "water_g": 44.4
+   },
+   "allergens": [
+    "fish"
+   ],
+   "diet": "contains meat or fish",
+   "shelf_life": {
+    "pantry_days": [
+     1825,
+     1825
+    ],
+    "fridge_days": null,
+    "freezer_days": [
+     60,
+     60
+    ],
+    "opened_fridge_days": [
+     3,
+     4
+    ],
+    "source_name": "Anchovies canned"
+   },
+   "variants": [
+    {
+     "food": "fdc:2747652",
+     "description": "Anchovies, canned in olive oil, with salt, drained",
+     "state": "canned"
     }
    ],
    "variant_count": 1
@@ -10577,44 +11005,26 @@
    "name": "Apple juice",
    "aliases": [],
    "curated": false,
-   "aisle": "Frozen",
+   "aisle": "Pantry",
    "group": "Fruits and Fruit Juices",
-   "default_food": "usda:09017",
-   "default_description": "Apple juice, frozen concentrate, unsweetened, undiluted, without added ascorbic acid",
-   "name_fr_source": "Pomme, jus, concentré, congélé, non dilué, sans vitamine C",
+   "default_food": "fdc:2003590",
+   "default_description": "Apple juice, with added vitamin C, from concentrate, shelf stable",
+   "name_fr_source": "Pomme, jus, conserve ou bouteille, vitamine C ajoutée",
    "per_100g": {
-    "energy_kcal": 166,
-    "protein_g": 0.51,
-    "fat_g": 0.37,
-    "carbs_g": 41.0,
-    "fibre_g": 0.4,
-    "sugars_g": 38.83,
-    "sat_fat_g": 0.06,
-    "mono_fat_g": 0.01,
-    "poly_fat_g": 0.11,
-    "trans_fat_g": 0.0,
-    "cholesterol_mg": 0,
-    "sodium_mg": 25,
-    "potassium_mg": 448,
-    "calcium_mg": 20,
-    "iron_mg": 0.91,
-    "magnesium_mg": 17,
-    "zinc_mg": 0.13,
-    "vitamin_a_mcg": 0,
-    "vitamin_c_mg": 2.1,
-    "vitamin_d_mcg": 0.0,
-    "vitamin_e_mg": 0.04,
-    "vitamin_k_mcg": 0.0,
-    "vitamin_b12_mcg": 0.0,
-    "folate_mcg": 1,
-    "water_g": 57.0,
-    "alcohol_g": 0.0,
-    "caffeine_mg": 0
-   },
-   "density_g_per_ml": 1.189,
-   "density_basis": "plain measure",
-   "unit_weights_g": {
-    "can": 211.0
+    "energy_kcal": 47,
+    "protein_g": 0.09,
+    "fat_g": 0.29,
+    "carbs_g": 11.36,
+    "sugars_g": 10.29,
+    "sodium_mg": 5,
+    "potassium_mg": 96,
+    "calcium_mg": 7,
+    "iron_mg": 0.04,
+    "magnesium_mg": 5,
+    "zinc_mg": 0.0,
+    "vitamin_c_mg": 51.2,
+    "folate_mcg": 3,
+    "water_g": 88.1
    },
    "allergens": [],
    "diet": "vegan",
@@ -10632,6 +11042,11 @@
     "source_name": "Apple juice fresh squeezed"
    },
    "variants": [
+    {
+     "food": "fdc:2003590",
+     "description": "Apple juice, with added vitamin C, from concentrate, shelf stable",
+     "state": null
+    },
     {
      "food": "usda:09017",
      "description": "Apple juice, frozen concentrate, unsweetened, undiluted, without added ascorbic acid",
@@ -10668,7 +11083,7 @@
      "state": "frozen"
     }
    ],
-   "variant_count": 7
+   "variant_count": 8
   },
   {
    "id": "apples",
@@ -10777,6 +11192,56 @@
      "state": "raw"
     },
     {
+     "food": "fdc:1105781",
+     "description": "Apples, gala, with skin, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1105897",
+     "description": "Apples, fuji, with skin, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1750340",
+     "description": "Apples, fuji, with skin, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1750341",
+     "description": "Apples, gala, with skin, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1105547",
+     "description": "Apples, honeycrisp, with skin, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1750343",
+     "description": "Apples, honeycrisp, with skin, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1105664",
+     "description": "Apples, granny smith, with skin, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1750342",
+     "description": "Apples, granny smith, with skin, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1105430",
+     "description": "Apples, red delicious, with skin, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1750339",
+     "description": "Apples, red delicious, with skin, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:09011",
      "description": "Apples, dried, sulfured, uncooked",
      "state": "dried"
@@ -10832,49 +11297,32 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 18
+   "variant_count": 28
   },
   {
    "id": "applesauce",
    "name": "Applesauce",
    "aliases": [],
    "curated": false,
-   "aisle": "Canned",
+   "aisle": "Produce",
    "group": "Fruits and Fruit Juices",
-   "default_food": "usda:09019",
-   "default_description": "Applesauce, canned, unsweetened, without added ascorbic acid (includes USDA commodity)",
-   "name_fr_source": "Pomme, purée (compote), conserve, non sucrée",
+   "default_food": "fdc:2263892",
+   "default_description": "Applesauce, unsweetened, with added vitamin C",
    "per_100g": {
-    "energy_kcal": 42,
-    "protein_g": 0.17,
-    "fat_g": 0.1,
-    "carbs_g": 11.27,
-    "fibre_g": 1.1,
-    "sugars_g": 9.39,
-    "sat_fat_g": 0.01,
-    "mono_fat_g": 0.0,
-    "poly_fat_g": 0.01,
-    "trans_fat_g": 0.0,
-    "cholesterol_mg": 0,
-    "sodium_mg": 2,
-    "potassium_mg": 74,
+    "energy_kcal": 46,
+    "protein_g": 0.27,
+    "fat_g": 0.16,
+    "carbs_g": 12.26,
+    "sugars_g": 9.66,
+    "sodium_mg": 1,
+    "potassium_mg": 108,
     "calcium_mg": 4,
-    "iron_mg": 0.23,
-    "magnesium_mg": 3,
-    "zinc_mg": 0.03,
-    "vitamin_a_mcg": 1,
-    "vitamin_c_mg": 1.0,
-    "vitamin_d_mcg": 0.0,
-    "vitamin_e_mg": 0.16,
-    "vitamin_k_mcg": 0.5,
-    "vitamin_b12_mcg": 0.0,
-    "folate_mcg": 3,
-    "water_g": 88.2,
-    "alcohol_g": 0.0,
-    "caffeine_mg": 0
+    "iron_mg": 0.04,
+    "magnesium_mg": 4,
+    "zinc_mg": 0.0,
+    "vitamin_c_mg": 43.7,
+    "water_g": 87.1
    },
-   "density_g_per_ml": 1.031,
-   "density_basis": "plain measure",
    "allergens": [],
    "diet": "vegan",
    "shelf_life": {
@@ -10891,6 +11339,16 @@
     "source_name": "Applesauce commercial"
    },
    "variants": [
+    {
+     "food": "fdc:2263892",
+     "description": "Applesauce, unsweetened, with added vitamin C",
+     "state": null
+    },
+    {
+     "food": "fdc:2346414",
+     "description": "Applesauce, unsweetened, with added vitamin C",
+     "state": null
+    },
     {
      "food": "usda:09019",
      "description": "Applesauce, canned, unsweetened, without added ascorbic acid (includes USDA commodity)",
@@ -10912,7 +11370,60 @@
      "state": "canned"
     }
    ],
-   "variant_count": 4
+   "variant_count": 6
+  },
+  {
+   "id": "apricot",
+   "name": "Apricot",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Produce",
+   "group": "Fruits and Fruit Juices",
+   "default_food": "fdc:2710815",
+   "default_description": "Apricot, with skin, raw",
+   "name_fr_source": "Abricot, cru",
+   "per_100g": {
+    "energy_kcal": 43,
+    "protein_g": 0.96,
+    "fat_g": 0.41,
+    "carbs_g": 10.24,
+    "fibre_g": 1.5,
+    "sugars_g": 6.25,
+    "sodium_mg": 0,
+    "potassium_mg": 231,
+    "calcium_mg": 12,
+    "iron_mg": 0.16,
+    "magnesium_mg": 9,
+    "zinc_mg": 0.15,
+    "vitamin_c_mg": 3.1,
+    "water_g": 87.9
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "shelf_life": {
+    "pantry_days": [
+     1,
+     2
+    ],
+    "fridge_days": null,
+    "freezer_days": [
+     240,
+     240
+    ],
+    "opened_fridge_days": [
+     7,
+     7
+    ],
+    "source_name": "Fruit pies apple, peach, blueberry, apricot, cherry, blackberry"
+   },
+   "variants": [
+    {
+     "food": "fdc:2710815",
+     "description": "Apricot, with skin, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 1
   },
   {
    "id": "apricot-kernel-oil",
@@ -11651,9 +12162,14 @@
      "food": "usda:11959",
      "description": "Arugula, raw",
      "state": "raw"
+    },
+    {
+     "food": "fdc:2710822",
+     "description": "Arugula, baby, raw",
+     "state": "raw"
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "asiago-cheese",
@@ -11783,6 +12299,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2710823",
+     "description": "Asparagus, green, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11015",
      "description": "Asparagus, canned, drained solids",
      "state": "canned"
@@ -11823,7 +12344,52 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 9
+   "variant_count": 10
+  },
+  {
+   "id": "avocado",
+   "name": "Avocado",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Produce",
+   "group": "Fruits and Fruit Juices",
+   "default_food": "fdc:2710824",
+   "default_description": "Avocado, Hass, peeled, raw",
+   "per_100g": {
+    "energy_kcal": 206,
+    "protein_g": 1.81,
+    "fat_g": 20.31,
+    "carbs_g": 8.32,
+    "sodium_mg": 0,
+    "potassium_mg": 576,
+    "calcium_mg": 14,
+    "iron_mg": 0.61,
+    "magnesium_mg": 33,
+    "zinc_mg": 0.46,
+    "vitamin_c_mg": 0.0,
+    "folate_mcg": 129,
+    "water_g": 67.0
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "shelf_life": {
+    "pantry_days": null,
+    "fridge_days": [
+     3,
+     4
+    ],
+    "freezer_days": null,
+    "opened_fridge_days": null,
+    "source_name": "Avocados"
+   },
+   "variants": [
+    {
+     "food": "fdc:2710824",
+     "description": "Avocado, Hass, peeled, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 1
   },
   {
    "id": "avocado-oil",
@@ -12629,6 +13195,43 @@
    "variant_count": 1
   },
   {
+   "id": "banana-or-hungarian-wax-peppers",
+   "name": "Banana or hungarian wax peppers",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Produce",
+   "group": "Vegetables and Vegetable Products",
+   "default_food": "fdc:2747660",
+   "default_description": "Peppers, banana or Hungarian wax, seeded, raw",
+   "per_100g": {
+    "energy_kcal": 24,
+    "protein_g": 0.72,
+    "fat_g": 0.13,
+    "carbs_g": 4.97,
+    "fibre_g": 1.8,
+    "sugars_g": 2.71,
+    "sodium_mg": 0,
+    "potassium_mg": 177,
+    "calcium_mg": 10,
+    "iron_mg": 0.16,
+    "magnesium_mg": 10,
+    "zinc_mg": 0.13,
+    "vitamin_c_mg": 112.1,
+    "folate_mcg": 32,
+    "water_g": 93.8
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2747660",
+     "description": "Peppers, banana or Hungarian wax, seeded, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 1
+  },
+  {
    "id": "bananas",
    "name": "Bananas",
    "aliases": [],
@@ -12699,12 +13302,32 @@
      "state": "raw"
     },
     {
+     "food": "fdc:790991",
+     "description": "Bananas, ripe and slightly ripe, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1105314",
+     "description": "Bananas, ripe and slightly ripe, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:790774",
+     "description": "Bananas, overripe, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:1105073",
+     "description": "Bananas, overripe, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:09041",
      "description": "Bananas, dehydrated, or banana powder",
      "state": "dried"
     }
    ],
-   "variant_count": 2
+   "variant_count": 6
   },
   {
    "id": "bannock-bread",
@@ -14138,6 +14761,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2646175",
+     "description": "Beef, flank, steak, boneless, choice, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:13970",
      "description": "Beef, flank, steak, separable lean and fat, trimmed to 0\" fat, all grades, raw",
      "state": "raw"
@@ -14203,7 +14831,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 18
+   "variant_count": 19
   },
   {
    "id": "beef-loin",
@@ -14274,6 +14902,16 @@
     {
      "food": "usda:13915",
      "description": "Beef, short loin, top loin, steak, separable lean and fat, trimmed to 1/8\" fat, prime, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:335109",
+     "description": "Beef, short loin, porterhouse steak, separable lean only, trimmed to 1/8\" fat, select, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:746762",
+     "description": "Beef, short loin, porterhouse steak, separable lean only, trimmed to 1/8\" fat, select, raw",
      "state": "raw"
     },
     {
@@ -14417,6 +15055,16 @@
      "state": "raw"
     },
     {
+     "food": "fdc:334849",
+     "description": "Beef, loin, top loin steak, boneless, lip-on, separable lean only, trimmed to 1/8\" fat, choice, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:746759",
+     "description": "Beef, loin, top loin steak, boneless, lip-on, separable lean only, trimmed to 1/8\" fat, choice, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:23282",
      "description": "Beef, loin, top sirloin cap steak, boneless, separable lean and fat, trimmed to 1/8\" fat, choice, raw",
      "state": "raw"
@@ -14425,29 +15073,9 @@
      "food": "usda:23283",
      "description": "Beef, loin, top sirloin cap steak, boneless, separable lean and fat, trimmed to 1/8\" fat, select, raw",
      "state": "raw"
-    },
-    {
-     "food": "usda:23291",
-     "description": "Beef, top loin petite roast/filet, boneless, separable lean and fat, trimmed to 1/8\" fat, choice, raw",
-     "state": "raw"
-    },
-    {
-     "food": "usda:23292",
-     "description": "Beef, top loin petite roast/filet, boneless, separable lean and fat, trimmed to 1/8\" fat, select, raw",
-     "state": "raw"
-    },
-    {
-     "food": "usda:23303",
-     "description": "Beef, Australian, imported, grass-fed, loin, top loin steak/roast, boneless, separable lean only, raw",
-     "state": "raw"
-    },
-    {
-     "food": "usda:23340",
-     "description": "Beef, loin, top loin steak, boneless, lip off, separable lean and fat, trimmed to 0\" fat, choice, raw",
-     "state": "raw"
     }
    ],
-   "variant_count": 153
+   "variant_count": 162
   },
   {
    "id": "beef-plate",
@@ -14886,42 +15514,34 @@
    "curated": false,
    "aisle": "Meat and seafood",
    "group": "Beef Products",
-   "default_food": "usda:23270",
-   "default_description": "Beef, ribeye cap steak, boneless, separable lean only, trimmed to 0\" fat, choice, raw",
+   "default_food": "fdc:2646172",
+   "default_description": "Beef, ribeye, steak, boneless, choice, raw",
    "per_100g": {
-    "energy_kcal": 187,
-    "protein_g": 19.46,
-    "fat_g": 11.4,
-    "carbs_g": 1.75,
-    "fibre_g": 0.0,
-    "sugars_g": 0.0,
-    "sat_fat_g": 4.36,
-    "mono_fat_g": 5.17,
-    "poly_fat_g": 0.45,
-    "trans_fat_g": 0.48,
-    "cholesterol_mg": 64,
-    "sodium_mg": 88,
-    "potassium_mg": 357,
-    "calcium_mg": 6,
-    "iron_mg": 2.64,
-    "magnesium_mg": 24,
-    "zinc_mg": 7.8,
-    "vitamin_a_mcg": 2,
-    "vitamin_c_mg": 0.0,
-    "vitamin_d_mcg": 0.1,
-    "vitamin_k_mcg": 1.5,
-    "vitamin_b12_mcg": 3.21,
-    "folate_mcg": 3,
-    "water_g": 66.5,
-    "alcohol_g": 0.0,
-    "caffeine_mg": 0
-   },
-   "unit_weights_g": {
-    "steak": 249.0
+    "energy_kcal": 260,
+    "protein_g": 18.74,
+    "fat_g": 20.04,
+    "carbs_g": 0.0,
+    "sat_fat_g": 7.97,
+    "mono_fat_g": 7.73,
+    "poly_fat_g": 0.63,
+    "trans_fat_g": 0.97,
+    "cholesterol_mg": 63,
+    "sodium_mg": 43,
+    "potassium_mg": 288,
+    "calcium_mg": 4,
+    "iron_mg": 1.64,
+    "magnesium_mg": 17,
+    "zinc_mg": 4.06,
+    "water_g": 60.6
    },
    "allergens": [],
    "diet": "contains meat or fish",
    "variants": [
+    {
+     "food": "fdc:2646172",
+     "description": "Beef, ribeye, steak, boneless, choice, raw",
+     "state": "raw"
+    },
     {
      "food": "usda:23270",
      "description": "Beef, ribeye cap steak, boneless, separable lean only, trimmed to 0\" fat, choice, raw",
@@ -14998,7 +15618,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 15
+   "variant_count": 16
   },
   {
    "id": "beef-round",
@@ -15048,6 +15668,11 @@
     {
      "food": "cnf:6041",
      "description": "Beef, hip, outside (bottom) round roast, boneless, lean, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2646173",
+     "description": "Beef, round, top round, boneless, choice, raw",
      "state": "raw"
     },
     {
@@ -15121,6 +15746,16 @@
      "state": "raw"
     },
     {
+     "food": "fdc:334963",
+     "description": "Beef, round, top round roast, boneless, separable lean only, trimmed to 0\" fat, select, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:746761",
+     "description": "Beef, round, top round roast, boneless, separable lean only, trimmed to 0\" fat, select, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:23030",
      "description": "Beef, round, knuckle, tip side, steak, separable lean and fat, trimmed to 0\" fat, choice, raw",
      "state": "raw"
@@ -15176,6 +15811,16 @@
      "state": "raw"
     },
     {
+     "food": "fdc:334898",
+     "description": "Beef, round, eye of round roast, boneless, separable lean only, trimmed to 0\" fat, select, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:746760",
+     "description": "Beef, round, eye of round roast, boneless, separable lean only, trimmed to 0\" fat, select, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:23045",
      "description": "Beef, round, knuckle, tip center, steak, separable lean and fat, trimmed to 0\" fat, choice, raw",
      "state": "raw"
@@ -15219,34 +15864,9 @@
      "food": "usda:23335",
      "description": "Beef, round, eye of round steak, boneless, separable lean and fat, trimmed to 0\" fat, select, raw",
      "state": "raw"
-    },
-    {
-     "food": "usda:23324",
-     "description": "Beef, round, top round steak, boneless, separable lean and fat, trimmed to 0\" fat, all grades, raw",
-     "state": "raw"
-    },
-    {
-     "food": "usda:23327",
-     "description": "Beef, round, top round roast, boneless, separable lean and fat, trimmed to 0\" fat, all grades, raw",
-     "state": "raw"
-    },
-    {
-     "food": "usda:23360",
-     "description": "Beef, round, eye of round roast, boneless, separable lean only, trimmed to 0\" fat, all grades, raw",
-     "state": "raw"
-    },
-    {
-     "food": "usda:23363",
-     "description": "Beef, round, eye of round steak, boneless, separable lean only, trimmed to 0\" fat, all grades, raw",
-     "state": "raw"
-    },
-    {
-     "food": "usda:23061",
-     "description": "Beef, round, knuckle, tip center, steak, separable lean and fat, trimmed to 0\" fat, all grades, raw",
-     "state": "raw"
     }
    ],
-   "variant_count": 167
+   "variant_count": 172
   },
   {
    "id": "beef-rump",
@@ -15778,6 +16398,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2727573",
+     "description": "Beef, tenderloin steak, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:23441",
      "description": "Beef, New Zealand, imported, tenderloin, separable lean only, raw",
      "state": "raw"
@@ -15873,7 +16498,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 22
+   "variant_count": 23
   },
   {
    "id": "beef-tongue",
@@ -15980,6 +16605,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2727574",
+     "description": "Beef, top sirloin steak, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:23584",
      "description": "Beef, top sirloin, steak, separable lean only, trimmed to 1/8\" fat, select, raw",
      "state": "raw"
@@ -16060,7 +16690,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 19
+   "variant_count": 20
   },
   {
    "id": "beef-variety-meats",
@@ -16508,6 +17138,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2747653",
+     "description": "Beet greens, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11736",
      "description": "Beet greens, cooked, boiled, drained, with salt",
      "state": "cooked"
@@ -16518,7 +17153,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 3
+   "variant_count": 4
   },
   {
    "id": "beets",
@@ -16586,6 +17221,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2685576",
+     "description": "Beets, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11084",
      "description": "Beets, canned, drained solids",
      "state": "canned"
@@ -16621,7 +17261,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 8
+   "variant_count": 9
   },
   {
    "id": "beverage",
@@ -16891,6 +17531,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2727571",
+     "description": "Bison, ground, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:17331",
      "description": "Game meat, bison, ground, cooked, pan-broiled",
      "state": "cooked"
@@ -16926,7 +17571,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 15
+   "variant_count": 16
   },
   {
    "id": "black-beans",
@@ -16996,6 +17641,11 @@
      "state": null
     },
     {
+     "food": "fdc:2644285",
+     "description": "Beans, black, canned, sodium added, drained and rinsed",
+     "state": "canned"
+    },
+    {
      "food": "usda:16316",
      "description": "Beans, black, mature seeds, canned, low sodium",
      "state": "canned"
@@ -17011,7 +17661,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 5
+   "variant_count": 6
   },
   {
    "id": "black-crowberry",
@@ -17048,6 +17698,40 @@
      "food": "cnf:5938",
      "description": "Black crowberry (curlewberry), Indigenous",
      "state": null
+    }
+   ],
+   "variant_count": 1
+  },
+  {
+   "id": "black-rice",
+   "name": "Black rice",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dry goods",
+   "group": "Cereal Grains and Pasta",
+   "default_food": "fdc:2710825",
+   "default_description": "Rice, black, unenriched, raw",
+   "per_100g": {
+    "energy_kcal": 361,
+    "protein_g": 7.57,
+    "fat_g": 3.44,
+    "carbs_g": 77.19,
+    "fibre_g": 4.2,
+    "sodium_mg": 0,
+    "potassium_mg": 256,
+    "calcium_mg": 14,
+    "iron_mg": 1.12,
+    "magnesium_mg": 113,
+    "zinc_mg": 1.72,
+    "water_g": 10.5
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2710825",
+     "description": "Rice, black, unenriched, raw",
+     "state": "raw"
     }
    ],
    "variant_count": 1
@@ -17245,6 +17929,44 @@
     }
    ],
    "variant_count": 1
+  },
+  {
+   "id": "blackeye-pea",
+   "name": "Blackeye pea",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dry goods",
+   "group": "Legumes and Legume Products",
+   "default_food": "fdc:2644284",
+   "default_description": "Blackeye pea, dry",
+   "per_100g": {
+    "energy_kcal": 346,
+    "protein_g": 21.23,
+    "fat_g": 2.42,
+    "carbs_g": 61.84,
+    "sodium_mg": 3,
+    "potassium_mg": 1243,
+    "calcium_mg": 71,
+    "iron_mg": 5.93,
+    "magnesium_mg": 184,
+    "zinc_mg": 3.65,
+    "water_g": 11.0
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2644284",
+     "description": "Blackeye pea, dry",
+     "state": "dried"
+    },
+    {
+     "food": "fdc:2644293",
+     "description": "Blackeye pea, canned, sodium added, drained and rinsed",
+     "state": "canned"
+    }
+   ],
+   "variant_count": 2
   },
   {
    "id": "blood-sausage",
@@ -17486,6 +18208,16 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2263889",
+     "description": "Blueberries, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2346411",
+     "description": "Blueberries, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:09054",
      "description": "Blueberries, frozen, unsweetened",
      "state": "frozen"
@@ -17521,7 +18253,7 @@
      "state": "canned"
     }
    ],
-   "variant_count": 8
+   "variant_count": 10
   },
   {
    "id": "bluefish",
@@ -17740,6 +18472,43 @@
     {
      "food": "usda:07006",
      "description": "Bockwurst, pork, veal, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 1
+  },
+  {
+   "id": "bok-choy-cabbage",
+   "name": "Bok choy cabbage",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Produce",
+   "group": "Vegetables and Vegetable Products",
+   "default_food": "fdc:2685572",
+   "default_description": "Cabbage, bok choy, raw",
+   "name_fr_source": "Bok choy, pak-choi, cru",
+   "per_100g": {
+    "energy_kcal": 17,
+    "protein_g": 1.02,
+    "fat_g": 0.23,
+    "carbs_g": 3.51,
+    "fibre_g": 1.3,
+    "sodium_mg": 14,
+    "potassium_mg": 228,
+    "calcium_mg": 62,
+    "iron_mg": 0.44,
+    "magnesium_mg": 14,
+    "zinc_mg": 0.27,
+    "vitamin_c_mg": 30.3,
+    "folate_mcg": 68,
+    "water_g": 94.5
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2685572",
+     "description": "Cabbage, bok choy, raw",
      "state": "raw"
     }
    ],
@@ -18288,42 +19057,21 @@
    "curated": false,
    "aisle": "Dry goods",
    "group": "Nut and Seed Products",
-   "default_food": "usda:12078",
-   "default_description": "Nuts, brazilnuts, dried, unblanched",
-   "name_fr_source": "Noix, noix de Brésil, séchées, non blanchies",
+   "default_food": "fdc:2515373",
+   "default_description": "Nuts, brazilnuts, raw",
    "per_100g": {
-    "energy_kcal": 659,
-    "protein_g": 14.32,
-    "fat_g": 67.1,
-    "carbs_g": 11.74,
-    "fibre_g": 7.5,
-    "sugars_g": 2.33,
-    "sat_fat_g": 16.13,
-    "mono_fat_g": 23.88,
-    "poly_fat_g": 24.4,
-    "cholesterol_mg": 0,
-    "sodium_mg": 3,
-    "potassium_mg": 659,
-    "calcium_mg": 160,
-    "iron_mg": 2.43,
-    "magnesium_mg": 376,
-    "zinc_mg": 4.06,
-    "vitamin_a_mcg": 0,
-    "vitamin_c_mg": 0.7,
-    "vitamin_d_mcg": 0.0,
-    "vitamin_e_mg": 5.65,
-    "vitamin_k_mcg": 0.0,
-    "vitamin_b12_mcg": 0.0,
-    "folate_mcg": 22,
-    "water_g": 3.4,
-    "alcohol_g": 0.0,
-    "caffeine_mg": 0
-   },
-   "density_g_per_ml": 0.592,
-   "density_basis": "plain measure",
-   "unit_weights_g": {
-    "kernel": 5.0,
-    "medium": 3.5
+    "energy_kcal": 621,
+    "protein_g": 15.04,
+    "fat_g": 57.43,
+    "carbs_g": 21.64,
+    "fibre_g": 6.0,
+    "sodium_mg": 0,
+    "potassium_mg": 592,
+    "calcium_mg": 168,
+    "iron_mg": 2.47,
+    "magnesium_mg": 351,
+    "zinc_mg": 3.82,
+    "water_g": 2.3
    },
    "allergens": [
     "tree nuts"
@@ -18331,12 +19079,17 @@
    "diet": "vegan",
    "variants": [
     {
+     "food": "fdc:2515373",
+     "description": "Nuts, brazilnuts, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:12078",
      "description": "Nuts, brazilnuts, dried, unblanched",
      "state": "dried"
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "bread-crumbs",
@@ -19050,6 +19803,16 @@
      "state": "raw"
     },
     {
+     "food": "fdc:321900",
+     "description": "Broccoli, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:747447",
+     "description": "Broccoli, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11994",
      "description": "Broccoli, chinese, raw",
      "state": "raw"
@@ -19110,7 +19873,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 14
+   "variant_count": 16
   },
   {
    "id": "broccoli-raab",
@@ -19434,6 +20197,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2512380",
+     "description": "Rice, brown, long grain, unenriched, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:20037",
      "description": "Rice, brown, long-grain, cooked",
      "state": "cooked"
@@ -19444,7 +20212,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 4
+   "variant_count": 5
   },
   {
    "id": "brussels-sprouts",
@@ -19509,6 +20277,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2685575",
+     "description": "Brussels sprouts, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11100",
      "description": "Brussels sprouts, frozen, unprepared",
      "state": "frozen"
@@ -19534,7 +20307,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 6
+   "variant_count": 7
   },
   {
    "id": "buckwheat",
@@ -19595,9 +20368,14 @@
      "food": "usda:20008",
      "description": "Buckwheat",
      "state": null
+    },
+    {
+     "food": "fdc:2512378",
+     "description": "Buckwheat, whole grain",
+     "state": null
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "buckwheat-flour",
@@ -19817,12 +20595,17 @@
      "state": "dried"
     },
     {
+     "food": "fdc:2710820",
+     "description": "Bulgur, dry, raw",
+     "state": "dried"
+    },
+    {
      "food": "usda:20013",
      "description": "Bulgur, cooked",
      "state": "cooked"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "burbot",
@@ -20311,6 +21094,60 @@
      "food": "usda:11250",
      "description": "Lettuce, butterhead (includes boston and bibb types), raw",
      "state": "raw"
+    }
+   ],
+   "variant_count": 1
+  },
+  {
+   "id": "buttermilk",
+   "name": "Buttermilk",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dairy and eggs",
+   "group": "Dairy and Egg Products",
+   "default_food": "fdc:2259792",
+   "default_description": "Buttermilk, low fat",
+   "name_fr_source": "Lait, liquide, babeurre (lait de beurre), 1% M.G.",
+   "per_100g": {
+    "energy_kcal": 43,
+    "protein_g": 3.46,
+    "fat_g": 1.08,
+    "carbs_g": 4.81,
+    "sat_fat_g": 0.55,
+    "mono_fat_g": 0.2,
+    "cholesterol_mg": 5,
+    "sodium_mg": 92,
+    "potassium_mg": 158,
+    "calcium_mg": 120,
+    "iron_mg": 0.01,
+    "magnesium_mg": 11,
+    "zinc_mg": 0.43,
+    "vitamin_d_mcg": 0.5,
+    "vitamin_k_mcg": 0.0,
+    "water_g": 89.8
+   },
+   "allergens": [
+    "milk"
+   ],
+   "diet": "vegetarian",
+   "shelf_life": {
+    "pantry_days": null,
+    "fridge_days": [
+     7,
+     14
+    ],
+    "freezer_days": [
+     90,
+     90
+    ],
+    "opened_fridge_days": null,
+    "source_name": "Buttermilk"
+   },
+   "variants": [
+    {
+     "food": "fdc:2259792",
+     "description": "Buttermilk, low fat",
+     "state": null
     }
    ],
    "variant_count": 1
@@ -21376,6 +22213,44 @@
    "variant_count": 1
   },
   {
+   "id": "cannellini-beans",
+   "name": "Cannellini beans",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dry goods",
+   "group": "Legumes and Legume Products",
+   "default_food": "fdc:2644281",
+   "default_description": "Beans, cannellini, dry",
+   "per_100g": {
+    "energy_kcal": 337,
+    "protein_g": 21.56,
+    "fat_g": 2.2,
+    "carbs_g": 59.8,
+    "sodium_mg": 0,
+    "potassium_mg": 1424,
+    "calcium_mg": 143,
+    "iron_mg": 6.67,
+    "magnesium_mg": 154,
+    "zinc_mg": 2.72,
+    "water_g": 12.3
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2644281",
+     "description": "Beans, cannellini, dry",
+     "state": "dried"
+    },
+    {
+     "food": "fdc:2644287",
+     "description": "Beans, cannellini, canned, sodium added, drained and rinsed",
+     "state": "canned"
+    }
+   ],
+   "variant_count": 2
+  },
+  {
    "id": "canola-and-soybean-oil",
    "name": "Canola and soybean oil",
    "aliases": [],
@@ -21491,9 +22366,19 @@
      "food": "usda:09181",
      "description": "Melons, cantaloupe, raw",
      "state": "raw"
+    },
+    {
+     "food": "fdc:327198",
+     "description": "Melons, cantaloupe, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:746770",
+     "description": "Melons, cantaloupe, raw",
+     "state": "raw"
     }
    ],
-   "variant_count": 1
+   "variant_count": 3
   },
   {
    "id": "carambola",
@@ -22456,6 +23341,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2515374",
+     "description": "Nuts, cashew nuts, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:12586",
      "description": "Nuts, cashew nuts, oil roasted, with salt added",
      "state": "cooked"
@@ -22476,7 +23366,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 5
+   "variant_count": 6
   },
   {
    "id": "cassava",
@@ -22621,6 +23511,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2684445",
+     "description": "Fish, catfish, farm raised, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:15233",
      "description": "Fish, catfish, channel, wild, cooked, dry heat",
      "state": "cooked"
@@ -22636,7 +23531,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 5
+   "variant_count": 6
   },
   {
    "id": "cauliflower",
@@ -22715,6 +23610,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2685573",
+     "description": "Cauliflower, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11137",
      "description": "Cauliflower, frozen, unprepared",
      "state": "frozen"
@@ -22750,7 +23650,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 9
+   "variant_count": 10
   },
   {
    "id": "caviar",
@@ -24160,6 +25060,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2346399",
+     "description": "Cherries, sweet, dark red, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:09044",
      "description": "Cherries, tart, dried, sweetened",
      "state": "dried"
@@ -24235,7 +25140,7 @@
      "state": "canned"
     }
    ],
-   "variant_count": 16
+   "variant_count": 17
   },
   {
    "id": "cherry-juice",
@@ -24598,9 +25503,14 @@
      "food": "usda:12006",
      "description": "Seeds, chia seeds, dried",
      "state": "dried"
+    },
+    {
+     "food": "fdc:2710819",
+     "description": "Chia seeds, dry, raw",
+     "state": "dried"
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "chicken-breast-tenders",
@@ -25034,6 +25944,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2727566",
+     "description": "Chicken, drumstick, meat and skin, raw",
+     "state": "raw"
+    },
+    {
      "food": "cnf:846",
      "description": "Chicken, broiler, drumstick, meat and skin, stewed",
      "state": "cooked"
@@ -25087,9 +26002,14 @@
      "food": "usda:05359",
      "description": "Chicken, broiler, rotisserie, BBQ, drumstick meat and skin",
      "state": "cooked"
+    },
+    {
+     "food": "fdc:331897",
+     "description": "Chicken, broilers or fryers, drumstick, meat only, cooked, braised",
+     "state": "cooked"
     }
    ],
-   "variant_count": 12
+   "variant_count": 14
   },
   {
    "id": "chicken-fat",
@@ -25828,6 +26748,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2727568",
+     "description": "Chicken, wing, meat and skin, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:05312",
      "description": "Chicken, wing, frozen, glazed, barbecue flavored",
      "state": "frozen"
@@ -25898,7 +26823,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 16
+   "variant_count": 17
   },
   {
    "id": "chickpea-flour",
@@ -26005,6 +26930,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2644282",
+     "description": "Chickpeas, (garbanzo beans, bengal gram), dry",
+     "state": "dried"
+    },
+    {
      "food": "usda:16358",
      "description": "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids",
      "state": "canned"
@@ -26025,6 +26955,11 @@
      "state": "canned"
     },
     {
+     "food": "fdc:2644288",
+     "description": "Chickpeas (garbanzo beans, bengal gram), canned, sodium added, drained and rinsed",
+     "state": "canned"
+    },
+    {
      "food": "usda:16357",
      "description": "Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, with salt",
      "state": "cooked"
@@ -26035,7 +26970,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 7
+   "variant_count": 9
   },
   {
    "id": "chicory",
@@ -28934,9 +29869,14 @@
      "food": "usda:04047",
      "description": "Oil, coconut",
      "state": null
+    },
+    {
+     "food": "fdc:330458",
+     "description": "Oil, coconut",
+     "state": null
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "coconut-water",
@@ -29073,6 +30013,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2684444",
+     "description": "Fish, cod, Atlantic, wild caught, raw",
+     "state": "raw"
+    },
+    {
      "food": "cnf:3231",
      "description": "Fish, cod (scrod), Atlantic, tongues and cheeks, raw",
      "state": "raw"
@@ -29113,6 +30058,11 @@
      "state": "cooked"
     },
     {
+     "food": "fdc:2747654",
+     "description": "Cod, Pacific or Alaskan, frozen, wild caught",
+     "state": "frozen"
+    },
+    {
      "food": "usda:15192",
      "description": "Fish, cod, Pacific, cooked, dry heat (may have been previously frozen)",
      "state": "cooked"
@@ -29123,7 +30073,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 11
+   "variant_count": 13
   },
   {
    "id": "coffee",
@@ -29829,6 +30779,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2685574",
+     "description": "Collards, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11163",
      "description": "Collards, frozen, chopped, unprepared",
      "state": "frozen"
@@ -29854,7 +30809,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 6
+   "variant_count": 7
   },
   {
    "id": "common-cabbage",
@@ -30407,6 +31362,11 @@
      "state": null
     },
     {
+     "food": "fdc:333008",
+     "description": "Cookies, oatmeal, soft, with raisins",
+     "state": null
+    },
+    {
      "food": "usda:28333",
      "description": "Cookies, gluten-free, chocolate wafer",
      "state": null
@@ -30535,14 +31495,9 @@
      "food": "usda:18213",
      "description": "Cookies, vanilla wafers, higher fat",
      "state": null
-    },
-    {
-     "food": "usda:18167",
-     "description": "Cookies, chocolate sandwich, with creme filling, regular, chocolate-coated",
-     "state": null
     }
    ],
-   "variant_count": 79
+   "variant_count": 80
   },
   {
    "id": "coriander-leaf",
@@ -30718,6 +31673,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2710826",
+     "description": "Corn, sweet, yellow and white kernels,  fresh, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11906",
      "description": "Corn, sweet, white, canned, cream style, regular pack",
      "state": "canned"
@@ -30878,7 +31838,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 34
+   "variant_count": 35
   },
   {
    "id": "corn-and-canola-oil",
@@ -31066,9 +32026,14 @@
      "food": "usda:20315",
      "description": "Corn flour, whole-grain, blue (harina de maiz morado)",
      "state": null
+    },
+    {
+     "food": "fdc:2710835",
+     "description": "Corn flour, masa harina, white or yellow, dry, raw",
+     "state": "dried"
     }
    ],
-   "variant_count": 7
+   "variant_count": 8
   },
   {
    "id": "corn-fritter",
@@ -31882,6 +32847,55 @@
      "food": "usda:11251",
      "description": "Lettuce, cos or romaine, raw",
      "state": "raw"
+    },
+    {
+     "food": "fdc:327923",
+     "description": "Lettuce, cos or romaine, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:746769",
+     "description": "Lettuce, cos or romaine, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 3
+  },
+  {
+   "id": "cotija-cheese",
+   "name": "Cotija cheese",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dairy and eggs",
+   "group": "Dairy and Egg Products",
+   "default_food": "fdc:2647443",
+   "default_description": "Cheese, cotija, solid",
+   "per_100g": {
+    "energy_kcal": 352,
+    "protein_g": 23.84,
+    "fat_g": 27.24,
+    "carbs_g": 2.72,
+    "sat_fat_g": 15.89,
+    "mono_fat_g": 5.93,
+    "cholesterol_mg": 89,
+    "sodium_mg": 1625,
+    "potassium_mg": 117,
+    "calcium_mg": 700,
+    "iron_mg": 0.0,
+    "magnesium_mg": 30,
+    "zinc_mg": 3.6,
+    "vitamin_d_mcg": 0.0,
+    "water_g": 40.0
+   },
+   "allergens": [
+    "milk"
+   ],
+   "diet": "vegetarian",
+   "variants": [
+    {
+     "food": "fdc:2647443",
+     "description": "Cheese, cotija, solid",
+     "state": null
     }
    ],
    "variant_count": 1
@@ -31960,6 +32974,11 @@
      "state": null
     },
     {
+     "food": "fdc:2346384",
+     "description": "Cottage cheese, full fat, large or small curd",
+     "state": null
+    },
+    {
      "food": "usda:01015",
      "description": "Cheese, cottage, lowfat, 2% milkfat",
      "state": null
@@ -31967,6 +32986,11 @@
     {
      "food": "usda:01016",
      "description": "Cheese, cottage, lowfat, 1% milkfat",
+     "state": null
+    },
+    {
+     "food": "fdc:328841",
+     "description": "Cheese, cottage, lowfat, 2% milkfat",
      "state": null
     },
     {
@@ -31990,7 +33014,7 @@
      "state": "dried"
     }
    ],
-   "variant_count": 9
+   "variant_count": 11
   },
   {
    "id": "cottage-pudding-cake-with-caramel-sauce",
@@ -32520,6 +33544,11 @@
      "state": null
     },
     {
+     "food": "fdc:2684446",
+     "description": "Crustaceans, crab, blue swimming, lump, pasteurized, refrigerated",
+     "state": null
+    },
+    {
      "food": "usda:15138",
      "description": "Crustaceans, crab, alaska king, imitation, made from surimi",
      "state": null
@@ -32565,7 +33594,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 14
+   "variant_count": 15
   },
   {
    "id": "crabapples",
@@ -33432,9 +34461,14 @@
      "food": "usda:43382",
      "description": "Cranberry juice, unsweetened",
      "state": null
+    },
+    {
+     "food": "fdc:2003594",
+     "description": "Cranberry juice, not fortified, from concentrate, shelf stable",
+     "state": null
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "cranberry-juice-blend",
@@ -33951,6 +34985,11 @@
      "state": null
     },
     {
+     "food": "fdc:2346385",
+     "description": "Cream cheese, full fat, block",
+     "state": null
+    },
+    {
      "food": "usda:43274",
      "description": "Cheese, cream, low fat",
      "state": null
@@ -33961,7 +35000,7 @@
      "state": null
     }
    ],
-   "variant_count": 3
+   "variant_count": 4
   },
   {
    "id": "cream-cheese-product",
@@ -34872,6 +35911,11 @@
      "state": null
     },
     {
+     "food": "fdc:324653",
+     "description": "Pickles, cucumber, dill or kosher dill",
+     "state": null
+    },
+    {
      "food": "usda:11947",
      "description": "Pickles, cucumber, dill, reduced sodium",
      "state": null
@@ -34892,7 +35936,7 @@
      "state": "pickled"
     }
    ],
-   "variant_count": 6
+   "variant_count": 7
   },
   {
    "id": "cumin-seed",
@@ -37080,9 +38124,19 @@
      "food": "usda:01227",
      "description": "Cheese, dry white, queso seco",
      "state": "dried"
+    },
+    {
+     "food": "fdc:329830",
+     "description": "Cheese, dry white, queso seco",
+     "state": "dried"
+    },
+    {
+     "food": "fdc:746765",
+     "description": "Cheese, dry white, queso seco",
+     "state": "dried"
     }
    ],
-   "variant_count": 1
+   "variant_count": 3
   },
   {
    "id": "duck",
@@ -38532,6 +39586,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2685577",
+     "description": "Eggplant, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:43146",
      "description": "Eggplant, pickled",
      "state": "pickled"
@@ -38547,7 +39606,41 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 4
+   "variant_count": 5
+  },
+  {
+   "id": "einkorn",
+   "name": "Einkorn",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dry goods",
+   "group": "Cereal Grains and Pasta",
+   "default_food": "fdc:2710827",
+   "default_description": "Einkorn, grain, dry, raw",
+   "per_100g": {
+    "energy_kcal": 346,
+    "protein_g": 15.12,
+    "fat_g": 3.81,
+    "carbs_g": 68.65,
+    "fibre_g": 8.9,
+    "sodium_mg": 0,
+    "potassium_mg": 432,
+    "calcium_mg": 41,
+    "iron_mg": 3.69,
+    "magnesium_mg": 140,
+    "zinc_mg": 5.23,
+    "water_g": 10.5
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2710827",
+     "description": "Einkorn, grain, dry, raw",
+     "state": "dried"
+    }
+   ],
+   "variant_count": 1
   },
   {
    "id": "elderberries",
@@ -39639,6 +40732,55 @@
    "variant_count": 3
   },
   {
+   "id": "farro",
+   "name": "Farro",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dry goods",
+   "group": "Cereal Grains and Pasta",
+   "default_food": "fdc:2710828",
+   "default_description": "Farro, pearled, dry, raw",
+   "per_100g": {
+    "energy_kcal": 344,
+    "protein_g": 12.64,
+    "fat_g": 3.1,
+    "carbs_g": 72.13,
+    "fibre_g": 7.3,
+    "sodium_mg": 1,
+    "potassium_mg": 385,
+    "calcium_mg": 26,
+    "iron_mg": 3.19,
+    "magnesium_mg": 119,
+    "zinc_mg": 3.97,
+    "water_g": 10.5
+   },
+   "allergens": [
+    "wheat or gluten"
+   ],
+   "diet": "vegan",
+   "shelf_life": {
+    "pantry_days": [
+     180,
+     180
+    ],
+    "fridge_days": null,
+    "freezer_days": [
+     360,
+     360
+    ],
+    "opened_fridge_days": null,
+    "source_name": "Farro whole grain"
+   },
+   "variants": [
+    {
+     "food": "fdc:2710828",
+     "description": "Farro, pearled, dry, raw",
+     "state": "dried"
+    }
+   ],
+   "variant_count": 1
+  },
+  {
    "id": "fat-free-ice-cream",
    "name": "Fat free ice cream",
    "aliases": [],
@@ -39867,9 +41009,14 @@
      "food": "usda:11957",
      "description": "Fennel, bulb, raw",
      "state": "raw"
+    },
+    {
+     "food": "fdc:2747655",
+     "description": "Fennel, bulb, raw",
+     "state": "raw"
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "fennel-seed",
@@ -40112,6 +41259,16 @@
      "state": "dried"
     },
     {
+     "food": "fdc:326905",
+     "description": "Figs, dried, uncooked",
+     "state": "dried"
+    },
+    {
+     "food": "fdc:746768",
+     "description": "Figs, dried, uncooked",
+     "state": "dried"
+    },
+    {
      "food": "usda:09090",
      "description": "Figs, canned, water pack, solids and liquids",
      "state": "canned"
@@ -40137,7 +41294,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 7
+   "variant_count": 9
   },
   {
    "id": "filled-milk",
@@ -40814,9 +41971,14 @@
      "food": "usda:12220",
      "description": "Seeds, flaxseed",
      "state": null
+    },
+    {
+     "food": "fdc:2262075",
+     "description": "Flaxseed, ground",
+     "state": null
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "flaxseed-oil",
@@ -40926,6 +42088,40 @@
      "food": "usda:18973",
      "description": "Focaccia, Italian flatbread, plain",
      "state": null
+    }
+   ],
+   "variant_count": 1
+  },
+  {
+   "id": "fonio",
+   "name": "Fonio",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dry goods",
+   "group": "Cereal Grains and Pasta",
+   "default_food": "fdc:2710829",
+   "default_description": "Fonio, grain, dry, raw",
+   "per_100g": {
+    "energy_kcal": 377,
+    "protein_g": 7.17,
+    "fat_g": 1.69,
+    "carbs_g": 81.31,
+    "fibre_g": 2.2,
+    "sodium_mg": 3,
+    "potassium_mg": 44,
+    "calcium_mg": 12,
+    "iron_mg": 2.66,
+    "magnesium_mg": 39,
+    "zinc_mg": 1.85,
+    "water_g": 9.4
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2710829",
+     "description": "Fonio, grain, dry, raw",
+     "state": "dried"
     }
    ],
    "variant_count": 1
@@ -41155,6 +42351,11 @@
      "state": null
     },
     {
+     "food": "fdc:323121",
+     "description": "Frankfurter, beef, unheated",
+     "state": "raw"
+    },
+    {
      "food": "usda:07962",
      "description": "Frankfurter, meat and poultry, unheated",
      "state": "raw"
@@ -41200,7 +42401,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 15
+   "variant_count": 16
   },
   {
    "id": "french-beans",
@@ -43802,45 +45003,39 @@
    "name": "Grape juice",
    "aliases": [],
    "curated": false,
-   "aisle": "Frozen",
+   "aisle": "Pantry",
    "group": "Fruits and Fruit Juices",
-   "default_food": "cnf:1720",
-   "default_description": "Grape juice, frozen concentrate, sugar and vitamin C added, diluted",
-   "name_fr_source": "Raisin, jus, concentré, congelé, sucre et vitamine C ajoutés, dilué",
+   "default_food": "fdc:2003593",
+   "default_description": "Grape juice, white, with added vitamin C, from concentrate, shelf stable",
    "per_100g": {
-    "energy_kcal": 51,
-    "protein_g": 0.19,
-    "fat_g": 0.09,
-    "carbs_g": 12.75,
-    "fibre_g": 0.1,
-    "sugars_g": 12.65,
-    "sat_fat_g": 0.03,
-    "mono_fat_g": 0.0,
-    "poly_fat_g": 0.03,
-    "trans_fat_g": 0.0,
-    "cholesterol_mg": 0,
-    "sodium_mg": 2,
-    "potassium_mg": 21,
-    "calcium_mg": 4,
-    "iron_mg": 0.1,
+    "energy_kcal": 65,
+    "protein_g": 0.09,
+    "fat_g": 0.27,
+    "carbs_g": 15.84,
+    "sugars_g": 14.45,
+    "sodium_mg": 7,
+    "potassium_mg": 49,
+    "calcium_mg": 7,
+    "iron_mg": 0.12,
     "magnesium_mg": 4,
-    "zinc_mg": 0.04,
-    "vitamin_a_mcg": 0,
-    "vitamin_c_mg": 15.0,
-    "vitamin_d_mcg": 0.0,
-    "vitamin_e_mg": 0.0,
-    "vitamin_k_mcg": 0.4,
-    "vitamin_b12_mcg": 0.0,
-    "folate_mcg": 1,
-    "water_g": 86.9,
-    "alcohol_g": 0.0,
-    "caffeine_mg": 0
+    "zinc_mg": 0.02,
+    "vitamin_c_mg": 55.2,
+    "folate_mcg": 2,
+    "water_g": 83.7
    },
-   "density_g_per_ml": 1.057,
-   "density_basis": "plain measure",
    "allergens": [],
    "diet": "vegan",
    "variants": [
+    {
+     "food": "fdc:2003593",
+     "description": "Grape juice, white, with added vitamin C, from concentrate, shelf stable",
+     "state": null
+    },
+    {
+     "food": "fdc:2003592",
+     "description": "Grape juice, purple, with added vitamin C, from concentrate, shelf stable",
+     "state": null
+    },
     {
      "food": "cnf:1720",
      "description": "Grape juice, frozen concentrate, sugar and vitamin C added, diluted",
@@ -43867,7 +45062,7 @@
      "state": "canned"
     }
    ],
-   "variant_count": 5
+   "variant_count": 7
   },
   {
    "id": "grape-juice-drink",
@@ -44149,12 +45344,22 @@
      "state": null
     },
     {
+     "food": "fdc:2003595",
+     "description": "Grapefruit juice, red, not fortified, not from concentrate, refrigerated",
+     "state": null
+    },
+    {
      "food": "usda:09125",
      "description": "Grapefruit juice, white, frozen concentrate, unsweetened, undiluted",
      "state": "frozen"
     },
     {
      "food": "usda:09123",
+     "description": "Grapefruit juice, white, canned or bottled, unsweetened",
+     "state": "canned"
+    },
+    {
+     "food": "fdc:325287",
      "description": "Grapefruit juice, white, canned or bottled, unsweetened",
      "state": "canned"
     },
@@ -44169,7 +45374,7 @@
      "state": "canned"
     }
    ],
-   "variant_count": 7
+   "variant_count": 9
   },
   {
    "id": "grapes",
@@ -44250,6 +45455,26 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2263890",
+     "description": "Grapes, red, seedless, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2346412",
+     "description": "Grapes, red, seedless, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2263891",
+     "description": "Grapes, green, seedless, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2346413",
+     "description": "Grapes, green, seedless, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:09133",
      "description": "Grapes, canned, thompson seedless, water pack, solids and liquids",
      "state": "canned"
@@ -44260,7 +45485,7 @@
      "state": "canned"
     }
    ],
-   "variant_count": 5
+   "variant_count": 9
   },
   {
    "id": "grapeseed-oil",
@@ -44426,6 +45651,11 @@
      "state": "canned"
     },
     {
+     "food": "fdc:2644294",
+     "description": "Beans, great northern, canned, sodium added, drained and rinsed",
+     "state": "canned"
+    },
+    {
      "food": "usda:16326",
      "description": "Beans, great northern, mature seeds, canned, low sodium",
      "state": "canned"
@@ -44441,7 +45671,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 5
+   "variant_count": 6
   },
   {
    "id": "greek-yogurt",
@@ -44497,12 +45727,22 @@
      "state": null
     },
     {
+     "food": "fdc:2259794",
+     "description": "Yogurt, Greek, plain, whole milk",
+     "state": null
+    },
+    {
      "food": "usda:01287",
      "description": "Yogurt, Greek, plain, lowfat",
      "state": null
     },
     {
      "food": "usda:01256",
+     "description": "Yogurt, Greek, plain, nonfat",
+     "state": null
+    },
+    {
+     "food": "fdc:330137",
      "description": "Yogurt, Greek, plain, nonfat",
      "state": null
     },
@@ -44522,12 +45762,53 @@
      "state": null
     },
     {
+     "food": "fdc:330415",
+     "description": "Yogurt, Greek, strawberry, nonfat",
+     "state": null
+    },
+    {
      "food": "usda:01297",
      "description": "Yogurt, Greek, vanilla, lowfat",
      "state": null
     }
    ],
-   "variant_count": 8
+   "variant_count": 11
+  },
+  {
+   "id": "green-cabbage",
+   "name": "Green cabbage",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Produce",
+   "group": "Vegetables and Vegetable Products",
+   "default_food": "fdc:2346407",
+   "default_description": "Cabbage, green, raw",
+   "name_fr_source": "Chou, cru",
+   "per_100g": {
+    "energy_kcal": 28,
+    "protein_g": 0.96,
+    "fat_g": 0.23,
+    "carbs_g": 6.38,
+    "sodium_mg": 16,
+    "potassium_mg": 207,
+    "calcium_mg": 42,
+    "iron_mg": 0.07,
+    "magnesium_mg": 14,
+    "zinc_mg": 0.21,
+    "vitamin_c_mg": 40.3,
+    "vitamin_k_mcg": 59.4,
+    "water_g": 91.9
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2346407",
+     "description": "Cabbage, green, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 1
   },
   {
    "id": "green-goddess-dressing",
@@ -44733,6 +46014,11 @@
      "state": "cooked"
     },
     {
+     "food": "fdc:2644291",
+     "description": "Peas, green, sweet, canned, sodium added, sugar added, drained and rinsed",
+     "state": "canned"
+    },
+    {
      "food": "usda:11811",
      "description": "Peas, green, cooked, boiled, drained, with salt",
      "state": "cooked"
@@ -44748,7 +46034,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 13
+   "variant_count": 14
   },
   {
    "id": "grenadine-syrup",
@@ -44851,12 +46137,17 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2514746",
+     "description": "Chicken, ground, with additives, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:05333",
      "description": "Chicken, ground, crumbles, cooked, pan-browned",
      "state": "cooked"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "ground-lamb",
@@ -44924,6 +46215,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2727570",
+     "description": "Lamb, ground, raw",
+     "state": "raw"
+    },
+    {
      "food": "cnf:3640",
      "description": "Lamb, Canadian, ground, cooked",
      "state": "cooked"
@@ -44939,7 +46235,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 7
+   "variant_count": 8
   },
   {
    "id": "ground-pork",
@@ -44992,6 +46288,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2514745",
+     "description": "Pork, ground, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:10219",
      "description": "Pork, fresh, ground, raw",
      "state": "raw"
@@ -45037,7 +46338,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 10
+   "variant_count": 11
   },
   {
    "id": "ground-turkey",
@@ -45115,6 +46416,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2514747",
+     "description": "Turkey, ground, 93% lean/ 7% fat, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:05662",
      "description": "Ground turkey, fat free, raw",
      "state": "raw"
@@ -45145,6 +46451,16 @@
      "state": "cooked"
     },
     {
+     "food": "fdc:330869",
+     "description": "Turkey, ground, 93% lean, 7% fat, pan-broiled crumbles",
+     "state": "cooked"
+    },
+    {
+     "food": "fdc:746785",
+     "description": "Turkey, ground, 93% lean, 7% fat, pan-broiled crumbles",
+     "state": "cooked"
+    },
+    {
      "food": "usda:05664",
      "description": "Ground turkey, fat free, patties, broiled",
      "state": "cooked"
@@ -45155,7 +46471,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 11
+   "variant_count": 14
   },
   {
    "id": "ground-veal",
@@ -45771,6 +47087,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:333374",
+     "description": "Fish, haddock, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:15035",
      "description": "Fish, haddock, smoked",
      "state": "cured"
@@ -45781,7 +47102,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 3
+   "variant_count": 4
   },
   {
    "id": "half-and-half-cream",
@@ -45922,6 +47243,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2747656",
+     "description": "Halibut, frozen, wild caught",
+     "state": "frozen"
+    },
+    {
      "food": "usda:15196",
      "description": "Fish, halibut, greenland, cooked, dry heat",
      "state": "cooked"
@@ -45932,7 +47258,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 4
+   "variant_count": 5
   },
   {
    "id": "ham-and-cheese-loaf-or-roll",
@@ -46323,6 +47649,11 @@
      "state": null
     },
     {
+     "food": "fdc:2515375",
+     "description": "Nuts, hazelnuts or filberts, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:12121",
      "description": "Nuts, hazelnuts or filberts, blanched",
      "state": "cooked"
@@ -46333,7 +47664,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 3
+   "variant_count": 4
   },
   {
    "id": "headcheese",
@@ -47078,9 +48409,14 @@
      "food": "usda:09184",
      "description": "Melons, honeydew, raw",
      "state": "raw"
+    },
+    {
+     "food": "fdc:2710816",
+     "description": "Melons, honeydew, raw",
+     "state": "raw"
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "horchata",
@@ -47769,12 +49105,17 @@
      "state": null
     },
     {
+     "food": "fdc:321358",
+     "description": "Hummus, commercial",
+     "state": null
+    },
+    {
      "food": "usda:16137",
      "description": "Hummus, home prepared",
      "state": "cooked"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "hungarian-peppers",
@@ -48428,9 +49769,14 @@
      "food": "usda:11252",
      "description": "Lettuce, iceberg (includes crisphead types), raw",
      "state": "raw"
+    },
+    {
+     "food": "fdc:2346388",
+     "description": "Lettuce, iceberg, raw",
+     "state": "raw"
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "icing",
@@ -49476,12 +50822,17 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2747661",
+     "description": "Peppers, jalapeno, seeded, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11632",
      "description": "Peppers, jalapeno, canned, solids and liquids",
      "state": "canned"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "jams",
@@ -50242,6 +51593,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:323505",
+     "description": "Kale, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11622",
      "description": "Kale, scotch, raw",
      "state": "raw"
@@ -50280,9 +51636,14 @@
      "food": "usda:11623",
      "description": "Kale, scotch, cooked, boiled, drained, without salt",
      "state": "cooked"
+    },
+    {
+     "food": "fdc:326196",
+     "description": "Kale, frozen, cooked, boiled, drained, without salt",
+     "state": "cooked"
     }
    ],
-   "variant_count": 9
+   "variant_count": 11
   },
   {
    "id": "kanpyo",
@@ -50429,6 +51790,40 @@
    "variant_count": 1
   },
   {
+   "id": "khorasan",
+   "name": "Khorasan",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dry goods",
+   "group": "Cereal Grains and Pasta",
+   "default_food": "fdc:2710830",
+   "default_description": "Khorasan, grain, dry, raw",
+   "per_100g": {
+    "energy_kcal": 348,
+    "protein_g": 14.76,
+    "fat_g": 2.8,
+    "carbs_g": 71.79,
+    "fibre_g": 10.5,
+    "sodium_mg": 4,
+    "potassium_mg": 450,
+    "calcium_mg": 24,
+    "iron_mg": 3.87,
+    "magnesium_mg": 130,
+    "zinc_mg": 4.46,
+    "water_g": 8.9
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2710830",
+     "description": "Khorasan, grain, dry, raw",
+     "state": "dried"
+    }
+   ],
+   "variant_count": 1
+  },
+  {
    "id": "kidney-beans",
    "name": "Kidney beans",
    "aliases": [],
@@ -50523,6 +51918,11 @@
      "state": "canned"
     },
     {
+     "food": "fdc:2644289",
+     "description": "Beans, kidney, dark red, canned, sodium added, sugar added, drained and rinsed",
+     "state": "canned"
+    },
+    {
      "food": "usda:16333",
      "description": "Beans, kidney, red, mature seeds, cooked, boiled, with salt",
      "state": "cooked"
@@ -50546,6 +51946,11 @@
      "food": "usda:11713",
      "description": "Beans, kidney, mature seeds, sprouted, cooked, boiled, drained, with salt",
      "state": "cooked"
+    },
+    {
+     "food": "fdc:2644290",
+     "description": "Beans, kidney, light red, canned, sodium added, sugar added, drained and rinsed",
+     "state": "canned"
     },
     {
      "food": "usda:16033",
@@ -50573,7 +51978,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 20
+   "variant_count": 22
   },
   {
    "id": "kielbasa",
@@ -50803,9 +52208,19 @@
      "food": "usda:09148",
      "description": "Kiwifruit, green, raw",
      "state": "raw"
+    },
+    {
+     "food": "fdc:327046",
+     "description": "Kiwifruit, green, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2710831",
+     "description": "Kiwifruit (kiwi), green, peeled, raw",
+     "state": "raw"
     }
    ],
-   "variant_count": 1
+   "variant_count": 3
   },
   {
    "id": "knackwurst",
@@ -52901,6 +54316,47 @@
    "variant_count": 1
   },
   {
+   "id": "leaf-lettuce",
+   "name": "Leaf lettuce",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Produce",
+   "group": "Vegetables and Vegetable Products",
+   "default_food": "fdc:2346390",
+   "default_description": "Lettuce, leaf, red, raw",
+   "name_fr_source": "Laitue, feuilles rouges",
+   "per_100g": {
+    "energy_kcal": 15,
+    "protein_g": 0.88,
+    "fat_g": 0.11,
+    "carbs_g": 3.26,
+    "sodium_mg": 25,
+    "potassium_mg": 321,
+    "calcium_mg": 43,
+    "iron_mg": 0.4,
+    "magnesium_mg": 12,
+    "zinc_mg": 0.3,
+    "vitamin_c_mg": 9.3,
+    "vitamin_k_mcg": 73.2,
+    "water_g": 95.0
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2346390",
+     "description": "Lettuce, leaf, red, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2346391",
+     "description": "Lettuce, leaf, green, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 2
+  },
+  {
    "id": "lebanon-bologna",
    "name": "Lebanon bologna",
    "aliases": [],
@@ -53481,6 +54937,11 @@
      "state": null
     },
     {
+     "food": "fdc:2644283",
+     "description": "Lentils, dry",
+     "state": "dried"
+    },
+    {
      "food": "cnf:5918",
      "description": "Lentils, pink, mature seeds, boiled",
      "state": "cooked"
@@ -53506,7 +54967,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 9
+   "variant_count": 10
   },
   {
    "id": "light-cream",
@@ -54487,12 +55948,17 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2747657",
+     "description": "Lobster, tail only, frozen, wild caught",
+     "state": "frozen"
+    },
+    {
      "food": "usda:15148",
      "description": "Crustaceans, lobster, northern, cooked, moist heat",
      "state": "cooked"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "loganberries",
@@ -54975,6 +56441,16 @@
      "state": null
     },
     {
+     "food": "fdc:322228",
+     "description": "Milk, lowfat, fluid, 1% milkfat, with added vitamin A and vitamin D",
+     "state": null
+    },
+    {
+     "food": "fdc:746772",
+     "description": "Milk, lowfat, fluid, 1% milkfat, with added vitamin A and vitamin D",
+     "state": null
+    },
+    {
      "food": "usda:01084",
      "description": "Milk, lowfat, fluid, 1% milkfat, protein fortified, with added vitamin A and vitamin D",
      "state": null
@@ -54985,7 +56461,7 @@
      "state": null
     }
    ],
-   "variant_count": 3
+   "variant_count": 5
   },
   {
    "id": "luncheon-meat",
@@ -55380,6 +56856,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2515378",
+     "description": "Nuts, macadamia nuts, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:12632",
      "description": "Nuts, macadamia nuts, dry roasted, with salt added",
      "state": "cooked"
@@ -55390,7 +56871,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 3
+   "variant_count": 4
   },
   {
    "id": "macaroni-and-cheese-loaf",
@@ -55659,6 +57140,42 @@
     }
    ],
    "variant_count": 2
+  },
+  {
+   "id": "mahi-mahi",
+   "name": "Mahi mahi",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Frozen",
+   "group": "Finfish and Shellfish Products",
+   "default_food": "fdc:2747658",
+   "default_description": "Mahi mahi, frozen, wild caught",
+   "per_100g": {
+    "energy_kcal": 84,
+    "protein_g": 19.79,
+    "fat_g": 0.38,
+    "carbs_g": 0.29,
+    "sodium_mg": 52,
+    "potassium_mg": 408,
+    "calcium_mg": 6,
+    "iron_mg": 0.05,
+    "magnesium_mg": 28,
+    "zinc_mg": 0.3,
+    "vitamin_b12_mcg": 1.34,
+    "water_g": 78.3
+   },
+   "allergens": [
+    "fish"
+   ],
+   "diet": "contains meat or fish",
+   "variants": [
+    {
+     "food": "fdc:2747658",
+     "description": "Mahi mahi, frozen, wild caught",
+     "state": "frozen"
+    }
+   ],
+   "variant_count": 1
   },
   {
    "id": "mahimahi",
@@ -56217,46 +57734,66 @@
    "variant_count": 1
   },
   {
+   "id": "mandarin",
+   "name": "Mandarin",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Produce",
+   "group": "Fruits and Fruit Juices",
+   "default_food": "fdc:2710832",
+   "default_description": "Mandarin, seedless, peeled, raw",
+   "per_100g": {
+    "energy_kcal": 56,
+    "protein_g": 1.04,
+    "fat_g": 0.46,
+    "carbs_g": 13.42,
+    "fibre_g": 1.3,
+    "sugars_g": 9.12,
+    "sodium_mg": 0,
+    "potassium_mg": 167,
+    "calcium_mg": 44,
+    "iron_mg": 0.0,
+    "magnesium_mg": 13,
+    "zinc_mg": 0.07,
+    "vitamin_c_mg": 21.2,
+    "water_g": 84.7
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2710832",
+     "description": "Mandarin, seedless, peeled, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 1
+  },
+  {
    "id": "mango",
    "name": "Mango",
    "aliases": [],
    "curated": false,
-   "aisle": "Dry goods",
+   "aisle": "Produce",
    "group": "Fruits and Fruit Juices",
-   "default_food": "usda:09178",
-   "default_description": "Mango, dried, sweetened",
-   "name_fr_source": "Mangue, séchée, sucrée",
+   "default_food": "fdc:2710834",
+   "default_description": "Mango, Ataulfo, peeled, raw",
    "per_100g": {
-    "energy_kcal": 319,
-    "protein_g": 2.45,
-    "fat_g": 1.18,
-    "carbs_g": 78.58,
-    "fibre_g": 2.4,
-    "sugars_g": 66.27,
-    "sat_fat_g": 0.29,
-    "mono_fat_g": 0.44,
-    "poly_fat_g": 0.22,
-    "trans_fat_g": 0.0,
-    "cholesterol_mg": 0,
-    "sodium_mg": 162,
-    "potassium_mg": 279,
-    "calcium_mg": 0,
-    "iron_mg": 0.23,
-    "magnesium_mg": 20,
-    "zinc_mg": 0.3,
-    "vitamin_a_mcg": 67,
-    "vitamin_c_mg": 42.3,
-    "vitamin_d_mcg": 0.0,
-    "vitamin_e_mg": 4.02,
-    "vitamin_k_mcg": 13.2,
-    "vitamin_b12_mcg": 0.0,
-    "folate_mcg": 68,
-    "water_g": 16.6,
-    "alcohol_g": 0.0,
-    "caffeine_mg": 0
+    "energy_kcal": 71,
+    "protein_g": 0.69,
+    "fat_g": 0.68,
+    "carbs_g": 17.4,
+    "fibre_g": 1.3,
+    "sugars_g": 11.1,
+    "sodium_mg": 0,
+    "potassium_mg": 204,
+    "calcium_mg": 10,
+    "iron_mg": 0.0,
+    "magnesium_mg": 11,
+    "zinc_mg": 0.1,
+    "vitamin_c_mg": 168.1,
+    "water_g": 80.8
    },
-   "density_g_per_ml": 0.427,
-   "density_basis": "plain measure",
    "allergens": [],
    "diet": "vegan",
    "shelf_life": {
@@ -56277,12 +57814,22 @@
    },
    "variants": [
     {
+     "food": "fdc:2710834",
+     "description": "Mango, Ataulfo, peeled, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2710833",
+     "description": "Mango, Tommy Atkins, peeled, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:09178",
      "description": "Mango, dried, sweetened",
      "state": "dried"
     }
    ],
-   "variant_count": 1
+   "variant_count": 3
   },
   {
    "id": "mango-nectar",
@@ -58309,12 +59856,17 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2512379",
+     "description": "Millet, whole grain",
+     "state": null
+    },
+    {
      "food": "usda:20032",
      "description": "Millet, cooked",
      "state": "cooked"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "millet-flour",
@@ -58752,6 +60304,45 @@
     }
    ],
    "variant_count": 2
+  },
+  {
+   "id": "monterey-jack-cheese",
+   "name": "Monterey jack cheese",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dairy and eggs",
+   "group": "Dairy and Egg Products",
+   "default_food": "fdc:2647438",
+   "default_description": "Cheese, monterey jack, solid",
+   "per_100g": {
+    "energy_kcal": 391,
+    "protein_g": 22.62,
+    "fat_g": 32.63,
+    "carbs_g": 1.9,
+    "sat_fat_g": 19.16,
+    "mono_fat_g": 6.68,
+    "cholesterol_mg": 100,
+    "sodium_mg": 662,
+    "potassium_mg": 83,
+    "calcium_mg": 715,
+    "iron_mg": 0.0,
+    "magnesium_mg": 30,
+    "zinc_mg": 3.79,
+    "vitamin_d_mcg": 0.0,
+    "water_g": 39.2
+   },
+   "allergens": [
+    "milk"
+   ],
+   "diet": "vegetarian",
+   "variants": [
+    {
+     "food": "fdc:2647438",
+     "description": "Cheese, monterey jack, solid",
+     "state": null
+    }
+   ],
+   "variant_count": 1
   },
   {
    "id": "moose",
@@ -60090,9 +61681,14 @@
      "food": "usda:02046",
      "description": "Mustard, prepared, yellow",
      "state": "cooked"
+    },
+    {
+     "food": "fdc:326698",
+     "description": "Mustard, prepared, yellow",
+     "state": "cooked"
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "mustard-cabbage",
@@ -60848,6 +62444,11 @@
      "state": "canned"
     },
     {
+     "food": "fdc:2644286",
+     "description": "Beans, navy, canned, sodium added, drained and rinsed",
+     "state": "canned"
+    },
+    {
      "food": "usda:16338",
      "description": "Beans, navy, mature seeds, cooked, boiled, with salt",
      "state": "cooked"
@@ -60868,7 +62469,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 7
+   "variant_count": 8
   },
   {
    "id": "nectarines",
@@ -60938,9 +62539,14 @@
      "food": "usda:09191",
      "description": "Nectarines, raw",
      "state": "raw"
+    },
+    {
+     "food": "fdc:327357",
+     "description": "Nectarines, raw",
+     "state": "raw"
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "netted-willow",
@@ -61194,6 +62800,16 @@
      "state": null
     },
     {
+     "food": "fdc:322559",
+     "description": "Milk, nonfat, fluid, with added vitamin A and vitamin D (fat free or skim)",
+     "state": null
+    },
+    {
+     "food": "fdc:746776",
+     "description": "Milk, nonfat, fluid, with added vitamin A and vitamin D (fat free or skim)",
+     "state": null
+    },
+    {
      "food": "usda:01151",
      "description": "Milk, nonfat, fluid, without added vitamin A and vitamin D (fat free or skim)",
      "state": null
@@ -61209,7 +62825,7 @@
      "state": null
     }
    ],
-   "variant_count": 5
+   "variant_count": 7
   },
   {
    "id": "nopales",
@@ -61711,6 +63327,45 @@
    "variant_count": 1
   },
   {
+   "id": "oat-milk",
+   "name": "Oat milk",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Pantry",
+   "group": "Beverages",
+   "default_food": "fdc:2257046",
+   "default_description": "Oat milk, unsweetened, plain, refrigerated",
+   "per_100g": {
+    "energy_kcal": 48,
+    "protein_g": 0.8,
+    "fat_g": 2.75,
+    "carbs_g": 5.1,
+    "fibre_g": 0.0,
+    "sugars_g": 2.32,
+    "sodium_mg": 42,
+    "potassium_mg": 148,
+    "calcium_mg": 148,
+    "iron_mg": 0.26,
+    "magnesium_mg": 6,
+    "zinc_mg": 0.09,
+    "vitamin_d_mcg": 1.7,
+    "vitamin_k_mcg": 0.4,
+    "vitamin_b12_mcg": 0.51,
+    "folate_mcg": 0,
+    "water_g": 90.6
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2257046",
+     "description": "Oat milk, unsweetened, plain, refrigerated",
+     "state": null
+    }
+   ],
+   "variant_count": 1
+  },
+  {
    "id": "oat-oil",
    "name": "Oat oil",
    "aliases": [],
@@ -61877,6 +63532,16 @@
      "state": null
     },
     {
+     "food": "fdc:2346397",
+     "description": "Oats, whole grain, steel cut",
+     "state": null
+    },
+    {
+     "food": "fdc:2346396",
+     "description": "Oats, whole grain, rolled, old fashioned",
+     "state": null
+    },
+    {
      "food": "usda:08120",
      "description": "Cereals, oats, regular and quick, not fortified, dry",
      "state": "dried"
@@ -61927,7 +63592,46 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 11
+   "variant_count": 13
+  },
+  {
+   "id": "oaxaca-cheese",
+   "name": "Oaxaca cheese",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dairy and eggs",
+   "group": "Dairy and Egg Products",
+   "default_food": "fdc:2647441",
+   "default_description": "Cheese, oaxaca, solid",
+   "per_100g": {
+    "energy_kcal": 298,
+    "protein_g": 22.14,
+    "fat_g": 22.1,
+    "carbs_g": 2.4,
+    "sat_fat_g": 12.71,
+    "mono_fat_g": 4.74,
+    "cholesterol_mg": 66,
+    "sodium_mg": 734,
+    "potassium_mg": 81,
+    "calcium_mg": 532,
+    "iron_mg": 0.0,
+    "magnesium_mg": 22,
+    "zinc_mg": 3.51,
+    "vitamin_d_mcg": 0.0,
+    "water_g": 49.8
+   },
+   "allergens": [
+    "milk"
+   ],
+   "diet": "vegetarian",
+   "variants": [
+    {
+     "food": "fdc:2647441",
+     "description": "Cheese, oaxaca, solid",
+     "state": null
+    }
+   ],
+   "variant_count": 1
   },
   {
    "id": "ocean-perch",
@@ -62366,45 +64070,36 @@
    "name": "Olives",
    "aliases": [],
    "curated": false,
-   "aisle": "Canned",
+   "aisle": "Produce",
    "group": "Fruits and Fruit Juices",
-   "default_food": "usda:09193",
-   "default_description": "Olives, ripe, canned (small-extra large)",
-   "name_fr_source": "Olive, mûre, conserve, petite à extra large",
+   "default_food": "fdc:332791",
+   "default_description": "Olives, green, Manzanilla, stuffed with pimiento",
    "per_100g": {
-    "energy_kcal": 115,
-    "protein_g": 0.84,
-    "fat_g": 10.68,
-    "carbs_g": 6.26,
-    "fibre_g": 3.2,
+    "energy_kcal": 130,
+    "protein_g": 1.15,
+    "fat_g": 12.9,
+    "carbs_g": 4.96,
+    "fibre_g": 4.0,
     "sugars_g": 0.0,
-    "sat_fat_g": 1.42,
-    "mono_fat_g": 7.89,
-    "poly_fat_g": 0.91,
+    "sat_fat_g": 2.3,
+    "mono_fat_g": 8.86,
+    "poly_fat_g": 0.66,
     "trans_fat_g": 0.0,
-    "cholesterol_mg": 0,
-    "sodium_mg": 735,
-    "potassium_mg": 8,
-    "calcium_mg": 88,
-    "iron_mg": 3.3,
-    "magnesium_mg": 4,
-    "zinc_mg": 0.22,
-    "vitamin_a_mcg": 20,
-    "vitamin_c_mg": 0.9,
-    "vitamin_d_mcg": 0.0,
-    "vitamin_e_mg": 1.65,
-    "vitamin_k_mcg": 1.4,
-    "vitamin_b12_mcg": 0.0,
+    "sodium_mg": 1620,
+    "potassium_mg": 43,
+    "calcium_mg": 121,
+    "iron_mg": 0.31,
+    "magnesium_mg": 12,
+    "zinc_mg": 0.09,
+    "vitamin_a_mcg": 25,
+    "vitamin_c_mg": 0.0,
+    "vitamin_e_mg": 3.78,
+    "vitamin_k_mcg": 16.6,
     "folate_mcg": 0,
-    "water_g": 80.0,
-    "alcohol_g": 0.0,
-    "caffeine_mg": 0
+    "water_g": 76.7
    },
-   "density_g_per_ml": 0.567,
-   "density_basis": "plain measure",
    "unit_weights_g": {
-    "large": 4.4,
-    "small": 3.2
+    "olive": 3.2
    },
    "allergens": [],
    "diet": "vegan",
@@ -62419,6 +64114,11 @@
     "source_name": "Olives from olive bar"
    },
    "variants": [
+    {
+     "food": "fdc:332791",
+     "description": "Olives, green, Manzanilla, stuffed with pimiento",
+     "state": null
+    },
     {
      "food": "usda:09193",
      "description": "Olives, ripe, canned (small-extra large)",
@@ -62435,7 +64135,7 @@
      "state": "canned"
     }
    ],
-   "variant_count": 3
+   "variant_count": 4
   },
   {
    "id": "onion-powder",
@@ -62561,9 +64261,14 @@
      "food": "usda:11295",
      "description": "Onion rings, breaded, par fried, frozen, unprepared",
      "state": "cooked"
+    },
+    {
+     "food": "fdc:324317",
+     "description": "Onion rings, breaded, par fried, frozen, prepared, heated in oven",
+     "state": "cooked"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "opossum",
@@ -62875,6 +64580,16 @@
      "state": null
     },
     {
+     "food": "fdc:2003591",
+     "description": "Orange juice, no pulp, not fortified, from concentrate, refrigerated",
+     "state": null
+    },
+    {
+     "food": "fdc:2003597",
+     "description": "Orange juice, no pulp, not fortified, not from concentrate, refrigerated",
+     "state": null
+    },
+    {
      "food": "usda:09207",
      "description": "Orange juice, canned, unsweetened",
      "state": "canned"
@@ -62900,7 +64615,7 @@
      "state": "frozen"
     }
    ],
-   "variant_count": 11
+   "variant_count": 13
   },
   {
    "id": "orange-juice-drink",
@@ -63263,9 +64978,19 @@
      "food": "usda:09200",
      "description": "Oranges, raw, all commercial varieties",
      "state": "raw"
+    },
+    {
+     "food": "fdc:746771",
+     "description": "Oranges, raw, navels",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:327501",
+     "description": "Oranges, raw, navels (Includes foods for USDA's Food Distribution Program)",
+     "state": "raw"
     }
    ],
-   "variant_count": 5
+   "variant_count": 7
   },
   {
    "id": "oregano",
@@ -64640,6 +66365,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2747659",
+     "description": "Parsnips, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11808",
      "description": "Parsnips, cooked, boiled, drained, with salt",
      "state": "cooked"
@@ -64650,7 +66380,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 3
+   "variant_count": 4
   },
   {
    "id": "pasilla-peppers",
@@ -65025,12 +66755,17 @@
      "state": null
     },
     {
+     "food": "fdc:332282",
+     "description": "Sauce, pasta, spaghetti/marinara, ready-to-serve",
+     "state": null
+    },
+    {
      "food": "usda:06976",
      "description": "Sauce, pasta, spaghetti/marinara, ready-to-serve, low sodium",
      "state": null
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "pasteurized-process-cheese",
@@ -65120,9 +66855,53 @@
      "food": "usda:01042",
      "description": "Cheese, pasteurized process, American, fortified with vitamin D",
      "state": null
+    },
+    {
+     "food": "fdc:325198",
+     "description": "Cheese, pasteurized process, American, vitamin D fortified",
+     "state": null
     }
    ],
-   "variant_count": 8
+   "variant_count": 9
+  },
+  {
+   "id": "pasteurized-process-cheese-food-or-product",
+   "name": "Pasteurized process cheese food or product",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dairy and eggs",
+   "group": "Dairy and Egg Products",
+   "default_food": "fdc:2647439",
+   "default_description": "Cheese, pasteurized process cheese food or product, American, singles",
+   "per_100g": {
+    "energy_kcal": 308,
+    "protein_g": 15.57,
+    "fat_g": 23.86,
+    "carbs_g": 8.19,
+    "sat_fat_g": 13.7,
+    "mono_fat_g": 4.89,
+    "cholesterol_mg": 73,
+    "sodium_mg": 1420,
+    "potassium_mg": 212,
+    "calcium_mg": 1498,
+    "iron_mg": 1.3,
+    "magnesium_mg": 35,
+    "zinc_mg": 2.38,
+    "vitamin_d_mcg": 4.4,
+    "water_g": 44.8
+   },
+   "allergens": [
+    "milk"
+   ],
+   "diet": "vegetarian",
+   "variants": [
+    {
+     "food": "fdc:2647439",
+     "description": "Cheese, pasteurized process cheese food or product, American, singles",
+     "state": null
+    }
+   ],
+   "variant_count": 1
   },
   {
    "id": "pastrami",
@@ -65497,6 +67276,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:325430",
+     "description": "Peaches, yellow, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:09246",
      "description": "Peaches, dried, sulfured, uncooked",
      "state": "dried"
@@ -65567,7 +67351,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 15
+   "variant_count": 16
   },
   {
    "id": "peanut-butter",
@@ -65641,6 +67425,16 @@
      "state": null
     },
     {
+     "food": "fdc:324860",
+     "description": "Peanut butter, smooth style, with salt",
+     "state": null
+    },
+    {
+     "food": "fdc:2262072",
+     "description": "Peanut butter, creamy",
+     "state": null
+    },
+    {
      "food": "usda:42291",
      "description": "Peanut butter, reduced sodium",
      "state": null
@@ -65671,7 +67465,7 @@
      "state": null
     }
    ],
-   "variant_count": 9
+   "variant_count": 11
   },
   {
    "id": "peanut-butter-with-omega-3",
@@ -66026,6 +67820,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2515376",
+     "description": "Peanuts, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:16088",
      "description": "Peanuts, all types, cooked, boiled, with salt",
      "state": "cooked"
@@ -66081,7 +67880,57 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 15
+   "variant_count": 16
+  },
+  {
+   "id": "pear",
+   "name": "Pear",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Produce",
+   "group": "Fruits and Fruit Juices",
+   "default_food": "fdc:2710836",
+   "default_description": "Pear, Anjou, green, with skin, raw",
+   "name_fr_source": "Poire, anjou verte, crue",
+   "per_100g": {
+    "energy_kcal": 57,
+    "protein_g": 0.31,
+    "fat_g": 0.37,
+    "carbs_g": 14.77,
+    "fibre_g": 2.6,
+    "sugars_g": 7.8,
+    "sodium_mg": 0,
+    "potassium_mg": 122,
+    "calcium_mg": 10,
+    "iron_mg": 0.0,
+    "magnesium_mg": 6,
+    "zinc_mg": 0.11,
+    "vitamin_c_mg": 5.5,
+    "water_g": 84.3
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "shelf_life": {
+    "pantry_days": null,
+    "fridge_days": [
+     3,
+     5
+    ],
+    "freezer_days": [
+     60,
+     60
+    ],
+    "opened_fridge_days": null,
+    "source_name": "Peaches, nectarines, plums, pears, sapote"
+   },
+   "variants": [
+    {
+     "food": "fdc:2710836",
+     "description": "Pear, Anjou, green, with skin, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 1
   },
   {
    "id": "pear-nectar",
@@ -66219,6 +68068,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:746773",
+     "description": "Pears, raw, bartlett",
+     "state": "raw"
+    },
+    {
      "food": "usda:09413",
      "description": "Pears, raw, red anjou",
      "state": "raw"
@@ -66231,6 +68085,11 @@
     {
      "food": "usda:09340",
      "description": "Pears, asian, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:332597",
+     "description": "Pears, raw, bartlett (Includes foods for USDA's Food Distribution Program)",
      "state": "raw"
     },
     {
@@ -66284,7 +68143,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 16
+   "variant_count": 18
   },
   {
    "id": "peas-and-onions",
@@ -66419,6 +68278,11 @@
      "state": null
     },
     {
+     "food": "fdc:2346395",
+     "description": "Nuts, pecans, halves, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:12643",
      "description": "Nuts, pecans, dry roasted, with salt added",
      "state": "cooked"
@@ -66439,7 +68303,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 5
+   "variant_count": 6
   },
   {
    "id": "pectin",
@@ -67882,41 +69746,23 @@
    "curated": false,
    "aisle": "Dry goods",
    "group": "Nut and Seed Products",
-   "default_food": "usda:12147",
-   "default_description": "Nuts, pine nuts, dried",
+   "default_food": "fdc:2346392",
+   "default_description": "Nuts, pine nuts, raw",
    "name_fr_source": "Noix, noix de pins, pignons (pignes), séchées",
    "per_100g": {
-    "energy_kcal": 673,
-    "protein_g": 13.69,
-    "fat_g": 68.37,
-    "carbs_g": 13.08,
-    "fibre_g": 3.7,
-    "sugars_g": 3.59,
-    "sat_fat_g": 4.9,
-    "mono_fat_g": 18.76,
-    "poly_fat_g": 34.07,
-    "cholesterol_mg": 0,
-    "sodium_mg": 2,
-    "potassium_mg": 597,
-    "calcium_mg": 16,
-    "iron_mg": 5.53,
-    "magnesium_mg": 251,
-    "zinc_mg": 6.45,
-    "vitamin_a_mcg": 1,
-    "vitamin_c_mg": 0.8,
-    "vitamin_d_mcg": 0.0,
-    "vitamin_e_mg": 9.33,
-    "vitamin_k_mcg": 53.9,
-    "vitamin_b12_mcg": 0.0,
-    "folate_mcg": 34,
-    "water_g": 2.3,
-    "alcohol_g": 0.0,
-    "caffeine_mg": 0
-   },
-   "density_g_per_ml": 0.571,
-   "density_basis": "plain measure",
-   "unit_weights_g": {
-    "nuts": 0.2
+    "energy_kcal": 643,
+    "protein_g": 15.7,
+    "fat_g": 61.27,
+    "carbs_g": 18.59,
+    "fibre_g": 3.9,
+    "sodium_mg": 0,
+    "potassium_mg": 655,
+    "calcium_mg": 9,
+    "iron_mg": 5.36,
+    "magnesium_mg": 206,
+    "zinc_mg": 5.71,
+    "vitamin_k_mcg": 3.2,
+    "water_g": 1.9
    },
    "allergens": [
     "tree nuts"
@@ -67940,6 +69786,11 @@
    },
    "variants": [
     {
+     "food": "fdc:2346392",
+     "description": "Nuts, pine nuts, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:12147",
      "description": "Nuts, pine nuts, dried",
      "state": "dried"
@@ -67950,7 +69801,7 @@
      "state": "dried"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "pineapple",
@@ -68031,6 +69882,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2346398",
+     "description": "Pineapple, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:09354",
      "description": "Pineapple, canned, juice pack, drained",
      "state": "canned"
@@ -68066,7 +69922,7 @@
      "state": "frozen"
     }
    ],
-   "variant_count": 10
+   "variant_count": 11
   },
   {
    "id": "pineapple-and-grapefruit-juice-drink",
@@ -68384,6 +70240,11 @@
      "state": "canned"
     },
     {
+     "food": "fdc:2644292",
+     "description": "Beans, pinto, canned, sodium added, drained and rinsed",
+     "state": "canned"
+    },
+    {
      "food": "usda:11720",
      "description": "Beans, pinto, immature seeds, frozen, cooked, boiled, drained, with salt",
      "state": "cooked"
@@ -68414,7 +70275,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 13
+   "variant_count": 14
   },
   {
    "id": "pistachio-nuts",
@@ -68471,6 +70332,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2515379",
+     "description": "Nuts, pistachio nuts, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:12652",
      "description": "Nuts, pistachio nuts, dry roasted, with salt added",
      "state": "cooked"
@@ -68481,7 +70347,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 3
+   "variant_count": 4
   },
   {
    "id": "pita-bread",
@@ -68805,12 +70671,22 @@
      "state": null
     },
     {
+     "food": "fdc:2259793",
+     "description": "Yogurt, plain, whole milk",
+     "state": null
+    },
+    {
      "food": "usda:01117",
      "description": "Yogurt, plain, low fat, 12 grams protein per 8 ounce",
      "state": null
+    },
+    {
+     "food": "fdc:2647437",
+     "description": "Yogurt, plain, nonfat",
+     "state": null
     }
    ],
-   "variant_count": 3
+   "variant_count": 5
   },
   {
    "id": "plant-based-beverage",
@@ -69118,6 +70994,21 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2710817",
+     "description": "Plantains, ripe, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2710843",
+     "description": "Plantains, overripe, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2710818",
+     "description": "Plantains, underripe, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:09446",
      "description": "Plantains, green, fried",
      "state": "cooked"
@@ -69133,7 +71024,56 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 4
+   "variant_count": 7
+  },
+  {
+   "id": "plum",
+   "name": "Plum",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Produce",
+   "group": "Fruits and Fruit Juices",
+   "default_food": "fdc:2710837",
+   "default_description": "Plum, black, with skin, raw",
+   "per_100g": {
+    "energy_kcal": 53,
+    "protein_g": 0.58,
+    "fat_g": 0.28,
+    "carbs_g": 13.46,
+    "fibre_g": 1.3,
+    "sugars_g": 7.96,
+    "sodium_mg": 0,
+    "potassium_mg": 186,
+    "calcium_mg": 4,
+    "iron_mg": 0.0,
+    "magnesium_mg": 7,
+    "zinc_mg": 0.05,
+    "vitamin_c_mg": 1.8,
+    "water_g": 84.9
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "shelf_life": {
+    "pantry_days": null,
+    "fridge_days": [
+     3,
+     5
+    ],
+    "freezer_days": [
+     60,
+     60
+    ],
+    "opened_fridge_days": null,
+    "source_name": "Peaches, nectarines, plums, pears, sapote"
+   },
+   "variants": [
+    {
+     "food": "fdc:2710837",
+     "description": "Plum, black, with skin, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 1
   },
   {
    "id": "plum-sauce",
@@ -69296,6 +71236,43 @@
    "variant_count": 10
   },
   {
+   "id": "poblano-peppers",
+   "name": "Poblano peppers",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Produce",
+   "group": "Vegetables and Vegetable Products",
+   "default_food": "fdc:2747662",
+   "default_description": "Peppers, poblano, seeded, raw",
+   "per_100g": {
+    "energy_kcal": 28,
+    "protein_g": 1.43,
+    "fat_g": 0.19,
+    "carbs_g": 5.14,
+    "fibre_g": 2.1,
+    "sugars_g": 2.68,
+    "sodium_mg": 0,
+    "potassium_mg": 192,
+    "calcium_mg": 8,
+    "iron_mg": 0.12,
+    "magnesium_mg": 11,
+    "zinc_mg": 0.13,
+    "vitamin_c_mg": 128.4,
+    "folate_mcg": 26,
+    "water_g": 92.8
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2747662",
+     "description": "Peppers, poblano, seeded, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 1
+  },
+  {
    "id": "poi",
    "name": "Poi",
    "aliases": [],
@@ -69450,41 +71427,35 @@
    "curated": false,
    "aisle": "Meat and seafood",
    "group": "Finfish and Shellfish Products",
-   "default_food": "usda:15065",
-   "default_description": "Fish, pollock, Atlantic, raw",
-   "name_fr_source": "Poisson, goberge, atlantique (merlan, lieu noir), crue",
+   "default_food": "fdc:333476",
+   "default_description": "Fish, pollock, raw",
+   "name_fr_source": "Poisson, goberge d'Alaska, crue",
    "per_100g": {
-    "energy_kcal": 92,
-    "protein_g": 19.44,
-    "fat_g": 0.98,
+    "energy_kcal": 56,
+    "protein_g": 12.3,
+    "fat_g": 0.41,
     "carbs_g": 0.0,
-    "fibre_g": 0.0,
-    "sugars_g": 0.0,
-    "sat_fat_g": 0.14,
-    "mono_fat_g": 0.11,
-    "poly_fat_g": 0.48,
-    "cholesterol_mg": 71,
-    "sodium_mg": 86,
-    "potassium_mg": 356,
-    "calcium_mg": 60,
-    "iron_mg": 0.46,
-    "magnesium_mg": 67,
-    "zinc_mg": 0.47,
-    "vitamin_a_mcg": 14,
+    "sat_fat_g": 0.13,
+    "mono_fat_g": 0.07,
+    "poly_fat_g": 0.18,
+    "trans_fat_g": 0.02,
+    "cholesterol_mg": 46,
+    "sodium_mg": 333,
+    "potassium_mg": 160,
+    "calcium_mg": 15,
+    "iron_mg": 0.22,
+    "magnesium_mg": 16,
+    "zinc_mg": 0.31,
+    "vitamin_a_mcg": 3,
     "vitamin_c_mg": 0.0,
-    "vitamin_d_mcg": 1.0,
-    "vitamin_e_mg": 0.23,
-    "vitamin_k_mcg": 0.1,
-    "vitamin_b12_mcg": 3.19,
-    "folate_mcg": 3,
-    "water_g": 78.2,
-    "alcohol_g": 0.0,
-    "caffeine_mg": 0
+    "vitamin_d_mcg": 0.2,
+    "vitamin_e_mg": 0.49,
+    "vitamin_k_mcg": 0.0,
+    "vitamin_b12_mcg": 1.63,
+    "water_g": 86.7
    },
    "unit_weights_g": {
-    "fillet": 386.0,
-    "/2 fillet": 193.0,
-    "food guide serving = 90g": 90.0
+    "fillet": 177.0
    },
    "allergens": [
     "fish"
@@ -69504,6 +71475,11 @@
     "source_name": "Lean fish pollock, ocean perch, rockfish, sea trout."
    },
    "variants": [
+    {
+     "food": "fdc:333476",
+     "description": "Fish, pollock, raw",
+     "state": "raw"
+    },
     {
      "food": "usda:15065",
      "description": "Fish, pollock, Atlantic, raw",
@@ -69535,7 +71511,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 6
+   "variant_count": 7
   },
   {
    "id": "pomegranate-juice",
@@ -70330,6 +72306,11 @@
      "state": "cooked"
     },
     {
+     "food": "fdc:749420",
+     "description": "Pork, cured, bacon, cooked, restaurant",
+     "state": "cooked"
+    },
+    {
      "food": "usda:10862",
      "description": "Pork, cured, bacon, pre-sliced, cooked, pan-fried",
      "state": "cooked"
@@ -70340,7 +72321,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 7
+   "variant_count": 8
   },
   {
    "id": "pork-belly",
@@ -70385,6 +72366,45 @@
     {
      "food": "usda:10005",
      "description": "Pork, fresh, belly, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2727576",
+     "description": "Pork, belly, with skin, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 2
+  },
+  {
+   "id": "pork-chop",
+   "name": "Pork chop",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Meat and seafood",
+   "group": "Pork Products",
+   "default_food": "fdc:2727575",
+   "default_description": "Pork, chop, center cut, raw",
+   "per_100g": {
+    "energy_kcal": 145,
+    "protein_g": 22.81,
+    "fat_g": 5.47,
+    "carbs_g": -0.56,
+    "cholesterol_mg": 57,
+    "sodium_mg": 39,
+    "potassium_mg": 366,
+    "calcium_mg": 4,
+    "iron_mg": 0.42,
+    "magnesium_mg": 23,
+    "zinc_mg": 1.32,
+    "water_g": 71.2
+   },
+   "allergens": [],
+   "diet": "contains meat or fish",
+   "variants": [
+    {
+     "food": "fdc:2727575",
+     "description": "Pork, chop, center cut, raw",
      "state": "raw"
     }
    ],
@@ -70908,6 +72928,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2646168",
+     "description": "Pork, loin, boneless, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:10207",
      "description": "Pork, fresh, loin, country-style ribs, separable lean only, raw",
      "state": "raw"
@@ -70930,6 +72955,11 @@
     {
      "food": "usda:10040",
      "description": "Pork, fresh, loin, center loin (chops), bone-in, separable lean only, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2646169",
+     "description": "Pork, loin, tenderloin, boneless, raw",
      "state": "raw"
     },
     {
@@ -71071,19 +73101,9 @@
      "food": "usda:10061",
      "description": "Pork, fresh, loin, tenderloin, separable lean only, cooked, roasted",
      "state": "cooked"
-    },
-    {
-     "food": "usda:10223",
-     "description": "Pork, fresh, loin, tenderloin, separable lean only, cooked, broiled",
-     "state": "cooked"
-    },
-    {
-     "food": "usda:10221",
-     "description": "Pork, fresh, loin, tenderloin, separable lean and fat, cooked, broiled",
-     "state": "cooked"
     }
    ],
-   "variant_count": 116
+   "variant_count": 118
   },
   {
    "id": "pork-sausage",
@@ -73096,12 +75116,17 @@
      "state": null
     },
     {
+     "food": "fdc:2647440",
+     "description": "Cheese, provolone, sliced",
+     "state": null
+    },
+    {
      "food": "usda:01208",
      "description": "Cheese, provolone, reduced fat",
      "state": null
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "prune-juice",
@@ -73953,6 +75978,54 @@
    "variant_count": 1
   },
   {
+   "id": "pumpkin-seeds",
+   "name": "Pumpkin seeds",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dry goods",
+   "group": "Nut and Seed Products",
+   "default_food": "fdc:2515380",
+   "default_description": "Seeds, pumpkin seeds (pepitas), raw",
+   "name_fr_source": "Graines, citrouille et courge, graines, déshydratées",
+   "per_100g": {
+    "energy_kcal": 515,
+    "protein_g": 29.91,
+    "fat_g": 40.03,
+    "carbs_g": 18.68,
+    "fibre_g": 5.1,
+    "sodium_mg": 0,
+    "potassium_mg": 691,
+    "calcium_mg": 37,
+    "iron_mg": 8.36,
+    "magnesium_mg": 500,
+    "zinc_mg": 6.34,
+    "water_g": 6.6
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "shelf_life": {
+    "pantry_days": [
+     180,
+     180
+    ],
+    "fridge_days": [
+     180,
+     180
+    ],
+    "freezer_days": null,
+    "opened_fridge_days": null,
+    "source_name": "Pumpkin seeds raw, no shell"
+   },
+   "variants": [
+    {
+     "food": "fdc:2515380",
+     "description": "Seeds, pumpkin seeds (pepitas), raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 1
+  },
+  {
    "id": "purslane",
    "name": "Purslane",
    "aliases": [],
@@ -74131,9 +76204,14 @@
      "food": "usda:01228",
      "description": "Cheese, fresh, queso fresco",
      "state": "raw"
+    },
+    {
+     "food": "fdc:2647442",
+     "description": "Cheese, queso fresco, solid",
+     "state": null
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "quinces",
@@ -74442,9 +76520,14 @@
      "food": "usda:11952",
      "description": "Radicchio, raw",
      "state": "raw"
+    },
+    {
+     "food": "fdc:2747664",
+     "description": "Radicchio, raw",
+     "state": "raw"
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "radish-seeds",
@@ -74568,6 +76651,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2747665",
+     "description": "Radishes, red, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11432",
      "description": "Radishes, oriental, dried",
      "state": "dried"
@@ -74588,7 +76676,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 7
+   "variant_count": 8
   },
   {
    "id": "raisin-bread",
@@ -74923,6 +77011,16 @@
      "state": null
     },
     {
+     "food": "fdc:2263888",
+     "description": "Raspberries, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2346410",
+     "description": "Raspberries, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:09518",
      "description": "Raspberries, frozen, unsweetened",
      "state": "frozen"
@@ -74938,7 +77036,7 @@
      "state": "frozen"
     }
    ],
-   "variant_count": 6
+   "variant_count": 8
   },
   {
    "id": "raspberry-juice-concentrate",
@@ -75090,6 +77188,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2346408",
+     "description": "Cabbage, red, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11752",
      "description": "Cabbage, red, cooked, boiled, drained, with salt",
      "state": "cooked"
@@ -75100,7 +77203,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 3
+   "variant_count": 4
   },
   {
    "id": "red-leaf-lettuce",
@@ -75158,6 +77261,40 @@
      "food": "usda:11257",
      "description": "Lettuce, red leaf, raw",
      "state": "raw"
+    }
+   ],
+   "variant_count": 1
+  },
+  {
+   "id": "red-rice",
+   "name": "Red rice",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dry goods",
+   "group": "Cereal Grains and Pasta",
+   "default_food": "fdc:2710838",
+   "default_description": "Rice, red, unenriched, dry, raw",
+   "per_100g": {
+    "energy_kcal": 360,
+    "protein_g": 8.56,
+    "fat_g": 3.44,
+    "carbs_g": 76.15,
+    "fibre_g": 4.2,
+    "sodium_mg": 0,
+    "potassium_mg": 245,
+    "calcium_mg": 9,
+    "iron_mg": 1.2,
+    "magnesium_mg": 126,
+    "zinc_mg": 2.56,
+    "water_g": 10.5
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2710838",
+     "description": "Rice, red, unenriched, dry, raw",
+     "state": "dried"
     }
    ],
    "variant_count": 1
@@ -75267,6 +77404,16 @@
      "state": null
     },
     {
+     "food": "fdc:321359",
+     "description": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+     "state": null
+    },
+    {
+     "food": "fdc:746778",
+     "description": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+     "state": null
+    },
+    {
      "food": "usda:01174",
      "description": "Milk, reduced fat, fluid, 2% milkfat, without added vitamin A and vitamin D",
      "state": null
@@ -75287,7 +77434,7 @@
      "state": null
     }
    ],
-   "variant_count": 5
+   "variant_count": 7
   },
   {
    "id": "reduced-calorie-bread",
@@ -76012,12 +78159,22 @@
      "state": null
     },
     {
+     "food": "fdc:323444",
+     "description": "Cheese, ricotta, whole milk",
+     "state": null
+    },
+    {
+     "food": "fdc:746766",
+     "description": "Cheese, ricotta, whole milk",
+     "state": null
+    },
+    {
      "food": "usda:01037",
      "description": "Cheese, ricotta, part skim milk",
      "state": null
     }
    ],
-   "variant_count": 2
+   "variant_count": 4
   },
   {
    "id": "roast-beef",
@@ -76484,6 +78641,40 @@
     }
    ],
    "variant_count": 21
+  },
+  {
+   "id": "romaine-lettuce",
+   "name": "Romaine lettuce",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Produce",
+   "group": "Vegetables and Vegetable Products",
+   "default_food": "fdc:2346389",
+   "default_description": "Lettuce, romaine, green, raw",
+   "per_100g": {
+    "energy_kcal": 17,
+    "protein_g": 0.98,
+    "fat_g": 0.07,
+    "carbs_g": 4.06,
+    "sodium_mg": 23,
+    "potassium_mg": 260,
+    "calcium_mg": 28,
+    "iron_mg": 0.27,
+    "magnesium_mg": 12,
+    "zinc_mg": 0.25,
+    "vitamin_k_mcg": 83.4,
+    "water_g": 94.3
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2346389",
+     "description": "Lettuce, romaine, green, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 1
   },
   {
    "id": "romano-cheese",
@@ -77720,12 +79911,22 @@
      "state": null
     },
     {
+     "food": "fdc:324038",
+     "description": "Sauce, salsa, ready-to-serve",
+     "state": null
+    },
+    {
+     "food": "fdc:746777",
+     "description": "Sauce, salsa, ready-to-serve",
+     "state": null
+    },
+    {
      "food": "usda:27047",
      "description": "Sauce, salsa, verde, ready-to-serve",
      "state": null
     }
    ],
-   "variant_count": 2
+   "variant_count": 4
   },
   {
    "id": "salsify",
@@ -78409,6 +80610,16 @@
      "state": null
     },
     {
+     "food": "fdc:325992",
+     "description": "Sausage, turkey, breakfast links, mild, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:746783",
+     "description": "Sausage, turkey, breakfast links, mild, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:07976",
      "description": "Sausage, chicken or turkey, Italian style,  lower sodium",
      "state": null
@@ -78484,6 +80695,16 @@
      "state": "cooked"
     },
     {
+     "food": "fdc:332864",
+     "description": "Sausage, pork, chorizo, link or ground, cooked, pan-fried",
+     "state": "cooked"
+    },
+    {
+     "food": "fdc:746781",
+     "description": "Sausage, pork, chorizo, link or ground, cooked, pan-fried",
+     "state": "cooked"
+    },
+    {
      "food": "cnf:1217",
      "description": "Sausage, ham, pre cooked",
      "state": "cooked"
@@ -78514,6 +80735,16 @@
      "state": "cooked"
     },
     {
+     "food": "fdc:325658",
+     "description": "Sausage, Italian, pork, mild, cooked, pan-fried",
+     "state": "cooked"
+    },
+    {
+     "food": "fdc:746780",
+     "description": "Sausage, Italian, pork, mild, cooked, pan-fried",
+     "state": "cooked"
+    },
+    {
      "food": "cnf:7362",
      "description": "Sausage, spicy beef and roasted red pepper, cooked",
      "state": "cooked"
@@ -78524,27 +80755,17 @@
      "state": "cooked"
     },
     {
-     "food": "cnf:7353",
-     "description": "Sausage, smoked, with cheddar cheese, pre-cooked, reheated",
+     "food": "fdc:324157",
+     "description": "Sausage, breakfast sausage, beef, pre-cooked, unprepared",
      "state": "cooked"
     },
     {
-     "food": "cnf:7351",
-     "description": "Sausage, smoked, pork, pre-cooked, reheated, reduced fat",
-     "state": "cooked"
-    },
-    {
-     "food": "cnf:7355",
-     "description": "Sausage, smoked, with cheddar cheese, pre-cooked, reduced fat",
-     "state": "cooked"
-    },
-    {
-     "food": "cnf:7356",
-     "description": "Sausage, smoked, with cheddar cheese, pre-cooked, reheated, reduced fat",
+     "food": "fdc:746779",
+     "description": "Sausage, breakfast sausage, beef, pre-cooked, unprepared",
      "state": "cooked"
     }
    ],
-   "variant_count": 36
+   "variant_count": 44
   },
   {
    "id": "savory",
@@ -78737,6 +80958,60 @@
     }
    ],
    "variant_count": 4
+  },
+  {
+   "id": "scallops",
+   "name": "Scallops",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Frozen",
+   "group": "Finfish and Shellfish Products",
+   "default_food": "fdc:2747667",
+   "default_description": "Scallops, sea, frozen, wild caught",
+   "per_100g": {
+    "energy_kcal": 66,
+    "protein_g": 13.51,
+    "fat_g": 0.49,
+    "carbs_g": 1.97,
+    "sodium_mg": 313,
+    "potassium_mg": 245,
+    "calcium_mg": 11,
+    "iron_mg": 0.21,
+    "magnesium_mg": 31,
+    "zinc_mg": 1.0,
+    "vitamin_b12_mcg": 1.28,
+    "water_g": 82.5
+   },
+   "allergens": [
+    "fish"
+   ],
+   "diet": "contains meat or fish",
+   "shelf_life": {
+    "pantry_days": null,
+    "fridge_days": [
+     1,
+     3
+    ],
+    "freezer_days": [
+     180,
+     540
+    ],
+    "opened_fridge_days": null,
+    "source_name": "Scallops"
+   },
+   "variants": [
+    {
+     "food": "fdc:2747667",
+     "description": "Scallops, sea, frozen, wild caught",
+     "state": "frozen"
+    },
+    {
+     "food": "fdc:2747666",
+     "description": "Scallops, bay, Patagonian, frozen, wild caught",
+     "state": "frozen"
+    }
+   ],
+   "variant_count": 2
   },
   {
    "id": "scotch-broth",
@@ -79007,12 +81282,17 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2747668",
+     "description": "Sea bass, Chilean, frozen, wild caught",
+     "state": "frozen"
+    },
+    {
      "food": "usda:15092",
      "description": "Fish, sea bass, mixed species, cooked, dry heat",
      "state": "cooked"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "sea-cucumber",
@@ -79323,9 +81603,14 @@
      "food": "usda:11977",
      "description": "Peppers, serrano, raw",
      "state": "raw"
+    },
+    {
+     "food": "fdc:2747663",
+     "description": "Peppers, serrano, seeded, raw",
+     "state": "raw"
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "sesame-butter",
@@ -79384,6 +81669,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2262073",
+     "description": "Sesame butter, creamy",
+     "state": null
+    },
+    {
      "food": "usda:12171",
      "description": "Seeds, sesame butter, tahini, from unroasted kernels (non-chemically removed seed coat)",
      "state": null
@@ -79394,7 +81684,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 5
+   "variant_count": 6
   },
   {
    "id": "sesame-flour",
@@ -80330,6 +82620,16 @@
      "state": "raw"
     },
     {
+     "food": "fdc:1750346",
+     "description": "Mushrooms, shiitake",
+     "state": null
+    },
+    {
+     "food": "fdc:1999628",
+     "description": "Mushrooms, shiitake",
+     "state": null
+    },
+    {
      "food": "usda:11268",
      "description": "Mushrooms, shiitake, dried",
      "state": "dried"
@@ -80350,7 +82650,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 5
+   "variant_count": 7
   },
   {
    "id": "shortening",
@@ -81093,6 +83393,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2346400",
+     "description": "Beans, snap, green, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11060",
      "description": "Beans, snap, green, frozen, all styles, unprepared",
      "state": "frozen"
@@ -81148,6 +83453,11 @@
      "state": "canned"
     },
     {
+     "food": "fdc:321611",
+     "description": "Beans, snap, green, canned, regular pack, drained solids",
+     "state": "canned"
+    },
+    {
      "food": "usda:11063",
      "description": "Beans, snap, green, microwaved",
      "state": "cooked"
@@ -81198,7 +83508,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 23
+   "variant_count": 25
   },
   {
    "id": "snapper",
@@ -81253,12 +83563,53 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2747669",
+     "description": "Snapper, frozen, wild caught",
+     "state": "frozen"
+    },
+    {
      "food": "usda:15102",
      "description": "Fish, snapper, mixed species, cooked, dry heat",
      "state": "cooked"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
+  },
+  {
+   "id": "snow-crab",
+   "name": "Snow crab",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Frozen",
+   "group": "Finfish and Shellfish Products",
+   "default_food": "fdc:2747670",
+   "default_description": "Snow crab, legs only, frozen",
+   "per_100g": {
+    "energy_kcal": 69,
+    "protein_g": 15.54,
+    "fat_g": 0.29,
+    "carbs_g": 1.11,
+    "sodium_mg": 728,
+    "potassium_mg": 193,
+    "calcium_mg": 98,
+    "iron_mg": 0.28,
+    "magnesium_mg": 58,
+    "zinc_mg": 3.37,
+    "vitamin_b12_mcg": 2.22,
+    "water_g": 80.3
+   },
+   "allergens": [
+    "shellfish"
+   ],
+   "diet": "contains meat or fish",
+   "variants": [
+    {
+     "food": "fdc:2747670",
+     "description": "Snow crab, legs only, frozen",
+     "state": "frozen"
+    }
+   ],
+   "variant_count": 1
   },
   {
    "id": "sofrito-sauce",
@@ -81294,6 +83645,87 @@
      "food": "usda:06142",
      "description": "Sauce, sofrito, prepared from recipe",
      "state": "cooked"
+    }
+   ],
+   "variant_count": 1
+  },
+  {
+   "id": "sorghum",
+   "name": "Sorghum",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dry goods",
+   "group": "Cereal Grains and Pasta",
+   "default_food": "fdc:2710842",
+   "default_description": "Sorghum, whole grain, white, dry, raw",
+   "per_100g": {
+    "energy_kcal": 341,
+    "protein_g": 10.08,
+    "fat_g": 4.22,
+    "carbs_g": 73.57,
+    "fibre_g": 8.3,
+    "sodium_mg": 0,
+    "potassium_mg": 367,
+    "calcium_mg": 15,
+    "iron_mg": 3.9,
+    "magnesium_mg": 136,
+    "zinc_mg": 1.77,
+    "water_g": 10.6
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "shelf_life": {
+    "pantry_days": [
+     120,
+     120
+    ],
+    "fridge_days": null,
+    "freezer_days": [
+     240,
+     240
+    ],
+    "opened_fridge_days": null,
+    "source_name": "Sorghum whole grain"
+   },
+   "variants": [
+    {
+     "food": "fdc:2710842",
+     "description": "Sorghum, whole grain, white, dry, raw",
+     "state": "dried"
+    }
+   ],
+   "variant_count": 1
+  },
+  {
+   "id": "sorghum-bran",
+   "name": "Sorghum bran",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dry goods",
+   "group": "Cereal Grains and Pasta",
+   "default_food": "fdc:2710839",
+   "default_description": "Sorghum bran, white, unenriched, dry, raw",
+   "per_100g": {
+    "energy_kcal": 365,
+    "protein_g": 11.17,
+    "fat_g": 9.26,
+    "carbs_g": 68.7,
+    "fibre_g": 35.0,
+    "sodium_mg": 3,
+    "potassium_mg": 852,
+    "calcium_mg": 62,
+    "iron_mg": 14.21,
+    "magnesium_mg": 274,
+    "zinc_mg": 4.4,
+    "water_g": 7.4
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:2710839",
+     "description": "Sorghum bran, white, unenriched, dry, raw",
+     "state": "dried"
     }
    ],
    "variant_count": 1
@@ -81349,9 +83781,14 @@
      "food": "usda:20650",
      "description": "Sorghum flour, refined, unenriched",
      "state": null
+    },
+    {
+     "food": "fdc:2710840",
+     "description": "Sorghum flour, white, pearled, unenriched, dry, raw",
+     "state": "dried"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "sorghum-grain",
@@ -81401,9 +83838,14 @@
      "food": "usda:20067",
      "description": "Sorghum grain",
      "state": null
+    },
+    {
+     "food": "fdc:2710841",
+     "description": "Sorghum grain, white, pearled, unenriched, dry, raw",
+     "state": "dried"
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "sorghum-syrup",
@@ -81698,6 +84140,62 @@
     }
    ],
    "variant_count": 1
+  },
+  {
+   "id": "soy-milk",
+   "name": "Soy milk",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dry goods",
+   "group": "Legumes and Legume Products",
+   "default_food": "fdc:1750337",
+   "default_description": "Soy milk, unsweetened, plain, shelf stable",
+   "per_100g": {
+    "energy_kcal": 38,
+    "protein_g": 3.55,
+    "fat_g": 2.12,
+    "carbs_g": 1.29,
+    "fibre_g": 0.0,
+    "sugars_g": 0.56,
+    "sat_fat_g": 0.31,
+    "mono_fat_g": 0.42,
+    "poly_fat_g": 1.15,
+    "trans_fat_g": 0.0,
+    "sodium_mg": 34,
+    "potassium_mg": 158,
+    "calcium_mg": 101,
+    "iron_mg": 0.54,
+    "magnesium_mg": 22,
+    "zinc_mg": 0.31,
+    "vitamin_a_mcg": 58,
+    "vitamin_d_mcg": 0.7,
+    "vitamin_e_mg": 0.16,
+    "vitamin_b12_mcg": 0.39,
+    "folate_mcg": 20,
+    "water_g": 92.4
+   },
+   "allergens": [
+    "soy"
+   ],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:1750337",
+     "description": "Soy milk, unsweetened, plain, shelf stable",
+     "state": null
+    },
+    {
+     "food": "fdc:1999630",
+     "description": "Soy milk, unsweetened, plain, shelf stable",
+     "state": null
+    },
+    {
+     "food": "fdc:2257044",
+     "description": "Soy milk, sweetened, plain, refrigerated",
+     "state": null
+    }
+   ],
+   "variant_count": 3
   },
   {
    "id": "soy-protein-concentrate",
@@ -83560,6 +86058,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2747671",
+     "description": "Squid (calamari), frozen, tubes only",
+     "state": "frozen"
+    },
+    {
      "food": "cnf:6712",
      "description": "Mollusks, squid (calamari), mixed species, breaded and fried",
      "state": "cooked"
@@ -83570,7 +86073,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 3
+   "variant_count": 4
   },
   {
    "id": "squirrel",
@@ -83856,6 +86359,26 @@
      "state": "raw"
     },
     {
+     "food": "fdc:327699",
+     "description": "Strawberries, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:747448",
+     "description": "Strawberries, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2263887",
+     "description": "Strawberries, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2346409",
+     "description": "Strawberries, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:09318",
      "description": "Strawberries, frozen, unsweetened",
      "state": "frozen"
@@ -83876,7 +86399,7 @@
      "state": "frozen"
     }
    ],
-   "variant_count": 5
+   "variant_count": 9
   },
   {
    "id": "strawberry-flavor-beverage-mix",
@@ -84537,6 +87060,16 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2685569",
+     "description": "Squash, summer, yellow, includes skin, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2685568",
+     "description": "Squash, summer, green, zucchini, includes skin, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11479",
      "description": "Squash, summer, zucchini, includes skin, frozen, unprepared",
      "state": "frozen"
@@ -84617,7 +87150,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 20
+   "variant_count": 22
   },
   {
    "id": "sunfish",
@@ -84747,6 +87280,51 @@
     }
    ],
    "variant_count": 4
+  },
+  {
+   "id": "sunflower-seed",
+   "name": "Sunflower seed",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Dry goods",
+   "group": "Nut and Seed Products",
+   "default_food": "fdc:2515381",
+   "default_description": "Seeds, sunflower seed, kernel, raw",
+   "name_fr_source": "Graines, tournesol, graines, déshydratées",
+   "per_100g": {
+    "energy_kcal": 571,
+    "protein_g": 18.87,
+    "fat_g": 48.44,
+    "carbs_g": 24.5,
+    "fibre_g": 7.2,
+    "sodium_mg": 0,
+    "potassium_mg": 657,
+    "calcium_mg": 116,
+    "iron_mg": 4.37,
+    "magnesium_mg": 302,
+    "zinc_mg": 5.58,
+    "water_g": 4.9
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "shelf_life": {
+    "pantry_days": [
+     360,
+     360
+    ],
+    "fridge_days": null,
+    "freezer_days": null,
+    "opened_fridge_days": null,
+    "source_name": "Sunflower seeds raw, unsalted, no shell"
+   },
+   "variants": [
+    {
+     "food": "fdc:2515381",
+     "description": "Seeds, sunflower seed, kernel, raw",
+     "state": "raw"
+    }
+   ],
+   "variant_count": 1
   },
   {
    "id": "sunflower-seed-butter",
@@ -84915,6 +87493,11 @@
      "state": "cooked"
     },
     {
+     "food": "fdc:325524",
+     "description": "Seeds, sunflower seed kernels, dry roasted, with salt added",
+     "state": "cooked"
+    },
+    {
      "food": "usda:12039",
      "description": "Seeds, sunflower seed kernels, toasted, without salt",
      "state": "cooked"
@@ -84930,7 +87513,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 7
+   "variant_count": 8
   },
   {
    "id": "sunflower-seed-kernels-from-shell",
@@ -85585,6 +88168,16 @@
      "state": null
     },
     {
+     "food": "fdc:326135",
+     "description": "Cheese, swiss",
+     "state": null
+    },
+    {
+     "food": "fdc:746767",
+     "description": "Cheese, swiss",
+     "state": null
+    },
+    {
      "food": "cnf:7766",
      "description": "Cheese, swiss, light",
      "state": null
@@ -85605,7 +88198,7 @@
      "state": null
     }
    ],
-   "variant_count": 5
+   "variant_count": 7
   },
   {
    "id": "swisswurst",
@@ -85711,12 +88304,17 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2747672",
+     "description": "Swordfish, frozen, wild caught",
+     "state": "frozen"
+    },
+    {
      "food": "usda:15111",
      "description": "Fish, swordfish, cooked, dry heat",
      "state": "cooked"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "syrup",
@@ -87433,12 +90031,17 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2684442",
+     "description": "Fish, tilapia, farm raised, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:15262",
      "description": "Fish, tilapia, cooked, dry heat",
      "state": "cooked"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "tilefish",
@@ -87967,45 +90570,35 @@
    "name": "Tomato juice",
    "aliases": [],
    "curated": false,
-   "aisle": "Canned",
+   "aisle": "Pantry",
    "group": "Vegetables and Vegetable Products",
-   "default_food": "usda:11540",
-   "default_description": "Tomato juice, canned, with salt added",
+   "default_food": "fdc:2003596",
+   "default_description": "Tomato juice, with added ingredients, from concentrate, shelf stable",
    "name_fr_source": "Jus, tomates, conserve",
    "per_100g": {
-    "energy_kcal": 17,
-    "protein_g": 0.85,
+    "energy_kcal": 20,
+    "protein_g": 0.86,
     "fat_g": 0.29,
-    "carbs_g": 3.53,
-    "fibre_g": 0.4,
-    "sugars_g": 2.58,
-    "sat_fat_g": 0.02,
-    "mono_fat_g": 0.01,
-    "poly_fat_g": 0.03,
-    "trans_fat_g": 0.0,
-    "cholesterol_mg": 0,
-    "sodium_mg": 253,
-    "potassium_mg": 217,
+    "carbs_g": 4.32,
+    "sugars_g": 2.57,
+    "sodium_mg": 236,
+    "potassium_mg": 198,
     "calcium_mg": 10,
-    "iron_mg": 0.39,
-    "magnesium_mg": 11,
-    "zinc_mg": 0.11,
-    "vitamin_a_mcg": 23,
-    "vitamin_c_mg": 70.1,
-    "vitamin_d_mcg": 0.0,
-    "vitamin_e_mg": 0.32,
-    "vitamin_k_mcg": 2.3,
-    "vitamin_b12_mcg": 0.0,
-    "folate_mcg": 20,
-    "water_g": 94.2,
-    "alcohol_g": 0.0,
-    "caffeine_mg": 0
+    "iron_mg": 0.3,
+    "magnesium_mg": 10,
+    "zinc_mg": 0.1,
+    "vitamin_c_mg": 49.8,
+    "folate_mcg": 19,
+    "water_g": 93.6
    },
-   "density_g_per_ml": 1.027,
-   "density_basis": "plain measure",
    "allergens": [],
    "diet": "vegan",
    "variants": [
+    {
+     "food": "fdc:2003596",
+     "description": "Tomato juice, with added ingredients, from concentrate, shelf stable",
+     "state": null
+    },
     {
      "food": "usda:11540",
      "description": "Tomato juice, canned, with salt added",
@@ -88017,7 +90610,7 @@
      "state": "canned"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "tomato-powder",
@@ -88845,6 +91438,11 @@
      "state": "canned"
     },
     {
+     "food": "fdc:2747673",
+     "description": "Tuna, ahi or yellowfin, frozen, wild caught",
+     "state": "frozen"
+    },
+    {
      "food": "usda:15118",
      "description": "Fish, tuna, fresh, bluefin, cooked, dry heat",
      "state": "cooked"
@@ -88858,9 +91456,14 @@
      "food": "usda:15221",
      "description": "Fish, tuna, yellowfin, fresh, cooked, dry heat",
      "state": "cooked"
+    },
+    {
+     "food": "fdc:334194",
+     "description": "Fish, tuna, light, canned in water, drained solids",
+     "state": "canned"
     }
    ],
-   "variant_count": 14
+   "variant_count": 16
   },
   {
    "id": "tuna-salad",
@@ -90799,6 +93402,11 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2747674",
+     "description": "Turnips, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11566",
      "description": "Turnips, frozen, unprepared",
      "state": "frozen"
@@ -90824,7 +93432,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 6
+   "variant_count": 7
   },
   {
    "id": "turnover",
@@ -93580,6 +96188,11 @@
      "state": null
     },
     {
+     "food": "fdc:2346394",
+     "description": "Nuts, walnuts, English, halves, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:12154",
      "description": "Nuts, walnuts, black, dried",
      "state": "dried"
@@ -93590,7 +96203,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 4
+   "variant_count": 5
   },
   {
    "id": "wasabi",
@@ -93882,9 +96495,14 @@
      "food": "usda:09326",
      "description": "Watermelon, raw",
      "state": "raw"
+    },
+    {
+     "food": "fdc:2747676",
+     "description": "Watermelon, seedless, rind only, raw",
+     "state": "raw"
     }
    ],
-   "variant_count": 1
+   "variant_count": 2
   },
   {
    "id": "watermelon-seed-kernels",
@@ -95166,6 +97784,11 @@
      "state": "cooked"
     },
     {
+     "food": "fdc:325871",
+     "description": "Bread, white, commercially prepared",
+     "state": "cooked"
+    },
+    {
      "food": "usda:18416",
      "description": "Bread, white, commercially prepared, low sodium, no salt",
      "state": "cooked"
@@ -95191,7 +97814,46 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 8
+   "variant_count": 9
+  },
+  {
+   "id": "white-button-mushrooms",
+   "name": "White button mushrooms",
+   "aliases": [],
+   "curated": false,
+   "aisle": "Produce",
+   "group": "Vegetables and Vegetable Products",
+   "default_food": "fdc:1750347",
+   "default_description": "Mushrooms, white button",
+   "per_100g": {
+    "energy_kcal": 25,
+    "protein_g": 2.89,
+    "fat_g": 0.37,
+    "carbs_g": 4.08,
+    "sodium_mg": 6,
+    "potassium_mg": 373,
+    "calcium_mg": 5,
+    "iron_mg": 0.23,
+    "magnesium_mg": 10,
+    "zinc_mg": 0.51,
+    "folate_mcg": 35,
+    "water_g": 91.8
+   },
+   "allergens": [],
+   "diet": "vegan",
+   "variants": [
+    {
+     "food": "fdc:1750347",
+     "description": "Mushrooms, white button",
+     "state": null
+    },
+    {
+     "food": "fdc:1999629",
+     "description": "Mushrooms, white button",
+     "state": null
+    }
+   ],
+   "variant_count": 2
   },
   {
    "id": "white-cheese",
@@ -95973,6 +98635,11 @@
      "state": "cooked"
     },
     {
+     "food": "fdc:335240",
+     "description": "Bread, whole-wheat, commercially prepared",
+     "state": "cooked"
+    },
+    {
      "food": "usda:18078",
      "description": "Bread, whole-wheat, prepared from recipe, toasted",
      "state": "cooked"
@@ -95983,7 +98650,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 4
+   "variant_count": 5
   },
   {
    "id": "wiener",
@@ -96090,12 +98757,17 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2710821",
+     "description": "Wild rice, dry, raw",
+     "state": "dried"
+    },
+    {
      "food": "usda:20089",
      "description": "Wild rice, cooked",
      "state": "cooked"
     }
    ],
-   "variant_count": 2
+   "variant_count": 3
   },
   {
    "id": "wine",
@@ -96610,6 +99282,16 @@
      "state": "raw"
     },
     {
+     "food": "fdc:2685571",
+     "description": "Squash, winter, acorn, raw",
+     "state": "raw"
+    },
+    {
+     "food": "fdc:2685570",
+     "description": "Squash, winter, butternut, raw",
+     "state": "raw"
+    },
+    {
      "food": "usda:11487",
      "description": "Squash, winter, butternut, frozen, unprepared",
      "state": "frozen"
@@ -96695,7 +99377,7 @@
      "state": "cooked"
     }
    ],
-   "variant_count": 22
+   "variant_count": 24
   },
   {
    "id": "with-herbs-and-cheese",
